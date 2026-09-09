@@ -37,12 +37,13 @@ android/local.properties
 .vscode/
 !.vscode/launch.json
 
-# Server
-server/node_modules/
-server/dist/
-server/data/
-server/.env
-server/secrets/
+# Toolchain Flutter locale al progetto (oltre 1 GB, vedi §5.8)
+/.flutter/
+
+# Il License Server e' una repo git separata, solo su Gitea (ADR-001).
+# Vive qui su disco ma non appartiene a questo monorepo: non va mai aggiunto,
+# nemmeno con git add -f, perche' questo monorepo finisce anche su GitHub.
+/server/
 
 # Artefatti di build
 dist/

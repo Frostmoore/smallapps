@@ -11,10 +11,26 @@ registro di chi ha comprato cosa.
 | **Scorte Calore** | `apps/scorte_calore/` | Autonomia residua di pellet, GPL, gasolio, legna | `apps/scorte_calore/codebase_reference.md` |
 | **Film Tracker** | `apps/film_tracker/` | Diario dei rullini fotografici analogici | `apps/film_tracker/codebase_reference.md` |
 | **micro_core** | `packages/micro_core/` | Nucleo condiviso: tema, billing, licenze, notifiche, backup | `packages/micro_core/codebase_reference.md` |
-| **License Server** | `server/` | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
+| **License Server** | `server/` — **repo separata** | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
 
 > Gli atlanti elencati sopra **non esistono ancora**: vengono creati alla fine della fase che
 > costruisce il rispettivo progetto. Vedi `develop_microapps.md`.
+
+## Repository
+
+| Repo | Remote | URL |
+|---|---|---|
+| Monorepo app | `origin` | `https://git.home.varitest.ovh/smp-webmaster/microapps.git` |
+| Monorepo app | `github` | `https://github.com/Frostmoore/smallapps.git` |
+| License Server | `origin` | `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git` |
+
+Il **License Server sta in una repo separata, ospitata solo su Gitea**. Su disco vive in
+`server/`, dentro questa cartella ma con un proprio `.git`, ed è ignorato dal monorepo. Il
+motivo è in `develop_microapps.md`, ADR-001: git pusha commit interi, quindi l'unico modo per
+garantire che il server non finisca su GitHub è che non stia nella repo che ci va.
+
+Il branch corrente si pusha su entrambi i remote con `pwsh tool/push_all.ps1`, che si rifiuta
+di procedere se trova file del server tracciati nel monorepo.
 
 ## Da dove si comincia
 
@@ -26,10 +42,25 @@ Chiunque riprenda il progetto parte da lì, non da questo file.
 
 | Strumento | Versione |
 |---|---|
-| Flutter | vedi `.flutter-version` (stable ≥ 3.35) |
+| Flutter | **locale al progetto**, in `.flutter/`, versione in `.flutter-version` |
 | JDK | 17 |
 | Android SDK | compileSdk 35 |
 | Node.js | 22 |
+
+## Toolchain Flutter
+
+Questo progetto **non usa il Flutter di sistema** e non lo aggiorna: altri progetti della
+macchina dipendono dalla versione vecchia. La toolchain sta in `.flutter/` (ignorata da git)
+e si invoca sempre attraverso il wrapper.
+
+```powershell
+# Prima volta, o per cambiare versione
+pwsh tool/get_flutter.ps1
+
+# Qualunque comando flutter
+pwsh tool/fl.ps1 --version
+pwsh tool/fl.ps1 doctor
+```
 
 ## Comandi
 
@@ -45,10 +76,10 @@ pwsh tool/test_all.ps1
 pwsh tool/test_all.ps1 -Project trashcan
 
 # Eseguire un'app in debug (billing finto, nessun server)
-flutter run -d <device> --dart-define=BILLING=fake
+pwsh tool/fl.ps1 run -d <device> --dart-define=BILLING=fake
 
 # Eseguire un'app contro il server locale
-flutter run -d <device> --dart-define=BILLING=fake `
+pwsh tool/fl.ps1 run -d <device> --dart-define=BILLING=fake `
   --dart-define=MA_LICENSE_URL=http://10.0.2.2:8087 `
   --dart-define=MA_APP_SECRET=<segreto di sviluppo>
 
@@ -56,8 +87,10 @@ flutter run -d <device> --dart-define=BILLING=fake `
 pwsh tool/build_release.ps1 -App trashcan
 ```
 
+Il License Server ha una sua repo e i suoi comandi:
+
 ```bash
-# Server di licenze in locale
+# Prima volta: la cartella server/ e' una repo git a se stante
 cd server
 npm install
 npm run migrate && npm run seed
@@ -67,9 +100,13 @@ npm run dev
 ## Versionamento
 
 I branch si chiamano come le versioni, da `v1.0.0` in avanti. Le regole di incremento sono in
-`develop_microapps.md`, §5.3. `tool/bump_version.ps1` calcola la versione successiva.
+`develop_microapps.md`, §5.3.
+
+```powershell
+pwsh tool/bump_version.ps1 -Medium -Create   # crea il branch della versione successiva
+pwsh tool/push_all.ps1                       # lo pusha su origin e github
+```
 
 ## Stato
 
-Vedi la sezione §7 di `develop_microapps.md`. Al momento è completata solo la fase F0.1
-(struttura del repository e piano di sviluppo).
+Vedi la sezione §7 di `develop_microapps.md`, che è l'unica fonte di verità sullo stato.

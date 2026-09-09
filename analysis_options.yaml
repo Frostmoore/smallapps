@@ -1,0 +1,43 @@
+# Lint condivise del monorepo MicroApps.
+# Ogni progetto Dart (packages/micro_core e le quattro app) include questo file con:
+#   include: ../../analysis_options.yaml
+#
+# Motivazioni delle scelte non ovvie: develop_microapps.md §5.5.
+
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    # strict-casts: senza, i dynamic che arrivano dal JSON dei backup si propagano nel
+    # codice e i cast falliscono a runtime sul telefono dell'utente invece che in
+    # compilazione sulla macchina di sviluppo.
+    strict-casts: true
+    strict-raw-types: true
+  errors:
+    invalid_annotation_target: ignore
+    # Una TODO senza issue collegata e' debito che nessuno ritrovera'.
+    todo: warning
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.drift.dart"
+    - "**/generated_plugin_registrant.dart"
+    - "**/l10n/generated/**"
+
+linter:
+  rules:
+    always_declare_return_types: true
+    avoid_print: true
+    avoid_relative_lib_imports: true
+    avoid_slow_async_io: true
+    cancel_subscriptions: true
+    close_sinks: true
+    directives_ordering: true
+    prefer_final_locals: true
+    prefer_single_quotes: true
+    require_trailing_commas: true
+    sort_child_properties_last: true
+    unawaited_futures: true
+    unnecessary_await_in_return: true
+    use_build_context_synchronously: true
+    use_super_parameters: true

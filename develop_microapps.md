@@ -2,9 +2,11 @@
 
 > **Progetto**: MicroApps — quattro app Flutter monetizzate una tantum su Google Play
 > più un server di licenze/entitlement self-hosted.
-> **Repository unica**: `https://git.home.varitest.ovh/smp-webmaster/microapps.git` (Gitea, push-to-create)
+> **Repository app** (remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps.git`
+> **Mirror pubblico app** (remote `github`): `https://github.com/Frostmoore/smallapps.git`
+> **Repository server** (**solo Gitea**, remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`
 > **Documento creato**: 2026-09-09
-> **Stato**: F0.1 completata — tutto il resto da fare.
+> **Stato**: F0.1 completata, F0.2 in corso — vedi §7.
 
 ---
 
@@ -128,10 +130,31 @@ Elenco esplicito, per evitare che qualcuno lo cerchi invano o lo aggiunga per in
 Ogni ADR è numerata e stabile. Se una decisione cambia, si aggiunge una nuova ADR che
 **supersede** la vecchia; la vecchia resta scritta.
 
-### ADR-001 — Monorepo unico: quattro app, un package condiviso, un server
+### ADR-001 — Monorepo per le app, repo separata per il server
 
-**Decisione**: una sola repo Gitea `microapps` contenente `apps/` (4 progetti Flutter),
-`packages/micro_core/` (package Dart condiviso), `server/` (Node), `docs/`, `tool/`.
+**Decisione**: una repo Gitea `microapps` contenente `apps/` (4 progetti Flutter),
+`packages/micro_core/` (package Dart condiviso), `docs/`, `tool/`. Il **server vive in una
+repo separata** `microapps-server`, ospitata **solo** su Gitea.
+
+⚑ **Perché il server è fuori dal monorepo** (decisione del 2026-09-09, supersede la versione
+originale di questa ADR): il monorepo delle app viene pubblicato anche su GitHub
+(`Frostmoore/smallapps`), mentre il server deve restare privato su Gitea. Git pusha commit
+interi: **non esiste modo di escludere una cartella da un push**. Le alternative erano
+mantenere due storie git divergenti con uno script di filtro, oppure separare le repo. Si è
+scelta la separazione perché è l'unica in cui l'errore è **impossibile** invece che
+sorvegliato: il server non sta nella repo che finisce su GitHub, quindi nessun push distratto
+può esporlo.
+
+**Il percorso su disco resta `server/`**, dentro la cartella di lavoro ma **ignorato** dal
+monorepo (`/server/` in `.gitignore`) e con un proprio `.git`. Così tutti i percorsi
+documentati in §8/F2 restano validi alla lettera e chi lavora ha comunque tutto sotto la
+stessa cartella.
+
+☠ **Trappola**: `server/` è una repo git annidata dentro l'albero di un'altra. Un
+`git add -A` dal monorepo **non** la include perché è in `.gitignore`, ma un
+`git add -f server` la includerebbe. Non farlo mai.
+
+**Versione originale della decisione** (superata): una sola repo contenente anche `server/`.
 
 ⚑ **Perché**: le quattro app condividono circa il 40% del codice non-UI (billing,
 entitlement, notifiche, backup, export, design system). Con quattro repo separate ogni fix
@@ -362,20 +385,24 @@ che divergono.
 
 | Elemento | Stato rilevato | Azione richiesta |
 |---|---|---|
-| Flutter | 3.27.1 stable, Dart 3.6.0 | **Aggiornare** (F0.2) — vedi ADR-002 |
-| Android SDK | 36.0.0 installato | Licenze **non accettate**: `flutter doctor --android-licenses` (F0.2) |
+| Flutter di sistema | 3.27.1 stable, Dart 3.6.0 | **Non toccare**: altri progetti della macchina dipendono da questa versione |
+| Flutter del progetto | 3.47.3 stable, Dart 3.13.3, in `.flutter/` | Scaricata in F0.2, si usa via `tool/fl.ps1` — vedi §5.8 |
+| Android SDK | 36.0.0 installato | Licenze **non accettate**: `pwsh tool/fl.ps1 doctor --android-licenses` (F0.2) |
 | Android Studio | 2024.2 | OK |
 | JDK | OpenJDK 17.0.13 | OK (Gradle 8.x + AGP 8.x richiedono 17) |
 | Node.js | v22.13.0 | OK per il server |
 | Git | 2.47.1.windows.1 | OK |
 | Gitea | `git.home.varitest.ovh`, utente `smp-webmaster`, credenziali in Git Credential Manager | OK, push-to-create verificato su repo esistenti |
-| clawserver | `51.68.129.241`, user `ubuntu`, chiave `~/.ssh/clawserver_ed25519` | **Chiave rifiutata**: `Permission denied (publickey)` su root/ubuntu/almalinux/debian. Da sbloccare in F8.1 |
+| clawserver | `51.68.129.241`, `vps-3e7d932a`, Ubuntu 24.04, 4 core, 7,6 GB RAM, 45 GB liberi | **Raggiungibile.** La chiave ha una passphrase ed è nell'ssh-agent di **Windows**: va usato l'`ssh` di Windows (PowerShell), non quello di Git Bash |
+| clawserver — servizi | OpenClaw gateway (porte locali 18789/18791/18792), nginx con 3 vhost e Certbot, wa-webhook su 3100, MariaDB, Redis | Docker 29.3 e Compose v5.1 attivi, **nessun container in esecuzione**, porta 8087 libera |
+| clawserver — bonifica | Desktop XFCE, GNOME parziale, Xorg, CUPS, VNC e noVNC **rimossi** il 2026-09-09; porta 6080 chiusa | Le dipendenze di Chromium/Playwright sono state marcate `manual` prima delle purghe e verificate dopo |
 | Play Console | non verificato | Serve un account sviluppatore attivo **prima** di F4.12 |
 
-☠ **Trappola clawserver**: la chiave locale esiste ma il server la rifiuta. Prima di
-progettare qualunque deploy va chiarito se `~/.ssh/clawserver_ed25519.pub` è ancora in
-`authorized_keys` o se il server è stato reinstallato. **Non si scrivono script di deploy su
-un accesso che non esiste**: F8.1 è un cancello, non un dettaglio.
+☠ **Trappola già disinnescata**: `ssh clawserver` da Git Bash risponde
+`Permission denied (publickey)`. Non è un problema del server: la chiave
+`~/.ssh/clawserver_ed25519` ha una **passphrase** ed è caricata nell'**ssh-agent di
+Windows**, che l'ssh di Git Bash non vede. Tutti i comandi verso `clawserver` vanno dati
+con l'`ssh` di Windows, quindi dallo strumento PowerShell.
 
 ---
 
@@ -419,10 +446,10 @@ microapps/
 │  ├─ scorte_calore/             ← stessa struttura
 │  └─ film_tracker/              ← stessa struttura
 │
-├─ server/
+├─ server/                       ← REPO SEPARATA (ADR-001): propria .git, solo Gitea,
 │  ├─ package.json  tsconfig.json  Dockerfile  docker-compose.yml  .env.example
 │  ├─ codebase_reference.md      ← atlante del server
-│  ├─ src/  test/
+│  ├─ src/  test/                  ignorata dal monorepo tramite /server/ in .gitignore
 │
 └─ tool/
    ├─ pub_get_all.ps1            ← flutter pub get su micro_core + 4 app
@@ -545,6 +572,44 @@ errore lì è invisibile all'utente finché non sbaglia il giorno della raccolta
 UI costa più di quanto rende e ostacola il refactoring visivo, che in queste app sarà
 frequente.
 
+### §5.7 Remote git
+
+| Repo | Remote | URL | Contenuto |
+|---|---|---|---|
+| Monorepo app | `origin` | `https://git.home.varitest.ovh/smp-webmaster/microapps.git` | app, `micro_core`, docs, tool |
+| Monorepo app | `github` | `https://github.com/Frostmoore/smallapps.git` | **identico** a `origin` |
+| Server | `origin` | `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git` | solo il License Server |
+
+**Regola**: ogni branch di versione del monorepo si pusha su **entrambi** i remote, nello
+stesso momento e con lo stesso nome. Il server si pusha **solo** su `origin`, e non ha né
+deve mai avere un remote GitHub.
+
+```powershell
+git push -u origin  vX.Y.Z
+git push -u github  vX.Y.Z
+```
+
+☠ **Trappola**: il server non ha un remote `github` **per costruzione**. Se un giorno
+qualcuno lo aggiunge "per comodità", i segreti di produzione, la logica di verifica delle
+licenze e lo schema del registro acquisti diventano pubblici. Non aggiungerlo.
+
+### §5.8 Toolchain Flutter locale al progetto
+
+Flutter **non** si aggiorna a livello di sistema: sulla macchina di sviluppo ci sono altri
+progetti che dipendono dalla versione vecchia. La versione usata qui è scaricata dentro il
+progetto in `.flutter/` (ignorata da git) e si invoca tramite il wrapper `tool/fl.ps1`.
+
+```powershell
+pwsh tool/fl.ps1 --version        # equivale a .flutter\bin\flutter --version
+pwsh tool/fl.ps1 pub get
+pwsh tool/fl.ps1 run -d <device>
+```
+
+⚑ **Perché un wrapper e non il `PATH`**: modificare il `PATH` di sistema cambierebbe la
+versione di Flutter per **tutti** i progetti della macchina, che è esattamente ciò che si
+vuole evitare. Il wrapper rende impossibile usare per sbaglio la versione sbagliata, e rende
+esplicito nel comando quale toolchain si sta usando.
+
 ---
 
 ## §6 — RITUALE DI FINE FASE (obbligatorio)
@@ -611,10 +676,10 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 ### F0 — Fondamenta del repository e del toolchain → `v1.0.0`
 
 - [x] **F0.1** Creazione repo Gitea, struttura cartelle, `develop_microapps.md`, spec versionate
-- [ ] **F0.2** Aggiornamento toolchain Flutter e licenze Android SDK
-- [ ] **F0.3** `analysis_options.yaml`, `.gitignore`, `.gitattributes`, `.flutter-version`
-- [ ] **F0.4** Script in `tool/` (`pub_get_all`, `analyze_all`, `test_all`, `bump_version`, `verify_atlas`)
-- [ ] **F0.5** `README.md` con indice dei sei progetti e istruzioni di build
+- [~] **F0.2** Toolchain Flutter locale al progetto in `.flutter/` e licenze Android SDK
+- [x] **F0.3** `analysis_options.yaml`, `.gitignore`, `.gitattributes`, `.flutter-version`
+- [x] **F0.4** Script in `tool/` (`fl`, `get_flutter`, `pub_get_all`, `analyze_all`, `test_all`, `bump_version`, `verify_atlas`, `push_all`)
+- [x] **F0.5** `README.md` con indice dei sei progetti e istruzioni di build
 - [ ] **F0.6** Keystore di firma Android condiviso e `key.properties` fuori dal repo
 - [ ] **F0.7** Rituale di fine fase F0
 
@@ -740,7 +805,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 
 ### F8 — Deploy e pubblicazione → `v9.0.0`
 
-- [ ] **F8.1** [!] Ripristino dell'accesso SSH a `clawserver` (bloccante)
+- [x] **F8.1** Accesso SSH a `clawserver` verificato (anticipata il 2026-09-09)
 - [ ] **F8.2** Ricognizione di `clawserver`: reverse proxy, porte, Docker, spazio, convivenza con OpenClaw
 - [ ] **F8.3** Deploy del License Server in Docker, con volume persistente e healthcheck
 - [ ] **F8.4** TLS, dominio, reverse proxy, hardening di rete
@@ -859,6 +924,9 @@ Tutti in PowerShell, perché la macchina di sviluppo è Windows.
 
 | Script | Firma | Cosa fa |
 |---|---|---|
+| `tool/get_flutter.ps1` | `-Version <x.y.z>`, `-Force` | Scarica la toolchain Flutter in `.flutter/`, verifica lo SHA256 dell'archivio e aggiorna `.flutter-version`. Non tocca il Flutter di sistema. |
+| `tool/fl.ps1` | argomenti passati a `flutter` | Wrapper obbligatorio sulla toolchain del progetto (§5.8). |
+| `tool/push_all.ps1` | `-Branch <nome>` | Pusha il branch su `origin` e `github`. Si rifiuta di procedere se il monorepo traccia file del server (ADR-001). |
 | `tool/pub_get_all.ps1` | `-Clean` (switch) | `flutter pub get` su `packages/micro_core` e sulle quattro app, in quest'ordine. Con `-Clean` fa prima `flutter clean`. |
 | `tool/analyze_all.ps1` | — | `dart analyze` su tutti e cinque i progetti Dart; esce con codice ≠ 0 alla prima issue. |
 | `tool/test_all.ps1` | `-Coverage` (switch), `-Project <nome>` | `flutter test` su tutti o su uno; con `-Coverage` produce `coverage/lcov.info`. |
@@ -1958,6 +2026,12 @@ admin per guardarlo. Gira in un container Docker su `clawserver` senza toccare O
 **Regola non negoziabile**: il server **non** può concedere il Pro a nessuno senza un token
 Play verificato presso Google, tranne per una concessione manuale di un admin, che finisce
 nell'audit log con il nome dell'admin e la motivazione.
+
+**Regola non negoziabile numero due**: questa fase si sviluppa in una **repo separata**
+(ADR-001), su disco in `server/`, con un proprio `.git` e **un solo remote**, `origin`, su
+Gitea. Il primo passo di F2.1 è `git init` in `server/` e il push-to-create verso
+`https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`. Nessun remote GitHub,
+mai.
 
 ### F2.1 — Bootstrap Node/TypeScript/Fastify
 
@@ -4120,26 +4194,43 @@ sono analytics, come chiedere la cancellazione.
 prese prima (porta interna, bind su localhost, volume dei dati, backup) dipendono da come
 finirà.
 
-### F8.1 — Ripristino dell'accesso a `clawserver` [BLOCCANTE]
+### F8.1 — Accesso SSH a `clawserver` ✅ (chiusa il 2026-09-09)
 
-Stato attuale: `ssh clawserver` risponde `Permission denied (publickey,password)` con la
-chiave `~/.ssh/clawserver_ed25519`, per gli utenti `root`, `ubuntu`, `almalinux`, `debian`.
+L'accesso funziona. Il `Permission denied (publickey)` iniziale era dovuto alla passphrase
+sulla chiave `~/.ssh/clawserver_ed25519`, caricata nell'ssh-agent di **Windows**: l'ssh di
+Git Bash non vede quell'agent.
 
-▶ Da fare, in ordine, finché uno funziona:
+**Regola operativa**: tutti i comandi verso `clawserver` si danno con l'`ssh` di Windows,
+cioè dallo strumento PowerShell. `ssh clawserver 'hostname'` risponde `vps-3e7d932a`.
 
-1. Verificare dal pannello del provider se la VM è la stessa di marzo o è stata
-   reinstallata.
-2. Aggiungere `~/.ssh/clawserver_ed25519.pub` alle chiavi autorizzate tramite la console
-   web del provider (rescue mode o accesso VNC).
-3. In alternativa, generare una nuova coppia dedicata al deploy
-   (`microapps_deploy_ed25519`) e installarla, aggiornando `~/.ssh/config`.
+### F8.2 — Ricognizione del server (svolta il 2026-09-09, da riverificare prima del deploy)
 
-✔ DoD: `ssh clawserver 'hostname'` risponde.
+Fotografia attuale, da riconfermare in F8.3 perché il server è vivo e può cambiare:
 
-☠ **Non si procede a F8.2 senza aver chiuso F8.1.** Qualunque script di deploy scritto prima
-sarebbe basato su ipotesi.
+| Voce | Valore |
+|---|---|
+| Sistema | Ubuntu 24.04.4 LTS, kernel 6.8, 4 core, 7,6 GB RAM, nessuna swap |
+| Disco | 72 GB totali, 45 GB liberi |
+| Docker | 29.3.0 + Compose v5.1.0, attivo e abilitato, **nessun container in esecuzione** |
+| Reverse proxy | nginx, 3 vhost in `/etc/nginx/sites-enabled/`: `hesclaw.ovh`, `wa-webhook.hesclaw.ovh`, `flamingnews.it` |
+| TLS | Certbot, certificati in `/etc/letsencrypt/live/` per i tre domini |
+| Altri servizi | OpenClaw gateway (18789/18791/18792 su localhost), wa-webhook Node su 3100, MariaDB 10.11, Redis, tutti su localhost |
+| Firewall | ufw attivo: 22, 80, 443 aperte; **6080 chiusa il 2026-09-09** |
+| Porta 8087 | **libera**, confermata per il License Server |
+| sudo | senza password per l'utente `ubuntu` |
 
-### F8.2 — Ricognizione del server
+**Bonifica già eseguita** (2026-09-09): rimossi VNC, noVNC, websockify, il desktop XFCE, i
+residui GNOME, Xorg e CUPS. 421 pacchetti in meno, circa 300 MB di RAM liberati, porta 6080
+chiusa. Le 73 librerie di sistema richieste da Chromium/Playwright sono state marcate
+`apt-mark manual` **prima** delle purghe, e il funzionamento di Chromium è stato verificato
+dopo.
+
+☠ **Trappola disinnescata**: OpenClaw usa Playwright con Chromium, che dipende da librerie
+GTK/X11 installate come dipendenze del desktop. Un `apt purge --autoremove` dei pacchetti
+desktop le avrebbe portate via, rompendo l'automazione browser di OpenClaw senza alcun
+messaggio d'errore evidente. Il metodo da riusare: risolvere le librerie del binario con
+`ldd`, mapparle sui pacchetti con `dpkg -S`, marcarle `manual`, simulare con `apt-get -s` e
+verificare che l'intersezione con la lista di rimozione sia vuota.
 
 Da raccogliere e scrivere in `server/codebase_reference.md`:
 
@@ -4267,8 +4358,10 @@ Elencate qui perché un piano onesto distingue ciò che è deciso da ciò che è
    Da confermare prima di F3.12.
 2. **Prezzi di lancio**: assunta la cifra bassa delle due indicate in ogni spec. Da
    confermare prima di creare i prodotti in Play Console.
-3. **Dominio del License Server**: assunto un sottodominio di `varitest.ovh`. Da confermare
-   in F8.4.
+3. **Dominio del License Server**: **dominio nuovo, ancora da registrare**. L'ipotesi
+   iniziale di un sottodominio esistente è caduta: il committente fornirà il dominio quando
+   sarà disponibile. Fino ad allora, in F8.4 si usa un sottodominio provvisorio e la
+   configurazione nginx resta parametrica sul `server_name`.
 4. **Tipo di account Play** (personale o organizzazione): determina se si applicano i 14
    giorni di closed testing. Da verificare in F3.12.
 5. **Verifica server obbligatoria o opt-in**: incide sulla dichiarazione "Sicurezza dei
