@@ -1,0 +1,54 @@
+name: trashcan
+description: Il tuo calendario della raccolta differenziata. Funziona ovunque, senza account.
+publish_to: none
+
+# versionName+versionCode. Il versionCode e' monotono crescente e non si riusa mai:
+# Play rifiuta un AAB con un numero gia' visto e quel numero non si libera.
+# Lo incrementa tool/build_release.ps1 prima del build. Vedi develop_microapps.md §5.4.
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.35.0"
+
+# Le versioni delle dipendenze si risolvono con "pwsh tool/fl.ps1 pub add <pacchetto>".
+# Non si scrivono a memoria: un vincolo inventato fa fallire la risoluzione.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  meta: ^1.19.0
+  micro_core:
+    path: ../../packages/micro_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+
+  # Outfit e' un font VARIABILE: un solo file copre tutti i pesi da 100 a 900, e pesa
+  # 111 KB invece dei circa 190 KB di quattro istanze statiche.
+  #
+  # Google Fonts non serve piu' TTF statici via API: restituisce WOFF o WOFF2, che
+  # Flutter non sa leggere, ed EOT se il client si dichiara Internet Explorer. Il file
+  # qui sotto viene dal repository ufficiale google/fonts, insieme alla sua licenza
+  # (assets/fonts/OFL.txt, SIL Open Font License 1.1, che ne consente l'uso in app
+  # commerciali purche' il testo della licenza sia incluso).
+  #
+  # I pesi si ottengono con FontVariation, non dichiarando lo stesso file quattro volte:
+  # Flutter non interpola da solo, e quattro dichiarazioni dello stesso file darebbero
+  # sempre l'istanza predefinita. Vedi MicroTheme in micro_core.
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Variable.ttf

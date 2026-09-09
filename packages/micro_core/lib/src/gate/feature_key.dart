@@ -1,0 +1,52 @@
+/// Le categorie di valore che le MicroApps vendono.
+///
+/// E' una enum condivisa, non una lista per app, perche' le quattro app vendono
+/// sostanzialmente le stesse cose sotto nomi diversi: il secondo calendario di
+/// TrashCan, il secondo freezer di Full Freezer e la seconda fonte di Scorte Calore
+/// sono lo stesso concetto ([unlimitedEntities]). Una enum comune permette di scrivere
+/// una sola pagina di paywall che elenca i benefici leggendo la mappa dei limiti,
+/// invece di quattro liste di testi che divergono al primo ritocco.
+///
+/// Aggiungere una voce qui e' una modifica che tocca tutte e quattro le app: si fa solo
+/// quando la funzione esiste davvero in almeno una, e si documenta nell'atlante.
+enum FeatureKey {
+  /// L'entita' principale dell'app: calendari, freezer, fonti di combustibile,
+  /// rullini. Nel piano gratuito ne esiste un numero limitato.
+  unlimitedEntities,
+
+  /// Entita' di contorno: macchine fotografiche, scomparti aggiuntivi.
+  secondaryEntities,
+
+  /// Allegare fotografie ai record.
+  photos,
+
+  /// Grafici e aggregazioni.
+  statistics,
+
+  /// Storico completo invece che troncato a un numero di giorni o di record.
+  fullHistory,
+
+  /// Esportazione in CSV.
+  csvExport,
+
+  /// Riepilogo in PDF.
+  pdfReport,
+
+  /// Backup completo e ripristino.
+  backupRestore,
+
+  /// Widget home screen nella versione ricca.
+  advancedWidget,
+
+  /// Piu' di un promemoria per evento.
+  multipleNotifications,
+
+  /// Sincronizzazione con il calendario del dispositivo.
+  calendarSync,
+
+  /// Categorie definite dall'utente oltre a quelle predefinite.
+  customCategories,
+
+  /// Colori, icone e tema personalizzabili.
+  themeCustomization,
+}

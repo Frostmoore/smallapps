@@ -57,3 +57,7 @@ Thumbs.db
 
 # Memoria dell.agente: le spec versionate stanno in docs/specs/
 memory/
+
+# Localizzazioni generate da gen-l10n: si rigenerano a ogni pub get
+**/lib/l10n/generated/
+**/lib/l10n/untranslated.json

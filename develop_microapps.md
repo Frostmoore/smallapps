@@ -6,7 +6,7 @@
 > **Mirror pubblico app** (remote `github`): `https://github.com/Frostmoore/smallapps.git`
 > **Repository server** (**solo Gitea**, remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`
 > **Documento creato**: 2026-09-09
-> **Stato**: F0.1 completata, F0.2 in corso — vedi §7.
+> **Stato**: F0 quasi chiusa, F1 e F3 avviate. 88 test verdi. Vedi §7.
 
 ---
 
@@ -294,14 +294,51 @@ i font da Internet al primo avvio. Un'app che dichiara "funziona offline" e most
 fallback in aereo è sciatta. I `.ttf` stanno in `assets/fonts/` di ogni app, dichiarati nel
 `pubspec.yaml`. Costo: circa 400 KB per app. Accettabile.
 
-### ADR-011 — Localizzazione: italiano primario, inglese secondario
+### ADR-011 — Due lingue: italiano sui dispositivi italiani, inglese su tutti gli altri
 
-**Decisione**: `flutter_localizations` + file ARB in `lib/l10n/`, `app_it.arb` come
-`template-arb-file`, `app_en.arb` tradotto. Nessuna stringa hard-coded nella UI.
+**Decisione**: `flutter_localizations` + file ARB in `lib/l10n/`. Due lingue e due sole:
+`it` e `en`. Un dispositivo con lingua italiana vede l'app in italiano; **qualunque altra
+lingua vede l'inglese**, senza eccezioni e senza schermate a metà tradotte.
 
-⚑ **Perché**: TrashCan (raccolta porta a porta) e Scorte Calore (pellet, bomboloni GPL)
-hanno un mercato prevalentemente italiano; Film Tracker e Full Freezer sono universali.
-Fare l'ARB dal primo giorno costa poco; aggiungerlo dopo significa riaprire ogni file di UI.
+Implementazione, identica in tutte e quattro le app:
+
+| Elemento | Valore | Perché così |
+|---|---|---|
+| `template-arb-file` | **`app_en.arb`** | Il template è l'unico file di cui `gen_l10n` garantisce la completezza: se manca una chiave in un'altra lingua, si ripiega sul template. Poiché l'inglese è la lingua di ripiego per il mondo, dev'essere lui il template. Una chiave dimenticata produce una parola inglese in un'app italiana, non una parola italiana in un'app coreana. |
+| `supportedLocales` | `[Locale('en'), Locale('it')]`, **`en` per primo** | Quando il dispositivo non corrisponde a nessuna lingua supportata, Flutter ripiega sul **primo** elemento della lista. Mettere `it` per primo darebbe l'italiano a un utente tedesco. |
+| `localeResolutionCallback` | esplicito | Non ci si affida al comportamento implicito: la regola è scritta in una funzione con un nome, così è leggibile e testabile. |
+| `untranslated-messages-file` | `l10n/untranslated.json` | Elenca a ogni build le chiavi non tradotte in italiano. Serve a non accorgersi dei buchi in produzione. |
+
+```dart
+Locale resolveLocale(List<Locale>? deviceLocales, Iterable<Locale> supported) {
+  // Italiano se il dispositivo lo chiede, in qualunque variante regionale
+  // (it, it_IT, it_CH). Inglese in tutti gli altri casi.
+  for (final locale in deviceLocales ?? const <Locale>[]) {
+    if (locale.languageCode == 'it') return const Locale('it');
+  }
+  return const Locale('en');
+}
+```
+
+⚑ **Perché non si segue la lista completa delle preferenze del dispositivo**: un utente con
+preferenze `[de, it, en]` riceverebbe l'italiano perché viene prima dell'inglese. È un
+comportamento difendibile in astratto, ma qui produce sorpresa: chi ha il telefono in tedesco
+si aspetta l'inglese come ripiego, non l'italiano. La regola scelta è quella che l'utente
+riesce a prevedere.
+
+⚑ **Perché solo due lingue**: TrashCan (raccolta porta a porta) e Scorte Calore (pellet,
+bomboloni GPL) hanno un mercato prevalentemente italiano; Film Tracker e Full Freezer sono
+universali. Aggiungere spagnolo o tedesco senza un traduttore vero significa pubblicare
+traduzioni automatiche, che nelle recensioni si notano e fanno più danno che bene.
+
+☠ **Trappola**: nessuna stringa visibile all'utente va scritta nel codice, **nemmeno le
+stringhe apparentemente neutre** come i formati di data, le unità di misura e i separatori
+decimali. `intl` va usato con il locale corrente, altrimenti un'app inglese mostra "9,5 kg"
+con la virgola e un'app italiana mostra "9/9/2026" nell'ordine americano.
+
+☠ **Trappola numero due**: le stringhe dello **store** (titolo, descrizione, screenshot) sono
+una localizzazione separata, gestita in Play Console (F7.6). Un'app tradotta con una scheda
+solo in italiano non viene trovata da chi cerca in inglese.
 
 ### ADR-012 — Server: Node 22 + Fastify 5 + TypeScript + SQLite
 
@@ -676,24 +713,24 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 ### F0 — Fondamenta del repository e del toolchain → `v1.0.0`
 
 - [x] **F0.1** Creazione repo Gitea, struttura cartelle, `develop_microapps.md`, spec versionate
-- [~] **F0.2** Toolchain Flutter locale al progetto in `.flutter/` e licenze Android SDK
+- [x] **F0.2** Toolchain Flutter 3.47.3 / Dart 3.13.3 in `.flutter/`, usata via `tool/fl.ps1`
 - [x] **F0.3** `analysis_options.yaml`, `.gitignore`, `.gitattributes`, `.flutter-version`
 - [x] **F0.4** Script in `tool/` (`fl`, `get_flutter`, `pub_get_all`, `analyze_all`, `test_all`, `bump_version`, `verify_atlas`, `push_all`)
 - [x] **F0.5** `README.md` con indice dei sei progetti e istruzioni di build
-- [ ] **F0.6** Keystore di firma Android condiviso e `key.properties` fuori dal repo
+- [~] **F0.6** Keystore di firma Android generato; manca il backup fuori macchina (azione per il committente)
 - [ ] **F0.7** Rituale di fine fase F0
 
 ### F1 — `micro_core`: il package condiviso → `v2.0.0`
 
-- [ ] **F1.1** Bootstrap del package, `pubspec.yaml`, barrel `micro_core.dart`
-- [ ] **F1.2** Utility di base: `Result`, `CivilDate`, `Money`, `MicroLog`, `AppPaths`
+- [x] **F1.1** Bootstrap del package, `pubspec.yaml`, barrel `micro_core.dart`
+- [~] **F1.2** Utility di base: `Result` e `CivilDate` fatti e testati; mancano `Money`, `MicroLog`, `AppPaths`, `AtomicFile`
 - [ ] **F1.3** `SettingsStore` (preferenze tipizzate su `shared_preferences`)
 - [ ] **F1.4** `InstallId` (UUID persistente in `flutter_secure_storage`)
 - [ ] **F1.5** Design system — token: `MicroTheme`, `MicroSpacing`, `MicroRadius`, `MicroElevation`
 - [ ] **F1.6** Design system — componenti: card, stat tile, section header, empty state, chip, bottom sheet di conferma, snackbar, bottone primario
 - [ ] **F1.7** Billing: `PurchaseGateway`, `MicroProduct`, `PurchaseEvent`, `PlayPurchaseGateway`, `FakePurchaseGateway`
 - [ ] **F1.8** Entitlement: `Entitlement`, `EntitlementStore`, `EntitlementService`, `LicenseApiClient`
-- [ ] **F1.9** Gating: `FeatureKey`, `FeatureLimit`, `FeatureGate`, widget `ProLock` e `PaywallPage`
+- [~] **F1.9** Gating: `FeatureKey`, `FeatureLimit`, `FeatureGate` fatti e testati; mancano `ProLock` e `PaywallPage`
 - [ ] **F1.10** Notifiche: `NotificationService`, canali, permessi, ripianificazione
 - [ ] **F1.11** Dati fuori dall'app: `BackupSource`, `BackupService`, `JsonBackupCodec`, `CsvWriter`, `PdfReportBuilder`, `ImageStore`
 - [ ] **F1.12** Test di `micro_core` (inclusi i test anti-regressione ADR-007)
@@ -718,9 +755,9 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 
 ### F3 — TrashCan (app pilota, integrazione billing end-to-end) → `v4.0.0`
 
-- [ ] **F3.1** Bootstrap progetto Flutter, dipendenze, tema, l10n, router
+- [~] **F3.1** Progetto, dipendenze, l10n (it/en, 154 chiavi, zero non tradotte), font Outfit, rotte, limiti Pro; mancano tema e router
 - [ ] **F3.2** Data layer Drift: calendari, tipi di rifiuto, regole, eccezioni
-- [ ] **F3.3** Motore delle ricorrenze `OccurrenceEngine` + test esaustivi
+- [x] **F3.3** Motore delle ricorrenze `OccurrenceEngine` + 40 test
 - [ ] **F3.4** Wizard di setup iniziale
 - [ ] **F3.5** Home "Stasera / Prossima raccolta"
 - [ ] **F3.6** Gestione tipi di rifiuto e regole (CRUD)
@@ -954,18 +991,31 @@ debug in meno di cinque minuti.
 
 ### F0.6 — Keystore di firma Android
 
-▶ Azioni:
+**Stato**: keystore generato il 2026-09-09.
 
-1. Generare **un solo** keystore per tutte e quattro le app:
-   `keytool -genkey -v -keystore microapps-upload.jks -keyalg RSA -keysize 4096 -validity 10000 -alias microapps`
-2. Salvarlo **fuori dal repo**, in `%USERPROFILE%\.android-keys\microapps-upload.jks`.
-3. Creare `apps/<app>/android/key.properties` (ignorato da git) con `storeFile`,
-   `storePassword`, `keyAlias`, `keyPassword`.
-4. Configurare `signingConfigs.release` in `apps/<app>/android/app/build.gradle.kts` leggendo
+| Voce | Valore |
+|---|---|
+| File | `%USERPROFILE%\.android-keys\microapps-upload.p12` |
+| Formato | PKCS12 (non JKS: `keytool` segnala JKS come formato proprietario e deprecato) |
+| Alias | `microapps` |
+| Chiave | RSA 4096, SHA384withRSA |
+| Validità | dal 2026-09-09 al 2054-01-25 |
+| Impronta SHA256 | `51:05:48:49:B5:B5:BD:A9:21:38:60:6B:F0:9E:FB:FE:6D:48:80:89:2F:FD:92:A3:97:1A:28:87:71:D3:0E:9F` |
+| Password | 32 caratteri casuali, in `%USERPROFILE%\.android-keys\microapps-upload.password.txt` |
+
+⚑ **Perché la validità fino al 2054**: Google Play richiede che la chiave di upload sia
+valida almeno fino al 2033. Dieci anni oltre il minimo evitano di doverci ripensare.
+
+▶ Azioni residue:
+
+1. Creare `apps/<app>/android/key.properties` (ignorato da git) con `storeFile`,
+   `storePassword`, `keyAlias`, `keyPassword`. Si fa quando l'app esiste, in `X.1`.
+2. Configurare `signingConfigs.release` in `apps/<app>/android/app/build.gradle.kts` leggendo
    `key.properties`, con fallback esplicito che **fa fallire il build** se il file manca,
    invece di firmare con la chiave di debug.
-5. Fare due backup del `.jks` e delle password in luoghi diversi, e annotare dove, in un
-   documento che **non** è in questa repo.
+3. **[AZIONE PER IL COMMITTENTE]** Fare due backup del `.p12` e della password in luoghi
+   diversi, e annotare dove, in un documento che **non** è in questa repo. Non è un passo
+   delegabile: chi ha i backup deve essere chi ha accesso ai luoghi dove metterli.
 
 ⚑ **Perché un keystore solo per quattro app**: sono quattro app dello stesso publisher,
 gestite dalla stessa persona. Quattro keystore significano quattro cose da non perdere invece
@@ -2669,36 +2719,68 @@ stato del rullino) sono la parte in cui un errore è invisibile e costoso. Tenen
 Flutter si testano in millisecondi, senza `WidgetTester`, e si può girare l'intera suite dei
 motori a ogni salvataggio.
 
-**`lib/app/app_config.dart`** — stessa forma in tutte le app:
+**`lib/app/app_config.dart`** — **solo i valori**. La classe `MicroAppConfig` vive in
+`micro_core` (`lib/src/config/micro_app_config.dart`), perché la forma è identica in tutte
+e quattro le app e duplicarla quattro volte sarebbe esattamente ciò che `micro_core` esiste
+per evitare. Ogni app espone una funzione `build<Nome>Config()` che chiama
+`MicroAppConfig.fromEnvironment(...)` con i propri valori.
+
+⚑ **Correzione rispetto alla prima stesura di questo piano**: qui era scritto di definire
+la classe in ogni app. Sbagliato: quattro definizioni identiche divergono al primo ritocco.
+La firma reale è quella qui sotto, con la classe in `micro_core`.
+
+`MicroAppConfig` in `micro_core`:
 
 ```dart
-class AppConfig {
-  const AppConfig({required this.appId, required this.appName, required this.proSku,
-    required this.seedColor, required this.fontFamily, this.displayFontFamily,
-    required this.defaultBrightness, required this.licenseBaseUrl, required this.appSecret,
-    required this.billingMode});
+enum BillingMode { fake, play }
 
-  final String appId;              // 'trashcan'
+@immutable
+class MicroAppConfig {
+  const MicroAppConfig({required this.appId, required this.appName, required this.proSku,
+    required this.seedColor, required this.fontFamily, required this.defaultBrightness,
+    required this.billingMode, this.displayFontFamily, this.licenseBaseUrl,
+    this.appSecret = ''});
+
+  factory MicroAppConfig.fromEnvironment({
+    required String appId, required String appName, required String proSku,
+    required Color seedColor, required String fontFamily,
+    required Brightness defaultBrightness, String? displayFontFamily});
+
+  final String appId;
   final String appName;
-  final String proSku;             // 'trashcan_pro_lifetime'
+  final String proSku;
   final Color seedColor;
   final String fontFamily;
   final String? displayFontFamily;
   final Brightness defaultBrightness;
+  final BillingMode billingMode;
   final Uri? licenseBaseUrl;       // null = nessuna verifica server
   final String appSecret;
-  final BillingMode billingMode;   // fake | play
 
-  static AppConfig fromEnvironment();   // legge i --dart-define
-  bool get serverEnabled => licenseBaseUrl != null && appSecret.isNotEmpty;
+  bool get serverEnabled;
+  bool get usesRealBilling;
+  void assertUsableInRelease();    // lancia se release + BILLING=fake
 }
-
-enum BillingMode { fake, play }
 ```
 
-`fromEnvironment()` legge: `BILLING` (default `fake` in debug, `play` in release),
-`MA_LICENSE_URL`, `MA_APP_SECRET`. In `release` con `BILLING=fake` deve fallire con un
-`assert` e un `throw StateError`.
+`fromEnvironment` legge tre `--dart-define`:
+
+| define | valori | significato |
+|---|---|---|
+| `BILLING` | `fake` oppure `play` | quale gateway usare; senza define, `fake` in debug e `play` in release |
+| `MA_LICENSE_URL` | URL | base del License Server; assente = nessuna verifica lato server |
+| `MA_APP_SECRET` | stringa | segreto HMAC per firmare le chiamate (ADR-014) |
+
+Ogni app espone poi la sua sola riga di valori, per esempio in
+`apps/trashcan/lib/app/app_config.dart`:
+
+```dart
+MicroAppConfig buildTrashcanConfig();
+```
+
+☠ **Trappola**: una build di release con `BILLING=fake` regalerebbe il Pro a chiunque
+tocchi il pulsante. `assertUsableInRelease()`, chiamata in `main()` prima di `runApp`, la fa
+fallire all'avvio. Un crash in fase di verifica e' incomparabilmente meno grave.
 
 **`lib/main.dart`** — identico in tutte le app, salvo il config:
 
@@ -3064,6 +3146,18 @@ distanza senza mettere a fuoco. È l'intera proposta di valore in un colpo d'occ
 ☠ **Trappola**: il colore del tipo di rifiuto scelto dall'utente può avere contrasto
 insufficiente con il testo. `MicroCard(accent:)` calcola il colore del testo con
 `ThemeData.estimateBrightnessForColor` e non usa mai il colore grezzo come sfondo del testo.
+
+☠ **Trappola di prestazioni, da disinnescare quando si scrive la home**:
+`OccurrenceEngine.expand` è O(giorni × regole) e alloca un oggetto per ogni raccolta.
+`next()` con orizzonte 400 giorni ne costruisce qualche centinaio. È irrilevante una volta,
+**disastroso se chiamato a ogni frame**. La home deve leggere le occorrenze da un provider
+che le calcola una sola volta e le ricalcola solo quando cambiano i dati o la data:
+
+```dart
+final occurrencesProvider = StreamProvider.autoDispose<List<CollectionOccurrence>>(...);
+```
+
+Non si chiama mai `expand`, `next` o `tonight` dentro un `build`.
 
 ### F3.6 — Gestione tipi e regole
 

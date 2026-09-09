@@ -1,0 +1,18 @@
+/// Nucleo condiviso delle MicroApps.
+///
+/// Questa e' l'**unica** superficie pubblica del package: le app importano
+/// `package:micro_core/micro_core.dart` e mai `package:micro_core/src/...`.
+/// Quello che non compare qui e' dettaglio interno e puo' cambiare senza preavviso.
+///
+/// Regola non negoziabile: `micro_core` non conosce nessuna delle quattro app. Non
+/// esiste un `if (appId == 'trashcan')` da nessuna parte. Tutto cio' che varia si
+/// passa come parametro, cosi' che aggiungere una quinta app non richieda di toccare
+/// una riga di questo package.
+library;
+
+export 'src/config/micro_app_config.dart';
+export 'src/gate/feature_gate.dart';
+export 'src/gate/feature_key.dart';
+export 'src/gate/feature_limits.dart';
+export 'src/util/civil_date.dart';
+export 'src/util/result.dart';

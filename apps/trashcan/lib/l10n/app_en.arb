@@ -1,0 +1,211 @@
+{
+  "@@locale": "en",
+  "@@context": "Template file. English is the fallback for every non-Italian device, so this file must always be complete. See develop_microapps.md ADR-011.",
+
+  "appTitle": "TrashCan",
+  "@appTitle": {
+    "description": "App name. Not translated: it is the product name."
+  },
+
+  "common_save": "Save",
+  "common_cancel": "Cancel",
+  "common_delete": "Delete",
+  "common_edit": "Edit",
+  "common_add": "Add",
+  "common_done": "Done",
+  "common_next": "Next",
+  "common_back": "Back",
+  "common_skip": "Skip",
+  "common_close": "Close",
+  "common_retry": "Try again",
+  "common_notNow": "Not now",
+  "common_undo": "Undo",
+  "common_today": "Today",
+  "common_tomorrow": "Tomorrow",
+  "common_yesterday": "Yesterday",
+
+  "home_tonightTitle": "Tonight",
+  "@home_tonightTitle": {
+    "description": "Heading of the big card that answers the only question the app exists for."
+  },
+  "home_tonightEmpty": "Nothing to take out tonight",
+  "home_nextCollection": "Next collection",
+  "home_nextIn": "{waste} — {when}",
+  "@home_nextIn": {
+    "placeholders": {
+      "waste": { "type": "String", "example": "Plastic" },
+      "when": { "type": "String", "example": "tomorrow evening" }
+    }
+  },
+  "home_whenTomorrowEvening": "tomorrow evening",
+  "home_whenThisEvening": "this evening",
+  "home_whenOnWeekdayEvening": "{weekday} evening",
+  "@home_whenOnWeekdayEvening": {
+    "placeholders": {
+      "weekday": { "type": "String", "example": "Thursday" }
+    }
+  },
+  "home_next7Days": "Next 7 days",
+  "home_noUpcoming": "No collections scheduled",
+  "home_noUpcomingHint": "Add a waste type and its collection days to get started.",
+  "home_calendarPickerLabel": "Calendar",
+
+  "onboarding_welcomeTitle": "Never miss a collection again",
+  "onboarding_welcomeBody": "Set up your collection days once. TrashCan reminds you every evening what to take out. No account, no internet, no need for your town to support anything.",
+  "onboarding_start": "Set up my calendar",
+  "onboarding_calendarNameTitle": "What should we call this calendar?",
+  "onboarding_calendarNameHint": "Home",
+  "onboarding_calendarNameHelp": "You can add more calendars later, for a second home or a relative's place.",
+  "onboarding_wasteTypesTitle": "What gets collected where you live?",
+  "onboarding_wasteTypesHelp": "Pick the types your town collects. You can change icons and colours later.",
+  "onboarding_scheduleTitle": "Which days?",
+  "onboarding_scheduleHelp": "Tap the days each type is collected. Copy it straight off your town's leaflet.",
+  "onboarding_notificationTitle": "When should we remind you?",
+  "onboarding_notificationHelp": "The reminder arrives the evening before, so you still have time to take the bin out.",
+  "onboarding_finish": "Finish",
+
+  "waste_organic": "Organic",
+  "waste_paper": "Paper",
+  "waste_plastic": "Plastic",
+  "waste_glass": "Glass",
+  "waste_metal": "Metal",
+  "waste_unsorted": "Unsorted",
+  "waste_garden": "Garden waste",
+  "waste_nappies": "Nappies",
+  "waste_other": "Other",
+
+  "wasteTypes_title": "Waste types",
+  "wasteTypes_empty": "No waste types yet",
+  "wasteTypes_emptyHint": "Add the types your town collects.",
+  "wasteTypes_addTitle": "New waste type",
+  "wasteTypes_editTitle": "Edit waste type",
+  "wasteTypes_nameLabel": "Name",
+  "wasteTypes_colourLabel": "Colour",
+  "wasteTypes_iconLabel": "Icon",
+  "wasteTypes_notificationsLabel": "Remind me for this type",
+  "wasteTypes_deleteConfirmTitle": "Delete {name}?",
+  "@wasteTypes_deleteConfirmTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "wasteTypes_deleteConfirmBody": "Its collection days and any exceptions will be deleted too. This cannot be undone.",
+
+  "rules_title": "Collection days",
+  "rules_addTitle": "New rule",
+  "rules_editTitle": "Edit rule",
+  "rules_kindLabel": "How often",
+  "rules_kindWeekly": "Every week",
+  "rules_kindEveryNWeeks": "Every {count} weeks",
+  "@rules_kindEveryNWeeks": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "rules_kindMonthlyDay": "A day of the month",
+  "rules_kindMonthlyNthWeekday": "A weekday of the month",
+  "rules_kindManual": "Specific dates",
+  "rules_weekdaysLabel": "Days",
+  "rules_intervalLabel": "Every how many weeks",
+  "rules_anchorLabel": "Starting from",
+  "rules_anchorHelp": "Pick the next collection date, so we know which week the cycle starts on.",
+  "rules_dayOfMonthLabel": "Day of the month",
+  "rules_nthLabel": "Which one",
+  "rules_nthFirst": "First",
+  "rules_nthSecond": "Second",
+  "rules_nthThird": "Third",
+  "rules_nthFourth": "Fourth",
+  "rules_nthLast": "Last",
+  "rules_previewTitle": "Next collections",
+  "rules_previewHelp": "Check these dates against your leaflet before saving.",
+  "rules_empty": "No collection days set",
+
+  "exceptions_title": "Exceptions",
+  "exceptions_skip": "Skip this collection",
+  "exceptions_move": "Move it to another day",
+  "exceptions_extra": "Add an extra collection",
+  "exceptions_movedTo": "Moved to {date}",
+  "@exceptions_movedTo": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "exceptions_skipped": "Skipped",
+  "exceptions_extraBadge": "Extra",
+  "exceptions_empty": "No exceptions",
+  "exceptions_emptyHint": "Bank holidays often shift collections. You can skip, move or add one here.",
+  "exceptions_removeConfirm": "Remove this exception?",
+
+  "notifications_title": "Reminders",
+  "notifications_enabledLabel": "Evening reminder",
+  "notifications_timeLabel": "Time",
+  "notifications_secondTimeLabel": "Second reminder",
+  "notifications_body": "{waste} is collected tomorrow. Remember to take it out tonight.",
+  "@notifications_body": {
+    "description": "Body of the evening reminder. waste is already a comma-separated list when there is more than one.",
+    "placeholders": { "waste": { "type": "String", "example": "Organic" } }
+  },
+  "notifications_permissionTitle": "Allow notifications",
+  "notifications_permissionBody": "Without notifications TrashCan cannot remind you, and the app loses most of its point. You can still use the calendar.",
+  "notifications_exactAlarmTitle": "Allow exact timing",
+  "notifications_exactAlarmBody": "Android lets us pick the exact minute only with your permission. Without it the reminder still arrives, but the system may delay it by a few hours, which for an evening reminder means the morning after.",
+  "notifications_exactAlarmOpenSettings": "Open settings",
+  "notifications_inexactWarning": "Reminders may arrive late: exact timing is not allowed.",
+
+  "calendars_title": "Calendars",
+  "calendars_addTitle": "New calendar",
+  "calendars_editTitle": "Edit calendar",
+  "calendars_nameLabel": "Name",
+  "calendars_deleteConfirmTitle": "Delete {name}?",
+  "@calendars_deleteConfirmTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "calendars_deleteConfirmBody": "Every waste type, rule and exception in this calendar will be deleted.",
+
+  "settings_title": "Settings",
+  "settings_appearance": "Appearance",
+  "settings_themeSystem": "Follow the system",
+  "settings_themeLight": "Light",
+  "settings_themeDark": "Dark",
+  "settings_data": "Your data",
+  "settings_exportCalendar": "Share this calendar",
+  "settings_exportCalendarHelp": "Send it to a neighbour: they can import the same collection days.",
+  "settings_importCalendar": "Import a calendar",
+  "settings_backup": "Back up everything",
+  "settings_restore": "Restore from a backup",
+  "settings_about": "About",
+  "settings_version": "Version {version}",
+  "@settings_version": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+  "settings_exportLog": "Export diagnostic log",
+  "settings_installId": "Installation ID",
+  "settings_installIdHelp": "Only used to link your purchase to this device. It is not a personal identifier.",
+
+  "paywall_headline": "TrashCan Pro",
+  "paywall_subhead": "One payment. No subscription. Yours forever.",
+  "paywall_buy": "Unlock Pro",
+  "paywall_buyWithPrice": "Unlock Pro — {price}",
+  "@paywall_buyWithPrice": {
+    "placeholders": { "price": { "type": "String", "example": "€2.99" } }
+  },
+  "paywall_restore": "Restore purchase",
+  "paywall_pending": "Your payment is being processed. We will unlock Pro as soon as it goes through.",
+  "paywall_thanks": "Thank you. Pro is unlocked.",
+  "paywall_restoredNothing": "No previous purchase found on this account.",
+  "paywall_unavailable": "In-app purchases are not available on this device.",
+  "paywall_benefitCalendarsTitle": "As many calendars as you need",
+  "paywall_benefitCalendarsBody": "A second home, your parents' place, the office. Each with its own days and reminders.",
+  "paywall_benefitWidgetTitle": "Full home screen widget",
+  "paywall_benefitWidgetBody": "Tonight's collection in colour, plus the next three days, without opening the app.",
+  "paywall_benefitNotificationsTitle": "More than one reminder",
+  "paywall_benefitNotificationsBody": "One at six, another at eight. For the evenings you are not home at the first one.",
+  "paywall_benefitBackupTitle": "Backup and transfer",
+  "paywall_benefitBackupBody": "Move everything to a new phone in one file.",
+  "paywall_benefitThemeTitle": "Make it yours",
+  "paywall_benefitThemeBody": "Colours and icons for every waste type.",
+
+  "gate_limitReachedTitle": "This needs Pro",
+  "gate_calendarLimitBody": "The free version keeps one calendar. Pro adds as many as you like, each with its own collection days.",
+  "gate_seePro": "See what Pro includes",
+
+  "error_generic": "Something went wrong.",
+  "error_fileUnreadable": "This file cannot be read.",
+  "error_fileWrongApp": "This backup belongs to a different app.",
+  "error_fileTooNew": "This backup was made with a newer version of TrashCan. Update the app first.",
+  "error_noNetwork": "No connection. Nothing to worry about: TrashCan works offline."
+}

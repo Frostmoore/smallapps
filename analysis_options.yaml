@@ -6,6 +6,12 @@
 
 include: package:flutter_lints/flutter.yaml
 
+# Larghezza di riga usata da "dart format". Da Dart 3.7 si dichiara qui invece che
+# passare --line-length a ogni invocazione, cosi' l'IDE e la riga di comando non
+# litigano sullo stesso file.
+formatter:
+  page_width: 100
+
 analyzer:
   language:
     # strict-casts: senza, i dynamic che arrivano dal JSON dei backup si propagano nel

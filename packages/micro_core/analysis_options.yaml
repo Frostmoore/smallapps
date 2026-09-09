@@ -1,0 +1,5 @@
+# Eredita le lint del monorepo. Vedi develop_microapps.md §5.5.
+analyzer:
+  exclude:
+    - build/**
+include: ../../analysis_options.yaml
