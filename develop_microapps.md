@@ -6,7 +6,7 @@
 > **Mirror pubblico app** (remote `github`): `https://github.com/Frostmoore/smallapps.git`
 > **Repository server** (**solo Gitea**, remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`
 > **Documento creato**: 2026-09-09
-> **Stato**: **F0 e F1 chiuse.** F3 (TrashCan) in corso. 159 test verdi. Vedi §7.
+> **Stato**: **F0, F1 e F2 chiuse.** F3 (TrashCan) in corso. 202 test verdi. Vedi §7.
 
 ---
 
@@ -786,19 +786,19 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 
 ### F2 — MicroApps License Server → `v3.0.0`
 
-- [ ] **F2.1** Bootstrap Node/TypeScript/Fastify, config e logging
-- [ ] **F2.2** Schema SQLite, migrazioni, seed delle app e dei prodotti
-- [ ] **F2.3** Plugin `auth` (HMAC device) e `rateLimit`
-- [ ] **F2.4** `PlayVerifier`: verifica acquisti con Android Publisher v3
-- [ ] **F2.5** `EntitlementService` lato server e rotte `/v1/purchases/verify`, `/v1/entitlements/:installId`
-- [ ] **F2.6** Codici di ripristino: `/v1/restore/code`, `/v1/restore/claim`
-- [ ] **F2.7** Real-time Developer Notifications: `/v1/rtdn` (rimborsi e revoche)
-- [ ] **F2.8** Pannello admin: login, dashboard, elenco entitlement, ricerca, revoca manuale, audit log
-- [ ] **F2.9** Backup automatico del database e rotazione
-- [ ] **F2.10** Test del server (ogni rotta, ogni codice d'errore)
-- [ ] **F2.11** Dockerfile, docker-compose, `.env.example`, healthcheck
-- [ ] **F2.12** `server/codebase_reference.md`
-- [ ] **F2.13** Rituale di fine fase F2
+- [x] **F2.1** Bootstrap Node/TypeScript/Fastify, config e logging
+- [x] **F2.2** Schema SQLite (10 tabelle), migrazioni idempotenti, seed delle quattro app
+- [~] **F2.3** Plugin `auth` (HMAC + anti-replay) fatto; i limiti per rotta sono registrati ma non ancora cablati, vedi debito
+- [x] **F2.4** `PlayVerifier`, con la distinzione fra errori definitivi e transitori
+- [x] **F2.5** `EntitlementService` e le rotte `/v1/purchases/verify`, `/v1/entitlements/:installId`
+- [x] **F2.6** Codici di ripristino, con scadenza, uso singolo e tetto di 3 in 30 giorni
+- [x] **F2.7** `/v1/rtdn` con deduplica per `messageId` e risposta sempre 200
+- [x] **F2.8** Pannello admin: login argon2id, riepilogo, entitlement filtrabili, acquisti, RTDN, audit, export CSV
+- [x] **F2.9** Backup con `db.backup()` e rotazione. **Il ripristino va provato in F8.5**
+- [x] **F2.10** 43 test: ogni rotta, ogni codice d'errore, più l'avvio reale del bundle compilato
+- [x] **F2.11** Dockerfile multi-stage, compose con bind su `127.0.0.1`, `.env.example`, healthcheck
+- [x] **F2.12** `server/codebase_reference.md`
+- [x] **F2.13** Rituale di fine fase F2
 
 ### F3 — TrashCan (app pilota, integrazione billing end-to-end) → `v4.0.0`
 
