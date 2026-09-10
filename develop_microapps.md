@@ -734,7 +734,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [ ] **F1.10** Notifiche: `NotificationService`, canali, permessi, ripianificazione
 - [ ] **F1.11** Dati fuori dall'app: `BackupSource`, `BackupService`, `JsonBackupCodec`, `CsvWriter`, `PdfReportBuilder`, `ImageStore`
 - [ ] **F1.12** Test di `micro_core` (inclusi i test anti-regressione ADR-007)
-- [ ] **F1.13** `packages/micro_core/codebase_reference.md`
+- [x] **F1.13** `packages/micro_core/codebase_reference.md` (prima stesura, da riverificare a fine F1)
 - [ ] **F1.14** Rituale di fine fase F1
 
 ### F2 — MicroApps License Server → `v3.0.0`
@@ -769,7 +769,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [ ] **F3.12** Play Console: creazione app, prodotto in-app, canale interno, verifica end-to-end del billing reale contro il server
 - [ ] **F3.13** Test (unit, DB, widget, golden, integrazione)
 - [ ] **F3.14** Rifinitura visiva, onboarding, empty state, accessibilità
-- [ ] **F3.15** `apps/trashcan/codebase_reference.md`
+- [x] **F3.15** `apps/trashcan/codebase_reference.md` (prima stesura, da riverificare a fine F3)
 - [ ] **F3.16** Rituale di fine fase F3
 
 ### F4 — Full Freezer → `v5.0.0`
