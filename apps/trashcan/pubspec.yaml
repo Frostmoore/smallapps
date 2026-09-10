@@ -31,6 +31,9 @@ dependencies:
   sqlite3_flutter_libs: ^0.6.0+eol
 
 dev_dependencies:
+  # StreamQueue, usata nei test degli stream. E' gia' una dipendenza transitiva di
+  # flutter_test, ma l'analyzer pretende che chi la importa la dichiari.
+  async: ^2.13.0
   flutter_test:
     sdk: flutter
   integration_test:

@@ -6,7 +6,7 @@ import 'package:micro_core/micro_core.dart';
 import '../../app/providers.dart';
 import '../../app/routes.dart';
 import '../../app/waste_presets.dart';
-import '../../domain/recurrence.dart';
+import '../../features/rules/rule_summary.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 /// L'elenco dei tipi di rifiuto del calendario attivo.
@@ -35,22 +35,47 @@ class WasteTypesPage extends ConsumerWidget {
                 actionLabel: l.common_add,
                 onAction: () => context.push(Routes.wasteTypeNew),
               )
-            : ListView(
+            : ReorderableListView(
                 padding: MicroSpacing.page,
+                // ⚑ La maniglia è esplicita e sta a destra: il trascinamento con pressione
+                // prolungata esiste di default ma non si vede, e una funzione che nessuno
+                // scopre vale quanto una che non c'è. In più, sulla riga intera il tocco
+                // lungo entrerebbe in conflitto col menu delle eccezioni (F3.7).
+                buildDefaultDragHandles: false,
+                onReorderItem: (oldIndex, newIndex) =>
+                    _reorder(ref, types.map((t) => t.id).toList(), oldIndex, newIndex),
                 children: [
-                  for (final type in types)
+                  for (var index = 0; index < types.length; index++)
                     Padding(
+                      key: ValueKey(types[index].id),
                       padding: const EdgeInsets.only(bottom: MicroSpacing.s),
                       child: MicroCard(
                         padding: EdgeInsets.zero,
-                        child: MicroListTile(
-                          title: type.name,
-                          subtitle: _describeRule(context, ref, type.id),
-                          leading: Icon(
-                            WasteIcons.resolve(type.iconKey),
-                            color: Color(type.colorValue),
-                          ),
-                          onTap: () => context.push(Routes.wasteTypeEditOf(type.id)),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: MicroListTile(
+                                title: types[index].name,
+                                subtitle: _describeRule(context, ref, types[index].id),
+                                leading: Icon(
+                                  WasteIcons.resolve(types[index].iconKey),
+                                  color: Color(types[index].colorValue),
+                                ),
+                                onTap: () =>
+                                    context.push(Routes.wasteTypeEditOf(types[index].id)),
+                              ),
+                            ),
+                            ReorderableDragStartListener(
+                              index: index,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: MicroSpacing.m),
+                                child: Icon(
+                                  Icons.drag_handle,
+                                  color: Theme.of(context).colorScheme.mutedText,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -60,21 +85,28 @@ class WasteTypesPage extends ConsumerWidget {
     );
   }
 
-  /// Un riassunto della regola, letto dal bundle gia' in memoria.
+  /// Applica lo spostamento di una voce e riscrive l'ordine di tutte.
   ///
-  /// Non si interroga il database qui: il bundle contiene gia' le regole tradotte, e una
+  /// ☠ Il callback è `onReorderItem` e non `onReorder`: quest'ultimo consegna un
+  /// `newIndex` già incrementato quando si trascina verso il basso, e chi non applica la
+  /// correzione ottiene ogni spostamento in giù una posizione più avanti del punto in cui
+  /// l'utente ha lasciato il dito. `onReorderItem` la applica al posto nostro ed è il
+  /// motivo per cui `onReorder` è deprecato: qui l'indice arriva già buono.
+  void _reorder(WidgetRef ref, List<int> ids, int oldIndex, int newIndex) {
+    final reordered = [...ids];
+    reordered.insert(newIndex, reordered.removeAt(oldIndex));
+    ref.read(repositoryProvider).reorderWasteTypes(reordered);
+  }
+
+  /// Un riassunto della regola, letto dal bundle già in memoria.
+  ///
+  /// Non si interroga il database qui: il bundle contiene già le regole tradotte, e una
   /// query per riga trasformerebbe una lista di dieci voci in dieci letture.
   String _describeRule(BuildContext context, WidgetRef ref, int wasteTypeId) {
     final l = L.of(context);
     final bundle = ref.watch(activeBundleProvider).value;
     final rule = bundle?.rules.where((r) => r.wasteTypeId == wasteTypeId).firstOrNull;
     if (rule == null) return l.rules_empty;
-    return switch (rule.recurrence) {
-      WeeklyRecurrence() => l.rules_kindWeekly,
-      EveryNWeeksRecurrence(:final intervalWeeks) => l.rules_kindEveryNWeeks(intervalWeeks),
-      MonthlyDayRecurrence() => l.rules_kindMonthlyDay,
-      MonthlyNthWeekdayRecurrence() => l.rules_kindMonthlyNthWeekday,
-      ManualDatesRecurrence() => l.rules_kindManual,
-    };
+    return describeRecurrence(context, rule.recurrence);
   }
 }

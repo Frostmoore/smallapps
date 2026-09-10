@@ -802,12 +802,12 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 
 ### F3 — TrashCan (app pilota, integrazione billing end-to-end) → `v4.0.0`
 
-- [~] **F3.1** Progetto, dipendenze, l10n (it/en, 154 chiavi, zero non tradotte), font Outfit, rotte, limiti Pro; mancano tema e router
-- [~] **F3.2** Data layer Drift: tabelle, mapper riga→dominio, `watchBundle` e 19 test. Mancano i DAO di scrittura e il test di migrazione (F3.2.6)
+- [x] **F3.1** Progetto, dipendenze, l10n (it/en, 166 chiavi, zero non tradotte), font Outfit, tema, router, rotte, limiti Pro, piattaforma Android (`com.smp.trashcan`, minSdk 24)
+- [~] **F3.2** Data layer Drift: tabelle, mapper riga↔dominio nelle due direzioni, repository di scrittura, `watchBundle` corretto (osserva tutte e quattro le tabelle) e 31 test. Manca il test di migrazione (F3.2.6)
 - [x] **F3.3** Motore delle ricorrenze `OccurrenceEngine` + 40 test
-- [ ] **F3.4** Wizard di setup iniziale
-- [ ] **F3.5** Home "Stasera / Prossima raccolta"
-- [ ] **F3.6** Gestione tipi di rifiuto e regole (CRUD)
+- [x] **F3.4** Wizard di setup iniziale: 4 passi, preset, giorni, orario, `PopScope` sul back di sistema. Verificato sull'emulatore
+- [x] **F3.5** Home "Stasera / Prossima raccolta / Prossimi 7 giorni". Verificata sull'emulatore
+- [x] **F3.6** Gestione tipi e regole: lista con riordino a trascinamento, editor del tipo, editor delle regole con tutte e cinque le forme e anteprima live delle prossime 6 date
 - [ ] **F3.7** Eccezioni: salta, sposta, raccolta straordinaria
 - [ ] **F3.8** Notifiche: pianificazione, orari multipli, permesso exact alarm
 - [ ] **F3.9** Calendari multipli + gating Pro + paywall

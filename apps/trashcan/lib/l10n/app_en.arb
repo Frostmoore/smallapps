@@ -115,6 +115,33 @@
   "rules_previewTitle": "Next collections",
   "rules_previewHelp": "Check these dates against your leaflet before saving.",
   "rules_empty": "No collection days set",
+  "rules_manualDatesLabel": "Dates",
+  "rules_manualAdd": "Add a date",
+  "rules_manualEmpty": "No dates yet.",
+  "rules_remove": "Remove collection days",
+  "rules_advanced": "More options",
+  "rules_previewNone": "These settings don't produce any collection yet.",
+  "rules_summaryWeekly": "Every week: {days}",
+  "@rules_summaryWeekly": {
+    "placeholders": { "days": { "type": "String" } }
+  },
+  "rules_summaryEveryNWeeks": "Every {count} weeks: {days}",
+  "@rules_summaryEveryNWeeks": {
+    "placeholders": { "count": { "type": "int" }, "days": { "type": "String" } }
+  },
+  "rules_summaryMonthlyDay": "Day {day} of each month",
+  "@rules_summaryMonthlyDay": {
+    "placeholders": { "day": { "type": "int" } }
+  },
+  "rules_summaryMonthlyNth": "{nth} {weekday} of each month",
+  "@rules_summaryMonthlyNth": {
+    "placeholders": { "nth": { "type": "String" }, "weekday": { "type": "String" } }
+  },
+  "rules_summaryManual": "{count, plural, =1{1 specific date} other{{count} specific dates}}",
+  "@rules_summaryManual": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "wasteTypes_scheduleChange": "Change",
 
   "exceptions_title": "Exceptions",
   "exceptions_skip": "Skip this collection",

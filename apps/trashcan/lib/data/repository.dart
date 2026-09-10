@@ -213,6 +213,16 @@ class TrashcanRepository {
     ),
   );
 
+  /// Sostituisce tutte le regole di un tipo con la ricorrenza data, di qualunque forma.
+  ///
+  /// I cinque metodi tipizzati qui sopra restano perche' descrivono l'intenzione al
+  /// chiamante ("imposta una regola settimanale") e perche' i test li usano. Questo invece
+  /// serve all'editor delle regole, che lavora su un [Recurrence] gia' costruito e non sa
+  /// quale forma abbia: senza, l'editor dovrebbe fare uno switch per richiamare il metodo
+  /// giusto, cioe' duplicare lo switch che sta gia' in [RecurrenceToRow].
+  Future<void> setRule({required int wasteTypeId, required Recurrence recurrence}) =>
+      _replaceRule(wasteTypeId, recurrence.toCompanion(wasteTypeId));
+
   Future<void> clearRules(int wasteTypeId) =>
       (db.delete(db.recurrenceRules)..where((r) => r.wasteTypeId.equals(wasteTypeId))).go();
 
@@ -333,4 +343,54 @@ class WizardWasteType {
     colorValue: colorValue,
     weekdays: weekdays ?? this.weekdays,
   );
+}
+
+/// Traduzione dominio -> riga per le regole: l'inverso di `RecurrenceRuleMapper.toDomain`.
+///
+/// Le due direzioni vivono in file diversi perche' la lettura deve tollerare righe storte
+/// (import, versioni future) e restituire `null`, mentre la scrittura parte da un oggetto
+/// gia' valido per costruzione e non puo' fallire. Se si tocca una delle due, si controlla
+/// l'altra: sono l'unico punto in cui la tabella "larga" delle regole viene interpretata.
+extension RecurrenceToRow on Recurrence {
+  RecurrenceRulesCompanion toCompanion(int wasteTypeId) => switch (this) {
+    WeeklyRecurrence(:final weekdays) => RecurrenceRulesCompanion.insert(
+      wasteTypeId: wasteTypeId,
+      kind: 'weekly',
+      weekdaysMask: Value(WeekdayMask.fromSet(weekdays)),
+      startDate: startDate.toIso(),
+      endDate: Value(endDate?.toIso()),
+    ),
+    EveryNWeeksRecurrence(:final weekdays, :final intervalWeeks, :final anchor) =>
+      RecurrenceRulesCompanion.insert(
+        wasteTypeId: wasteTypeId,
+        kind: 'everyNWeeks',
+        weekdaysMask: Value(WeekdayMask.fromSet(weekdays)),
+        intervalWeeks: Value(intervalWeeks),
+        anchorDate: Value(anchor.toIso()),
+        startDate: startDate.toIso(),
+        endDate: Value(endDate?.toIso()),
+      ),
+    MonthlyDayRecurrence(:final dayOfMonth) => RecurrenceRulesCompanion.insert(
+      wasteTypeId: wasteTypeId,
+      kind: 'monthlyDay',
+      dayOfMonth: Value(dayOfMonth),
+      startDate: startDate.toIso(),
+      endDate: Value(endDate?.toIso()),
+    ),
+    MonthlyNthWeekdayRecurrence(:final nth, :final weekday) => RecurrenceRulesCompanion.insert(
+      wasteTypeId: wasteTypeId,
+      kind: 'monthlyNthWeekday',
+      nthOfMonth: Value(nth),
+      weekday: Value(weekday),
+      startDate: startDate.toIso(),
+      endDate: Value(endDate?.toIso()),
+    ),
+    ManualDatesRecurrence(:final dates) => RecurrenceRulesCompanion.insert(
+      wasteTypeId: wasteTypeId,
+      kind: 'manual',
+      manualDatesCsv: Value((dates.toList()..sort()).map((d) => d.toIso()).join(',')),
+      startDate: startDate.toIso(),
+      endDate: Value(endDate?.toIso()),
+    ),
+  };
 }

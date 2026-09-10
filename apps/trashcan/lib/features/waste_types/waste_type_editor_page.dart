@@ -7,6 +7,9 @@ import '../../app/providers.dart';
 import '../../app/waste_presets.dart';
 import '../../domain/occurrence_engine.dart';
 import '../../domain/recurrence.dart';
+import '../../features/rules/rule_editor_page.dart';
+import '../../features/rules/rule_summary.dart';
+import '../../features/rules/weekday_labels.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 /// Crea o modifica un tipo di rifiuto con i suoi giorni di raccolta.
@@ -29,7 +32,17 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
   final TextEditingController _name = TextEditingController();
   String _iconKey = 'trash';
   Color _color = WastePalette.colors.first;
-  Set<int> _weekdays = <int>{};
+
+  /// La regola in corso di modifica, non ancora scritta sul database.
+  ///
+  /// ⚑ Perché un [Recurrence] e non un semplice insieme di giorni: da qui si arriva anche
+  /// alle regole a settimane alterne e a quelle mensili. Tenendo un solo campo, la riga di
+  /// cerchietti dei giorni e l'editor completo modificano lo stesso valore e non possono
+  /// dire due cose diverse. Se invece si tenesse un `Set<int>` accanto a un `Recurrence`,
+  /// salvare dopo aver toccato prima uno e poi l'altro darebbe risultati che dipendono
+  /// dall'ordine dei tocchi.
+  Recurrence? _recurrence;
+
   bool _loaded = false;
   bool _saving = false;
 
@@ -49,9 +62,10 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
     _name.text = type.name;
     _iconKey = type.iconKey;
     _color = Color(type.colorValue);
-    final rule = bundle?.rules.where((r) => r.wasteTypeId == type.id).firstOrNull;
-    final recurrence = rule?.recurrence;
-    if (recurrence is WeeklyRecurrence) _weekdays = <int>{...recurrence.weekdays};
+    _recurrence = bundle?.rules
+        .where((r) => r.wasteTypeId == type.id)
+        .firstOrNull
+        ?.recurrence;
     _loaded = true;
   }
 
@@ -84,13 +98,14 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
       );
     }
 
-    // Nessun giorno scelto significa "questo tipo esiste ma non ha ancora un calendario":
+    // Nessuna regola significa "questo tipo esiste ma non ha ancora un calendario":
     // si cancella la regola invece di lasciarne una vuota, che non genererebbe nulla e
     // sarebbe indistinguibile da un difetto.
-    if (_weekdays.isEmpty) {
+    final recurrence = _recurrence;
+    if (recurrence == null) {
       await repo.clearRules(id);
     } else {
-      await repo.setWeeklyRule(wasteTypeId: id, weekdays: _weekdays);
+      await repo.setRule(wasteTypeId: id, recurrence: recurrence);
     }
 
     if (!mounted) return;
@@ -112,14 +127,61 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
     if (mounted) Navigator.of(context).pop();
   }
 
+  /// Apre l'editor completo delle regole.
+  ///
+  /// ⚑ `Navigator.push` e non `go_router`: questo editor è un sotto-passaggio che
+  /// restituisce un valore al chiamante, non una destinazione raggiungibile da un deep
+  /// link. Dargli una rotta dichiarata significherebbe poterci arrivare da una notifica
+  /// senza il tipo di rifiuto da modificare in mano.
+  Future<void> _openRuleEditor() async {
+    final l = L.of(context);
+    final result = await Navigator.of(context).push<RuleEditorResult>(
+      MaterialPageRoute(
+        builder: (_) => RuleEditorPage(
+          typeName: _name.text.trim().isEmpty ? l.rules_title : _name.text.trim(),
+          accent: _color,
+          initial: _recurrence,
+        ),
+      ),
+    );
+    if (result == null) return; // annullato: si tiene la regola che c'era
+    setState(() => _recurrence = result.recurrence);
+  }
+
+  /// I giorni della settimana, quando la regola è settimanale.
+  ///
+  /// La riga di cerchietti si mostra solo per le regole settimanali, che sono la
+  /// stragrande maggioranza. Per tutte le altre forme un insieme di giorni non basta a
+  /// descrivere la regola, e mostrarlo lo stesso farebbe credere che modificarlo la
+  /// cambi tutta.
+  Set<int>? get _weeklyDays => switch (_recurrence) {
+    WeeklyRecurrence(:final weekdays) => weekdays,
+    null => const <int>{},
+    _ => null,
+  };
+
+  void _toggleWeekday(int weekday) {
+    final current = _weeklyDays;
+    if (current == null) return;
+    final next = <int>{...current};
+    if (!next.remove(weekday)) next.add(weekday);
+    setState(() {
+      _recurrence = next.isEmpty
+          ? null
+          : WeeklyRecurrence(
+              weekdays: next,
+              startDate: _recurrence?.startDate ?? CivilDate.today(),
+              endDate: _recurrence?.endDate,
+            );
+    });
+  }
+
   /// Le prossime sei raccolte secondo la regola in corso di modifica.
   List<CivilDate> get _preview {
-    if (_weekdays.isEmpty) return const <CivilDate>[];
+    final recurrence = _recurrence;
+    if (recurrence == null) return const <CivilDate>[];
     const engine = OccurrenceEngine();
-    final rule = RuleWithExceptions(
-      wasteTypeId: 0,
-      recurrence: WeeklyRecurrence(weekdays: _weekdays, startDate: CivilDate.today()),
-    );
+    final rule = RuleWithExceptions(wasteTypeId: 0, recurrence: recurrence);
     return engine.nextN(6, rules: [rule]).map((o) => o.date).toList();
   }
 
@@ -129,6 +191,7 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
     final l = L.of(context);
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final weeklyDays = _weeklyDays;
 
     return Scaffold(
       appBar: AppBar(
@@ -189,7 +252,9 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: key == _iconKey ? _color : theme.colorScheme.surfaceContainerHighest,
+                        color: key == _iconKey
+                            ? _color
+                            : theme.colorScheme.surfaceContainerHighest,
                         borderRadius: MicroRadius.chip,
                       ),
                       child: Icon(
@@ -204,21 +269,27 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
               ],
             ),
             MicroSpacing.gapXL,
-            MicroSectionHeader(title: l.rules_weekdaysLabel),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (var weekday = DateTime.monday; weekday <= DateTime.sunday; weekday++)
-                  _DayCircle(
-                    label: _weekdayInitial(locale, weekday),
-                    selected: _weekdays.contains(weekday),
-                    color: _color,
-                    onTap: () => setState(() {
-                      if (!_weekdays.remove(weekday)) _weekdays.add(weekday);
-                    }),
-                  ),
-              ],
+            MicroSectionHeader(
+              title: l.rules_title,
+              trailing: TextButton(
+                onPressed: _openRuleEditor,
+                child: Text(l.rules_advanced),
+              ),
             ),
+            if (weeklyDays != null)
+              WeekdayPicker(selected: weeklyDays, color: _color, onToggle: _toggleWeekday)
+            else
+              MicroCard(
+                padding: EdgeInsets.zero,
+                child: MicroListTile(
+                  // Niente sottotitolo: il riassunto e' gia' la riga che conta, e ripetere
+                  // "Altre opzioni" sotto al bottone omonimo aggiunge rumore, non aiuto.
+                  title: describeRecurrence(context, _recurrence!),
+                  leading: const Icon(Icons.event_repeat_outlined),
+                  accent: _color,
+                  onTap: _openRuleEditor,
+                ),
+              ),
             if (_preview.isNotEmpty) ...[
               MicroSpacing.gapXL,
               MicroSectionHeader(title: l.rules_previewTitle),
@@ -228,7 +299,9 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
                   children: [
                     Text(
                       l.rules_previewHelp,
-                      style: theme.textTheme.cardMeta.copyWith(color: theme.colorScheme.mutedText),
+                      style: theme.textTheme.cardMeta.copyWith(
+                        color: theme.colorScheme.mutedText,
+                      ),
                     ),
                     MicroSpacing.gapM,
                     for (final date in _preview)
@@ -243,58 +316,6 @@ class _WasteTypeEditorPageState extends ConsumerState<WasteTypeEditorPage> {
             MicroSpacing.gapXXL,
             MicroPrimaryButton(label: l.common_save, loading: _saving, onPressed: _save),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// L'iniziale del giorno nella lingua del dispositivo.
-///
-/// ☠ In inglese lunedì e martedì iniziano entrambi per M, e giovedì e martedì per T: con
-/// una sola lettera due colonne su sette diventano indistinguibili. In italiano una
-/// lettera basta e sta meglio su schermi stretti.
-String _weekdayInitial(String locale, int weekday) {
-  // 2026-09-07 è un lunedì: sommando il giorno della settimana si ottiene la data giusta.
-  final sample = DateTime(2026, 9, 6 + weekday);
-  final name = DateFormat('EEEE', locale).format(sample);
-  return name.substring(0, locale.startsWith('it') ? 1 : 2).toUpperCase();
-}
-
-class _DayCircle extends StatelessWidget {
-  const _DayCircle({
-    required this.label,
-    required this.selected,
-    required this.color,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
-      child: AnimatedContainer(
-        duration: MicroDuration.quick,
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: selected ? color : scheme.surfaceContainerHighest,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: selected ? MicroCard.foregroundOn(color) : scheme.mutedText,
-            fontWeight: FontWeight.w700,
-          ),
         ),
       ),
     );

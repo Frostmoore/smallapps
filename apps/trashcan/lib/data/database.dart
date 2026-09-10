@@ -126,25 +126,35 @@ extension AppDatabaseQueries on AppDatabase {
   /// ⚑ È l'unico punto in cui le righe del database diventano oggetti di dominio. Le
   /// pagine non vedono mai una `RecurrenceRule` grezza: vedono una `Recurrence` già
   /// tipizzata, e non possono sbagliare a interpretare le colonne nullable.
-  Stream<CalendarBundle?> watchBundle(int calendarId) {
-    final calendarStream =
-        (select(collectionCalendars)..where((t) => t.id.equals(calendarId))).watchSingleOrNull();
-
-    return calendarStream.asyncMap((calendar) async {
-      if (calendar == null) return null;
-      final types = await (select(wasteTypes)
-            ..where((t) => t.calendarId.equals(calendarId))
-            ..orderBy([
-              (t) => OrderingTerm(expression: t.sortOrder),
-              (t) => OrderingTerm(expression: t.id),
-            ]))
-          .get();
-      return CalendarBundle(
-        calendar: calendar,
-        wasteTypes: types,
-        rules: await _rulesFor(types),
-      );
-    });
+  /// Il bundle del calendario, ricalcolato a ogni modifica di **una qualsiasi** delle
+  /// tabelle che lo compongono.
+  ///
+  /// ☠ Trappola gia' pagata una volta: la prima versione partiva da
+  /// `select(collectionCalendars).watchSingleOrNull()` e leggeva tipi, regole ed eccezioni
+  /// con `get()` dentro l'`asyncMap`. Drift invalida uno stream in base alle tabelle
+  /// **della query osservata**, non a quelle lette dentro la callback: lo stream riemetteva
+  /// solo quando cambiava la riga del calendario. Il risultato era che modificare una
+  /// regola, aggiungere un tipo di rifiuto o riordinare la lista scriveva correttamente sul
+  /// database e non cambiava niente sullo schermo fino al riavvio dell'app. Il bug piu'
+  /// insidioso possibile: nessun errore, nessun crash, solo un'app che sembra ignorare
+  /// quello che l'utente le dice.
+  ///
+  /// Qui si osservano esplicitamente tutte e quattro le tabelle e si ricarica tutto. Drift
+  /// raggruppa le notifiche per transazione, quindi un riordino che scrive dieci righe
+  /// produce una sola riemissione.
+  Stream<CalendarBundle?> watchBundle(int calendarId) async* {
+    yield await loadBundle(calendarId);
+    final changes = tableUpdates(
+      TableUpdateQuery.onAllTables([
+        collectionCalendars,
+        wasteTypes,
+        recurrenceRules,
+        collectionExceptions,
+      ]),
+    );
+    await for (final _ in changes) {
+      yield await loadBundle(calendarId);
+    }
   }
 
   /// Come [watchBundle] ma una tantum.
