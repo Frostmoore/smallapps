@@ -9,6 +9,7 @@ import '../../app/routes.dart';
 import '../../app/waste_presets.dart';
 import '../../data/repository.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../services/trashcan_scheduler.dart';
 
 /// Il wizard iniziale.
 ///
@@ -70,11 +71,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         .read(repositoryProvider)
         .createCalendarFromWizard(
           name: _name.text.trim().isEmpty ? l.onboarding_calendarNameHint : _name.text.trim(),
-          notificationTime: _formatTime(_time),
+          notificationTime: formatTime(_time),
           types: types,
         );
     await ref.read(settingsProvider).setBool(SettingKeys.onboardingDone, true);
-    await ref.read(settingsProvider).setString('notification_time', _formatTime(_time));
+    await ref.read(settingsProvider).setString('notification_time', formatTime(_time));
 
     if (!mounted) return;
     // Si invalida il provider perché il redirect del router legge la preferenza: senza,
@@ -159,9 +160,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 }
-
-String _formatTime(TimeOfDay time) =>
-    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
 /// Traduce la chiave ARB di un preset nel nome mostrato.
 ///
@@ -384,7 +382,7 @@ class _ScheduleStep extends StatelessWidget {
                   ),
                 ),
                 MicroSpacing.hGapS,
-                Text(_formatTime(time), style: theme.textTheme.titleMedium),
+                Text(formatTime(time), style: theme.textTheme.titleMedium),
               ],
             ),
           ),

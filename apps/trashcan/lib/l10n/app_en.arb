@@ -143,6 +143,8 @@
   },
   "wasteTypes_scheduleChange": "Change",
 
+  "day_empty": "No collection on this day.",
+
   "exceptions_title": "Exceptions",
   "exceptions_skip": "Skip this collection",
   "exceptions_move": "Move it to another day",

@@ -40,7 +40,19 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(calendar?.name ?? l.appTitle),
+        // ⛑ Il titolo e' il selettore dei calendari. Chi ne ha uno solo non nota
+        // niente; chi ne ha due passa dall'uno all'altro dove il nome gia' si trova,
+        // invece che da un menu nascosto nelle impostazioni.
+        title: InkWell(
+          onTap: () => context.push(Routes.calendars),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: Text(calendar?.name ?? l.appTitle, overflow: TextOverflow.ellipsis)),
+              const Icon(Icons.arrow_drop_down),
+            ],
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),

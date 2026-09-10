@@ -60,6 +60,16 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => context.push(Routes.exceptions),
               ),
             ),
+            MicroSpacing.gapS,
+            MicroCard(
+              padding: EdgeInsets.zero,
+              child: MicroListTile(
+                title: l.notifications_title,
+                subtitle: l.notifications_enabledLabel,
+                leading: const Icon(Icons.notifications_outlined),
+                onTap: () => context.push(Routes.notifications),
+              ),
+            ),
             MicroSpacing.gapXL,
             MicroSectionHeader(title: l.paywall_headline),
             MicroCard(

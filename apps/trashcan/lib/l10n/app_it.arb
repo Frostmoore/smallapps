@@ -104,6 +104,8 @@
   "rules_summaryManual": "{count, plural, =1{1 data specifica} other{{count} date specifiche}}",
   "wasteTypes_scheduleChange": "Cambia",
 
+  "day_empty": "Nessuna raccolta in questo giorno.",
+
   "exceptions_title": "Eccezioni",
   "exceptions_skip": "Salta questa raccolta",
   "exceptions_move": "Spostala a un altro giorno",

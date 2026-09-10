@@ -809,8 +809,8 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [x] **F3.5** Home "Stasera / Prossima raccolta / Prossimi 7 giorni". Verificata sull'emulatore
 - [x] **F3.6** Gestione tipi e regole: lista con riordino a trascinamento, editor del tipo, editor delle regole con tutte e cinque le forme e anteprima live delle prossime 6 date
 - [x] **F3.7** Eccezioni: menu contestuale sulla raccolta (salta, sposta, straordinaria, ripristina), pagina di riepilogo raggiungibile dalle impostazioni. Verificato sull'emulatore
-- [ ] **F3.8** Notifiche: pianificazione, orari multipli, permesso exact alarm
-- [ ] **F3.9** Calendari multipli + gating Pro + paywall
+- [x] **F3.8** Notifiche: `TrashcanScheduler` + 15 test, receiver e permessi nel manifest, pagina promemoria, deep link `/day/:date`. Verificata sull'emulatore: notifica consegnata alle 13:09:03 per un allarme delle 13:09:00
+- [x] **F3.9** Calendari multipli + gating Pro + paywall. Verificato sull'emulatore: il paywall si apre sul secondo calendario, l'acquisto finto sblocca il Pro, il secondo calendario si crea e si commuta dal titolo della home
 - [ ] **F3.10** Export/import calendario, backup, condivisione file
 - [ ] **F3.11** Widget Android home-screen
 - [ ] **F3.12** Play Console: creazione app, prodotto in-app, canale interno, verifica end-to-end del billing reale contro il server
@@ -3250,11 +3250,19 @@ Regole di calcolo:
   `enabled` sul calendario, genera una notifica il **giorno prima** all'orario del calendario
   (default 20:00).
 - Nel piano gratuito, **un solo** orario per calendario. Con Pro (`FeatureKey.multipleNotifications`),
-  fino a **tre** orari per calendario (per esempio 18:00 e 20:00).
+  **due** orari per calendario (per esempio 18:00 e 20:00).
+  *Correzione al piano, 2026-09-10*: qui c'era scritto "fino a tre", ma la tabella
+  `collection_calendars` prevede due colonne (`notificationTime`, `secondNotificationTime`)
+  e due coprono il caso reale. Il terzo orario costerebbe una migrazione e si aggiunge solo
+  se qualcuno lo chiede.
 - Testo: `"Domani raccolgono {tipi}. Ricordati di portarli fuori questa sera."` Con più tipi,
   la lista separata da virgole. Titolo: il nome del calendario, se ce n'è più di uno.
 - Ordina per data e tronca a 64.
-- `payload` = `trashcan://occurrence?date=YYYY-MM-DD&calendar=<id>` per il deep link.
+- `payload` = `/day/YYYY-MM-DD?calendar=<id>`, cioe' il percorso interno di `go_router`.
+  *Correzione al piano, 2026-09-10*: qui c'era `trashcan://occurrence?...`, che non
+  corrisponde a nessuna rotta dichiarata in `Routes`. Un secondo formato da tradurre e' un
+  secondo posto in cui sbagliare, e il sintomo sarebbe una notifica che si tocca e non porta
+  da nessuna parte.
 
 Permesso exact alarm: alla prima attivazione delle notifiche, se
 `canScheduleExactAlarms() == false`, mostra una schermata che spiega perché serve

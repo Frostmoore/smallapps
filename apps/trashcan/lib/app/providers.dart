@@ -7,6 +7,7 @@ import 'package:micro_core/micro_core.dart';
 import '../data/database.dart';
 import '../data/repository.dart';
 import '../domain/occurrence_engine.dart';
+import '../services/trashcan_scheduler.dart';
 import 'feature_limits.dart';
 
 /// I provider radice dell'app.
@@ -108,6 +109,21 @@ class EntitlementNotifier extends Notifier<EntitlementView> {
     final paths = ref.watch(appPathsProvider);
     final installId = ref.watch(installIdProvider).value;
 
+    // Il client del server lo costruisce questo provider, quindi tocca a lui chiuderlo.
+    // Il gateway no: quello vive in purchaseGatewayProvider, che se ne occupa da solo.
+    // Vedi il commento su EntitlementService.dispose: un servizio non chiude niente che
+    // non abbia costruito, e questo build() viene rieseguito almeno una volta a ogni
+    // avvio, appena l'id di installazione finisce di caricarsi.
+    final api = (config.serverEnabled && installId != null)
+        ? LicenseApiClient(
+            baseUri: config.licenseBaseUrl!,
+            appId: config.appId,
+            appSecret: config.appSecret,
+            installId: installId.value,
+            appVersion: appVersion,
+          )
+        : null;
+
     final service = EntitlementService(
       appId: config.appId,
       proSku: config.proSku,
@@ -116,21 +132,14 @@ class EntitlementNotifier extends Notifier<EntitlementView> {
       // Finché l'id non è stato letto si usa un segnaposto: il servizio funziona lo
       // stesso in locale, e appena l'id arriva questo provider si ricostruisce.
       installId: installId ?? InstallId.fixed('00000000-0000-0000-0000-000000000000'),
-      api: (config.serverEnabled && installId != null)
-          ? LicenseApiClient(
-              baseUri: config.licenseBaseUrl!,
-              appId: config.appId,
-              appSecret: config.appSecret,
-              installId: installId.value,
-              appVersion: appVersion,
-            )
-          : null,
+      api: api,
     );
     _service = service;
     service.addListener(_sync);
     ref.onDispose(() {
       service.removeListener(_sync);
       service.dispose();
+      api?.close();
     });
 
     // Il bootstrap parte da solo: la UI non deve ricordarsi di chiamarlo, e dimenticarlo
@@ -282,3 +291,82 @@ final upcomingWeekProvider = Provider<List<CollectionOccurrence>>((ref) {
       .where((o) => o.date.isSameOrAfter(today) && o.date.isSameOrBefore(limit))
       .toList();
 });
+
+// ── Notifiche ──────────────────────────────────────────────────────────────────────
+
+/// Il servizio di notifiche, creato al primo uso e non in `main()`.
+///
+/// ⚑ Inizializzarlo all'avvio costa decine di millisecondi prima del primo frame, per una
+/// cosa che serve solo dopo che esiste un calendario. Chi lo osserva riceve `null` finche'
+/// non e' pronto, e il pianificatore semplicemente non consegna niente in quell'istante.
+final notificationServiceProvider = FutureProvider<NotificationService>((ref) async {
+  final service = await NotificationService.create(
+    androidIconResource: '@mipmap/ic_launcher',
+    channels: const <MicroNotificationChannel>[trashcanChannel],
+  );
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+final schedulerProvider = Provider<TrashcanScheduler>(
+  (ref) => TrashcanScheduler(
+    db: ref.watch(databaseProvider),
+    settings: ref.watch(settingsProvider),
+    gate: ref.watch(featureGateProvider),
+    appName: ref.watch(appConfigProvider).appName,
+    // Si osserva il Future: quando il servizio e' pronto il pianificatore viene ricostruito
+    // con dentro il servizio vero, e la sincronizzazione qui sotto riparte da sola.
+    notifications: ref.watch(notificationServiceProvider).value,
+  ),
+);
+
+/// Tiene il piano delle notifiche allineato ai dati, senza che nessuno debba ricordarsene.
+///
+/// La ripianificazione e' ritardata di mezzo secondo perche' una singola azione dell'utente
+/// puo' produrre piu' scritture (creare un tipo e la sua regola, riordinare dieci righe):
+/// ricalcolare a ogni scrittura significa fare lo stesso lavoro tre volte di fila.
+final notificationSyncProvider = Provider<void>((ref) {
+  final scheduler = ref.watch(schedulerProvider);
+  final db = ref.watch(databaseProvider);
+
+  // ☠ Una passata all'avvio, appena il servizio e' pronto. Senza, il piano si
+  // ricostruiva solo quando i dati cambiavano: chi installa l'app, la configura e poi non
+  // la tocca piu' per due mesi non riceveva niente dopo i primi sessanta giorni, e chi
+  // ripristinava un backup non riceveva niente e basta. Costa una ripianificazione per
+  // avvio, cioe' quello che il guardiano dell'ora considera comunque accettabile.
+  if (scheduler.isReady) unawaited(scheduler.rescheduleAll());
+
+  Timer? debounce;
+  final subscription = db.watchAnyChange().listen((_) {
+    debounce?.cancel();
+    debounce = Timer(const Duration(milliseconds: 500), () {
+      unawaited(scheduler.rescheduleAll());
+    });
+  });
+
+  ref.onDispose(() {
+    debounce?.cancel();
+    unawaited(subscription.cancel());
+  });
+});
+
+/// L'interruttore generale dei promemoria.
+///
+/// Spegnerlo cancella subito tutto quello che era in attesa invece di limitarsi a non
+/// pianificare piu' nulla: le notifiche gia' consegnate ad Android sopravvivono
+/// all'impostazione, e continuerebbero ad arrivare per i sessanta giorni successivi.
+class NotificationsEnabled extends Notifier<bool> {
+  @override
+  bool build() =>
+      ref.watch(settingsProvider).getBool(SettingKeys.notificationsEnabled, orElse: true);
+
+  Future<void> set(bool value) async {
+    state = value;
+    await ref.read(settingsProvider).setBool(SettingKeys.notificationsEnabled, value);
+    await ref.read(schedulerProvider).rescheduleAll();
+  }
+}
+
+final notificationsEnabledProvider = NotifierProvider<NotificationsEnabled, bool>(
+  NotificationsEnabled.new,
+);

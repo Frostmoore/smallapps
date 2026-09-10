@@ -1,6 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Notifiche pianificate. Vedi develop_microapps.md F3.8.
+
+         RECEIVE_BOOT_COMPLETED: gli allarmi di Android non sopravvivono al riavvio del
+         telefono. Senza questo permesso e senza ScheduledNotificationBootReceiver, dopo
+         un riavvio l'utente semplicemente smette di ricevere i promemoria, e non c'e'
+         niente che glielo dica.
+
+         SCHEDULE_EXACT_ALARM e non USE_EXACT_ALARM: il secondo non chiede niente
+         all'utente ma richiede giustificazione e revisione da parte di Google Play, e
+         non regge un'app di promemoria domestici. Col primo si chiede il permesso, e se
+         l'utente rifiuta si pianifica in modo inesatto: il promemoria arriva lo stesso,
+         eventualmente in ritardo. L'app funziona comunque. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <application
-        android:label="trashcan"
+        android:label="TrashCan"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -25,6 +39,22 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Senza questi due receiver il plugin non ha nessuno a cui consegnare la
+             notifica quando l'allarme scatta: l'app si costruisce, si installa, pianifica
+             senza errori, e poi la notifica non arriva mai. Nessun messaggio, nessun log:
+             il modo peggiore possibile di rompersi. -->
+        <receiver android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

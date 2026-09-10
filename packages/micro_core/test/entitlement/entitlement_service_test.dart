@@ -124,6 +124,40 @@ void main() {
     api: api,
   );
 
+  group('proprieta delle dipendenze', () {
+    test('chiudere il servizio NON chiude il gateway che gli e stato passato', () async {
+      // ☠ Questo test esiste per un difetto trovato sull'emulatore, non a tavolino.
+      //
+      // EntitlementService.dispose() chiudeva il gateway ricevuto per iniezione. In
+      // TrashCan il gateway vive in un provider di Riverpod e il servizio viene ricreato
+      // appena l'id di installazione finisce di caricarsi, cioe' sempre, a ogni avvio. Il
+      // primo servizio chiudeva il gateway, il secondo ne riceveva uno gia' chiuso, e da
+      // quel momento ogni acquisto falliva con "Cannot add new events after calling close".
+      //
+      // Sintomo per l'utente: il bottone "Sblocca Pro" gira all'infinito. Cioe' nessuno
+      // puo' comprare, in un'app il cui unico ricavo e' quell'acquisto.
+      final gateway = FakePurchaseGateway.withProduct(sku);
+      final first = build(gateway: gateway);
+      await first.bootstrap();
+      first.dispose();
+
+      // Il gateway deve essere ancora vivo: chi lo ha costruito non lo ha chiuso.
+      final second = build(gateway: gateway);
+      await second.bootstrap();
+      final result = await second.buyPro();
+      expect(result, isNot(isA<Err<void>>()));
+
+      await pumpEventQueue();
+      expect(
+        second.isPro,
+        isTrue,
+        reason: 'un acquisto dopo la ricreazione del servizio deve andare a buon fine',
+      );
+      second.dispose();
+      await gateway.dispose();
+    });
+  });
+
   group('supersedes: la regola che protegge chi ha pagato (ADR-007)', () {
     const free = Entitlement(
       appId: appId,

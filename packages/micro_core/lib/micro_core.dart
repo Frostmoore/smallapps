@@ -24,6 +24,7 @@ export 'src/gate/feature_key.dart';
 export 'src/gate/feature_limits.dart';
 export 'src/gate/paywall.dart';
 export 'src/install/install_id.dart';
+export 'src/notifications/notification_scheduler.dart';
 export 'src/notifications/notification_service.dart';
 export 'src/prefs/settings_store.dart';
 export 'src/storage/app_paths.dart';

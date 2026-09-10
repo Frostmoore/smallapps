@@ -31,6 +31,8 @@ abstract final class Routes {
   /// Il percorso del giorno, con la data gia' inserita.
   static String dayOf(String isoDate) => '/day/$isoDate';
 
+  static String calendarEditOf(int id) => '/calendars/$id/edit';
+
   static String wasteTypeEditOf(int id) => '/waste-types/$id/edit';
 
   static String rulesOf(int wasteTypeId) => '/waste-types/$wasteTypeId/rules';

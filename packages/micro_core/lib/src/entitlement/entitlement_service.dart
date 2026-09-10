@@ -184,12 +184,25 @@ class EntitlementService extends ChangeNotifier {
     );
   }
 
+  /// Chiude solo cio' che questo servizio ha creato: la sottoscrizione agli eventi.
+  ///
+  /// ☠ Qui c'era `gateway.dispose()` e `api.close()`. Il gateway arriva per iniezione e
+  /// il suo ciclo di vita appartiene a chi lo costruisce, che in TrashCan e' un provider di
+  /// Riverpod. Il servizio invece viene ricreato ogni volta che una sua dipendenza cambia,
+  /// e la prima ricreazione avviene sempre: all'avvio l'id di installazione e' ancora in
+  /// caricamento, arriva un istante dopo e il servizio si ricostruisce. Il vecchio servizio
+  /// chiudeva il gateway; il nuovo riceveva lo stesso gateway, ormai chiuso.
+  ///
+  /// Sintomo osservato sull'emulatore: il bottone "Sblocca Pro" gira all'infinito e nel log
+  /// compare "Bad state: Cannot add new events after calling close". Cioe': **nessuno puo'
+  /// comprare**, in un'app il cui unico modo di guadagnare e' quell'acquisto. Nessun crash,
+  /// nessun avviso all'utente, e niente che si noti senza provare a pagare davvero.
+  ///
+  /// La regola, da qui in avanti: un servizio non chiude niente che non abbia costruito.
   @override
   void dispose() {
     _disposed = true;
     unawaited(_sub?.cancel());
-    unawaited(gateway.dispose());
-    api?.close();
     super.dispose();
   }
 

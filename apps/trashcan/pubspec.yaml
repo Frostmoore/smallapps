@@ -34,6 +34,10 @@ dev_dependencies:
   # StreamQueue, usata nei test degli stream. E' gia' una dipendenza transitiva di
   # flutter_test, ma l'analyzer pretende che chi la importa la dichiari.
   async: ^2.13.0
+  # SharedPreferences.setMockInitialValues nei test dello scheduler. E' gia' una
+  # dipendenza transitiva di micro_core, ma l'analyzer pretende che chi la importa la
+  # dichiari.
+  shared_preferences: ^2.5.3
   flutter_test:
     sdk: flutter
   integration_test:

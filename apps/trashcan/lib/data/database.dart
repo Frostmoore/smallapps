@@ -105,6 +105,34 @@ extension AppDatabaseQueries on AppDatabase {
           ]))
           .watch();
 
+  /// Un segnale a ogni modifica dei dati del calendario, qualunque tabella tocchi.
+  ///
+  /// ⚑ Serve al pianificatore delle notifiche. L'alternativa sarebbe chiamare la
+  /// ripianificazione a mano dopo ogni scrittura, in una ventina di punti: dimenticarne uno
+  /// non produce nessun errore, solo un promemoria che non arriva, e ci si accorge del
+  /// difetto quando il camion e' gia' passato. Qui il collegamento e' uno solo e non si
+  /// puo' dimenticare.
+  Stream<void> watchAnyChange() => tableUpdates(
+    TableUpdateQuery.onAllTables([
+      collectionCalendars,
+      wasteTypes,
+      recurrenceRules,
+      collectionExceptions,
+    ]),
+  );
+
+  /// Tutti i calendari, una tantum.
+  ///
+  /// Serve al pianificatore delle notifiche, che deve coprire **tutti** i calendari e non
+  /// solo quello aperto: chi ha comprato il Pro per la seconda casa si aspetta i promemoria
+  /// di entrambe, anche mentre guarda la prima.
+  Future<List<CollectionCalendar>> allCalendars() =>
+      (select(collectionCalendars)..orderBy([
+            (t) => OrderingTerm(expression: t.sortOrder),
+            (t) => OrderingTerm(expression: t.id),
+          ]))
+          .get();
+
   Future<int> countCalendars() async {
     final row = await (selectOnly(collectionCalendars)
           ..addColumns([collectionCalendars.id.count()]))
