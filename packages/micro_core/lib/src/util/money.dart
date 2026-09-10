@@ -20,11 +20,32 @@ final class Money implements Comparable<Money> {
   /// Accetta virgola e punto come separatore decimale, spazi, e il simbolo di valuta:
   /// chi scrive "6,50 €" in un campo prezzo si aspetta che funzioni.
   static Money? tryParse(String input, {String currency = 'EUR'}) {
-    final cleaned = input
-        .replaceAll(RegExp(r'[^\d,.\-]'), '')
-        .replaceAll('.', '')
-        .replaceAll(',', '.');
+    var cleaned = input.replaceAll(RegExp(r'[^\d,.\-]'), '');
     if (cleaned.isEmpty) return null;
+
+    final lastComma = cleaned.lastIndexOf(',');
+    final lastDot = cleaned.lastIndexOf('.');
+
+    if (lastComma >= 0 && lastDot >= 0) {
+      // Ci sono entrambi: l'ultimo dei due è il separatore decimale, l'altro è quello
+      // delle migliaia. Vale sia per "1.234,56" sia per "1,234.56".
+      final decimalSep = lastComma > lastDot ? ',' : '.';
+      final thousandsSep = decimalSep == ',' ? '.' : ',';
+      cleaned = cleaned.replaceAll(thousandsSep, '').replaceAll(decimalSep, '.');
+    } else if (lastComma >= 0) {
+      // Solo la virgola: in italiano è sempre il separatore decimale.
+      cleaned = cleaned.replaceAll(',', '.');
+    } else if (lastDot >= 0) {
+      // Solo il punto, ed è ambiguo. "1.000" sono mille, "6.50" sono sei e cinquanta.
+      // Si distingue dal numero di cifre che seguono: esattamente tre cifre dopo un
+      // punto, con qualcosa prima, è quasi sempre un separatore di migliaia.
+      final decimals = cleaned.length - lastDot - 1;
+      final hasMultipleDots = cleaned.indexOf('.') != lastDot;
+      if (hasMultipleDots || (decimals == 3 && lastDot > 0)) {
+        cleaned = cleaned.replaceAll('.', '');
+      }
+    }
+
     final value = double.tryParse(cleaned);
     return value == null ? null : Money.fromDouble(value, currency: currency);
   }

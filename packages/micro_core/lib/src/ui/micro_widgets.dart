@@ -524,3 +524,131 @@ abstract final class MicroSnack {
     iconColor: Theme.of(context).colorScheme.error,
   );
 }
+
+/// Un numero grande con la sua etichetta. Il mattone delle dashboard.
+class MicroStatTile extends StatelessWidget {
+  const MicroStatTile({
+    required this.label,
+    required this.value,
+    this.hint,
+    this.icon,
+    this.accent,
+    super.key,
+  });
+
+  final String label;
+  final String value;
+  final String? hint;
+  final IconData? icon;
+  final Color? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tint = accent ?? scheme.primary;
+
+    return MicroCard(
+      padding: MicroSpacing.cardTight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 16, color: tint),
+                const SizedBox(width: MicroSpacing.xs),
+              ],
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: theme.textTheme.sectionLabel.copyWith(color: scheme.mutedText),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          MicroSpacing.gapXS,
+          // `statValue` usa cifre a larghezza fissa: senza, affiancando due tile i numeri
+          // non si allineano e la riga sembra storta.
+          Text(value, style: theme.textTheme.statValue.copyWith(color: tint)),
+          if (hint != null)
+            Text(
+              hint!,
+              style: theme.textTheme.cardMeta.copyWith(color: scheme.mutedText),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Anello di riempimento, con un valore al centro.
+///
+/// Usato per l'autonomia del combustibile e per i riempimenti in genere. Il valore e'
+/// sempre limitato fra 0 e 1: una stima puo' superare il 100% e l'anello non deve
+/// disegnarsi addosso.
+class MicroProgressRing extends StatelessWidget {
+  const MicroProgressRing({
+    required this.value,
+    required this.centerLabel,
+    this.centerSubLabel,
+    this.color,
+    this.size = 140,
+    super.key,
+  });
+
+  final double value;
+  final String centerLabel;
+  final String? centerSubLabel;
+  final Color? color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tint = color ?? scheme.primary;
+    final clamped = value.isNaN ? 0.0 : value.clamp(0.0, 1.0);
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox.expand(
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: clamped),
+              duration: MicroDuration.slow,
+              curve: Curves.easeOutCubic,
+              builder: (context, animated, _) => CircularProgressIndicator(
+                value: animated,
+                strokeWidth: size / 12,
+                backgroundColor: scheme.surfaceContainerHighest,
+                valueColor: AlwaysStoppedAnimation<Color>(tint),
+                strokeCap: StrokeCap.round,
+              ),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                centerLabel,
+                style: theme.textTheme.statValue.copyWith(fontSize: size / 4),
+              ),
+              if (centerSubLabel != null)
+                Text(
+                  centerSubLabel!,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.cardMeta.copyWith(color: scheme.mutedText),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

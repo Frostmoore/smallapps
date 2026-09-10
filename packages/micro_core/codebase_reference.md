@@ -1,12 +1,11 @@
 # codebase_reference.md — `micro_core`
 
 > Atlante del package condiviso delle MicroApps.
-> **Obiettivo di questo documento**: capire il codice, trovare ciò che serve e modificarlo
-> **senza aprire i file**. Se per sapere che firma ha un metodo bisogna leggere il sorgente,
-> questo documento ha fallito.
+> **Obiettivo**: capire il codice, trovare ciò che serve e modificarlo **senza aprire i
+> file**. Se per sapere che firma ha un metodo bisogna leggere il sorgente, ha fallito.
 >
-> **Aggiornato al**: 2026-09-10 · **Versione repo**: `v1.2.0`
-> **Toolchain**: Flutter 3.47.3 · Dart 3.13.3 (in `.flutter/`, vedi `develop_microapps.md` §5.8)
+> **Aggiornato al**: 2026-09-10 · **Fase F1 chiusa** · **Toolchain**: Flutter 3.47.3, Dart 3.13.3
+> **Test**: 100 verdi · **Analisi statica**: nessuna issue
 
 ---
 
@@ -14,419 +13,519 @@
 
 | Cerchi… | Vai in |
 |---|---|
-| La superficie pubblica del package | `lib/micro_core.dart` (barrel) |
-| Il tipo di esito per gli errori attesi | `lib/src/util/result.dart` → `Result`, `Ok`, `Err`, `MicroError` |
-| I codici d'errore condivisi | `lib/src/util/result.dart` → `MicroErrorCodes` |
-| Le date senza fuso orario | `lib/src/util/civil_date.dart` → `CivilDate` |
-| La configurazione di un'app (appId, SKU, colori, billing) | `lib/src/config/micro_app_config.dart` → `MicroAppConfig` |
-| Quali funzioni sono a pagamento | `lib/src/gate/feature_key.dart` → `FeatureKey` |
-| Quanto ne concede il piano gratuito | `lib/src/gate/feature_limits.dart` → `FeatureLimit`, `FeatureLimits` |
-| Se l'utente può fare una cosa | `lib/src/gate/feature_gate.dart` → `FeatureGate`, `GateVerdict` |
-| Perché una funzione è bloccata | `lib/src/gate/feature_gate.dart` → `BlockReason` |
-| Cosa dimostrano i test | §7 di questo documento |
-| Cosa **non** esiste ancora | §9 di questo documento |
+| La superficie pubblica | `lib/micro_core.dart` (barrel) |
+| Esito di un'operazione fallibile | `src/util/result.dart` → `Result`, `Ok`, `Err`, `MicroError` |
+| Date senza fuso orario | `src/util/civil_date.dart` → `CivilDate` |
+| Importi di denaro | `src/util/money.dart` → `Money` |
+| Log su file | `src/util/micro_log.dart` → `MicroLog` |
+| Cartelle dell'app, scrittura atomica | `src/storage/app_paths.dart` → `AppPaths`, `AtomicFile` |
+| Immagini e miniature | `src/storage/image_store.dart` → `ImageStore`, `StoredImage` |
+| Preferenze tipizzate | `src/prefs/settings_store.dart` → `SettingsStore`, `SettingKeys` |
+| Identità dell'installazione | `src/install/install_id.dart` → `InstallId` |
+| Configurazione dell'app | `src/config/micro_app_config.dart` → `MicroAppConfig`, `BillingMode` |
+| Tema e token grafici | `src/theme/` → `MicroTheme`, `MicroSpacing`, `MicroRadius`, `MicroDuration` |
+| Componenti UI | `src/ui/micro_widgets.dart` → undici widget `Micro*` |
+| Acquisti | `src/billing/` → `PurchaseGateway`, `PlayPurchaseGateway`, `FakePurchaseGateway` |
+| Diritto al Pro | `src/entitlement/` → `Entitlement`, `EntitlementService`, `LicenseApi` |
+| Cosa è a pagamento | `src/gate/` → `FeatureKey`, `FeatureLimit`, `FeatureGate` |
+| Paywall e lucchetti | `src/gate/paywall.dart` → `PaywallPage`, `ProLock`, `ProBadge` |
+| Notifiche locali | `src/notifications/` → `NotificationService`, `NotificationIds` |
+| Backup e CSV | `src/backup/backup.dart`, `src/export/csv_writer.dart` |
+| Cosa dimostrano i test | §9 |
+| Cosa **non** esiste ancora | §10 |
 
 ---
 
 ## 2. Albero dei file
 
-Solo il codice scritto da noi. `.dart_tool/`, `build/` e le dipendenze sono esclusi.
-
 ```
 packages/micro_core/
-├─ pubspec.yaml                       name: micro_core, publish_to: none
-├─ analysis_options.yaml              include: ../../analysis_options.yaml
-├─ codebase_reference.md              questo file
+├─ pubspec.yaml
+├─ analysis_options.yaml          include: ../../analysis_options.yaml
+├─ codebase_reference.md          questo file
 ├─ lib/
-│  ├─ micro_core.dart                 BARREL: unica cosa che le app importano
+│  ├─ micro_core.dart             BARREL: l'unica cosa che le app importano
 │  └─ src/
-│     ├─ config/
-│     │  └─ micro_app_config.dart     BillingMode, MicroAppConfig
+│     ├─ backup/backup.dart       ImportMode, BackupSource, BackupManifest,
+│     │                           JsonBackupCodec, BackupService
+│     ├─ billing/
+│     │  ├─ purchase_gateway.dart      MicroProduct, PurchaseEvent + 4 sottotipi,
+│     │  │                             PurchaseGateway, BillingErrorCodes
+│     │  ├─ fake_purchase_gateway.dart FakeOutcome, FakePurchaseGateway
+│     │  └─ play_purchase_gateway.dart PlayPurchaseGateway
+│     ├─ config/micro_app_config.dart  BillingMode, MicroAppConfig
+│     ├─ entitlement/
+│     │  ├─ entitlement.dart           ProStatus, EntitlementSource, Entitlement
+│     │  ├─ entitlement_store.dart     EntitlementStore
+│     │  ├─ entitlement_service.dart   EntitlementService
+│     │  └─ license_api_client.dart    ServerEntitlement, RestoreCode,
+│     │                                LicenseApi, LicenseApiClient
+│     ├─ export/csv_writer.dart        CsvWriter
 │     ├─ gate/
-│     │  ├─ feature_key.dart          FeatureKey (13 valori)
-│     │  ├─ feature_limits.dart       FeatureLimit, FeatureLimits, _LimitKind
-│     │  └─ feature_gate.dart         GateVerdict, GateAllowed, GateBlocked,
-│     │                               BlockReason, FeatureGate
+│     │  ├─ feature_key.dart           FeatureKey (13 valori)
+│     │  ├─ feature_limits.dart        FeatureLimit, FeatureLimits
+│     │  ├─ feature_gate.dart          GateVerdict, GateAllowed, GateBlocked,
+│     │  │                             BlockReason, FeatureGate
+│     │  └─ paywall.dart               PaywallBenefit, PaywallConfig, PaywallPage,
+│     │                                ProBadge, ProLockMode, ProLock
+│     ├─ install/install_id.dart       InstallId
+│     ├─ notifications/
+│     │  └─ notification_service.dart  MicroImportance, MicroNotificationChannel,
+│     │                                ScheduledNotification, PermissionOutcome,
+│     │                                NotificationService, NotificationIds
+│     ├─ prefs/settings_store.dart     SettingsStore, SettingKeys
+│     ├─ storage/
+│     │  ├─ app_paths.dart             AppPaths, AtomicFile
+│     │  └─ image_store.dart           StoredImage, ImageStore
+│     ├─ theme/
+│     │  ├─ micro_tokens.dart          MicroSpacing, MicroRadius, MicroDuration,
+│     │  │                             MicroColorScheme, MicroTextTheme (extension)
+│     │  └─ micro_theme.dart           MicroTheme
+│     ├─ ui/micro_widgets.dart         MicroPageScaffold, MicroCard,
+│     │                                MicroSectionHeader, MicroListTile,
+│     │                                MicroEmptyState, MicroPrimaryButton,
+│     │                                MicroChip, MicroConfirmSheet, MicroSnack,
+│     │                                MicroStatTile, MicroProgressRing
 │     └─ util/
-│        ├─ result.dart               Result, Ok, Err, MicroError, MicroErrorCodes
-│        └─ civil_date.dart           CivilDate
+│        ├─ result.dart                Result, Ok, Err, MicroError, MicroErrorCodes
+│        ├─ civil_date.dart            CivilDate
+│        ├─ money.dart                 Money
+│        └─ micro_log.dart             LogLevel, MicroLog
 └─ test/
-   ├─ gate/feature_gate_test.dart     20 test
-   └─ util/civil_date_test.dart       28 test
+   ├─ core_modules_test.dart                      30 test
+   ├─ entitlement/entitlement_service_test.dart   22 test
+   ├─ gate/feature_gate_test.dart                 20 test
+   └─ util/civil_date_test.dart                   28 test
 ```
 
 **Regola del barrel**: le app importano solo `package:micro_core/micro_core.dart`. Mai
-`package:micro_core/src/...`. Quello che non è esportato dal barrel è dettaglio interno e può
-cambiare senza preavviso.
-
-Esportazioni correnti del barrel, in ordine alfabetico:
-
-```dart
-export 'src/config/micro_app_config.dart';
-export 'src/gate/feature_gate.dart';
-export 'src/gate/feature_key.dart';
-export 'src/gate/feature_limits.dart';
-export 'src/util/civil_date.dart';
-export 'src/util/result.dart';
-```
+`package:micro_core/src/...`. Quello che non è esportato è dettaglio interno.
 
 ---
 
 ## 3. Dipendenze
 
-| Pacchetto | Vincolo | Perché |
-|---|---|---|
-| `flutter` | sdk | `Color`, `Brightness`, `kReleaseMode` |
-| `meta` | `^1.19.0` | `@immutable`, `@protected` |
-| `flutter_test` | sdk (dev) | test |
-| `flutter_lints` | `^5.0.0` (dev) | lint |
+| Pacchetto | A cosa serve |
+|---|---|
+| `meta` | `@immutable`, `@protected` |
+| `intl` | formattazione di `Money` |
+| `path`, `path_provider` | `AppPaths` |
+| `shared_preferences` | `SettingsStore` |
+| `flutter_secure_storage`, `uuid`, `crypto` | `InstallId`, firma HMAC |
+| `http` | `LicenseApiClient` |
+| `in_app_purchase`, `in_app_purchase_android` | `PlayPurchaseGateway` |
+| `flutter_local_notifications`, `timezone`, `flutter_timezone` | `NotificationService` |
+| `archive`, `file_picker`, `share_plus` | `BackupService` |
+| `image` | `ImageStore` |
+| `pdf` | dichiarato ma **non ancora usato**: servirà a `PdfReportBuilder` (DT-10) |
 
-**Le versioni non si scrivono a mano**: si usa `pwsh tool/fl.ps1 pub add <pacchetto>`. Un
-vincolo inventato a memoria fa fallire la risoluzione o blocca l'aggiornamento di altro.
+**Le versioni non si scrivono a mano**: `pwsh tool/fl.ps1 pub add <pacchetto>`.
 
 ---
 
-## 4. `lib/src/util/result.dart`
+## 4. `util/` — le fondamenta
 
-### `sealed class Result<T>`
+### `sealed class Result<T>`, `final class Ok<T>`, `final class Err<T>`
 
-Esito di un'operazione che può fallire per cause **attese**. Le eccezioni restano per i bug:
-rete assente, file corrotto o acquisto annullato non sono bug, sono esiti. Questo evita il
-`try/catch` decorativo attorno a ogni chiamata e rende impossibile dimenticare il ramo
-d'errore, perché `fold` lo richiede.
-
-| Membro | Firma | Effetto |
-|---|---|---|
-| `isOk` | `bool get isOk` | `true` se è un `Ok` |
-| `isErr` | `bool get isErr` | `true` se è un `Err` |
-| `valueOrNull` | `T? get valueOrNull` | Il valore, `null` se errore |
-| `errorOrNull` | `MicroError? get errorOrNull` | L'errore, `null` se successo |
-| `orElse` | `T orElse(T fallback)` | Il valore, oppure `fallback` |
-| `fold` | `R fold<R>({required R Function(T value) ok, required R Function(MicroError error) err})` | Riduce i due rami a un valore. **Entrambi obbligatori.** |
-| `map` | `Result<R> map<R>(R Function(T value) transform)` | Trasforma il valore, propaga l'errore |
-| `flatMap` | `Result<R> flatMap<R>(Result<R> Function(T value) transform)` | Concatena un'altra operazione fallibile |
-
-### `final class Ok<T> extends Result<T>`
-
-| Membro | Firma |
+| Firma | Effetto |
 |---|---|
-| costruttore | `const Ok(this.value)` |
-| campo | `final T value` |
-| uguaglianza | per valore, su `value` |
+| `bool get isOk` · `bool get isErr` | |
+| `T? get valueOrNull` · `MicroError? get errorOrNull` | |
+| `T orElse(T fallback)` | |
+| `R fold<R>({required R Function(T) ok, required R Function(MicroError) err})` | Entrambi i rami obbligatori |
+| `Result<R> map<R>(R Function(T))` | Propaga l'errore |
+| `Result<R> flatMap<R>(Result<R> Function(T))` | Concatena |
 
-### `final class Err<T> extends Result<T>`
-
-| Membro | Firma |
-|---|---|
-| costruttore | `const Err(this.error)` |
-| campo | `final MicroError error` |
-| uguaglianza | per valore, su `error` |
+⚑ Rete assente, file corrotto e acquisto annullato non sono bug: sono esiti. Le eccezioni
+restano per i bug, e così sparisce il `try/catch` decorativo intorno a ogni chiamata.
 
 ### `class MicroError`
 
-| Membro | Firma | Note |
-|---|---|---|
-| costruttore | `const MicroError({required String code, required String message, Object? cause, StackTrace? stackTrace})` | |
-| da eccezione | `factory MicroError.unexpected(Object cause, [StackTrace? stackTrace])` | `code` = `'unexpected'` |
-| campi | `final String code`, `final String message`, `final Object? cause`, `final StackTrace? stackTrace` | |
-| uguaglianza | su `code` e `message` | |
+`const MicroError({required String code, required String message, Object? cause, StackTrace? stackTrace})`
+· `factory MicroError.unexpected(Object cause, [StackTrace?])`
 
-⚑ **`code` non è un messaggio**: è un identificatore stabile su cui il chiamante ramifica, e
-non cambia quando si riscrive o si traduce il testo. `message` è per i log, **non per la UI**:
-le stringhe mostrate all'utente vivono negli ARB dell'app.
+⚑ `code` è un identificatore stabile su cui ramificare; `message` è per i log, **non per la
+UI**: i testi mostrati all'utente vivono negli ARB delle app.
 
-### `abstract final class MicroErrorCodes`
-
-Costanti `static const String`: `network`, `timeout`, `unauthorized`, `notFound`,
-`rateLimited`, `badResponse`, `io`, `corruptedFile`, `unsupportedVersion`,
-`billingUnavailable`, `purchaseCanceled`, `purchaseFailed`, `permissionDenied`, `unexpected`.
-
-I moduli possono definirne altri, purché documentati nel proprio atlante.
-
----
-
-## 5. `lib/src/util/civil_date.dart`
+`MicroErrorCodes`: `network`, `timeout`, `unauthorized`, `notFound`, `rateLimited`,
+`badResponse`, `io`, `corruptedFile`, `unsupportedVersion`, `billingUnavailable`,
+`purchaseCanceled`, `purchaseFailed`, `permissionDenied`, `unexpected`.
 
 ### `final class CivilDate implements Comparable<CivilDate>`
 
-Una data del calendario, **senza ora e senza fuso**. Implementa ADR-008.
+Implementa ADR-008. Serializzata sempre come TEXT `YYYY-MM-DD`.
 
-⚑ **Perché esiste**: "la raccolta dell'organico è lunedì" e "il ragù è stato congelato il 4
-settembre" non sono istanti. Rappresentandoli con `DateTime` ci si porta dietro un'ora e un
-fuso che non esistono, e il risultato è che il cambio dell'ora legale sposta la data di un
-giorno per alcuni utenti in alcune settimane dell'anno. È il bug classico dei calendari:
-difficilissimo da riprodurre e devastante per un'app la cui unica funzione è dire il giorno
-giusto.
+**Costruttori**: `CivilDate(int y, int m, int d)` (normalizza i fuori intervallo) ·
+`.fromDateTime(DateTime)` · `.today({DateTime? now})` · `.parse(String)` ·
+`static CivilDate? tryParse(String?)` · `.fromEpochDay(int)`
 
-**Serializzazione**: sempre TEXT `YYYY-MM-DD`. Gli istanti veri (creazione record, verifica
-licenza) restano `DateTime` in millisecondi UTC.
+**Membri**: `year` · `month` · `day` · `weekday` · `epochDay` · `daysInMonth` ·
+`firstDayOfMonth` · `lastDayOfMonth`
 
-#### Costruttori
+**Metodi**: `toIso()` · `toLocalMidnight()` · `toLocalDateTime(int hour, [int minute = 0])` ·
+`addDays(int)` · `addMonths(int)` · `addYears(int)` · `daysUntil(CivilDate)` ·
+`isBefore` · `isAfter` · `isSameOrBefore` · `isSameOrAfter` · `isToday({DateTime? now})` ·
+`rangeTo(CivilDate)` · `compareTo(CivilDate)`
 
-| Firma | Effetto |
+### `final class Money implements Comparable<Money>`
+
+| Firma | Note |
 |---|---|
-| `factory CivilDate(int year, int month, int day)` | Normalizza i valori fuori intervallo come fa `DateTime`: `CivilDate(2026, 13, 1)` → 2027-01-01 |
-| `factory CivilDate.fromDateTime(DateTime dt)` | Legge la parte data nel fuso **locale** |
-| `factory CivilDate.today({DateTime? now})` | Oggi. `now` serve ai test per fissare il presente |
-| `factory CivilDate.parse(String iso)` | `YYYY-MM-DD`. Lancia `FormatException` se non lo è |
-| `static CivilDate? tryParse(String? iso)` | Come sopra, ma restituisce `null` |
-| `factory CivilDate.fromEpochDay(int epochDay)` | Dalla distanza in giorni dal 1970-01-01 |
+| `const Money.cents(int cents, {String currency = 'EUR'})` | |
+| `factory Money.fromDouble(double, {String currency})` | arrotonda al centesimo |
+| `static Money? tryParse(String, {String currency})` | interpreta ciò che l'utente digita |
+| `static const Money zero` | |
+| `double get asDouble` · `bool get isZero` · `bool get isNegative` | |
+| `operator +` `-` `*` `/` | `/` **non conserva il totale**, vedi §8 |
+| `String format({String? locale})` · `String formatPlain({String? locale})` | |
+| `static Money sum(Iterable<Money>, {String currency})` | |
+| `static Money? average(Iterable<Money>, {String currency})` | `null` su collezione vuota |
 
-#### Campi e proprietà
+### `abstract final class MicroLog` · `enum LogLevel { debug, info, warn, error }`
 
-| Membro | Firma | Note |
-|---|---|---|
-| `year` / `month` / `day` | `final int` | |
-| `weekday` | `int get weekday` | `DateTime.monday`…`DateTime.sunday` |
-| `epochDay` | `int get epochDay` | Giorni dal 1970-01-01. **Calcolato in UTC**, vedi trappola §8 |
-| `daysInMonth` | `int get daysInMonth` | |
-| `firstDayOfMonth` | `CivilDate get firstDayOfMonth` | |
-| `lastDayOfMonth` | `CivilDate get lastDayOfMonth` | |
-
-#### Metodi
-
-| Firma | Effetto |
-|---|---|
-| `String toIso()` | `YYYY-MM-DD`, la forma canonica che va nel database |
-| `DateTime toLocalMidnight()` | Mezzanotte locale di questa data |
-| `DateTime toLocalDateTime(int hour, [int minute = 0])` | Questa data all'ora locale indicata |
-| `CivilDate addDays(int days)` | |
-| `CivilDate addMonths(int months)` | **Con clamp a fine mese**, vedi §8 |
-| `CivilDate addYears(int years)` | Delega a `addMonths(years * 12)` |
-| `int daysUntil(CivilDate other)` | Positivo se `other` è successiva |
-| `bool isBefore(CivilDate other)` | |
-| `bool isAfter(CivilDate other)` | |
-| `bool isSameOrBefore(CivilDate other)` | |
-| `bool isSameOrAfter(CivilDate other)` | |
-| `bool isToday({DateTime? now})` | |
-| `Iterable<CivilDate> rangeTo(CivilDate end)` | Inclusivo agli estremi. Vuoto se `end` precede |
-| `int compareTo(CivilDate other)` | Cronologico |
-| `String toString()` | Coincide con `toIso()` |
+`init({required File file, LogLevel minLevel, int maxBytes})` · `d()` · `i()` · `w()` ·
+`e()` · `export({required Directory into})` · `clear()` · `dispose()` · `isActive` · `file`
 
 ---
 
-## 6. `lib/src/config/micro_app_config.dart`
+## 5. `storage/`
 
-### `enum BillingMode { fake, play }`
+### `class AppPaths`
 
-Quale implementazione di acquisto usare (ADR-006). `fake` è in-memory e deterministica, serve
-a sviluppare e testare tutto il flusso del paywall senza aver caricato l'app su Play Console.
+`static Future<AppPaths> forApp({required String appId})` ·
+`factory AppPaths.underRoot(Directory root)` (per i test)
 
-### `class MicroAppConfig`
+Cartelle: `documents` · `support` · `images` · `thumbs` · `exports` · `logs`
 
-Vive qui e non nelle app perché la **forma** è identica in tutte e quattro: cambiano solo i
-valori. Ogni app espone una funzione `build<Nome>Config()`.
+Metodi: `ensureAll()` · `file(Directory, String)` · **`resolve(String relativePath)`** ·
+`relativize(File)` · `sizeOf(Directory)`
 
-⚑ `micro_core` non conosce nessuna app: qui non c'è nessun elenco di `appId`, nessuno `switch`
-sul nome. Aggiungere una quinta app non richiede di toccare questo file.
+☠ **I percorsi assoluti non si salvano mai nel database.** Su Android la sandbox cambia
+percorso fra un aggiornamento e l'altro: un assoluto salvato oggi punta al nulla dopo il
+primo update, e tutte le foto degli utenti risultano mancanti.
 
-| Membro | Firma |
-|---|---|
-| costruttore | `const MicroAppConfig({required String appId, required String appName, required String proSku, required Color seedColor, required String fontFamily, required Brightness defaultBrightness, required BillingMode billingMode, String? displayFontFamily, Uri? licenseBaseUrl, String appSecret = ''})` |
-| da ambiente | `factory MicroAppConfig.fromEnvironment({required String appId, required String appName, required String proSku, required Color seedColor, required String fontFamily, required Brightness defaultBrightness, String? displayFontFamily})` |
-| | `bool get serverEnabled` — `licenseBaseUrl != null && appSecret.isNotEmpty` |
-| | `bool get usesRealBilling` — `billingMode == BillingMode.play` |
-| | `void assertUsableInRelease()` — lancia `StateError` se release + `BILLING=fake` |
+### `abstract final class AtomicFile`
 
-#### Chiavi di configurazione (`--dart-define`)
+`writeString(File, String)` · `writeBytes(File, List<int>)` · `readStringOrNull(File)` ·
+`readBytesOrNull(File)`
 
-| Define | Valori | Default | Significato |
-|---|---|---|---|
-| `BILLING` | `fake` \| `play` | `fake` in debug, `play` in release | Quale gateway di acquisto usare |
-| `MA_LICENSE_URL` | URL | assente | Base del License Server. Assente = nessuna verifica lato server, l'app funziona lo stesso (ADR-007) |
-| `MA_APP_SECRET` | stringa | vuota | Segreto HMAC per firmare le chiamate al server (ADR-014) |
+### `class ImageStore` · `class StoredImage`
 
-☠ **`appSecret` non è un segreto vero**: sta dentro l'APK e chi decompila lo trova. Serve a
-tenere fuori il traffico casuale, non a proteggere l'entitlement, che è protetto dalla verifica
-dell'acquisto presso Google.
+`importFile(File, {required String bucket, int maxLongSide = 1600, int thumbLongSide = 400, int quality = 82})` ·
+`importBytes(Uint8List, …)` · `resolve(String)` · `delete(StoredImage)` ·
+`deleteBucket(String)` · `totalBytes()` · `pruneOrphans(Set<String> referenced)`
+
+`StoredImage`: `path` (**relativo**) · `thumbPath` · `width` · `height` · `bytes` ·
+`createdAt` · `toJson()` · `fromJson()`
 
 ---
 
-## 7. `lib/src/gate/` — il gating Pro
+## 6. `prefs/`, `install/`, `config/`
 
-Implementa ADR-017: ogni limite del piano gratuito è dichiarato in **un'unica mappa per app**
-e valutato da `FeatureGate`. Nessuna pagina scrive `if (isPro)` a mano.
+### `class SettingsStore`
 
-⚑ **Perché**: i limiti cambiano, spostare il tetto gratuito dopo il lancio è normale. Se il
-valore è sparso in venti file diventa un refactoring invece che una riga. In più il paywall
-costruisce l'elenco dei benefici leggendo la stessa mappa, così non esistono due testi che
-dicono cose diverse sullo stesso limite.
+`static Future<SettingsStore> create({required String namespace})` ·
+`factory SettingsStore.withPreferences(SharedPreferences, {required String namespace})`
 
-### `enum FeatureKey`
+`getBool/setBool` · `getInt/setInt` · `getDouble/setDouble` · `getString/setString` ·
+`getStringList/setStringList` · `getDate/setDate` (come `YYYY-MM-DD`) ·
+`getInstant/setInstant` (ms UTC) · `remove` · `clearNamespace` · `Stream<String> changes`
 
-13 valori, condivisi da tutte e quattro le app: `unlimitedEntities`, `secondaryEntities`,
-`photos`, `statistics`, `fullHistory`, `csvExport`, `pdfReport`, `backupRestore`,
-`advancedWidget`, `multipleNotifications`, `calendarSync`, `customCategories`,
-`themeCustomization`.
+`SettingKeys`: `onboardingDone`, `themeMode`, `notificationsEnabled`, `lastRescheduleAt`,
+`lastServerSyncAt`, `paywallShownCount`, `reviewPromptShownAt`, `launchCount`,
+`firstLaunchAt`
 
-⚑ **Perché una enum condivisa e non una lista per app**: le quattro app vendono le stesse cose
-sotto nomi diversi. Il secondo calendario di TrashCan, il secondo freezer di Full Freezer e la
-seconda fonte di Scorte Calore sono lo stesso concetto (`unlimitedEntities`). Una enum comune
-permette una sola pagina di paywall invece di quattro liste che divergono.
+⚑ Ogni getter richiede un `orElse`: "preferenza mancante" ha sempre un significato preciso,
+e obbligare a dichiararlo evita i `?? false` sparsi che confondono "spento" con "mai deciso".
 
-Aggiungere una voce qui **tocca tutte e quattro le app**: si fa solo quando la funzione esiste
-davvero in almeno una.
+### `class InstallId`
 
-### `class FeatureLimit`
+`static Future<InstallId> load({required String appId, FlutterSecureStorage storage})` ·
+`factory InstallId.fixed(String)` · `value` · `obfuscatedAccountId` (SHA-256, 64 caratteri) ·
+`short`
 
-Tre forme, e nessun'altra.
+### `class MicroAppConfig` · `enum BillingMode { fake, play }`
 
-| Firma | Significato | `freeMax` |
+`const MicroAppConfig({required String appId, required String appName, required String proSku, required Color seedColor, required String fontFamily, required Brightness defaultBrightness, required BillingMode billingMode, String? displayFontFamily, Uri? licenseBaseUrl, String appSecret = ''})`
+
+`factory MicroAppConfig.fromEnvironment({required String appId, required String appName, required String proSku, required Color seedColor, required String fontFamily, required Brightness defaultBrightness, String? displayFontFamily})`
+
+`bool get serverEnabled` · `bool get usesRealBilling` · `void assertUsableInRelease()`
+
+| `--dart-define` | Valori | Default |
 |---|---|---|
-| `const FeatureLimit.open()` | Sempre disponibile | `null` |
-| `const FeatureLimit.count({required int freeMax})` | Gratuita fino a `freeMax` elementi | il valore |
-| `const FeatureLimit.locked()` | Solo con Pro | `0` |
-
-| Proprietà | Firma |
-|---|---|
-| | `final int? freeMax` |
-| | `bool get isLockedForFree` |
-| | `bool get isCounted` |
-| | `bool get isOpen` |
-
-Uguaglianza per valore. `typedef FeatureLimits = Map<FeatureKey, FeatureLimit>`.
-
-### `class FeatureGate`
-
-| Membro | Firma | Effetto |
-|---|---|---|
-| costruttore | `const FeatureGate({required FeatureLimits limits, required bool isPro})` | |
-| | `const FeatureGate.unlimited()` | Lascia passare tutto. Per test e anteprime |
-| | `FeatureLimit limitOf(FeatureKey key)` | Chiave non dichiarata → `FeatureLimit.open()`, con `assert` in debug |
-| | `bool allows(FeatureKey key)` | "Puoi usare questa funzione" |
-| | `int? freeLimitOf(FeatureKey key)` | Il tetto, `null` se non si conta |
-| | `bool withinLimit(FeatureKey key, int currentCount)` | "Puoi aggiungerne un'altra" |
-| | `int? remaining(FeatureKey key, int currentCount)` | Quante altre, mai negativo |
-| | `GateVerdict check(FeatureKey key, {int currentCount = 0})` | La verifica completa, con il motivo |
-| | `List<FeatureKey> get proOnlyFeatures` | Per l'elenco "cosa sblocchi" del paywall |
-| | `List<FeatureKey> get limitedFeatures` | Quelle con un tetto |
-| | `FeatureGate copyWith({bool? isPro})` | |
-
-☠ **Distinzione da non confondere**: `allows()` risponde "puoi usare questa funzione",
-`withinLimit()` risponde "puoi aggiungerne un'altra". Un utente gratuito che ha già il suo
-unico calendario continua a usarlo: il primo è vero, il secondo è falso. Confonderli produce o
-un'app che blocca l'accesso a dati esistenti, o un tetto che non tiene.
-
-### `sealed class GateVerdict`
-
-| Sottotipo | Firma | Quando |
-|---|---|---|
-| `GateAllowed` | `const GateAllowed()` | Si può fare |
-| `GateBlocked` | `const GateBlocked({required FeatureKey key, required BlockReason reason, int? freeMax})` | Non si può, e `reason` dice perché |
-
-`enum BlockReason { proOnly, limitReached }`.
-
-`GateVerdict` espone `bool get isAllowed`.
+| `BILLING` | `fake` \| `play` | `fake` in debug, `play` in release |
+| `MA_LICENSE_URL` | URL | assente = nessuna verifica server |
+| `MA_APP_SECRET` | stringa | vuota |
 
 ---
 
-## 8. Regole non negoziabili e trappole già disinnescate
+## 7. Acquisti, entitlement, gating, tema, notifiche
+
+### `abstract interface class PurchaseGateway`
+
+`isAvailable()` · `init()` · `Stream<PurchaseEvent> get events` ·
+`loadProducts(Set<String>)` · `buy(MicroProduct, {required String obfuscatedAccountId})` ·
+`restorePurchases()` · `completePurchase(PurchaseSucceeded)` · `dispose()`
+
+Implementazioni: `PlayPurchaseGateway({InAppPurchase? iap})` e
+`FakePurchaseGateway({List<MicroProduct> catalog, Duration latency, FakeOutcome outcome, bool startsOwned})`,
+con `FakePurchaseGateway.withProduct(...)`, `owns()`, `wasAcknowledged()`, `grant()`, `reset()`.
+
+`enum FakeOutcome { success, canceled, failed, pendingForever, unavailable }`
+
+`sealed class PurchaseEvent` → `PurchasePending` · `PurchaseSucceeded` (con
+`purchaseToken`, `orderId`, `purchasedAt`, `restored`) · `PurchaseCanceled` ·
+`PurchaseFailed` (con `code`, `message`)
+
+`class MicroProduct`: `id` · `title` · `description` · `formattedPrice` ·
+`rawPriceMicros` · `currencyCode` · `Money get price`
+
+### `class Entitlement`
+
+`enum ProStatus { free, pro, pending, revoked }` ·
+`enum EntitlementSource { none(0), local(1), play(2), server(3) }`
+
+`Entitlement.free(String appId)` · `fromJson` · `toJson` · `copyWith` · `isPro` ·
+`isPending` · `isRevoked` · **`bool supersedes(Entitlement other)`**
+
+Le sei regole di `supersedes`, in ordine di applicazione:
+
+1. Il nulla (`source == none`) non sostituisce un'informazione.
+2. Un `free` non toglie mai il Pro, **da nessuna fonte**.
+3. Una revoca dal server resta finché non arriva un acquisto **successivo** alla revoca.
+4. A stati diversi vince la fonte più affidabile.
+5. Stessa fonte, stato diverso: si applica (è il passaggio a `pending` e ritorno).
+6. Stesso stato e stessa fonte: vince la verifica più recente.
+
+### `class EntitlementService extends ChangeNotifier`
+
+`EntitlementService({required String appId, required String proSku, required PurchaseGateway gateway, required EntitlementStore store, required InstallId installId, LicenseApi? api, Duration serverSyncInterval = const Duration(hours: 24)})`
+
+`bootstrap()` · `buyPro()` · `restorePurchases()` · `refreshFromServer()` ·
+`createRestoreCode()` · `claimRestoreCode(String)` · `debugGrantPro()` ·
+`current` · `isPro` · `isPending` · `isBusy` · `storeAvailable` · `products` ·
+`proProduct` · `lastError` · `static const List<Duration> verifyBackoff` (2 s, 8 s, 30 s)
+
+**Ordine di `bootstrap()`**: legge il locale e notifica subito → apre il gateway → ascolta
+con deduplica per token → ripristino silenzioso → sync col server se scaduto l'intervallo.
+
+**Ordine dopo un acquisto riuscito**: scrive l'entitlement → riconosce l'acquisto allo store
+→ verifica col server. Invertire i primi due significa che chi è senza rete paga e non vede
+lo sblocco; saltare il secondo significa che Google rimborsa da solo dopo tre giorni.
+
+### `class EntitlementStore`
+
+`const EntitlementStore({required File file})` ·
+`static Future<EntitlementStore> open({required AppPaths paths})` ·
+`read(String appId)` · `write(Entitlement)` · `clear()`
+
+### `abstract interface class LicenseApi` · `class LicenseApiClient implements LicenseApi`
+
+`verifyPurchase({required String sku, required String purchaseToken, String? orderId})` ·
+`fetchEntitlement()` · `createRestoreCode()` · `claimRestoreCode(String)` · `close()`
+
+`LicenseApiClient({required Uri baseUri, required String appId, required String appSecret, required String installId, required String appVersion, http.Client? httpClient, Duration timeout = const Duration(seconds: 8)})`
+
+Classi di risposta: `ServerEntitlement` (`status`, `productId`, `purchasedAt`, `revokedAt`,
+`serverTime`) · `RestoreCode` (`code`, `expiresAt`)
+
+### Gating (ADR-017)
+
+`enum FeatureKey` (13 valori): `unlimitedEntities`, `secondaryEntities`, `photos`,
+`statistics`, `fullHistory`, `csvExport`, `pdfReport`, `backupRestore`, `advancedWidget`,
+`multipleNotifications`, `calendarSync`, `customCategories`, `themeCustomization`
+
+`class FeatureLimit`: `.open()` · `.count({required int freeMax})` · `.locked()` ·
+`freeMax` · `isLockedForFree` · `isCounted` · `isOpen`
+
+`typedef FeatureLimits = Map<FeatureKey, FeatureLimit>`
+
+`class FeatureGate`: `const FeatureGate({required FeatureLimits limits, required bool isPro})` ·
+`.unlimited()` · `limitOf` · `allows` · `freeLimitOf` · `withinLimit` · `remaining` ·
+`check({int currentCount = 0})` · `proOnlyFeatures` · `limitedFeatures` · `copyWith`
+
+`sealed class GateVerdict` → `GateAllowed` · `GateBlocked({required FeatureKey key, required BlockReason reason, int? freeMax})` ·
+`enum BlockReason { proOnly, limitReached }`
+
+### Paywall
+
+`PaywallPage.show(BuildContext, {required PaywallConfig config, required EntitlementService service, FeatureKey? highlight})` → `Future<bool>`
+
+`PaywallConfig({required String appName, required String headline, required String subhead, required List<PaywallBenefit> benefits, required String Function(String? price) buyLabel, required String restoreLabel, required String pendingLabel, required String thanksLabel, required String nothingToRestoreLabel, required String unavailableLabel, required String oneTimeNotice, WidgetBuilder? heroBuilder, String? footnote})`
+
+`PaywallBenefit({required FeatureKey key, required IconData icon, required String title, required String description})`
+
+`ProLock({required FeatureKey feature, required FeatureGate gate, required Widget child, int currentCount = 0, ProLockMode mode = ProLockMode.overlay, void Function(GateBlocked)? onBlocked})` ·
+`enum ProLockMode { overlay, hide, badgeOnly }` · `ProBadge({bool compact = false})`
+
+### Tema
+
+`MicroTheme.build({required Color seed, required Brightness brightness, required String fontFamily, String? displayFontFamily})`, con `.light()` e `.dark()`.
+
+Token: `MicroSpacing` (`xxs` 2 … `xxxl` 48, più `pageH`, `page`, `card`, `cardTight`, i gap
+verticali `gapXS`…`gapXXL` e orizzontali `hGapS`…`hGapL`) · `MicroRadius` (`small` 8,
+`medium` 14, `large` 22, più `chip`, `card`, `hero`, `sheet`) · `MicroDuration` (`quick`
+120 ms, `normal` 240 ms, `slow` 420 ms)
+
+Extension `MicroColorScheme` su `ColorScheme`: `success` · `onSuccess` · `warning` ·
+`onWarning` · `danger` · `onDanger` · `cardSurface` · `subtleBorder` · `mutedText`
+
+Extension `MicroTextTheme` su `TextTheme`: `numeric` · `cardTitle` · `cardMeta` ·
+`statValue` · `statLabel` · `sectionLabel`
+
+### Componenti (11)
+
+`MicroPageScaffold` · `MicroCard` (con `static Color foregroundOn(Color)`) ·
+`MicroSectionHeader` · `MicroListTile` · `MicroEmptyState` · `MicroPrimaryButton` ·
+`MicroChip` · `MicroConfirmSheet.show(...)` · `MicroSnack.success/error/show` ·
+`MicroStatTile` · `MicroProgressRing`
+
+### Notifiche (ADR-009)
+
+`NotificationService.create({required String androidIconResource, required List<MicroNotificationChannel> channels, FlutterLocalNotificationsPlugin? plugin})`
+
+`ensurePermission()` · `canScheduleExactAlarms()` · `requestExactAlarmPermission()` ·
+`scheduleOne(ScheduledNotification)` · **`replaceSchedule(Iterable<ScheduledNotification>)`** ·
+`cancel(int)` · `cancelAll()` · `pending()` · `Stream<String> taps` ·
+`consumeLaunchPayload()` · `static const int maxPending = 64`
+
+`MicroNotificationChannel({required String id, required String name, required String description, MicroImportance importance, bool enableVibration, bool playSound})` ·
+`enum MicroImportance { low, normal, high }` ·
+`ScheduledNotification({required int id, required DateTime localWhen, required String title, required String body, required String channelId, String? payload, bool exact = false})` ·
+`enum PermissionOutcome { granted, denied, permanentlyDenied, notRequired }`
+
+`NotificationIds`: `reservedMax` (999) · `weeklyDigest` (10) · `reorderWarning` (20) ·
+`reorderOverdue` (21) · `forOccurrence(int entityId, CivilDate date, int slot)`
+
+### Backup ed export
+
+`abstract interface class BackupSource`: `schemaId` · `schemaVersion` · `exportPayload()` ·
+`importPayload(Map, {required ImportMode mode})` · `imagePaths()` · `counts()`
+
+`enum ImportMode { replaceAll, mergeKeepExisting }`
+
+`class BackupService({required AppPaths paths, required String appVersion})`:
+`createBackup(BackupSource, {String? label, bool includeImages = false})` ·
+`inspect(File)` · `restore(File, BackupSource, {required ImportMode mode})` ·
+`pickBackupFile()` · `shareBackup(File, {String? subject})` · `cleanupExports({Duration olderThan})`
+
+`JsonBackupCodec`: `magic` = `MICROAPPS_BACKUP` · `formatVersion` = 1 · `encode(...)` ·
+`decode(String)`
+
+`class BackupManifest`: `schemaId` · `schemaVersion` · `appVersion` · `createdAt` ·
+`itemCounts` · `label` · `totalItems`
+
+`class CsvWriter({String separator = ';', String lineEnding = '\r\n', bool withBom = true})`:
+`addHeader(List<String>)` · `addRow(List<Object?>)` · `addBlankLine()` · `build()` ·
+`writeTo(File)`
+
+---
+
+## 8. Regole non negoziabili e trappole disinnescate
 
 ### Regole
 
-1. **`micro_core` non conosce nessuna app.** Nessun `if (appId == 'trashcan')`, mai. Tutto ciò
-   che varia si passa come parametro. Se aggiungere una quinta app richiedesse di toccare
-   questo package, il confine è stato messo nel posto sbagliato.
-2. **Le app importano solo il barrel.** `package:micro_core/src/...` è vietato.
-3. **Le date civili si serializzano come TEXT `YYYY-MM-DD`**, mai come timestamp.
-4. **Nessuna stringa destinata all'utente in questo package.** I testi vivono negli ARB delle
-   app: `micro_core` non sa in che lingua parla.
-5. **Le versioni delle dipendenze si aggiungono con `pub add`**, non si scrivono a memoria.
+1. **`micro_core` non conosce nessuna app.** Nessun `if (appId == ...)`, mai. È la
+   condizione perché la decima app costi quanto la quinta.
+2. **Le app importano solo il barrel.**
+3. **Date civili come TEXT `YYYY-MM-DD`**, istanti come millisecondi UTC.
+4. **Nessuna stringa destinata all'utente in questo package.**
+5. **Versioni delle dipendenze con `pub add`**, mai a memoria.
 
-### Trappole
+### Trappole, con la causa tecnica
 
-☠ **`CivilDate.epochDay` si calcola in UTC, non in locale.** In fuso locale una data a cavallo
-del cambio d'ora produce una differenza di 23 o 25 ore, e la divisione per 24 dà il giorno
-sbagliato. Il test `attraversare entrambi i cambi conta i giorni giusti` esiste per impedire
-che qualcuno "semplifichi" togliendo `utc`.
+☠ **1. Scritture concorrenti sullo stesso file.** `AtomicFile` usava un unico `.tmp`: due
+percorsi asincroni che salvavano lo stesso file si sabotavano, e `rename` falliva perché
+l'altro aveva già consumato il temporaneo. In produzione il sintomo sarebbe stato un
+entitlement che ogni tanto non si salva, cioè **un Pro che sparisce al riavvio**: raro, non
+riproducibile, devastante. Ora le scritture sono in fila per percorso e il temporaneo ha un
+nome unico. Trovata dai test.
 
-☠ **`addMonths` fa il clamp a fine mese.** 31 gennaio + 1 mese = 28 febbraio (29 negli anni
-bisestili), non 3 marzo. Senza il clamp, la regola "raccolta il 31 di ogni mese" salterebbe i
-mesi corti generando date nel mese successivo.
+☠ **2. La revoca eterna.** La prima versione di `supersedes` faceva vincere per sempre una
+revoca dal server: un utente rimborsato **non avrebbe mai più potuto ricomprare l'app**. Ora
+la revoca cede a un acquisto successivo alla revoca stessa. Trovata dai test.
 
-☠ **Il clamp non è permanente.** Chi somma un mese alla volta partendo dal risultato già
-clampato resta inchiodato al 28 per sempre. `addMonths` va chiamato sempre sulla data
-originale: `gennaio.addMonths(2)` dà il 31 marzo, `gennaio.addMonths(1).addMonths(1)` dà il 28
-marzo. Il test `il clamp non e permanente` documenta la differenza.
+☠ **3. Il `free` che declassa.** Un `free` non toglie il Pro da nessuna fonte, nemmeno dal
+server: per togliere il Pro il server deve dire `revoked`, che è un fatto (rimborso,
+chargeback), non l'assenza di un fatto.
 
-☠ **Una build di release con `BILLING=fake` regalerebbe il Pro a chiunque.**
-`assertUsableInRelease()` va chiamata in `main()` prima di `runApp`. Un crash in fase di
-verifica costa incomparabilmente meno di quella release pubblicata.
+☠ **4. `notifyListeners` dopo `dispose`.** Il servizio ha verifiche e sincronizzazioni in
+volo che si concludono dopo la distruzione. Guardia `_disposed`. Trovata dai test.
 
-☠ **`FeatureGate.limitOf` su chiave non dichiarata restituisce `open`, non `locked`.** La
-scelta è deliberata: dimenticare una dichiarazione regala una funzione a tutti, il che costa
-ricavi ma non rompe niente; il contrario toglierebbe agli utenti gratuiti una funzione che
-doveva essere loro, cioè un difetto visibile. Un `assert` in debug segnala comunque la
-dimenticanza.
+☠ **5. Acknowledge entro tre giorni.** Un acquisto non riconosciuto viene **rimborsato
+automaticamente** da Google. `completePurchase` va chiamata dopo aver scritto l'entitlement,
+e va ritentata all'avvio.
+
+☠ **6. Deduplica degli acquisti.** `in_app_purchase` consegna gli acquisti passati **a ogni
+avvio**, non solo dopo un ripristino. Senza deduplica per token, ogni avvio produce una
+verifica al server e una snackbar "grazie per l'acquisto".
+
+☠ **7. Il fuso orario delle notifiche.** Senza `initializeTimeZones()` e
+`setLocalLocation(...)`, `zonedSchedule` interpreta tutto come UTC: in Italia d'estate un
+promemoria delle 20:00 arriva alle 18:00.
+
+☠ **8. Id di notifica derivati e non progressivi.** Con un contatore, la ripianificazione a
+ogni resume darebbe alla stessa raccolta un id diverso ogni volta, accumulando duplicati
+fino a far arrivare la stessa notifica cinque volte.
+
+☠ **9. Il font variabile.** `fontWeight` da solo non basta: senza `fontVariations` sull'asse
+`wght` tutti i pesi renderizzano l'istanza predefinita e l'app appare tutta dello stesso
+spessore. Dichiarare lo stesso file quattro volte nel pubspec non risolve.
+
+☠ **10. CSV per Excel italiano.** Separatore `;` e BOM UTF-8. Con `,` l'intero file finisce
+in una colonna sola; senza BOM gli accenti si rompono.
+
+☠ **11. Ridimensionamento immagini fuori dal thread UI.** Una foto da 12 megapixel richiede
+secondi su un telefono di fascia bassa. `ImageStore` usa `compute` e applica
+`bakeOrientation`, senza il quale le foto verticali appaiono coricate.
+
+☠ **12. `Money.tryParse` e il punto ambiguo.** `1.000` sono mille, `6.50` sono sei e
+cinquanta: si distinguono dal numero di cifre dopo il punto. La prima versione trattava il
+punto sempre come separatore di migliaia e trasformava 6,50 € in 650 €. Trovata dai test.
+
+☠ **13. `Money./` non conserva il totale.** Dividere 10 € in tre dà tre volte 3,33 €, cioè
+9,99 €. Per ripartire un importo senza perdere centesimi serve un'allocazione, che qui non
+c'è perché nessuna app la richiede.
+
+☠ **14. `FeatureGate.limitOf` su chiave non dichiarata restituisce `open`, non `locked`.**
+Dimenticare una dichiarazione regala una funzione a tutti, il che costa ricavi ma non rompe
+niente; il contrario toglierebbe agli utenti gratuiti una funzione che doveva essere loro.
 
 ---
 
 ## 9. Catalogo dei test
 
-`pwsh tool/test_all.ps1 -Project micro_core` → **48 test, tutti verdi**.
+`pwsh tool/test_all.ps1 -Project micro_core` → **100 test verdi**.
 
-### `test/util/civil_date_test.dart` — 28 test
-
-| Gruppo | Cosa dimostra |
-|---|---|
-| parse e serializzazione | Round-trip ISO; `tryParse` rifiuta `2026-9-9` senza padding, `09/09/2026`, mese 13, 30 febbraio, e il 29 febbraio di un anno non bisestile; `parse` lancia; `toString` == `toIso` |
-| ora legale (ADR-008) | Il 29 marzo e il 25 ottobre 2026, cioè i due cambi d'ora italiani, non slittano di un giorno; contare i giorni attraverso entrambi dà 245 |
-| aritmetica sui mesi | 31 gennaio → 28 febbraio, e → 29 in anno bisestile; 31 marzo → 30 aprile; il clamp non è permanente; mesi negativi; `addYears` clampa il 29 febbraio |
-| anni bisestili | Regola dei 400 anni: 2000 sì, 1900 no |
-| epochDay e ordinamento | Epoca a 0, giorni negativi prima del 1970, `fromEpochDay` inverte `epochDay`, ordinamento cronologico, confronti ai bordi |
-| giorno della settimana | 9 settembre 2026 è mercoledì; il weekday è stabile attraverso i cambi d'ora |
-| intervalli | `rangeTo` inclusivo, vuoto se invertito, un solo giorno; primo e ultimo del mese |
-| costruzione da DateTime | Un istante UTC viene letto nel fuso locale; `today` accetta un presente fissato |
-| normalizzazione | Mese 13, giorno 32, mese 0 |
-| uguaglianza | Per valore, con `hashCode` coerente |
-
-### `test/gate/feature_gate_test.dart` — 20 test
-
-| Gruppo | Cosa dimostra |
-|---|---|
-| funzioni sempre aperte | Disponibili con e senza Pro, nessun tetto |
-| funzioni solo Pro | Bloccate senza Pro con `BlockReason.proOnly`; aperte con Pro; il conteggio non le sblocca |
-| bordi del tetto | Con tetto 1 e con tetto 3, i quattro bordi: 0, `freeMax−1`, `freeMax`, `freeMax+1`; `remaining` non va sotto zero; la funzione resta **accessibile** anche a tetto raggiunto; con Pro il tetto non esiste |
-| elenchi per il paywall | `proOnlyFeatures` e `limitedFeatures` classificano correttamente e non dipendono dallo stato Pro |
-| cancello senza limiti | `FeatureGate.unlimited()` lascia passare tutti i 13 `FeatureKey` |
-| copyWith | Cambia solo `isPro`, condivide la mappa, non muta l'originale |
-| forme di FeatureLimit | Le tre forme e l'uguaglianza per valore |
+| File | Test | Cosa dimostra |
+|---|---|---|
+| `util/civil_date_test.dart` | 28 | I due cambi d'ora italiani del 2026 non spostano le date; clamp di fine mese e sua non permanenza; regola dei 400 anni; `epochDay` e il suo inverso; intervalli inclusivi; normalizzazione dei fuori intervallo |
+| `gate/feature_gate_test.dart` | 20 | I quattro bordi di ogni tetto (0, max−1, max, max+1); le tre forme di limite; la distinzione fra `allows` e `withinLimit`; gli elenchi per il paywall |
+| `entitlement/entitlement_service_test.dart` | 22 | **ADR-007**: un Pro non si perde offline; solo una revoca dal server lo toglie; la revoca cede a un acquisto successivo; l'acquisto sblocca senza rete; l'acknowledge viene fatto; lo stato finisce su disco; deduplica dei token; i cinque esiti del gateway finto; file corrotto, di un'altra app, o con stati sconosciuti |
+| `core_modules_test.dart` | 30 | `Money` (somme senza errore di virgola mobile, parsing di ciò che l'utente digita davvero); `CsvWriter` (BOM, separatore, escaping); backup (round-trip, rifiuto di app e schema sbagliati, file inesistente); `AtomicFile` (venti scritture concorrenti); `AppPaths` (i relativi sopravvivono a un cambio di radice); `NotificationIds` (stabilità e unicità); `InstallId` |
 
 ---
 
 ## 10. Cosa NON esiste ancora
 
-Elenco esplicito, per non farlo cercare invano. La numerazione rimanda alle sottofasi di
-`develop_microapps.md` §7.
-
-| Non esiste | Sottofase che lo creerà |
+| Non esiste | Dove/quando |
 |---|---|
-| `Money` (importi in centesimi interi) | F1.2 |
-| `MicroLog` (log su file a rotazione) | F1.2 |
-| `AppPaths` (cartelle dell'app) | F1.2 |
-| `AtomicFile` (scrittura atomica) | F1.2 |
-| `SettingsStore` (preferenze tipizzate) | F1.3 |
-| `InstallId` (UUID persistente) | F1.4 |
-| `MicroTheme`, `MicroSpacing`, `MicroRadius`, i token del design system | F1.5 |
-| Tutti i widget `Micro*` (card, stat tile, empty state, bottone, chip, sheet, snack) | F1.6 |
-| `PurchaseGateway`, `PlayPurchaseGateway`, `FakePurchaseGateway`, `MicroProduct`, `PurchaseEvent` | F1.7 |
-| `Entitlement`, `EntitlementStore`, `EntitlementService`, `LicenseApiClient` | F1.8 |
-| `ProLock`, `ProBadge`, `PaywallPage`, `PaywallConfig` | F1.9 |
-| `NotificationService` e i canali di notifica | F1.10 |
-| `BackupSource`, `BackupService`, `JsonBackupCodec`, `CsvWriter`, `PdfReportBuilder`, `ImageStore` | F1.11 |
-| La app di galleria dei componenti (`example/`) | F1.6 |
-| Qualsiasi supporto iOS testato | non previsto (DT-01) |
-
-**Nota su `MicroAppConfig`**: la prima stesura del piano diceva di definirla in ogni app. Era
-sbagliato, quattro definizioni identiche divergono al primo ritocco. Ora vive qui e le app
-passano solo i valori.
+| `PdfReportBuilder` | Rinviato a F6.11: lo usa solo Film Tracker, e costruirlo ora vorrebbe dire indovinare che forma deve avere il riepilogo. Il pacchetto `pdf` è già in dipendenza |
+| Galleria dei componenti (`example/`) | Rinviata, DT-09: i componenti sono in uso reale dalla prima app, che è una verifica migliore di una galleria isolata |
+| Golden test dei componenti | F7 |
+| Provider Riverpod condivisi | Deliberatamente assenti: `micro_core` resta libero da Riverpod, e ogni app cabla i propri provider |
+| Test di `NotificationService` che tocchino il plugin | F3.8, insieme allo scheduler di TrashCan |
+| Test di `PlayPurchaseGateway` | F3.12: servono Play Services e un prodotto pubblicato |
+| Supporto iOS testato | Non previsto, DT-01 |
+| Widget Android nativi | Vivono nelle app, non qui (ADR-015) |
 
 ---
 
 ## 11. Debito tecnico aperto
 
-| Voce | Perché è rimandata | Quando affrontarla |
+| Voce | Perché è rimandata | Quando |
 |---|---|---|
-| `WeeklyRecurrence` e simili nelle app accettano `Set` mutabili in costruttori `const` | Renderli non modificabili impedirebbe il `const`, che serve nei test | Se emerge un bug da mutazione condivisa |
-| Nessun test di `MicroAppConfig.fromEnvironment` | Legge `String.fromEnvironment`, che è costante di compilazione: testarlo richiede build separate con `--dart-define` diversi | F3.12, insieme alla verifica end-to-end del billing |
-| `pubspec.lock` committato anche per il package libreria | Convenzione Dart dice di non farlo per le librerie. Qui è un monorepo chiuso e la riproducibilità della build vale più della convenzione | Da rivedere solo se `micro_core` venisse pubblicato |
+| Nessun test di `MicroAppConfig.fromEnvironment` | Legge `String.fromEnvironment`, costante di compilazione: servirebbero build separate con define diversi | F3.12 |
+| `pubspec.lock` committato per un package libreria | La convenzione Dart dice di no, ma questo è un monorepo chiuso e la riproducibilità della build vale di più | Solo se `micro_core` venisse pubblicato |
+| `Money` non ha un'allocazione che conservi il totale | Nessuna app deve ripartire importi | Quando servirà, va scritta e non improvvisata |

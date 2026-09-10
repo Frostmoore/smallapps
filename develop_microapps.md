@@ -6,7 +6,7 @@
 > **Mirror pubblico app** (remote `github`): `https://github.com/Frostmoore/smallapps.git`
 > **Repository server** (**solo Gitea**, remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`
 > **Documento creato**: 2026-09-09
-> **Stato**: F0 chiusa salvo backup keystore; F1 e F3 in corso. 107 test verdi. Vedi §7.
+> **Stato**: **F0 e F1 chiuse.** F3 (TrashCan) in corso. 159 test verdi. Vedi §7.
 
 ---
 
@@ -764,25 +764,25 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [x] **F0.3** `analysis_options.yaml`, `.gitignore`, `.gitattributes`, `.flutter-version`
 - [x] **F0.4** Script in `tool/` (`fl`, `get_flutter`, `pub_get_all`, `analyze_all`, `test_all`, `bump_version`, `verify_atlas`, `push_all`)
 - [x] **F0.5** `README.md` con indice dei sei progetti e istruzioni di build
-- [~] **F0.6** Keystore di firma Android generato; manca il backup fuori macchina (azione per il committente)
-- [ ] **F0.7** Rituale di fine fase F0
+- [x] **F0.6** Keystore PKCS12 generato e copiato sul Desktop. **Resta un'azione per il committente**: una copia su un supporto diverso da questa macchina, vedi §10 rischi
+- [x] **F0.7** Rituale di fine fase F0
 
 ### F1 — `micro_core`: il package condiviso → `v2.0.0`
 
 - [x] **F1.1** Bootstrap del package, `pubspec.yaml`, barrel `micro_core.dart`
-- [~] **F1.2** Utility di base: `Result` e `CivilDate` fatti e testati; mancano `Money`, `MicroLog`, `AppPaths`, `AtomicFile`
+- [x] **F1.2** Utility di base: `Result`, `CivilDate`, `Money`, `MicroLog`, `AppPaths`, `AtomicFile`
 - [x] **F1.3** `SettingsStore` (preferenze tipizzate su `shared_preferences`)
-- [ ] **F1.4** `InstallId` (UUID persistente in `flutter_secure_storage`)
+- [x] **F1.4** `InstallId` (UUID persistente in `flutter_secure_storage`)
 - [x] **F1.5** Design system — token: `MicroTheme`, `MicroSpacing`, `MicroRadius`, `MicroDuration`, colori e testi semantici
-- [~] **F1.6** Design system — fatti: page scaffold, card, section header, list tile, empty state, bottone primario, chip, sheet di conferma, snackbar. Mancano stat tile, progress ring e la galleria `example/`
-- [ ] **F1.7** Billing: `PurchaseGateway`, `MicroProduct`, `PurchaseEvent`, `PlayPurchaseGateway`, `FakePurchaseGateway`
-- [ ] **F1.8** Entitlement: `Entitlement`, `EntitlementStore`, `EntitlementService`, `LicenseApiClient`
-- [~] **F1.9** Gating: `FeatureKey`, `FeatureLimit`, `FeatureGate` fatti e testati; mancano `ProLock` e `PaywallPage`
-- [ ] **F1.10** Notifiche: `NotificationService`, canali, permessi, ripianificazione
-- [ ] **F1.11** Dati fuori dall'app: `BackupSource`, `BackupService`, `JsonBackupCodec`, `CsvWriter`, `PdfReportBuilder`, `ImageStore`
-- [ ] **F1.12** Test di `micro_core` (inclusi i test anti-regressione ADR-007)
-- [x] **F1.13** `packages/micro_core/codebase_reference.md` (prima stesura, da riverificare a fine F1)
-- [ ] **F1.14** Rituale di fine fase F1
+- [x] **F1.6** Design system — dieci componenti: page scaffold, card, section header, list tile, stat tile, progress ring, empty state, bottone primario, chip, sheet di conferma, snackbar. La galleria `example/` è rinviata, vedi §9 DT-09
+- [x] **F1.7** Billing: `PurchaseGateway`, `MicroProduct`, `PurchaseEvent`, `PlayPurchaseGateway`, `FakePurchaseGateway`
+- [x] **F1.8** Entitlement: `Entitlement`, `EntitlementStore`, `EntitlementService`, `LicenseApi` + `LicenseApiClient`
+- [x] **F1.9** Gating: `FeatureKey`, `FeatureLimit`, `FeatureGate`, `ProLock`, `ProBadge`, `PaywallPage`, `PaywallConfig`
+- [x] **F1.10** Notifiche: `NotificationService`, canali, permessi, `replaceSchedule`, `NotificationIds`
+- [x] **F1.11** Dati fuori dall'app: `BackupSource`, `BackupService`, `JsonBackupCodec`, `CsvWriter`, `ImageStore`. `PdfReportBuilder` rinviato a F6, vedi §9 DT-10
+- [x] **F1.12** Test di `micro_core`: 100 test, inclusi quelli anti-regressione su ADR-007
+- [x] **F1.13** `packages/micro_core/codebase_reference.md`
+- [x] **F1.14** Rituale di fine fase F1
 
 ### F2 — MicroApps License Server → `v3.0.0`
 
@@ -4473,6 +4473,8 @@ Elenco vivo. Ogni voce ha il motivo del rinvio e quando va affrontata.
 | DT-06 | Crash reporting | Vedi ADR-016 | Dopo il lancio, con consenso esplicito |
 | DT-07 | Test golden completi | Costosi e fragili durante il refactoring visivo | Due per app in F3–F6, estendere in F7 |
 | DT-08 | Sincronizzazione dati tra dispositivi | Contraddice "nessun account" | Non prevista |
+| DT-09 | Galleria dei componenti (`packages/micro_core/example/`) | I componenti sono in uso reale dalla prima app, che è una verifica migliore di una galleria isolata | Prima dei golden test di F7 |
+| DT-10 | `PdfReportBuilder` | Lo usa solo Film Tracker. Costruirlo ora significherebbe scriverlo senza sapere che forma deve avere il riepilogo | F6.11, insieme al riepilogo annuale |
 
 ---
 
