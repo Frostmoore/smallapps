@@ -14,11 +14,16 @@
   pwsh tool/fl.ps1 pub get
   pwsh tool/fl.ps1 run -d emulator-5554 --dart-define=BILLING=fake
 #>
-[CmdletBinding()]
-param(
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]] $Args
-)
+# NON aggiungere un blocco param() e NON aggiungere [CmdletBinding()].
+#
+# Con -File e un param() dichiarato, PowerShell tratta ogni token che inizia per trattino
+# come nome di parametro, doppio trattino incluso: `--debug` finiva legato a un parametro
+# inesistente (o a -Debug di CmdletBinding) e non arrivava mai a Flutter. Il risultato era
+# `fl.ps1 build apk --debug` che costruiva una RELEASE senza dire niente, e un APK firmato
+# in modo diverso che poi non si installa sopra quello di debug.
+#
+# Senza param(), la variabile automatica $args riceve gli argomenti alla lettera.
+# Verificato su pwsh 7 e su powershell.exe 5.1.
 
 $ErrorActionPreference = 'Stop'
 
@@ -44,5 +49,5 @@ versione vecchia. Vedi develop_microapps.md §5.8.
 $env:PUB_CACHE = Join-Path $flutterDir '.pub-cache'
 $env:PATH      = (Join-Path $flutterDir 'bin') + ';' + $env:PATH
 
-& $flutterBin @Args
+& $flutterBin @args
 exit $LASTEXITCODE

@@ -54,6 +54,7 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
+*.log.err
 
 # Memoria dell.agente: le spec versionate stanno in docs/specs/
 memory/
