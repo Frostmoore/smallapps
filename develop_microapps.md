@@ -47,18 +47,26 @@ Convenzione tipografica:
 
 | # | App | Package (applicationId) | Cartella | Problema risolto | Complessità reale |
 |---|---|---|---|---|---|
-| 1 | **TrashCan** | `ovh.varitest.trashcan` | `apps/trashcan/` | Calendario personale della raccolta differenziata, indipendente dal Comune | Logica ricorrenze 3/5 |
-| 2 | **Full Freezer** | `ovh.varitest.fullfreezer` | `apps/full_freezer/` | Inventario freezer ordinato per anzianità (oldest first) | UX 3/5, logica 1/5 |
-| 3 | **Scorte Calore** | `ovh.varitest.scortecalore` | `apps/scorte_calore/` | Quanto combustibile resta e quando riordinarlo | Logica stima 2/5 |
-| 4 | **Film Tracker** | `ovh.varitest.filmtracker` | `apps/film_tracker/` | Diario dei rullini analogici con anteprime visive | Frontend 3/5, storage foto 3/5 |
+| 1 | **TrashCan** | `com.smp.trashcan` | `apps/trashcan/` | Calendario personale della raccolta differenziata, indipendente dal Comune | Logica ricorrenze 3/5 |
+| 2 | **Full Freezer** | `com.smp.fullfreezer` | `apps/full_freezer/` | Inventario freezer ordinato per anzianità (oldest first) | UX 3/5, logica 1/5 |
+| 3 | **Scorte Calore** | `com.smp.scortecalore` | `apps/scorte_calore/` | Quanto combustibile resta e quando riordinarlo | Logica stima 2/5 |
+| 4 | **Film Tracker** | `com.smp.filmtracker` | `apps/film_tracker/` | Diario dei rullini analogici con anteprime visive | Frontend 3/5, storage foto 3/5 |
 
 Le spec di prodotto originali vivono in `docs/specs/` (copia versionata di `memory/*.md`).
 **Le spec sono il contratto di prodotto; questo documento è il contratto di implementazione.**
 Dove le due divergono, si aggiorna questo documento spiegando perché.
 
-☠ **Decisione da confermare prima di F3.10**: il prefisso `ovh.varitest.` deriva dal dominio
-Gitea esistente. L'`applicationId` è **immutabile dopo il primo upload su Play**: se si
-possiede un dominio migliore, va deciso adesso, non dopo.
+✅ **Prefisso deciso il 2026-09-10: `com.smp.`** (SMP, il marchio del committente).
+
+La prima stesura di questo piano usava `ovh.varitest.`, dedotto dal dominio del Gitea interno.
+Era una scelta sbagliata: un `applicationId` è il nome pubblico dell'app nel sistema Android e
+compare nell'URL della scheda su Play. Farlo derivare dall'hostname di un server di sviluppo
+avrebbe legato per sempre quattro prodotti commerciali a un dettaglio di infrastruttura.
+
+☠ **L'`applicationId` è immutabile dopo il primo upload su Play.** Non si rinomina, non si
+migra: si può solo pubblicare un'app nuova e perdere installazioni e recensioni. Il momento
+per cambiarlo è **prima** di F3.12, cioè prima che il primo AAB arrivi su Play Console. Al
+2026-09-10 non è stato caricato nulla, quindi il cambio è a costo zero.
 
 ### §1.2 Il server
 
@@ -2168,7 +2176,7 @@ test deve avviare un vero server su una porta.
 | Colonna | Tipo | Vincoli | Note |
 |---|---|---|---|
 | `id` | TEXT | PK | `trashcan`, `fullfreezer`, `scortecalore`, `filmtracker` |
-| `package_name` | TEXT | NOT NULL UNIQUE | `ovh.varitest.trashcan` |
+| `package_name` | TEXT | NOT NULL UNIQUE | `com.smp.trashcan` |
 | `display_name` | TEXT | NOT NULL | "TrashCan" |
 | `created_at` | INTEGER | NOT NULL | ms UTC |
 
@@ -2877,7 +2885,7 @@ target più ampio, la logica più interessante (ricorrenze) e la superficie UI p
 
 ▶ Azioni:
 
-1. `flutter create --org ovh.varitest --project-name trashcan --platforms=android apps/trashcan`
+1. `flutter create --org com.smp --project-name trashcan --platforms=android apps/trashcan`
    poi rinominare la cartella se necessario.
 2. Applicare **§8.T** per intero.
 3. `pubspec.yaml`: dipendenze `micro_core` (path), `flutter_riverpod`, `go_router`, `drift`,
@@ -3279,7 +3287,7 @@ Questa sottofase è il vero motivo per cui TrashCan è l'app pilota.
 
 ▶ Azioni:
 
-1. Creare l'app in Play Console con `ovh.varitest.trashcan`.
+1. Creare l'app in Play Console con `com.smp.trashcan`.
 2. Compilare la scheda minima richiesta per un test interno.
 3. Creare il prodotto in-app `trashcan_pro_lifetime`, prezzo 2,99 €, stato attivo.
 4. Caricare un AAB firmato sul canale **interno**.
@@ -4448,8 +4456,9 @@ Elenco vivo. Ogni voce ha il motivo del rinvio e quando va affrontata.
 
 Elencate qui perché un piano onesto distingue ciò che è deciso da ciò che è stato assunto.
 
-1. **`applicationId`**: assunto `ovh.varitest.<app>`. **Immutabile dopo il primo upload.**
-   Da confermare prima di F3.12.
+1. ~~**`applicationId`**~~ — **deciso il 2026-09-10**: `com.smp.<app>`. Vedi §1.1. Nessun
+   AAB era ancora stato caricato su Play, quindi il cambio dal precedente `ovh.varitest.` non
+   è costato nulla.
 2. **Prezzi di lancio**: assunta la cifra bassa delle due indicate in ogni spec. Da
    confermare prima di creare i prodotti in Play Console.
 3. **Dominio del License Server**: **dominio nuovo, ancora da registrare**. L'ipotesi

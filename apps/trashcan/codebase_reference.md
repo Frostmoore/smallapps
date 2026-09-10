@@ -4,7 +4,7 @@
 > **Obiettivo**: capire il codice, trovare ciò che serve e modificarlo **senza aprire i file**.
 >
 > **Aggiornato al**: 2026-09-10 · **Versione repo**: `v1.2.0` · **versionName+Code**: `0.1.0+1`
-> **Package Android**: `ovh.varitest.trashcan` (immutabile dopo il primo upload su Play)
+> **Package Android**: `com.smp.trashcan` (immutabile dopo il primo upload su Play)
 > **SKU Pro**: `trashcan_pro_lifetime` — 2,99 € una tantum
 >
 > Quello che questa app prende da `micro_core` **non è ricopiato qui**: si rimanda a
