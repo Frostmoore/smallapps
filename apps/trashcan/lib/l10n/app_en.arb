@@ -145,6 +145,26 @@
 
   "day_empty": "No collection on this day.",
 
+  "backup_title": "Backup and sharing",
+  "backup_shareCalendarTitle": "Share this calendar",
+  "backup_shareCalendarBody": "Send it to a neighbour: they get the same collection days without typing them in again.",
+  "backup_createTitle": "Save everything to a file",
+  "backup_createBody": "Every calendar, waste type, rule and exception, in one file to keep or move to a new phone.",
+  "backup_restoreTitle": "Restore from a file",
+  "backup_restoreBody": "Open a file you saved earlier, or one someone sent you.",
+  "backup_created": "File ready",
+  "backup_restoreConfirmTitle": "Restore this file?",
+  "backup_restoreSummary": "{calendars} calendars, {types} waste types, {rules} rules.",
+  "@backup_restoreSummary": {
+    "placeholders": { "calendars": { "type": "int" }, "types": { "type": "int" }, "rules": { "type": "int" } }
+  },
+  "backup_modeReplace": "Replace everything",
+  "backup_modeReplaceBody": "What is on this phone is deleted and replaced by the file.",
+  "backup_modeMerge": "Add what is missing",
+  "backup_modeMergeBody": "Calendars you already have are left as they are.",
+  "backup_restored": "Restored",
+  "backup_nothingPicked": "No file chosen.",
+
   "exceptions_title": "Exceptions",
   "exceptions_skip": "Skip this collection",
   "exceptions_move": "Move it to another day",

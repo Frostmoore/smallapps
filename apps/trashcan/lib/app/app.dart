@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../features/backup/backup_page.dart';
 import '../features/calendars/calendar_editor_page.dart';
 import '../features/calendars/calendars_page.dart';
 import '../features/day/day_page.dart';
@@ -57,6 +58,7 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
     GoRoute(path: Routes.exceptions, builder: (_, __) => const ExceptionsPage()),
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
     GoRoute(path: Routes.notifications, builder: (_, __) => const NotificationsPage()),
+    GoRoute(path: Routes.backup, builder: (_, __) => const BackupPage()),
   ],
   // Chi non ha ancora fatto il wizard viene portato lì, da qualunque punto entri:
   // anche da un deep link, che altrimenti mostrerebbe una home vuota e incomprensibile.

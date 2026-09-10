@@ -811,7 +811,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [x] **F3.7** Eccezioni: menu contestuale sulla raccolta (salta, sposta, straordinaria, ripristina), pagina di riepilogo raggiungibile dalle impostazioni. Verificato sull'emulatore
 - [x] **F3.8** Notifiche: `TrashcanScheduler` + 15 test, receiver e permessi nel manifest, pagina promemoria, deep link `/day/:date`. Verificata sull'emulatore: notifica consegnata alle 13:09:03 per un allarme delle 13:09:00
 - [x] **F3.9** Calendari multipli + gating Pro + paywall. Verificato sull'emulatore: il paywall si apre sul secondo calendario, l'acquisto finto sblocca il Pro, il secondo calendario si crea e si commuta dal titolo della home
-- [ ] **F3.10** Export/import calendario, backup, condivisione file
+- [~] **F3.10** Export/import calendario, backup, condivisione file: `TrashcanBackupSource` con 9 test (andata e ritorno, replaceAll, merge, file storti) e `BackupPage` collegata alle impostazioni. **Manca la verifica sull'emulatore del foglio di condivisione e del selettore di file.**
 - [ ] **F3.11** Widget Android home-screen
 - [ ] **F3.12** Play Console: creazione app, prodotto in-app, canale interno, verifica end-to-end del billing reale contro il server
 - [ ] **F3.13** Test (unit, DB, widget, golden, integrazione)

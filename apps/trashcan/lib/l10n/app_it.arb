@@ -106,6 +106,23 @@
 
   "day_empty": "Nessuna raccolta in questo giorno.",
 
+  "backup_title": "Backup e condivisione",
+  "backup_shareCalendarTitle": "Condividi questo calendario",
+  "backup_shareCalendarBody": "Mandalo a un vicino: avra' gli stessi giorni di raccolta senza riscriverli.",
+  "backup_createTitle": "Salva tutto in un file",
+  "backup_createBody": "Ogni calendario, tipo di rifiuto, regola ed eccezione, in un file da conservare o da portare su un telefono nuovo.",
+  "backup_restoreTitle": "Ripristina da un file",
+  "backup_restoreBody": "Apri un file che hai salvato, o che ti hanno mandato.",
+  "backup_created": "File pronto",
+  "backup_restoreConfirmTitle": "Ripristinare questo file?",
+  "backup_restoreSummary": "{calendars} calendari, {types} tipi di rifiuto, {rules} regole.",
+  "backup_modeReplace": "Sostituisci tutto",
+  "backup_modeReplaceBody": "Quello che c'e' su questo telefono viene cancellato e rimpiazzato dal file.",
+  "backup_modeMerge": "Aggiungi quello che manca",
+  "backup_modeMergeBody": "I calendari che hai gia' restano come sono.",
+  "backup_restored": "Ripristinato",
+  "backup_nothingPicked": "Nessun file scelto.",
+
   "exceptions_title": "Eccezioni",
   "exceptions_skip": "Salta questa raccolta",
   "exceptions_move": "Spostala a un altro giorno",

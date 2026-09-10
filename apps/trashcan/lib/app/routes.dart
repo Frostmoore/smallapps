@@ -23,6 +23,8 @@ abstract final class Routes {
   static const String exceptions = '/exceptions';
   static const String day = '/day/:date';
 
+  static const String backup = '/settings/backup';
+
   static const String settings = '/settings';
   static const String notifications = '/settings/notifications';
   static const String about = '/settings/about';
