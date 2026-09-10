@@ -6,7 +6,7 @@
 > **Mirror pubblico app** (remote `github`): `https://github.com/Frostmoore/smallapps.git`
 > **Repository server** (**solo Gitea**, remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`
 > **Documento creato**: 2026-09-09
-> **Stato**: F0 quasi chiusa, F1 e F3 avviate. 88 test verdi. Vedi §7.
+> **Stato**: F0 chiusa salvo backup keystore; F1 e F3 in corso. 107 test verdi. Vedi §7.
 
 ---
 
@@ -132,6 +132,45 @@ Elenco esplicito, per evitare che qualcuno lo cerchi invano o lo aggiunga per in
 - Nessuna funzione OCR/AI nell'MVP (foto del calendario cartaceo TrashCan: post-MVP).
 
 ---
+### §1.5 Questa è una piattaforma, non un progetto da quattro app
+
+**MicroApps è la base permanente su cui verranno costruite tutte le microapp future.** Le
+quattro descritte in §1.1 sono le prime, non l'insieme completo: il committente potrà
+chiederne di nuove in qualunque momento, e la risposta corretta non è mai "apro un progetto
+separato".
+
+**Cosa fare quando arriva la richiesta di una microapp nuova**, in ordine:
+
+1. Aggiungere una **fase propria** con le sue sottofasi nel tracking §7, numerata dopo
+   l'ultima esistente. Gli identificatori non si riciclano mai.
+2. Creare `apps/<nome>/` applicando **§8.T** per intero: struttura, `AppConfig`, provider,
+   l10n, manifest.
+3. Dichiarare i limiti del piano gratuito in `lib/app/feature_limits.dart`, **riusando i
+   `FeatureKey` esistenti**. Se serve una chiave nuova, è una modifica che tocca tutte le
+   app e va fatta in `micro_core` con la sua motivazione.
+4. Scegliere seed color e font, e aggiungerli alla tabella di **ADR-010**.
+5. Assegnare `applicationId` `com.smp.<nome>` e SKU `<nome>_pro_lifetime`. Entrambi
+   immutabili dopo il primo upload su Play.
+6. Registrare l'app nel License Server (tabelle `apps` e `products`, F2.2).
+7. Creare il suo **`codebase_reference.md`** alla fine della prima fase che la riguarda.
+
+⚑ **Un atlante per app, mai uno condiviso.** Ogni app ha il proprio
+`codebase_reference.md`, e così `micro_core` e il server. Un atlante unico costringerebbe a
+scorrere migliaia di righe che non riguardano l'app su cui si lavora, ed è esattamente la
+condizione in cui si smette di aggiornarlo.
+
+⚑ **Perché aggiungere un'app non deve costare nulla a `micro_core`**: la regola "il package
+condiviso non conosce nessuna app" (§F1, regola non negoziabile) esiste per questo. Non è
+purismo: è la condizione perché la decima app costi come la quinta. Se aggiungerne una
+richiedesse di toccare `micro_core`, il sintomo va letto al contrario, come un confine messo
+nel posto sbagliato da correggere lì, non da aggirare nell'app nuova.
+
+☠ **Trappola**: la tentazione, alla quinta app, è copiare la cartella della quarta e
+modificarla. Produce quattro copie divergenti della stessa infrastruttura, che è il motivo
+per cui esiste il monorepo. Si applica §8.T, che è la stessa cosa fatta senza portarsi
+dietro il dominio dell'app precedente.
+
+
 
 ## §2 — Decisioni architetturali (ADR)
 
@@ -732,10 +771,10 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 
 - [x] **F1.1** Bootstrap del package, `pubspec.yaml`, barrel `micro_core.dart`
 - [~] **F1.2** Utility di base: `Result` e `CivilDate` fatti e testati; mancano `Money`, `MicroLog`, `AppPaths`, `AtomicFile`
-- [ ] **F1.3** `SettingsStore` (preferenze tipizzate su `shared_preferences`)
+- [x] **F1.3** `SettingsStore` (preferenze tipizzate su `shared_preferences`)
 - [ ] **F1.4** `InstallId` (UUID persistente in `flutter_secure_storage`)
-- [ ] **F1.5** Design system — token: `MicroTheme`, `MicroSpacing`, `MicroRadius`, `MicroElevation`
-- [ ] **F1.6** Design system — componenti: card, stat tile, section header, empty state, chip, bottom sheet di conferma, snackbar, bottone primario
+- [x] **F1.5** Design system — token: `MicroTheme`, `MicroSpacing`, `MicroRadius`, `MicroDuration`, colori e testi semantici
+- [~] **F1.6** Design system — fatti: page scaffold, card, section header, list tile, empty state, bottone primario, chip, sheet di conferma, snackbar. Mancano stat tile, progress ring e la galleria `example/`
 - [ ] **F1.7** Billing: `PurchaseGateway`, `MicroProduct`, `PurchaseEvent`, `PlayPurchaseGateway`, `FakePurchaseGateway`
 - [ ] **F1.8** Entitlement: `Entitlement`, `EntitlementStore`, `EntitlementService`, `LicenseApiClient`
 - [~] **F1.9** Gating: `FeatureKey`, `FeatureLimit`, `FeatureGate` fatti e testati; mancano `ProLock` e `PaywallPage`
@@ -764,7 +803,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 ### F3 — TrashCan (app pilota, integrazione billing end-to-end) → `v4.0.0`
 
 - [~] **F3.1** Progetto, dipendenze, l10n (it/en, 154 chiavi, zero non tradotte), font Outfit, rotte, limiti Pro; mancano tema e router
-- [ ] **F3.2** Data layer Drift: calendari, tipi di rifiuto, regole, eccezioni
+- [~] **F3.2** Data layer Drift: tabelle, mapper riga→dominio, `watchBundle` e 19 test. Mancano i DAO di scrittura e il test di migrazione (F3.2.6)
 - [x] **F3.3** Motore delle ricorrenze `OccurrenceEngine` + 40 test
 - [ ] **F3.4** Wizard di setup iniziale
 - [ ] **F3.5** Home "Stasera / Prossima raccolta"

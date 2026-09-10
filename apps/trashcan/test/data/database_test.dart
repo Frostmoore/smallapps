@@ -1,8 +1,9 @@
-import 'package:drift/drift.dart';
+// drift esporta isNull/isNotNull come costruttori di espressioni SQL, e collidono con
+// i matcher omonimi di flutter_test. Qui servono i matcher.
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:micro_core/micro_core.dart';
 import 'package:trashcan/data/database.dart';
-import 'package:trashcan/data/tables.dart';
 import 'package:trashcan/domain/recurrence.dart';
 
 void main() {

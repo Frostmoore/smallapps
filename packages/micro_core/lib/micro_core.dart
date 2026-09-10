@@ -9,14 +9,24 @@
 /// passa come parametro, cosi' che aggiungere una quinta app non richieda di toccare
 /// una riga di questo package.
 library;
-
+export 'src/billing/fake_purchase_gateway.dart';
+export 'src/billing/play_purchase_gateway.dart';
+export 'src/billing/purchase_gateway.dart';
 export 'src/config/micro_app_config.dart';
+export 'src/entitlement/entitlement.dart';
+export 'src/entitlement/entitlement_service.dart';
+export 'src/entitlement/entitlement_store.dart';
+export 'src/entitlement/license_api_client.dart';
 export 'src/gate/feature_gate.dart';
 export 'src/gate/feature_key.dart';
 export 'src/gate/feature_limits.dart';
+export 'src/install/install_id.dart';
 export 'src/prefs/settings_store.dart';
+export 'src/storage/app_paths.dart';
 export 'src/theme/micro_theme.dart';
 export 'src/theme/micro_tokens.dart';
 export 'src/ui/micro_widgets.dart';
 export 'src/util/civil_date.dart';
+export 'src/util/micro_log.dart';
+export 'src/util/money.dart';
 export 'src/util/result.dart';
