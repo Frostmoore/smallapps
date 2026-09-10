@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +12,7 @@ import '../../app/waste_presets.dart';
 import '../../data/database.dart';
 import '../../domain/occurrence_engine.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../exceptions/occurrence_actions.dart';
 
 /// La home.
 ///
@@ -28,6 +31,12 @@ class HomePage extends ConsumerWidget {
     final tonight = ref.watch(tonightProvider);
     final next = ref.watch(nextOccurrenceProvider);
     final week = ref.watch(upcomingWeekProvider);
+
+    // ⛑ Toccare una raccolta apre il menu delle eccezioni. Il piano prevedeva il tocco
+    // lungo; qui c'e' anche il tocco semplice perche' una riga che non fa niente e' un
+    // vicolo cieco, e il menu non compie di per se' nessuna azione distruttiva.
+    void openActions(CollectionOccurrence occurrence) =>
+        unawaited(showOccurrenceActions(context, ref, occurrence: occurrence));
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +58,7 @@ class HomePage extends ConsumerWidget {
         child: ListView(
           padding: MicroSpacing.page,
           children: [
-            _TonightBlock(occurrences: tonight, bundle: bundle),
+            _TonightBlock(occurrences: tonight, bundle: bundle, onTap: openActions),
             MicroSpacing.gapXL,
             if (next != null) _NextCollection(occurrence: next, bundle: bundle),
             if (week.isNotEmpty) ...[
@@ -60,7 +69,7 @@ class HomePage extends ConsumerWidget {
                 child: Column(
                   children: [
                     for (final occurrence in week)
-                      _WeekRow(occurrence: occurrence, bundle: bundle),
+                      _WeekRow(occurrence: occurrence, bundle: bundle, onTap: openActions),
                   ],
                 ),
               ),
@@ -84,10 +93,11 @@ class HomePage extends ConsumerWidget {
 
 /// Il blocco che risponde alla domanda per cui l'app esiste.
 class _TonightBlock extends StatelessWidget {
-  const _TonightBlock({required this.occurrences, required this.bundle});
+  const _TonightBlock({required this.occurrences, required this.bundle, required this.onTap});
 
   final List<CollectionOccurrence> occurrences;
   final CalendarBundle? bundle;
+  final ValueChanged<CollectionOccurrence> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +151,9 @@ class _TonightBlock extends StatelessWidget {
           for (final occurrence in occurrences)
             Padding(
               padding: const EdgeInsets.only(bottom: MicroSpacing.s),
-              child: Row(
+              child: InkWell(
+                onTap: () => onTap(occurrence),
+                child: Row(
                 children: [
                   Icon(
                     WasteIcons.resolve(bundle?.typeOf(occurrence.wasteTypeId)?.iconKey),
@@ -162,6 +174,7 @@ class _TonightBlock extends StatelessWidget {
                       size: 20,
                     ),
                 ],
+                ),
               ),
             ),
         ],
@@ -208,10 +221,11 @@ class _NextCollection extends StatelessWidget {
 }
 
 class _WeekRow extends StatelessWidget {
-  const _WeekRow({required this.occurrence, required this.bundle});
+  const _WeekRow({required this.occurrence, required this.bundle, required this.onTap});
 
   final CollectionOccurrence occurrence;
   final CalendarBundle? bundle;
+  final ValueChanged<CollectionOccurrence> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -224,6 +238,7 @@ class _WeekRow extends StatelessWidget {
       subtitle: label,
       accent: Color(type?.colorValue ?? 0xFF888888),
       dense: true,
+      onTap: () => onTap(occurrence),
     );
   }
 }

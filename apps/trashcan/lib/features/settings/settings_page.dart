@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../../app/providers.dart';
+import '../../app/routes.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -45,6 +47,17 @@ class SettingsPage extends ConsumerWidget {
                       ),
                   ],
                 ),
+              ),
+            ),
+            MicroSpacing.gapXL,
+            MicroSectionHeader(title: l.settings_calendar),
+            MicroCard(
+              padding: EdgeInsets.zero,
+              child: MicroListTile(
+                title: l.exceptions_title,
+                subtitle: l.exceptions_emptyHint,
+                leading: const Icon(Icons.event_busy_outlined),
+                onTap: () => context.push(Routes.exceptions),
               ),
             ),
             MicroSpacing.gapXL,

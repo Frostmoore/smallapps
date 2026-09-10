@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../features/exceptions/exceptions_page.dart';
 import '../features/home/home_page.dart';
 import '../features/onboarding/onboarding_page.dart';
 import '../features/settings/settings_page.dart';
@@ -32,6 +33,7 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
         wasteTypeId: int.tryParse(state.pathParameters['wasteTypeId'] ?? ''),
       ),
     ),
+    GoRoute(path: Routes.exceptions, builder: (_, __) => const ExceptionsPage()),
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
   ],
   // Chi non ha ancora fatto il wizard viene portato lì, da qualunque punto entri:

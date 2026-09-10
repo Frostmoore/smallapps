@@ -204,6 +204,29 @@ extension AppDatabaseQueries on AppDatabase {
         ),
       );
     }
+
+    // ☠ Un tipo di rifiuto puo' avere eccezioni senza avere una regola: e' il caso di
+    // chi aggiunge una raccolta straordinaria per gli ingombranti, che non hanno un
+    // calendario fisso. Senza questo blocco quelle eccezioni non finirebbero in nessun
+    // RuleWithExceptions, e OccurrenceEngine.expand, che itera sulle regole, non le
+    // vedrebbe mai: l'utente aggiunge una data, la vede sparire e non ha modo di capire
+    // perche'. La ricorrenza sintetica non genera nulla di suo (nessuna data) e serve solo
+    // a portare con se' le eccezioni.
+    final typesWithRules = result.map((r) => r.wasteTypeId).toSet();
+    for (final entry in exceptionsByType.entries) {
+      if (typesWithRules.contains(entry.key)) continue;
+      result.add(
+        RuleWithExceptions(
+          wasteTypeId: entry.key,
+          recurrence: ManualDatesRecurrence(
+            dates: const <CivilDate>[],
+            startDate: CivilDate.fromEpochDay(0),
+          ),
+          exceptions: entry.value,
+          sortOrder: sortOrderByType[entry.key] ?? 0,
+        ),
+      );
+    }
     return result;
   }
 }

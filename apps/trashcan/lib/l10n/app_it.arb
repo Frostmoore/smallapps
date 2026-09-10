@@ -114,6 +114,14 @@
   "exceptions_empty": "Nessuna eccezione",
   "exceptions_emptyHint": "Le festività spostano spesso le raccolte. Qui puoi saltarne una, spostarla o aggiungerne una.",
   "exceptions_removeConfirm": "Rimuovere questa eccezione?",
+  "exceptions_removeConfirmBody": "La raccolta torna a seguire la regola.",
+  "exceptions_skippedOn": "Saltata il {date}",
+  "exceptions_movedFromTo": "Spostata dal {from} al {to}",
+  "exceptions_extraOn": "Raccolta straordinaria il {date}",
+  "exceptions_pickType": "Quale tipo di rifiuto?",
+  "exceptions_addedSkip": "Raccolta saltata",
+  "exceptions_addedMove": "Raccolta spostata",
+  "exceptions_addedExtra": "Raccolta straordinaria aggiunta",
 
   "notifications_title": "Promemoria",
   "notifications_enabledLabel": "Promemoria della sera",
@@ -136,6 +144,7 @@
 
   "settings_title": "Impostazioni",
   "settings_appearance": "Aspetto",
+  "settings_calendar": "Calendario",
   "settings_themeSystem": "Come il sistema",
   "settings_themeLight": "Chiaro",
   "settings_themeDark": "Scuro",

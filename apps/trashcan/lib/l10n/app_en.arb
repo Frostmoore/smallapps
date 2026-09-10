@@ -156,6 +156,23 @@
   "exceptions_empty": "No exceptions",
   "exceptions_emptyHint": "Bank holidays often shift collections. You can skip, move or add one here.",
   "exceptions_removeConfirm": "Remove this exception?",
+  "exceptions_removeConfirmBody": "The collection goes back to what the rule says.",
+  "exceptions_skippedOn": "Skipped on {date}",
+  "@exceptions_skippedOn": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "exceptions_movedFromTo": "Moved from {from} to {to}",
+  "@exceptions_movedFromTo": {
+    "placeholders": { "from": { "type": "String" }, "to": { "type": "String" } }
+  },
+  "exceptions_extraOn": "Extra collection on {date}",
+  "@exceptions_extraOn": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "exceptions_pickType": "Which waste type?",
+  "exceptions_addedSkip": "Collection skipped",
+  "exceptions_addedMove": "Collection moved",
+  "exceptions_addedExtra": "Extra collection added",
 
   "notifications_title": "Reminders",
   "notifications_enabledLabel": "Evening reminder",
@@ -185,6 +202,7 @@
 
   "settings_title": "Settings",
   "settings_appearance": "Appearance",
+  "settings_calendar": "Calendar",
   "settings_themeSystem": "Follow the system",
   "settings_themeLight": "Light",
   "settings_themeDark": "Dark",

@@ -808,7 +808,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [x] **F3.4** Wizard di setup iniziale: 4 passi, preset, giorni, orario, `PopScope` sul back di sistema. Verificato sull'emulatore
 - [x] **F3.5** Home "Stasera / Prossima raccolta / Prossimi 7 giorni". Verificata sull'emulatore
 - [x] **F3.6** Gestione tipi e regole: lista con riordino a trascinamento, editor del tipo, editor delle regole con tutte e cinque le forme e anteprima live delle prossime 6 date
-- [ ] **F3.7** Eccezioni: salta, sposta, raccolta straordinaria
+- [x] **F3.7** Eccezioni: menu contestuale sulla raccolta (salta, sposta, straordinaria, ripristina), pagina di riepilogo raggiungibile dalle impostazioni. Verificato sull'emulatore
 - [ ] **F3.8** Notifiche: pianificazione, orari multipli, permesso exact alarm
 - [ ] **F3.9** Calendari multipli + gating Pro + paywall
 - [ ] **F3.10** Export/import calendario, backup, condivisione file
