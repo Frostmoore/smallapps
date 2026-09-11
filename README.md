@@ -11,7 +11,7 @@ registro di chi ha comprato cosa.
 | **Scorte Calore** | `apps/scorte_calore/` | Autonomia residua di pellet, GPL, gasolio, legna | `apps/scorte_calore/codebase_reference.md` |
 | **Film Tracker** | `apps/film_tracker/` | Diario dei rullini fotografici analogici | `apps/film_tracker/codebase_reference.md` |
 | **micro_core** | `packages/micro_core/` | Nucleo condiviso: tema, billing, licenze, notifiche, backup | `packages/micro_core/codebase_reference.md` |
-| **Vetrina** | `site/` | Il sito pubblico su smpmicroapps.it: catalogo, pagina di TrashCan, contatti, pagine legali | `site/codebase_reference.md` |
+| **Vetrina** | `site/` | Il sito pubblico su smpmicroapps.it, in italiano e inglese: catalogo, pagina di TrashCan, contatti, pagine legali | `site/codebase_reference.md` |
 | **License Server** | `server/` — **repo separata** | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
 
 > **Stato al 2026-09-11**: esistono e sono aggiornati gli atlanti di `micro_core`, del
@@ -26,7 +26,7 @@ registro di chi ha comprato cosa.
 | F1 | `micro_core`: tema, billing, entitlement, gating, notifiche, backup | chiusa, 107 test |
 | F2 | License Server (Node + Fastify + SQLite), repo separata su Gitea | chiusa, 43 test |
 | **F3** | **TrashCan**, l'app pilota | **chiusa**, 122 test |
-| — | **Vetrina** `smpmicroapps.it` | online, con le pagine legali |
+| — | **Vetrina** `smpmicroapps.it` | online, bilingue, con le pagine legali |
 | F4 | Full Freezer | da fare |
 | F5 | Scorte Calore | da fare |
 | F6 | Film Tracker | da fare |

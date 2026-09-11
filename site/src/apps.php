@@ -15,6 +15,11 @@
  * nessuno se ne accorgerebbe per mesi.
  *
  * Quando si aggiunge una app al monorepo si aggiunge una voce qui, nello stesso giro.
+ *
+ * ☠ Qui dentro non c'e' **nessun testo visibile**: nome a parte, claim, sommario e prezzo
+ * stanno nei dizionari sotto le chiavi `app.<slug>.*`, perche' vanno tradotti. Rimetterli
+ * qui significherebbe un catalogo che resta italiano anche sulle pagine inglesi, senza che
+ * niente lo segnali.
  */
 
 declare(strict_types=1);
@@ -28,10 +33,6 @@ function catalogo(): array
     return [
         'trashcan' => [
             'nome'      => 'TrashCan',
-            'claim'     => 'Stasera cosa si butta?',
-            'sommario'  => 'Il calendario della raccolta differenziata del tuo Comune, '
-                         . 'con il promemoria la sera prima. Niente più bidone dimenticato '
-                         . 'sul pianerottolo.',
             'accento'   => '#2E7D5B',
             'logo'      => '/assets/img/trashcan.png',
             // Pubblicata: la card e' cliccabile e porta alla sua pagina.
@@ -41,43 +42,30 @@ function catalogo(): array
             // quando `suPlay` passa a true.
             'packageId' => 'com.smp.trashcan',
             'suPlay'    => false,
-            'prezzoPro' => '2,99 €',
         ],
         'full-freezer' => [
             'nome'      => 'Full Freezer',
-            'claim'     => 'Cosa c\'è nel congelatore, e da quanto.',
-            'sommario'  => 'L\'inventario del freezer ordinato per anzianità, così si '
-                         . 'consuma prima quello che aspetta da più tempo.',
             'accento'   => '#2C5F9E',
             'logo'      => null,
             'pubblicata' => false,
             'packageId' => 'com.smp.fullfreezer',
             'suPlay'    => false,
-            'prezzoPro' => null,
         ],
         'scorte-calore' => [
             'nome'      => 'Scorte Calore',
-            'claim'     => 'Quanto pellet ti resta davvero.',
-            'sommario'  => 'Consumo medio, autonomia residua e data in cui conviene '
-                         . 'riordinare. Per pellet, gasolio, GPL e legna.',
             'accento'   => '#A6503A',
             'logo'      => null,
             'pubblicata' => false,
             'packageId' => 'com.smp.scortecalore',
             'suPlay'    => false,
-            'prezzoPro' => null,
         ],
         'film-tracker' => [
             'nome'      => 'Film Tracker',
-            'claim'     => 'Il diario dei tuoi rullini.',
-            'sommario'  => 'Pellicole, scatti, tempi e diaframmi. Per chi fotografa in '
-                         . 'analogico e non vuole perdere le note dello sviluppo.',
             'accento'   => '#4A5560',
             'logo'      => null,
             'pubblicata' => false,
             'packageId' => 'com.smp.filmtracker',
             'suPlay'    => false,
-            'prezzoPro' => null,
         ],
     ];
 }

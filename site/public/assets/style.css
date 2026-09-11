@@ -534,3 +534,68 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   .btn { width: 100%; }
   .hero__actions .btn { width: auto; flex: 1 1 12rem; }
 }
+
+/* ─── Selettore di lingua ─────────────────────────────────────────────────── */
+
+.lingue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: 0.4rem;
+  padding: 0.15rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lingue__voce {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1;
+}
+
+.lingue__voce:hover { color: #fff; background: rgba(255, 255, 255, 0.12); text-decoration: none; }
+
+.lingue__voce--attiva { color: #fff; background: rgba(255, 255, 255, 0.18); }
+
+/*
+  Il filo di bordo sulla bandiera non e' decorazione: il tricolore ha una banda bianca e la
+  Union Jack ha il bordo bianco, e senza contorno sul fondo chiaro di un tema qualunque le
+  bandiere sembrerebbero mangiate da un lato.
+*/
+.lingue__voce img {
+  display: block;
+  width: 21px;
+  height: 14px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+  object-fit: cover;
+}
+
+/* Chi non e' attivo e' spento: si accende al passaggio. */
+.lingue__voce:not(.lingue__voce--attiva) img { opacity: 0.68; }
+.lingue__voce:not(.lingue__voce--attiva):hover img { opacity: 1; }
+
+.lingue__sigla { font-family: var(--font); }
+
+@media (max-width: 560px) {
+  .lingue { margin-left: auto; }
+  .lingue__sigla { display: none; }
+}
+
+/* Il bottone spento nel riquadro chiaro dei prezzi. */
+.btn--spento {
+  background: #e4e8e5;
+  color: var(--ink-faint);
+  border-color: transparent;
+}
+
+/* La riga di servizio sotto il modulo, su fondo chiaro. */
+.meta--scuro { color: var(--ink-faint) !important; }

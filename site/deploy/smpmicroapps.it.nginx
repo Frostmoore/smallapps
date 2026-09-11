@@ -55,6 +55,20 @@ server {
     #
     # Con `@php` e una `rewrite ... last` l'URI riscritto ripassa dal confronto delle
     # location e finisce nel blocco PHP, che e' quello che deve eseguirlo.
+    # La versione inglese: stesso albero di file, prefisso /en.
+    #
+    # ⚑ Non ci sono file duplicati sotto /en: il prefisso si toglie qui e la richiesta
+    # prosegue sulla stessa pagina. La lingua la deduce PHP da `REQUEST_URI`, che dopo una
+    # `rewrite ... last` **conserva l'indirizzo originale**. Cosi' non serve nessun
+    # parametro FastCGI da tenere allineato fra nginx e il router di sviluppo.
+    #
+    # ☠ L'espressione ancora `/en` per intero: `^/en(/.*)?$` e non un prefisso, altrimenti
+    # un ipotetico /energia verrebbe servito come pagina inglese.
+    location ~ ^/en(/.*)?$ {
+        rewrite ^/en/?$ /index.php last;
+        rewrite ^/en(/.+)$ $1 last;
+    }
+
     location / {
         try_files $uri $uri/ @php;
     }

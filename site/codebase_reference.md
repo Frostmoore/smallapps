@@ -5,6 +5,7 @@
 >
 > **Aggiornato al**: 2026-09-11 · **Stato**: online su <https://smpmicroapps.it>
 > **Stack**: PHP 8.3 su php-fpm, nginx, zero dipendenze, zero build step
+> **Lingue**: italiano alla radice, inglese sotto `/en` (vedi §3bis)
 > **Repo**: dentro il monorepo `microapps`, cartella `site/` (Gitea + mirror GitHub)
 
 ---
@@ -13,7 +14,11 @@
 
 | Cerchi… | Vai in… |
 |---|---|
-| L'elenco delle app e i loro testi | `src/apps.php` |
+| L'elenco delle app (dati, non testi) | `src/apps.php` |
+| **Tutti i testi visibili, in italiano** | `src/lang/it.php` e `src/lang/it.legale.php` |
+| **Tutti i testi visibili, in inglese** | `src/lang/en.php` e `src/lang/en.legale.php` |
+| Rilevamento della lingua, `t()`, `url_per()` | `src/i18n.php` |
+| Controllare che le due lingue siano allineate | `deploy/verifica_lingue.php` |
 | I dati dell'azienda (P. IVA, sede, PEC) | `src/config.php`, costante `AZIENDA` |
 | Intestazione, menu, pie' di pagina | `src/layout.php` |
 | Tutto il CSS | `public/assets/style.css` |
@@ -36,7 +41,13 @@ site/
 ├── config.example.php          modello della configurazione, VERSIONATO, senza segreti
 ├── config.local.php            solo sul server: credenziali SMTP. NON versionato.
 ├── src/
-│   ├── config.php              costante AZIENDA, SITO_URL, config(), e()
+│   ├── config.php              costante AZIENDA, SITO_URL, config(), e(), parametri_azienda()
+│   ├── i18n.php                lingua corrente, rilevamento, t(), url_per(), applica_lingua()
+│   ├── lang/
+│   │   ├── it.php              interfaccia e testi commerciali, italiano
+│   │   ├── it.legale.php       i corpi delle cinque pagine legali, italiano
+│   │   ├── en.php              interfaccia e testi commerciali, inglese
+│   │   └── en.legale.php       i corpi delle cinque pagine legali, inglese
 │   ├── apps.php                il catalogo: catalogo(), app_per_slug(), link_play()
 │   ├── layout.php              pagina_inizio(), pagina_fine(), intestazione_legale()
 │   ├── contact.php             validazione, CSRF, trappola, limite, archivio, notifica
@@ -47,19 +58,22 @@ site/
 │   ├── contatti.php            i tre canali + il modulo
 │   ├── sitemap.php             servita come /sitemap.xml
 │   ├── robots.txt
-│   ├── legale/
+│   ├── legale/                 cinque file da due righe: il contenuto sta nei dizionari
 │   │   ├── note-legali.php     l'impressum italiano (d.lgs. 70/2003, art. 2250 c.c.)
 │   │   ├── privacy.php         informativa artt. 13-14 GDPR
-│   │   ├── cookie.php          un solo cookie tecnico, niente banner
+│   │   ├── cookie.php          due cookie tecnici, niente banner
 │   │   ├── termini.php         condizioni di servizio e licenza d'uso
 │   │   └── responsabilita.php  limitazione di responsabilita'
 │   └── assets/
 │       ├── style.css           tutto il CSS, un file solo
 │       └── img/
 │           ├── favicon.svg     quattro caselle su fondo verde
+│           ├── flag-it.svg     il tricolore
+│           ├── flag-gb.svg     la Union Jack
 │           └── trashcan.png    256x256, derivata dal logo dell'app
 ├── deploy/
 │   ├── smpmicroapps.it.nginx   il vhost, PRIMA che certbot ci aggiunga il blocco TLS
+│   ├── verifica_lingue.php     controlla che i dizionari abbiano le stesse chiavi
 │   └── router.php              solo per `php -S`: riproduce le URL pulite di nginx
 └── var/                        solo sul server: messaggi ricevuti e contatore. NON versionato.
 ```
@@ -107,6 +121,107 @@ un'informativa che descrive un trattamento diverso da quello reale è una violaz
 
 ---
 
+## 3bis. Le due lingue
+
+### Lo schema degli indirizzi
+
+Italiano **alla radice**, inglese **sotto `/en`**: `/trashcan` e `/en/trashcan` sono la
+stessa pagina. Non ci sono file duplicati: nginx toglie il prefisso con una
+`rewrite ... last` e la richiesta prosegue sullo stesso file.
+
+⚑ **Perché l'italiano non sta sotto `/it`.** Il sito era già online e indicizzato con gli
+indirizzi senza prefisso. Spostarli tutti avrebbe richiesto una catena di redirect
+permanenti per non perdere posizionamento e per non rompere i link già condivisi, in cambio
+di nient'altro che simmetria.
+
+☠ **La lingua si legge da `REQUEST_URI`, non da una variabile di nginx.** Dopo una
+`rewrite ... last` l'URI riscritto cambia, ma `REQUEST_URI` conserva **l'indirizzo
+originale**. Leggerlo da lì fa funzionare il meccanismo identico sotto nginx e sotto
+`php -S`, senza parametri FastCGI da tenere allineati in due file di configurazione.
+
+### Come si sceglie la lingua
+
+| Situazione | Cosa succede |
+|---|---|
+| Cookie `ma_lang` presente | Vale la pagina che si sta visitando. Nessun redirect. |
+| Nessun cookie, `Accept-Language` assente o `*` | Resta l'italiano. |
+| Nessun cookie, l'intestazione preferisce l'italiano | Resta l'italiano. |
+| Nessun cookie, l'intestazione preferisce l'inglese | 302 verso la stessa pagina sotto `/en`. |
+| Nessun cookie, l'intestazione nomina **altre** lingue (`fr`, `de`) | 302 verso l'inglese. |
+
+☠ **Assente e "nessuna delle due" sono casi diversi, apposta.** I crawler dei motori di
+ricerca spesso non mandano `Accept-Language`: rimbalzarli sull'inglese farebbe apparire la
+home italiana come una pagina che redirige sempre. Ma chi ha il browser in francese non
+legge l'italiano più di quanto legga l'inglese, e mandarlo sulla versione italiana perché è
+quella predefinita significa dargli una pagina che non capisce.
+
+### Come si ricorda la scelta
+
+⚑ **Non esiste nessun endpoint per cambiare lingua, ed è voluto.** La bandierina è un link
+normale verso l'altra versione della **stessa pagina**, e visitarla *è* la scelta: il cookie
+viene scritto con la lingua della pagina che si sta guardando, e il rilevamento automatico
+scatta **solo quando il cookie non c'è**. Così non può mai rimbalzare indietro chi ha appena
+cliccato la bandiera, che è la trappola classica di questo meccanismo.
+
+☠ Il `?l=` sui soli link della bandierina copre chi ha i cookie bloccati: sopprime il
+rilevamento per quella richiesta. Senza, un browser in inglese e senza cookie tornerebbe
+all'inglese a ogni clic sulla bandiera italiana, e la bandiera sembrerebbe rotta.
+
+`Vary: Accept-Language, Cookie` viene mandato **sempre**, anche quando non si redirige:
+senza, una cache intermedia servirebbe la copia italiana a un visitatore inglese.
+
+### I dizionari
+
+Due file per lingua, uniti da `dizionario()`:
+
+| File | Contiene |
+|---|---|
+| `src/lang/it.php`, `en.php` | interfaccia, navigazione, piè, home, pagina TrashCan, contatti, modulo |
+| `src/lang/it.legale.php`, `en.legale.php` | i corpi HTML delle cinque pagine legali |
+
+Le chiavi sono **piatte e puntate** (`home.hero.titolo`): una ricerca testuale trova al primo
+colpo dove una frase è scritta e dove viene usata.
+
+☠ **I valori possono contenere HTML e `t()` non li ripulisce**, perché i testi hanno
+grassetti e collegamenti. Non deve quindi finirci MAI niente che provenga da un utente: i
+*parametri* passati a `t()`, quelli sì, vengono ripuliti.
+
+☠ I testi legali usano **NOWDOC** e non heredoc: nel nowdoc PHP non interpreta niente,
+quindi un simbolo di dollaro resta tale e i segnaposto `{denominazione}` restano intatti. Con
+l'heredoc un dollaro seguito da una lettera diventerebbe una variabile inesistente e la frase
+perderebbe una parola, senza nessun errore.
+
+### Cosa NON si traduce
+
+- **Le chiavi degli argomenti del modulo** (`bug`, `personalizzato`, ...): sono il valore
+  inviato e finiscono nell'archivio. Tradurle spezzerebbe ogni riga già salvata.
+- **La mail di notifica**: la legge chi gestisce la casella, non chi ha scritto. Resta in
+  italiano, con la lingua del visitatore su una riga a parte per sapere come rispondere.
+- **I nomi delle app**: TrashCan si chiama TrashCan in tutte le lingue.
+
+### Il testo che fa fede
+
+Le pagine legali inglesi si aprono con un riquadro che dichiara la **versione italiana come
+testo che governa**, e rimandano a essa con il segnaposto `{url_it}`. L'azienda è italiana,
+il contratto è regolato dalla legge italiana e i richiami sono ad articoli italiani: una
+traduzione che venisse letta come restrittiva di un diritto sarebbe un problema, e dirlo
+apertamente lo risolve.
+
+### La verifica
+
+```bash
+cd site
+php deploy/verifica_lingue.php
+```
+
+Controlla che i due dizionari abbiano le stesse chiavi, che nessuna stringa sia vuota, che
+nessuna traduzione **perda** un segnaposto e che nessun segnaposto usato sia sconosciuto al
+codice. Esce con codice 1 se qualcosa non va. **Va lanciato dopo ogni modifica ai testi**:
+una chiave mancante non produce nessun errore, produce una frase italiana in mezzo a una
+pagina inglese, e non la segnala nessuno.
+
+---
+
 ## 4. Le funzioni
 
 ### `src/config.php`
@@ -115,6 +230,22 @@ un'informativa che descrive un trattamento diverso da quello reale è una violaz
 |---|---|---|
 | `config` | `config(): array` | La configurazione, con i valori di `config.example.php` come ripiego. Non lancia se `config.local.php` manca. |
 | `e` | `e(?string $value): string` | `htmlspecialchars` con `ENT_QUOTES \| ENT_SUBSTITUTE`, UTF-8. Nome corto perché compare centinaia di volte. |
+| `parametri_azienda` | `parametri_azienda(): array` | I dati dell'azienda pronti per i segnaposto `{nome}` dei testi tradotti. |
+
+### `src/i18n.php`
+
+| Funzione | Firma | Cosa fa |
+|---|---|---|
+| `percorso_richiesto` | `percorso_richiesto(): string` | Il percorso della richiesta, senza query. |
+| `lingua_corrente` | `lingua_corrente(): string` | `'it'` o `'en'`, dedotta dall'indirizzo. |
+| `percorso_neutro` | `percorso_neutro(): string` | Il percorso senza prefisso di lingua. |
+| `url_per` | `url_per(string $lingua, ?string $percorso = null): string` | L'indirizzo di una pagina in una lingua. |
+| `lingua_preferita` | `lingua_preferita(?string $header): string` | Analizza `Accept-Language` con i pesi `q`. |
+| `applica_lingua` | `applica_lingua(): void` | Sceglie, eventualmente redirige, ricorda. **Prima di ogni output.** |
+| `dizionario` | `dizionario(string $lingua): array` | I due file della lingua, uniti e messi in cache. |
+| `t` | `t(string $chiave, array $parametri = []): string` | La stringa tradotta. **Non ripulita**: può contenere HTML. |
+
+Costanti: `LINGUE`, `LINGUA_DEFAULT`, `COOKIE_LINGUA`, `COOKIE_LINGUA_DURATA`.
 
 Costanti: `AZIENDA` (array), `SITO_URL` (`https://smpmicroapps.it`), `SITO_NOME`.
 
@@ -130,15 +261,16 @@ Campi di una voce del catalogo:
 
 | Campo | Tipo | Significato |
 |---|---|---|
-| `nome` | string | "TrashCan" |
-| `claim` | string | La frase in grassetto sulla card |
-| `sommario` | string | Tre righe di descrizione |
+| `nome` | string | "TrashCan". Non si traduce. |
 | `accento` | string | Colore esadecimale, diventa `--card-accent` nella card |
 | `logo` | ?string | Percorso dell'immagine, o `null` per il segnaposto con l'iniziale |
 | `pubblicata` | bool | Decide se la card è un link o un riquadro grigio |
 | `packageId` | string | Il nome del pacchetto Android, da cui si costruisce l'indirizzo Play |
 | `suPlay` | bool | `false` finché l'app non è davvero pubblicata: il bottone resta spento |
-| `prezzoPro` | ?string | "2,99 €" |
+
+☠ Nel catalogo non c'è **nessun testo visibile** oltre al nome: claim, sommario e prezzo
+stanno nei dizionari sotto `app.<slug>.*`, perché vanno tradotti. Rimetterli qui darebbe un
+catalogo che resta italiano anche sulle pagine inglesi, senza che niente lo segnali.
 
 ### `src/layout.php`
 
@@ -185,9 +317,16 @@ Supporta porta 465 (TLS implicito) e 587 (STARTTLS), autenticazione `AUTH LOGIN`
 | `/legale/cookie` | `public/legale/cookie.php` | |
 | `/legale/termini` | `public/legale/termini.php` | |
 | `/legale/responsabilita` | `public/legale/responsabilita.php` | |
-| `/sitemap.xml` | `public/sitemap.php` | `rewrite ^ /sitemap.php last` |
+| `/sitemap.xml` | `public/sitemap.php` | `rewrite ^ /sitemap.php last`. Contiene **entrambe** le lingue con gli `hreflang` |
 | `/robots.txt` | statico | |
 | qualunque altro | 404 | |
+
+**Ogni rotta qui sopra esiste anche con il prefisso `/en`**, e serve lo stesso file: nginx
+toglie il prefisso e PHP sceglie il dizionario leggendo `REQUEST_URI` (§3bis). `/en` e `/en/`
+danno la home inglese.
+
+☠ L'espressione del vhost ancora `/en` per intero, `^/en(/.*)?$`, non come prefisso:
+altrimenti un ipotetico `/energia` verrebbe servito come pagina inglese.
 
 ---
 
@@ -230,6 +369,11 @@ dell'hash SHA-256, per un'ora.
 | `/trashcan` restituiva il **codice sorgente PHP**, e la POST del modulo dava 405 | `try_files $uri $uri.php $uri/ =404`: quando try_files trova un argomento **intermedio** lo serve dal blocco corrente, che non ha handler FastCGI. Solo l'ultimo argomento rientra nel confronto delle location. Con una GET si vedeva una pagina di testo simile a quella giusta, quindi il difetto passava inosservato | `location / { try_files $uri $uri/ @php; }` + `location @php { rewrite ^(.*)$ $1.php last; }` |
 | Le immagini non caricavano provando in locale | il server integrato di PHP (`php -S`) serve **una richiesta per volta**: il browser che chiede CSS e immagini insieme si vede rifiutare le richieste in coda | è un limite del solo ambiente di sviluppo, nginx non ne soffre |
 | Frasi come "1 su 4 sono disponibili" | un conteggio infilato in una frase non concorda né al singolare né al plurale | due rami nel template |
+| Il modulo rifiuta **ogni** invio dicendo "la pagina è rimasta aperta troppo a lungo", su una pagina appena aperta | `csrf_token()` avvia la sessione, e avviare una sessione manda un `Set-Cookie`. Veniva chiamata **dentro il modulo**, cioè a metà documento: a quel punto l'HTML è già partito, PHP non può più mandare intestazioni, il cookie di sessione non arriva e alla POST successiva la sessione è nuova e vuota. Restava nascosto finché il buffer di output tratteneva l'intero documento: cresciuto il testo della pagina, il buffer si svuota prima di arrivare al modulo e l'invio smette di funzionare | `public/contatti.php`: `$csrf = csrf_token()` **prima** di ogni output, e nel modulo si stampa la variabile |
+| La bandierina italiana non funziona: si torna sempre all'inglese | il rilevamento automatico rimbalzava anche chi aveva appena scelto. Scatta **solo in assenza del cookie**, e per chi ha i cookie bloccati c'è il `?l=` sui link della bandierina | `src/i18n.php`, `applica_lingua()` |
+| Un visitatore francese vedeva l'italiano | ricadeva nel ramo "nessuna lingua riconosciuta", che tornava sul predefinito. Ora quel ramo va all'inglese, e solo l'intestazione **assente** (o `*`) resta sull'italiano, per non rimbalzare i crawler | `src/i18n.php`, `lingua_preferita()` |
+| Una frase italiana in mezzo a una pagina inglese | chiave mancante nel dizionario inglese: `t()` ripiega sull'italiano e non segnala niente in pagina | `deploy/verifica_lingue.php`, da lanciare dopo ogni modifica ai testi |
+| Una parola sparita da un testo legale | l'heredoc interpreta il simbolo di dollaro come inizio di variabile | i testi legali usano NOWDOC |
 | Uno script che parte da PowerShell verso `bash -s` dà `syntax error: unexpected end of file` | le fini riga di Windows: `\r` finisce dentro i comandi | si scrive lo script in un file con fini riga Unix e si passa da `ssh ... "cat > file && bash file"` |
 
 ---
@@ -281,26 +425,45 @@ php -S 127.0.0.1:8099 -t public deploy/router.php
   `sudo cat /var/www/smpmicroapps/var/contatti.jsonl`.
 - **Nessuna pagina di dettaglio** per Full Freezer, Scorte Calore e Film Tracker: le card
   ci sono ma non sono link. La pagina si crea alla chiusura della fase che costruisce l'app.
-- **Nessuna versione inglese**: il sito è solo in italiano, mentre le app sono bilingui.
+- **Nessuna terza lingua**: solo italiano e inglese. Aggiungerne una vuol dire un nuovo codice in `LINGUE`, due file di dizionario e una bandiera.
 - **Nessun blog, nessuna newsletter, nessun analytics.**
-- **Nessun test automatico**: il sito è statico nella sostanza, e la verifica è la lista di
-  controllo del §11.
+- **Nessun test automatico sulle pagine**: l'unico controllo automatico è
+  `deploy/verifica_lingue.php` sui dizionari. Per il resto vale la lista del §11.
 
 ---
 
 ## 11. Verifica dopo ogni modifica
 
-```powershell
-# Tutte le pagine rispondono ed eseguono PHP invece di mostrarne il sorgente
-foreach ($u in @('/','/trashcan','/contatti','/legale/privacy','/legale/note-legali',
-                 '/legale/cookie','/legale/termini','/legale/responsabilita','/sitemap.xml')) {
-  $r = Invoke-WebRequest "https://smpmicroapps.it$u" -UseBasicParsing
-  "{0,-28} {1} {2}" -f $u, $r.StatusCode, $(if ($r.Content -match '<\?php') {'SORGENTE ESPOSTO'} else {'ok'})
-}
+**1. I dizionari sono allineati** (locale, prima di caricare):
 
-# I file riservati non sono raggiungibili: devono dare tutti 404 o 403
-foreach ($u in @('/config.local.php','/src/config.php','/var/contatti.jsonl')) { ... }
+```bash
+cd site && php deploy/verifica_lingue.php
 ```
+
+**2. Tutte le pagine rispondono, in tutte e due le lingue, ed eseguono PHP invece di
+mostrarne il sorgente:**
+
+```powershell
+$percorsi = @('/','/trashcan','/contatti','/legale/privacy','/legale/note-legali',
+              '/legale/cookie','/legale/termini','/legale/responsabilita','/sitemap.xml')
+foreach ($p in $percorsi) {
+  foreach ($u in @($p, "/en$p")) {
+    $r = Invoke-WebRequest "https://smpmicroapps.it$u" -UseBasicParsing
+    $lang = [regex]::Match($r.Content,'<html lang="([a-z]+)"').Groups[1].Value
+    "{0,-32} {1} lang={2} {3}" -f $u, $r.StatusCode, $lang,
+      $(if ($r.Content -match '<\?php') {'SORGENTE ESPOSTO'} else {'ok'})
+  }
+}
+```
+
+**3. Il rilevamento della lingua**: con `Accept-Language: en-GB` la radice deve dare 302
+verso la versione inglese; con `it-IT` e senza intestazione deve restare dov'è.
+
+**4. Il modulo funziona in entrambe le lingue**: GET della pagina contatti, estrazione del
+token, POST. Deve rispondere "Messaggio ricevuto" e "Message received".
+
+**5. I file riservati non sono raggiungibili**: `/config.local.php`, `/src/config.php` e
+`/var/contatti.jsonl` devono dare tutti 404 o 403.
 
 Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente il difetto del
 §8 che una semplice verifica del codice 200 non avrebbe mai trovato.
@@ -312,7 +475,8 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 | Cosa | Perché è rimandato | Quando |
 |---|---|---|
 | **SMTP non configurato** | serve una casella vera con le sue credenziali, che deve fornire il proprietario. Fino ad allora i messaggi si salvano e non arrivano notifiche | appena ci sono le credenziali di `info@smp-digital.it` |
-| **Nessuna pagina per le altre tre app** | non esistono ancora | alla chiusura di F4, F5, F6 |
+| **Nessuna pagina per le altre tre app** | non esistono ancora | alla chiusura di F4, F5, F6. **Servono anche le chiavi `app.<slug>.*` in entrambi i dizionari** |
+| **Le pagine legali inglesi sono una traduzione** | l'originale italiano fa fede e le pagine lo dichiarano. Una revisione da parte di un legale madrelingua non è stata fatta | se e quando ci saranno clienti fuori dall'Italia |
 | **Numero REA assente** | non fornito. Se c'è iscrizione al Registro delle Imprese va indicato (art. 2250 c.c.) | va riempita `AZIENDA['rea']` in `src/config.php` |
 | **Nessuna schermata delle app** | la pagina di TrashCan descrive a parole; qualche immagine venderebbe meglio | quando ci saranno gli screenshot per Play, che servono comunque |
 | **Il bottone Play è spento** | l'app non è ancora pubblicata | si mette `suPlay => true` in `src/apps.php`, e basta |

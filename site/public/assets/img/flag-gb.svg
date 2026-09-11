@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  La Union Jack.
+
+  I due tracciati diagonali si disegnano due volte: prima in bianco e spessi, poi in rosso
+  e piu' sottili, cosi' il bianco resta come bordo. La seconda passata e' ritagliata da
+  `#sfalso` perche' le diagonali rosse della croce di San Patrizio sono sfalsate rispetto
+  all'asse, e senza quel ritaglio verrebbero centrate: e' l'errore che rende riconoscibile
+  a colpo d'occhio una Union Jack disegnata male.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" role="img" aria-label="English">
+  <clipPath id="bordo"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+  <clipPath id="sfalso"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+  <g clip-path="url(#bordo)">
+    <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#ffffff" stroke-width="6"/>
+    <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#sfalso)" stroke="#c8102e" stroke-width="4"/>
+    <path d="M30,0 v30 M0,15 h60" stroke="#ffffff" stroke-width="10"/>
+    <path d="M30,0 v30 M0,15 h60" stroke="#c8102e" stroke-width="6"/>
+  </g>
+</svg>

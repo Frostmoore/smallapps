@@ -13,10 +13,37 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/mailer.php';
 
-/** Gli argomenti selezionabili. La chiave finisce nell'oggetto della mail. */
+/**
+ * Gli argomenti selezionabili, nella lingua della pagina.
+ *
+ * ☠ Le **chiavi** restano in italiano e non vanno tradotte: sono il valore inviato dal
+ * modulo, finiscono nell'archivio e servono a ritrovare i messaggi. Tradurle spezzerebbe
+ * ogni riga gia' salvata.
+ *
+ * @return array<string, string>
+ */
 function argomenti_contatto(): array
+{
+    $chiavi = ['bug', 'personalizzato', 'app', 'privacy', 'altro'];
+    $voci = [];
+    foreach ($chiavi as $chiave) {
+        $voci[$chiave] = t('form.arg.' . $chiave);
+    }
+    return $voci;
+}
+
+/**
+ * Gli argomenti in italiano, per la notifica che arriva al titolare.
+ *
+ * ⚑ La mail di notifica resta **sempre in italiano**, anche quando il modulo e' stato
+ * compilato in inglese: la legge chi gestisce la casella, non chi ha scritto. La lingua
+ * usata dal visitatore compare come riga a parte, perche' serve a sapere in che lingua
+ * rispondere.
+ */
+function argomenti_notifica(): array
 {
     return [
         'bug'            => 'Segnalazione di un problema',
@@ -75,7 +102,7 @@ function valida_contatto(array $post): array
     if (!is_string($token) || $token === '' || !hash_equals($_SESSION['csrf'] ?? '', $token)) {
         // Succede anche in buona fede: una scheda lasciata aperta per ore ha una sessione
         // scaduta. Il messaggio lo dice, invece di accusare l'utente di qualcosa.
-        $errori[] = 'La pagina è rimasta aperta troppo a lungo. Ricaricala e reinvia il messaggio.';
+        $errori[] = t('form.err.sessione');
         return $errori;
     }
 
@@ -88,28 +115,28 @@ function valida_contatto(array $post): array
 
     $nome = trim($post['nome'] ?? '');
     if (mb_strlen($nome) < 2 || mb_strlen($nome) > 80) {
-        $errori[] = 'Indica un nome fra 2 e 80 caratteri.';
+        $errori[] = t('form.err.nome');
     }
 
     $email = trim($post['email'] ?? '');
     if (filter_var($email, FILTER_VALIDATE_EMAIL) === false || mb_strlen($email) > 190) {
-        $errori[] = 'Indica un indirizzo email valido: serve per poterti rispondere.';
+        $errori[] = t('form.err.email');
     }
 
     if (!array_key_exists($post['argomento'] ?? '', argomenti_contatto())) {
-        $errori[] = 'Scegli un argomento fra quelli proposti.';
+        $errori[] = t('form.err.argomento');
     }
 
     $messaggio = trim($post['messaggio'] ?? '');
     if (mb_strlen($messaggio) < 20) {
-        $errori[] = 'Scrivi qualche riga in più: sotto i 20 caratteri non si capisce cosa serve.';
+        $errori[] = t('form.err.corto');
     }
     if (mb_strlen($messaggio) > 5000) {
-        $errori[] = 'Il messaggio supera i 5.000 caratteri. Riassumilo, o allega il resto via email.';
+        $errori[] = t('form.err.lungo');
     }
 
     if (($post['consenso'] ?? '') !== 'si') {
-        $errori[] = 'Per poterti rispondere devi confermare di aver letto l\'informativa privacy.';
+        $errori[] = t('form.err.consenso');
     }
 
     return $errori;
@@ -196,6 +223,7 @@ function archivia_contatto(array $post): void
         'email'     => $post['email'],
         'argomento' => $post['argomento'],
         'app'       => $post['app'] ?? '',
+        'lingua'    => $post['lingua'] ?? '',
         'messaggio' => $post['messaggio'],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
@@ -219,8 +247,13 @@ function notifica_contatto(array $post): bool
         return false;
     }
 
-    $argomenti = argomenti_contatto();
+    // ☠ Gli argomenti in italiano, non quelli tradotti: questa mail la legge chi gestisce
+    // la casella. Un oggetto che cambia lingua a seconda del visitatore renderebbe
+    // impossibile filtrare la posta in arrivo per argomento.
+    $argomenti = argomenti_notifica();
     $oggetto = '[smpmicroapps] ' . $argomenti[$post['argomento']] . ' - ' . $post['nome'];
+
+    $lingue = ['it' => 'italiano', 'en' => 'inglese'];
 
     $corpo = implode("\n", [
         'Nuovo messaggio dal modulo di contatto di smpmicroapps.it',
@@ -229,6 +262,9 @@ function notifica_contatto(array $post): bool
         'Email:     ' . $post['email'],
         'Argomento: ' . $argomenti[$post['argomento']],
         'App:       ' . ($post['app'] !== '' ? $post['app'] : '(non indicata)'),
+        // Serve a sapere in che lingua rispondere: chi scrive dalla versione inglese in
+        // italiano non ci capisce niente.
+        'Lingua:    ' . ($lingue[$post['lingua'] ?? ''] ?? $post['lingua'] ?? '?'),
         'Ricevuto:  ' . date('d/m/Y H:i'),
         '',
         str_repeat('-', 60),

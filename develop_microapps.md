@@ -963,6 +963,42 @@ e verificata online su <https://smpmicroapps.it>:
   credenziali in `/var/www/smpmicroapps/config.local.php`, i messaggi si salvano in
   `/var/www/smpmicroapps/var/contatti.jsonl` e non arriva nessuna notifica.
 
+**Vetrina bilingue, 11 settembre 2026** (branch `v4.3.0`). Richiesta del proprietario, fatta
+e verificata online:
+
+- [x] **Sito in italiano e inglese.** Italiano alla radice, inglese sotto `/en`: `/trashcan`
+  e `/en/trashcan` sono la stessa pagina, senza file duplicati. L'italiano resta alla radice
+  perche' quegli indirizzi erano gia' online e indicizzati.
+- [x] **Bandierine nella barra di navigazione**, tutte e due, con quella attiva evidenziata.
+  Mostrarne una sola e' ambiguo: nessuno sa se dice "stai leggendo in italiano" o "clicca per
+  l'italiano". Il link porta alla **stessa pagina** nell'altra lingua, non alla home.
+- [x] **Selezione automatica** in base alla lingua di sistema, letta da `Accept-Language`.
+  Con l'inglese preferito si viene portati alla versione inglese; con l'italiano si resta.
+  Chi ha il browser in una terza lingua va all'inglese. **Senza intestazione si resta
+  sull'italiano**, per non far apparire la home come una pagina che redirige sempre ai
+  crawler dei motori di ricerca.
+- [x] La scelta si ricorda in un cookie tecnico `ma_lang`, e il rilevamento automatico scatta
+  **solo in sua assenza**: cosi' non puo' rimbalzare indietro chi ha appena cliccato la
+  bandiera. Non esiste nessun endpoint per cambiare lingua: visitare una versione *e'* la
+  scelta.
+- [x] **Tutti i testi in dizionari**, due file per lingua: interfaccia e corpi delle pagine
+  legali. Il catalogo delle app non contiene piu' nessun testo visibile oltre al nome.
+- [x] **Le cinque pagine legali tradotte**, con un riquadro che dichiara la versione italiana
+  come testo che fa fede: l'azienda e' italiana e i richiami sono ad articoli italiani.
+- [x] `hreflang` e link canonico per lingua su ogni pagina, sitemap con entrambe le versioni,
+  `Vary: Accept-Language, Cookie` sempre.
+- [x] **`site/deploy/verifica_lingue.php`**: controlla che i dizionari abbiano le stesse
+  chiavi, nessuna stringa vuota e nessun segnaposto perso o sconosciuto. Va lanciato dopo
+  ogni modifica ai testi, perche' una chiave mancante non da' nessun errore: da' una frase
+  italiana in mezzo a una pagina inglese.
+- [x] Cookie policy e informativa privacy aggiornate: ora i cookie tecnici sono due, e la
+  lettura di `Accept-Language` e' dichiarata.
+- [x] **Difetto trovato durante il giro**: il modulo di contatto rifiutava **ogni** invio.
+  `csrf_token()` veniva chiamata dentro il modulo, cioe' a meta' documento, quando l'HTML era
+  gia' partito e PHP non poteva piu' mandare il cookie di sessione. Restava nascosto finche'
+  il buffer di output tratteneva l'intera pagina; allungato il testo, l'invio ha smesso di
+  funzionare. Ora il token si prende prima di qualunque output.
+
 ---
 
 ## §8 — Guida allo sviluppo, fase per fase

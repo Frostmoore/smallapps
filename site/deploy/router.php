@@ -17,6 +17,17 @@ declare(strict_types=1);
 $percorso = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
 $radice = __DIR__ . '/../public';
 
+// ☠ Il prefisso di lingua si toglie **solo per trovare il file**: `REQUEST_URI` resta
+// intatto, ed e' da li' che `lingua_corrente()` capisce in che lingua servire la pagina.
+// E' esattamente quello che fa nginx con `rewrite ... last`. Azzerarlo qui darebbe un
+// locale che funziona e una produzione che no, o viceversa.
+if ($percorso === '/en' || str_starts_with($percorso, '/en/')) {
+    $percorso = substr($percorso, 3);
+    if ($percorso === '') {
+        $percorso = '/';
+    }
+}
+
 // /sitemap.xml e' generato da sitemap.php, come nel vhost.
 if ($percorso === '/sitemap.xml') {
     require $radice . '/sitemap.php';

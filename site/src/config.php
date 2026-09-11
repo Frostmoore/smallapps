@@ -68,3 +68,30 @@ function e(?string $value): string
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
+
+/**
+ * I dati dell'azienda pronti per i segnaposto `{nome}` dei testi tradotti.
+ *
+ * ⚑ Le pagine legali nominano la sede, la partita IVA e la PEC una dozzina di volte
+ * ciascuna, e in due lingue. Scriverli nei dizionari significherebbe ventiquattro copie
+ * dello stesso indirizzo: alla prima variazione il sito ne dichiarerebbe due diversi, e
+ * per le note legali quello **e'** il contenuto dell'obbligo, non un dettaglio.
+ *
+ * @return array<string, string>
+ */
+function parametri_azienda(): array
+{
+    return [
+        'denominazione' => AZIENDA['denominazione'],
+        'titolare'      => AZIENDA['titolare'],
+        'piva'          => AZIENDA['piva'],
+        'indirizzo'     => AZIENDA['indirizzo'],
+        'cap'           => AZIENDA['cap'],
+        'citta'         => AZIENDA['citta'],
+        'provincia'     => AZIENDA['provincia'],
+        'paese'         => AZIENDA['paese'],
+        'pec'           => AZIENDA['pec'],
+        'email'         => AZIENDA['email'],
+        'sito'          => SITO_URL,
+    ];
+}

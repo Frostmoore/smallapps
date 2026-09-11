@@ -14,6 +14,24 @@ declare(strict_types=1);
 require_once __DIR__ . '/../src/layout.php';
 require_once __DIR__ . '/../src/contact.php';
 
+$lingua = lingua_corrente();
+
+// ☠ Il token si prende **prima di stampare qualunque cosa**, e il valore si tiene in una
+// variabile per usarlo nel modulo piu' sotto.
+//
+// `csrf_token()` avvia la sessione, e avviare una sessione manda un `Set-Cookie`. Chiamarla
+// dentro il modulo, cioe' a meta' documento, significa chiederla quando l'HTML e' gia'
+// partito: PHP non puo' piu' mandare intestazioni, il cookie di sessione non arriva al
+// browser, e alla POST successiva la sessione e' nuova e vuota. Il risultato e' un modulo
+// che rifiuta **ogni** invio dicendo "la pagina e' rimasta aperta troppo a lungo", su una
+// pagina appena aperta.
+//
+// Il difetto restava nascosto finche' il buffer di output di PHP era abbastanza capiente da
+// trattenere il documento fino alla fine: cresciuto il testo della pagina, il buffer si
+// svuota prima di arrivare al modulo e il modulo smette di funzionare. Una pagina piu' lunga
+// non deve poter rompere l'invio.
+$csrf = csrf_token();
+
 $errori = [];
 $inviato = false;
 $notificato = false;
@@ -35,8 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($errori === []) {
         $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
         if (limite_superato($ip)) {
-            $errori[] = 'Hai inviato diversi messaggi nell\'ultima ora. '
-                . 'Riprova più tardi, oppure scrivi direttamente a ' . AZIENDA['email'] . '.';
+            $errori[] = t('form.err.limite', ['email' => AZIENDA['email']]);
         } else {
             try {
                 $pulito = [
@@ -44,6 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'email'     => trim($post['email']),
                     'argomento' => $post['argomento'],
                     'app'       => trim($post['app'] ?? ''),
+                    // La lingua in cui il modulo e' stato compilato: serve al titolare per
+                    // sapere in che lingua rispondere.
+                    'lingua'    => $lingua,
                     'messaggio' => trim($post['messaggio']),
                 ];
                 archivia_contatto($pulito);
@@ -52,8 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $vecchio = ['nome' => '', 'email' => '', 'argomento' => '', 'app' => '', 'messaggio' => ''];
             } catch (RuntimeException $e) {
                 error_log('[smpmicroapps] archiviazione fallita: ' . $e->getMessage());
-                $errori[] = 'Non è stato possibile registrare il messaggio. '
-                    . 'Scrivi direttamente a ' . AZIENDA['email'] . ', così non si perde nulla.';
+                $errori[] = t('form.err.archivio', ['email' => AZIENDA['email']]);
             }
         }
     }
@@ -61,22 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $argomenti = argomenti_contatto();
 
-pagina_inizio(
-    'Contatti e sviluppo su misura',
-    'Scrivi per una segnalazione, una domanda sulle app o per far sviluppare '
-        . 'un\'applicazione su misura.',
-    '/contatti'
-);
+pagina_inizio('contatti.titolo', 'contatti.descrizione', '/contatti');
 ?>
 
 <section class="hero hero--slim">
   <div class="wrap">
-    <p class="eyebrow">Parliamo</p>
-    <h1 class="display display--s">Scrivimi</h1>
-    <p class="lede">
-      Segnalazioni, domande sulle app e richieste di sviluppo su misura arrivano tutte
-      allo stesso posto, e le legge una persona sola.
-    </p>
+    <p class="eyebrow"><?= t('contatti.eyebrow') ?></p>
+    <h1 class="display display--s"><?= t('contatti.h1') ?></h1>
+    <p class="lede"><?= t('contatti.lede') ?></p>
   </div>
 </section>
 
@@ -85,49 +96,41 @@ pagina_inizio(
     <div class="features" style="margin-bottom:3rem">
       <div class="feature" id="personalizzato">
         <span class="feature__num" aria-hidden="true">&#9670;</span>
-        <h3>Sviluppo su misura</h3>
-        <p>
-          Applicazioni Android, gestionali, automazioni e strumenti interni. Descrivi il
-          problema e il contesto in cui nasce: la prima risposta dice se è fattibile, con
-          che tempi e con quale ordine di grandezza di costo.
-        </p>
+        <h3><?= t('contatti.misura.titolo') ?></h3>
+        <p><?= t('contatti.misura.testo') ?></p>
       </div>
       <div class="feature" id="bug">
         <span class="feature__num" aria-hidden="true">&#9888;</span>
-        <h3>Segnalare un problema</h3>
-        <p>
-          Indica il modello di telefono, la versione di Android e cosa stavi facendo quando
-          è successo. Con queste tre informazioni un problema si riproduce in pochi minuti;
-          senza, spesso non si riproduce affatto.
-        </p>
+        <h3><?= t('contatti.bug.titolo') ?></h3>
+        <p><?= t('contatti.bug.testo') ?></p>
       </div>
       <div class="feature">
         <span class="feature__num" aria-hidden="true">&#9993;</span>
-        <h3>Recapiti diretti</h3>
+        <h3><?= t('contatti.recapiti.titolo') ?></h3>
         <p>
-          Email: <a href="mailto:<?= e(AZIENDA['email']) ?>"><?= e(AZIENDA['email']) ?></a><br>
-          PEC: <a href="mailto:<?= e(AZIENDA['pec']) ?>"><?= e(AZIENDA['pec']) ?></a><br>
+          <a href="mailto:<?= e(AZIENDA['email']) ?>"><?= e(AZIENDA['email']) ?></a><br>
+          <a href="mailto:<?= e(AZIENDA['pec']) ?>"><?= e(AZIENDA['pec']) ?></a>
+          <?= t('contatti.recapiti.pec') ?><br>
           <?= e(AZIENDA['denominazione']) ?><br>
           <?= e(AZIENDA['indirizzo']) ?>, <?= e(AZIENDA['cap']) ?> <?= e(AZIENDA['citta']) ?> (<?= e(AZIENDA['provincia']) ?>)
         </p>
       </div>
     </div>
 
-    <h2 class="title" id="modulo">Il modulo</h2>
+    <h2 class="title" id="modulo"><?= t('form.titolo') ?></h2>
 
     <?php if ($inviato): ?>
       <div class="alert alert--ok" role="status">
-        <p><strong>Messaggio ricevuto.</strong> Ti rispondo all'indirizzo che hai indicato,
-          di solito entro due giorni lavorativi.</p>
+        <p><strong><?= t('form.ok.titolo') ?></strong> <?= t('form.ok.testo') ?></p>
         <?php if (!$notificato): ?>
-          <p style="margin-bottom:0">Il messaggio è stato registrato correttamente.</p>
+          <p style="margin-bottom:0"><?= t('form.ok.salvato') ?></p>
         <?php endif; ?>
       </div>
     <?php endif; ?>
 
     <?php if ($errori !== []): ?>
       <div class="alert alert--err" role="alert">
-        <strong>Il messaggio non è stato inviato.</strong>
+        <strong><?= t('form.ko.titolo') ?></strong>
         <ul>
           <?php foreach ($errori as $errore): ?>
             <li><?= e($errore) ?></li>
@@ -136,32 +139,32 @@ pagina_inizio(
       </div>
     <?php endif; ?>
 
-    <form class="form" method="post" action="/contatti#modulo" novalidate>
-      <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+    <form class="form" method="post" action="<?= e(url_per($lingua, '/contatti')) ?>#modulo" novalidate>
+      <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
 
       <!-- Il campo trappola: invisibile a una persona, irresistibile per un robot. -->
       <div class="trap" aria-hidden="true">
-        <label for="website">Non compilare questo campo</label>
+        <label for="website"><?= t('form.trappola') ?></label>
         <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
       </div>
 
       <div class="field">
-        <label for="nome">Nome <span aria-hidden="true">*</span></label>
+        <label for="nome"><?= t('form.nome') ?> <span aria-hidden="true">*</span></label>
         <input type="text" id="nome" name="nome" required maxlength="80"
                autocomplete="name" value="<?= e($vecchio['nome']) ?>">
       </div>
 
       <div class="field">
-        <label for="email">Email <span aria-hidden="true">*</span></label>
+        <label for="email"><?= t('form.email') ?> <span aria-hidden="true">*</span></label>
         <input type="email" id="email" name="email" required maxlength="190"
                autocomplete="email" value="<?= e($vecchio['email']) ?>">
-        <small>Serve solo per risponderti.</small>
+        <small><?= t('form.email.aiuto') ?></small>
       </div>
 
       <div class="field">
-        <label for="argomento">Argomento <span aria-hidden="true">*</span></label>
+        <label for="argomento"><?= t('form.argomento') ?> <span aria-hidden="true">*</span></label>
         <select id="argomento" name="argomento" required>
-          <option value="">Scegli…</option>
+          <option value=""><?= t('form.scegli') ?></option>
           <?php foreach ($argomenti as $chiave => $etichetta): ?>
             <option value="<?= e($chiave) ?>" <?= $vecchio['argomento'] === $chiave ? 'selected' : '' ?>>
               <?= e($etichetta) ?>
@@ -171,33 +174,29 @@ pagina_inizio(
       </div>
 
       <div class="field">
-        <label for="app">App interessata</label>
+        <label for="app"><?= t('form.app') ?></label>
         <input type="text" id="app" name="app" maxlength="60"
-               placeholder="TrashCan, oppure lascia vuoto"
+               placeholder="<?= e(t('form.app.ph')) ?>"
                value="<?= e($vecchio['app']) ?>">
-        <small>Per una segnalazione, aggiungi modello del telefono e versione di Android nel messaggio.</small>
+        <small><?= t('form.app.aiuto') ?></small>
       </div>
 
       <div class="field">
-        <label for="messaggio">Messaggio <span aria-hidden="true">*</span></label>
+        <label for="messaggio"><?= t('form.messaggio') ?> <span aria-hidden="true">*</span></label>
         <textarea id="messaggio" name="messaggio" required minlength="20" maxlength="5000"><?= e($vecchio['messaggio']) ?></textarea>
       </div>
 
       <label class="check">
         <input type="checkbox" name="consenso" value="si" required>
-        <span>
-          Ho letto l'<a href="/legale/privacy">informativa privacy</a> e acconsento al
-          trattamento dei miei dati per ricevere una risposta a questo messaggio.
-        </span>
+        <span><?= t('form.consenso', ['privacy' => url_per($lingua, '/legale/privacy')]) ?></span>
       </label>
 
       <div>
-        <button class="btn btn--primary" type="submit">Invia il messaggio</button>
+        <button class="btn btn--primary" type="submit"><?= t('form.invia') ?></button>
       </div>
 
-      <p class="meta" style="color:var(--ink-faint) !important">
-        I campi contrassegnati con <span aria-hidden="true">*</span> sono obbligatori.
-        Titolare del trattamento: <?= e(AZIENDA['denominazione']) ?>.
+      <p class="meta meta--scuro">
+        <?= t('form.obbligatori', ['denominazione' => AZIENDA['denominazione']]) ?>
       </p>
     </form>
   </div>
