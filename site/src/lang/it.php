@@ -40,6 +40,8 @@ return [
     'nav.contatti'    => 'Contatti',
     'nav.su_misura'   => 'Sviluppo su misura',
     'nav.principale'  => 'Principale',
+    'nav.apri'        => 'Apri il menu',
+    'nav.chiudi'      => 'Chiudi il menu',
 
     // ── Pie' di pagina ──────────────────────────────────────────────────────
     'footer.blurb'       => 'App piccole per Android, che fanno una cosa sola e la fanno '

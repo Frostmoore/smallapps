@@ -88,9 +88,22 @@ function pagina_inizio(string $chiaveTitolo, string $chiaveDescrizione, string $
 <meta property="og:description" content="<?= e($descrizione) ?>">
 <meta property="og:url" content="<?= e(SITO_URL . url_per($lingua, $canonical)) ?>">
 <meta property="og:locale" content="<?= $lingua === 'it' ? 'it_IT' : 'en_GB' ?>">
-<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/assets/img/trashcan.png">
-<link rel="stylesheet" href="/assets/style.css?v=3">
+<link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/assets/img/favicon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css?v=4">
+
+<?php
+// ⚑ Uno script di due righe, inline e nel `<head>`, che marca il documento come "con
+// JavaScript". Serve a una cosa sola: il menu a panino esiste **solo** se il browser puo'
+// aprirlo. Senza questa riga bisognerebbe nasconderlo con JavaScript dopo il primo
+// disegno, e su una connessione lenta si vedrebbe la navigazione comparire e sparire.
+//
+// ☠ Va nel `<head>` e non in fondo: piu' avanti e il browser avrebbe gia' disegnato la
+// pagina in versione senza JavaScript, con lo stesso sfarfallio che si voleva evitare.
+?>
+<script>document.documentElement.className += ' js';</script>
+<script src="/assets/menu.js?v=1" defer></script>
 </head>
 <body>
 
@@ -99,15 +112,61 @@ function pagina_inizio(string $chiaveTitolo, string $chiaveDescrizione, string $
 <header class="topbar">
   <div class="wrap topbar__inner">
     <a class="brand" href="<?= e(url_per($lingua, '/')) ?>">
-      <span class="brand__mark" aria-hidden="true"></span>
+      <img class="brand__mark" src="/assets/img/logo.png" alt="" width="30" height="30">
       <span class="brand__name">SMP<span>MicroApps</span></span>
     </a>
 
-    <nav class="nav" aria-label="<?= e(t('nav.principale')) ?>">
-      <a href="<?= e(url_per($lingua, '/')) ?>#app"><?= t('nav.app') ?></a>
-      <a href="<?= e(url_per($lingua, '/contatti')) ?>"><?= t('nav.contatti') ?></a>
-      <a href="<?= e(url_per($lingua, '/contatti')) ?>#personalizzato"><?= t('nav.su_misura') ?></a>
-      <?php selettore_lingua(); ?>
+    <?php
+    // Il bottone del menu a panino. Sta **prima** della navigazione nel documento perche'
+    // e' quello che la apre: chi naviga da tastiera o con uno screen reader lo incontra
+    // prima di cio' che controlla, non dopo.
+    //
+    // `hidden` di partenza: senza JavaScript resta nascosto e la navigazione si vede per
+    // intero, mandando a capo le voci come faceva prima. Una comodita' non deve diventare
+    // un requisito.
+    ?>
+    <button class="panino" type="button" id="panino"
+            aria-expanded="false" aria-controls="menu-principale"
+            aria-label="<?= e(t('nav.apri')) ?>"
+            data-apri="<?= e(t('nav.apri')) ?>"
+            data-chiudi="<?= e(t('nav.chiudi')) ?>" hidden>
+      <span class="panino__righe" aria-hidden="true"></span>
+    </button>
+
+    <nav class="nav" id="menu-principale" aria-label="<?= e(t('nav.principale')) ?>">
+      <ul class="nav__lista">
+        <?php
+        // "Le app" con il suo sottomenu. Sul desktop si apre passandoci sopra o entrandoci
+        // da tastiera; dentro il panino resta aperto, perche' con una voce sola costringere
+        // a un tocco in piu' sarebbe solo fastidioso.
+        $pubblicate = array_filter(catalogo(), static fn (array $a): bool => $a['pubblicata']);
+        ?>
+        <li class="nav__voce nav__voce--conSottomenu">
+          <a href="<?= e(url_per($lingua, '/')) ?>#app"><?= t('nav.app') ?></a>
+          <?php if ($pubblicate !== []): ?>
+            <ul class="sottomenu">
+              <?php foreach ($pubblicate as $slug => $app): ?>
+                <li>
+                  <a href="<?= e(url_per($lingua, '/' . $slug)) ?>">
+                    <?php if ($app['logo'] !== null): ?>
+                      <img src="<?= e($app['logo']) ?>" alt="" width="22" height="22">
+                    <?php endif; ?>
+                    <span><?= e($app['nome']) ?></span>
+                  </a>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php endif; ?>
+        </li>
+
+        <li class="nav__voce">
+          <a href="<?= e(url_per($lingua, '/contatti')) ?>"><?= t('nav.contatti') ?></a>
+        </li>
+        <li class="nav__voce">
+          <a href="<?= e(url_per($lingua, '/contatti')) ?>#personalizzato"><?= t('nav.su_misura') ?></a>
+        </li>
+        <li class="nav__voce nav__voce--lingue"><?php selettore_lingua(); ?></li>
+      </ul>
     </nav>
   </div>
 </header>

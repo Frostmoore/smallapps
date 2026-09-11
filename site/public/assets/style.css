@@ -104,24 +104,139 @@ a:hover { color: var(--accent); }
   letter-spacing: -0.02em;
 }
 
+/* Il logo: cubo isometrico su fondo trasparente, quindi si vede solo sulla barra scura. */
 .brand__mark {
-  width: 22px; height: 22px;
-  border-radius: 7px;
-  background: linear-gradient(140deg, #6fd6a4, var(--accent));
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
 }
 
 .brand__name span { color: #7fd7ab; font-weight: 500; }
 
-.nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+/* ─── Navigazione ─────────────────────────────────────────────────────────── */
 
-.nav a {
+.nav__lista {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.nav__voce { position: relative; }
+
+.nav__voce > a {
+  display: inline-block;
   color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
   font-size: 0.95rem;
-  padding-block: 0.4rem;
+  padding-block: 0.5rem;
+  white-space: nowrap;
 }
-.nav a:hover { color: #fff; text-decoration: underline; }
+.nav__voce > a:hover { color: #fff; text-decoration: underline; }
+
+/* La freccina che annuncia il sottomenu: senza, nessuno sa che c'e' qualcosa sotto. */
+.nav__voce--conSottomenu > a::after {
+  content: "";
+  display: inline-block;
+  width: 0.38em;
+  height: 0.38em;
+  margin-left: 0.45em;
+  vertical-align: 0.15em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0.7;
+}
+
+/* ─── Sottomenu delle app ─────────────────────────────────────────────────── */
+
+/*
+  ⚑ Si apre con `:hover` **e** con `:focus-within`. Il solo hover lo renderebbe
+  irraggiungibile da tastiera, e le voci dentro sarebbero focalizzabili ma invisibili: il
+  fuoco sparirebbe dentro un pannello che non si vede, che e' peggio che non avere il menu.
+
+  ☠ Il pannello parte a `top: 100%`, cioe' esattamente al bordo inferiore della voce, senza
+  stacco. Un solo pixel di distanza basta a farlo richiudere mentre ci si sposta sopra col
+  puntatore, e il menu diventa inutilizzabile senza che si capisca perche'.
+*/
+.sottomenu {
+  position: absolute;
+  top: 100%;
+  left: -0.85rem;
+  z-index: 50;
+  display: none;
+  min-width: 13rem;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  background: #16311f;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
+}
+
+.nav__voce--conSottomenu:hover > .sottomenu,
+.nav__voce--conSottomenu:focus-within > .sottomenu { display: block; }
+
+.sottomenu a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.sottomenu a:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.sottomenu img { width: 22px; height: 22px; border-radius: 6px; flex: 0 0 auto; }
+
+/* ─── Il bottone a panino ─────────────────────────────────────────────────── */
+
+/*
+  Nasce con l'attributo `hidden` dal server e lo toglie `menu.js`. Senza JavaScript resta
+  nascosto e la navigazione si vede per intero: una comodita' non deve diventare un
+  requisito.
+*/
+.panino {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+}
+.panino:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* Le tre righe: una vera e due disegnate con gli pseudo-elementi. */
+.panino__righe,
+.panino__righe::before,
+.panino__righe::after {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.panino__righe { position: relative; }
+.panino__righe::before,
+.panino__righe::after { content: ""; position: absolute; left: 0; }
+.panino__righe::before { top: -6px; }
+.panino__righe::after { top: 6px; }
+
+/* Aperto diventa una croce: dice che quel bottone adesso chiude. */
+.topbar--aperta .panino__righe { background: transparent; }
+.topbar--aperta .panino__righe::before { transform: translateY(6px) rotate(45deg); }
+.topbar--aperta .panino__righe::after { transform: translateY(-6px) rotate(-45deg); }
 
 /* ─── Hero ────────────────────────────────────────────────────────────────── */
 
@@ -528,9 +643,73 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
 /* ─── Schermo stretto ─────────────────────────────────────────────────────── */
 
+/* ─── Schermo stretto: il menu diventa un pannello ────────────────────────── */
+
+/*
+  ⚑ La soglia e' 860px e non 560: sotto quella larghezza le tre voci, le due bandierine e il
+  nome del sito non ci stanno su una riga, e la barra andava a capo diventando alta il doppio.
+  Il punto in cui serve il panino e' quello in cui il contenuto non entra, non quello in cui
+  comincia un telefono.
+
+  ☠ Tutto e' agganciato a `.js`: senza JavaScript il bottone non compare, quindi la
+  navigazione **non deve** nascondersi, o resterebbe irraggiungibile.
+*/
+@media (max-width: 860px) {
+  .js .panino { display: inline-flex; }
+
+  .js .nav {
+    display: none;
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .js .topbar--aperta .nav {
+    display: block;
+    padding-block: 0.5rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    margin-top: 0.6rem;
+  }
+
+  .js .nav__lista {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .js .nav__voce > a {
+    display: block;
+    padding: 0.85rem 0.25rem;
+    font-size: 1.05rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  /* Nel pannello non c'e' niente da aprire: il sottomenu e' gia' li'. */
+  .js .nav__voce--conSottomenu > a::after { display: none; }
+
+  .js .sottomenu {
+    position: static;
+    display: block;
+    min-width: 0;
+    margin: 0 0 0 0.25rem;
+    padding: 0;
+    background: none;
+    border: none;
+    border-left: 2px solid rgba(127, 215, 171, 0.45);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .js .sottomenu a {
+    padding: 0.7rem 0.9rem;
+    border-radius: 0;
+    font-size: 1rem;
+  }
+
+  .js .nav__voce--lingue { padding-top: 0.9rem; }
+}
+
 @media (max-width: 560px) {
   .topbar__inner { min-height: 0; padding-block: 0.7rem; }
-  .nav { gap: 1rem; width: 100%; }
   .btn { width: 100%; }
   .hero__actions .btn { width: auto; flex: 1 1 12rem; }
 }
@@ -585,9 +764,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
 .lingue__sigla { font-family: var(--font); }
 
-@media (max-width: 560px) {
-  .lingue { margin-left: auto; }
-  .lingue__sigla { display: none; }
+/* Nel pannello le sigle servono: c'e' spazio, e una bandiera da sola e' meno chiara. */
+@media (max-width: 860px) {
+  .lingue { margin-left: 0; }
 }
 
 /* Il bottone spento nel riquadro chiaro dei prezzi. */

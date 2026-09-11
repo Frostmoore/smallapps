@@ -999,6 +999,32 @@ e verificata online:
   il buffer di output tratteneva l'intera pagina; allungato il testo, l'invio ha smesso di
   funzionare. Ora il token si prende prima di qualunque output.
 
+**Logo, menu a panino e sottomenu, 11 settembre 2026** (branch `v4.4.0`). Richiesta del
+proprietario, fatta e verificata online:
+
+- [x] **Logo del proprietario** (`smpmicroappslogo.png`, cubo isometrico con le lettere SMP)
+  nella barra accanto al nome, e come favicon del sito. Da un'unica immagine si generano
+  `logo.png` 128, `favicon-32.png`, `favicon-192.png` e `apple-touch-icon.png` 180.
+- [x] L'icona per iOS e' l'unica **su fondo pieno**: iOS non gestisce la trasparenza in
+  quell'icona, la compone su nero, e un logo verde scuro su nero sparisce.
+- [x] **Menu a panino sotto gli 860 pixel.** La soglia non e' quella di un telefono ma quella
+  in cui le tre voci, le due bandierine e il nome non stanno su una riga e la barra andava a
+  capo diventando alta il doppio.
+- [x] **Sottomenu sotto "Le app"** con le app **pubblicate**, costruito dal catalogo: oggi
+  solo TrashCan, e una app nuova compare da sola appena la sua voce ha `pubblicata => true`.
+  Le app non ancora fatte non ci sono, perche' nel sottomenu una voce grigia che non porta da
+  nessuna parte sarebbe solo una riga morta.
+- [x] Sopra gli 860 pixel e' un pannello a discesa che si apre con `:hover` **e** con
+  `:focus-within`: col solo hover il sottomenu sarebbe irraggiungibile da tastiera e il fuoco
+  finirebbe dentro un pannello invisibile.
+- [x] **Senza JavaScript la navigazione resta quella di prima.** Il bottone arriva dal server
+  con `hidden` e lo toglie `menu.js`; tutte le regole che nascondono le voci sono agganciate
+  a una classe messa da una riga nel `<head>`. Un sito la cui navigazione dipende da
+  JavaScript e' un sito che a volte non si puo' navigare.
+- [x] `menu.js` (quaranta righe, nessuna libreria) chiude anche dopo il clic su una voce,
+  perche' quasi tutte sono ancore verso la stessa pagina e il pannello resterebbe aperto
+  sopra il punto a cui si e' appena saltati.
+
 ---
 
 ## §8 — Guida allo sviluppo, fase per fase

@@ -21,6 +21,7 @@
 | Controllare che le due lingue siano allineate | `deploy/verifica_lingue.php` |
 | I dati dell'azienda (P. IVA, sede, PEC) | `src/config.php`, costante `AZIENDA` |
 | Intestazione, menu, pie' di pagina | `src/layout.php` |
+| Il menu a panino e il sottomenù | `src/layout.php` + `public/assets/menu.js` (§3ter) |
 | Tutto il CSS | `public/assets/style.css` |
 | La home con la griglia delle card | `public/index.php` |
 | La pagina di TrashCan | `public/trashcan.php` |
@@ -66,8 +67,12 @@ site/
 │   │   └── responsabilita.php  limitazione di responsabilita'
 │   └── assets/
 │       ├── style.css           tutto il CSS, un file solo
+│       ├── menu.js             il menu a panino, quaranta righe (§3ter)
 │       └── img/
-│           ├── favicon.svg     quattro caselle su fondo verde
+│           ├── logo.png        128x128, il cubo SMP per la barra
+│           ├── favicon-32.png  la scheda del browser
+│           ├── favicon-192.png la schermata iniziale su Android
+│           ├── apple-touch-icon.png  180x180 su fondo pieno, per iOS
 │           ├── flag-it.svg     il tricolore
 │           ├── flag-gb.svg     la Union Jack
 │           └── trashcan.png    256x256, derivata dal logo dell'app
@@ -96,6 +101,9 @@ parti:
 
 **Aggiungere una sola risorsa esterna rende false tre pagine legali.** Se serve davvero, si
 self-hosta.
+
+Gli unici script sono nostri e serviti da qui: la riga che marca il documento come "con
+JavaScript" e `assets/menu.js`. Nessuna libreria, nessun bundler, nessun passo di build.
 
 ### ⚑ Il catalogo è una sola lista
 
@@ -219,6 +227,93 @@ nessuna traduzione **perda** un segnaposto e che nessun segnaposto usato sia sco
 codice. Esce con codice 1 se qualcosa non va. **Va lanciato dopo ogni modifica ai testi**:
 una chiave mancante non produce nessun errore, produce una frase italiana in mezzo a una
 pagina inglese, e non la segnala nessuno.
+
+---
+
+## 3ter. Il menu
+
+### Cosa c'è nella barra
+
+Logo, nome, tre voci e il selettore di lingua. La prima voce, **Le app**, ha un sottomenù con
+le app **pubblicate**: oggi solo TrashCan. Quelle non ancora fatte non ci sono, perché nel
+sottomenù non avrebbe senso una voce grigia che non porta da nessuna parte: in home la card
+comunica qualcosa, qui sarebbe solo una riga morta.
+
+Il sottomenù si costruisce dal catalogo, filtrando su `pubblicata`. **Una app nuova compare
+da sola** appena la sua voce entra in `src/apps.php` con `pubblicata => true`.
+
+### Sopra gli 860 pixel
+
+Barra orizzontale. Il sottomenù è un pannello a discesa che si apre con `:hover` **e** con
+`:focus-within`.
+
+☠ Servono tutti e due. Il solo `hover` renderebbe il sottomenù irraggiungibile da tastiera, e
+le voci dentro resterebbero focalizzabili ma invisibili: il fuoco sparirebbe dentro un
+pannello che non si vede, che è peggio che non avere il menù.
+
+☠ Il pannello parte a `top: 100%`, cioè esattamente al bordo inferiore della voce, **senza
+stacco**. Un solo pixel di distanza basta a farlo richiudere mentre ci si sposta sopra col
+puntatore, e il menù diventa inutilizzabile senza che si capisca perché.
+
+⚑ Su un dispositivo a tocco più largo di 860px (un tablet in orizzontale) il tocco su "Le
+app" **naviga** invece di aprire il pannello, perché il tocco non produce hover. È il
+comportamento voluto: la destinazione è la griglia del catalogo in home, che elenca tutte le
+app, cioè esattamente quello che il sottomenù avrebbe mostrato.
+
+### Sotto gli 860 pixel
+
+Compare il bottone a panino e la navigazione diventa un pannello sotto la barra, con il
+sottomenù già aperto e rientrato: con una voce sola, costringere a un tocco in più sarebbe
+solo fastidio.
+
+⚑ **La soglia è 860 e non 560.** Il punto in cui serve il panino è quello in cui il contenuto
+non entra, non quello in cui comincia un telefono: sotto quella larghezza le tre voci, le due
+bandierine e il nome del sito non stavano su una riga e la barra andava a capo, diventando
+alta il doppio.
+
+### Senza JavaScript
+
+☠ **Il bottone arriva dal server con l'attributo `hidden`, e solo `menu.js` lo toglie.** Tutte
+le regole che nascondono la navigazione sono agganciate alla classe `.js`, messa sul
+documento da uno script di una riga nel `<head>`. Se lo script non arriva — rete lenta,
+blocco, errore — la navigazione resta quella di prima: tutte le voci visibili, che vanno a
+capo. Un sito la cui navigazione dipende da JavaScript è un sito che a volte non si può
+navigare.
+
+☠ Quella riga sta nel `<head>` e non in fondo: più avanti, il browser avrebbe già disegnato la
+pagina in versione senza JavaScript, con lo stesso sfarfallio che si voleva evitare.
+
+### `public/assets/menu.js`
+
+Quaranta righe, nessuna libreria. Fa cinque cose:
+
+| Cosa | Perché |
+|---|---|
+| Toglie `hidden` dal bottone | È lui a dichiarare che il menù si può aprire |
+| Apre e chiude, aggiornando `aria-expanded` e `aria-label` | Le due etichette arrivano tradotte in attributi `data-`: il JavaScript non conosce nessuna lingua |
+| Chiude dopo il clic su una voce | ☠ Quasi tutti i link sono ancore verso la **stessa** pagina (`/#app`, `#personalizzato`). Senza, il pannello resta aperto sopra il contenuto a cui si è appena saltati, e sembra che il link non abbia funzionato |
+| `Esc` chiude e riporta il fuoco sul bottone | Altrimenti il fuoco resta dentro un pannello chiuso |
+| Al ridimensionamento richiude se il bottone non è più visibile | Ruotando il telefono il pannello sparisce per via del CSS, ma `aria-expanded` resterebbe `true` e uno screen reader annuncerebbe un menù aperto che non c'è |
+
+### Il logo e le icone
+
+Il logo è **fornito dal proprietario**: un cubo isometrico con le lettere SMP, sfondo
+trasparente. Da quello si generano quattro file.
+
+| File | Misura | Dove va |
+|---|---|---|
+| `logo.png` | 128 | Il segno accanto al nome, nella barra |
+| `favicon-32.png` | 32 | La scheda del browser |
+| `favicon-192.png` | 192 | La schermata iniziale su Android |
+| `apple-touch-icon.png` | 180 | iOS |
+
+☠ L'icona per iOS è l'unica **su fondo pieno**, il verde scuro della barra, con il logo
+rientrato del 10%. iOS non gestisce la trasparenza in quell'icona: la compone su nero, e un
+logo verde scuro su nero sparisce.
+
+⚑ Il logo ha lo sfondo trasparente, quindi si vede bene sulla barra scura e si vedrebbe male
+su fondo chiaro. Se un giorno servisse un'intestazione chiara, serve una seconda versione, non
+un filtro CSS.
 
 ---
 
@@ -374,6 +469,10 @@ dell'hash SHA-256, per un'ora.
 | Un visitatore francese vedeva l'italiano | ricadeva nel ramo "nessuna lingua riconosciuta", che tornava sul predefinito. Ora quel ramo va all'inglese, e solo l'intestazione **assente** (o `*`) resta sull'italiano, per non rimbalzare i crawler | `src/i18n.php`, `lingua_preferita()` |
 | Una frase italiana in mezzo a una pagina inglese | chiave mancante nel dizionario inglese: `t()` ripiega sull'italiano e non segnala niente in pagina | `deploy/verifica_lingue.php`, da lanciare dopo ogni modifica ai testi |
 | Una parola sparita da un testo legale | l'heredoc interpreta il simbolo di dollaro come inizio di variabile | i testi legali usano NOWDOC |
+| Il sottomenù si richiude mentre ci si sposta col puntatore | uno stacco fra la voce e il pannello: il puntatore esce dall'area in `:hover` e il pannello sparisce prima di essere raggiunto | `.sottomenu { top: 100%; }`, senza margine |
+| Il fuoco da tastiera sparisce dentro un pannello invisibile | il sottomenù si apriva col solo `:hover`: le voci restavano focalizzabili ma non visibili | aggiunto `:focus-within` |
+| Il pannello del panino resta aperto sopra il contenuto | quasi tutte le voci sono ancore verso la stessa pagina: il salto avviene, ma il pannello lo copre e sembra che il link non funzioni | `menu.js` chiude dopo il clic su una voce |
+| L'icona su iOS è un quadrato nero | iOS non gestisce la trasparenza nell'apple-touch-icon e la compone su nero | `apple-touch-icon.png` ha il fondo pieno verde scuro |
 | Uno script che parte da PowerShell verso `bash -s` dà `syntax error: unexpected end of file` | le fini riga di Windows: `\r` finisce dentro i comandi | si scrive lo script in un file con fini riga Unix e si passa da `ssh ... "cat > file && bash file"` |
 
 ---

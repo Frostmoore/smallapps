@@ -36,6 +36,8 @@ return [
     'nav.contatti'    => 'Contact',
     'nav.su_misura'   => 'Custom development',
     'nav.principale'  => 'Main',
+    'nav.apri'        => 'Open the menu',
+    'nav.chiudi'      => 'Close the menu',
 
     // ── Footer ──────────────────────────────────────────────────────────────
     'footer.blurb'       => 'Small Android apps that do one thing and do it well. Free in '
