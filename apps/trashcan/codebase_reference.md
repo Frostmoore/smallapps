@@ -12,7 +12,7 @@
 > settimane.
 >
 > Stato: l'app gira su Android ed è stata percorsa a mano sull'emulatore in ogni schermata.
-> 116 test propri, oltre ai 106 di `micro_core`.
+> 116 test propri, oltre ai 107 di `micro_core`.
 
 ---
 
@@ -466,7 +466,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 
 ## 9. Catalogo dei test
 
-116 test in `apps/trashcan/`, oltre ai 106 di `micro_core`.
+116 test in `apps/trashcan/`, oltre ai 107 di `micro_core`.
 
 | File | N. | Cosa dimostra |
 |---|---|---|
@@ -512,7 +512,8 @@ causa.
 | Dopo un riavvio del telefono i promemoria smettono | gli allarmi non sopravvivono al riavvio senza `RECEIVE_BOOT_COMPLETED` e il boot receiver | `AndroidManifest.xml` |
 | Configuro l'app e dopo due mesi non arriva più niente | niente ripianificava all'avvio: il piano si ricostruiva solo al cambio dei dati | `notificationSyncProvider` |
 | Tocco la notifica e il back esce dall'app | `go` sostituisce lo stack: la pagina del giorno restava senza nulla sotto | `app.dart`, `_openPayload` fa `go(home)` poi `push` |
-| Il widget resta un rettangolo colorato e vuoto | `home_widget` salva ogni intero Dart come **Long**: `getInt` lancia `ClassCastException` e il receiver crolla. In più un ARGB con alpha `0xFF` non entra in un Int con segno | `TrashcanWidgetProvider.kt`: `getLong(...).toInt()` |
+| Il widget resta un rettangolo colorato e vuoto | il receiver crollava leggendo il colore: vedi la riga seguente | `TrashcanWidgetProvider.kt` |
+| "TrashCan continua a bloccarsi", dopo giorni di funzionamento perfetto | il canale fra Dart e Android codifica un intero come **Integer** se sta in 32 bit con segno e come **Long** altrimenti: *il tipo dipende dal valore*. Un ARGB con alpha `0xFF` supera 2³¹ e arriva Long; lo zero che si manda quando stasera non si raccoglie niente arriva Integer. `getInt` e `getLong` sbagliano **a turno**. E un receiver che lancia fa cadere l'intero processo dell'app, non solo il widget | `TrashcanWidgetProvider.kt`: si legge da `widgetData.all[...]` accettando entrambi i tipi, e tutto `onUpdate` sta dentro un `try` |
 | L'icona nella barra di stato è una macchia bianca | Android usa solo il canale alfa dell'icona: `@mipmap/ic_launcher` è opaca ovunque | `drawable/ic_notification.xml` |
 | Il testo sul blocco "Stasera" si legge male | `ThemeData.estimateBrightnessForColor` confronta `(luminanza + 0.05)²` con 0.15, cioè passa al bianco sopra 0.337, non 0.5: sui colori di mezzo sceglie il bianco dove ci si aspetta il nero | tavolozza corretta + `palette_contrast_test.dart` |
 | Un widget test resta appeso dieci minuti e muore | `testWidgets` gira in `FakeAsync`, che non fa avanzare l'I/O vero di SQLite; e `pumpAndSettle` non termina perché drift pianifica lavoro di continuo | `test/widget/harness.dart`: si sostituiscono i provider, niente database |

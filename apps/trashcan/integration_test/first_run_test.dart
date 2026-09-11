@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -47,7 +46,10 @@ void main() {
       if (file.existsSync()) file.deleteSync();
     }
 
-    unawaited(Future<void>.sync(app.main));
+    // ☠ `await`, non un semplice lancio: `main()` finisce dopo `runApp`, e senza
+    // aspettarlo il primo `pumpAndSettle` gira su un albero che non esiste ancora. Il test
+    // muore in cinque secondi con "did not complete", che non dice niente sulla causa.
+    await app.main();
     await tester.pumpAndSettle(const Duration(seconds: 3));
 
     // Passo 1: la schermata di benvenuto.
@@ -79,8 +81,14 @@ void main() {
     expect(find.text('Organic'), findsWidgets);
     expect(find.text('Nothing to take out tonight'), findsNothing);
 
-    // E il promemoria è finito davvero nel database: è l'unica prova che il wizard ha
-    // scritto qualcosa invece di limitarsi a disegnare.
+    // E i dati sono finiti davvero nel database: è l'unica prova che il wizard ha scritto
+    // qualcosa invece di limitarsi a disegnare.
+    //
+    // Drift avverte che il database viene aperto una seconda volta, e ha ragione a
+    // segnalarlo: due istanze con esecutori diversi sulle stesse tabelle possono corrompere
+    // il file **in scrittura**. Qui si legge soltanto, ad app ferma, e più letture
+    // concorrenti su SQLite sono sicure. La lettura resta perché senza di essa il test
+    // proverebbe solo che la home disegna quello che ha in memoria.
     final db = AppDatabase.open();
     addTearDown(db.close);
     final calendars = await db.allCalendars();

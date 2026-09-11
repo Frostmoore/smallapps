@@ -531,7 +531,7 @@ niente; il contrario toglierebbe agli utenti gratuiti una funzione che doveva es
 
 ## 9. Catalogo dei test
 
-`pwsh tool/test_all.ps1 -Project micro_core` → **106 test verdi**.
+`pwsh tool/test_all.ps1 -Project micro_core` → **107 test verdi**.
 
 | File | Test | Cosa dimostra |
 |---|---|---|

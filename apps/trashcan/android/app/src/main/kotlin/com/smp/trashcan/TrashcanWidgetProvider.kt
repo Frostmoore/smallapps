@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetProvider
@@ -24,6 +25,23 @@ import es.antonborri.home_widget.HomeWidgetProvider
 class TrashcanWidgetProvider : HomeWidgetProvider() {
 
     override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray,
+        widgetData: SharedPreferences,
+    ) {
+        // ☠ Tutto dentro un try. Android esegue onUpdate in un BroadcastReceiver, e
+        // un'eccezione qui non rompe il widget: fa cadere il processo dell'app con
+        // "TrashCan continua a bloccarsi". Un widget che resta indietro di un aggiornamento
+        // e' un fastidio; un'app che non si apre piu' e' una disinstallazione.
+        try {
+            update(context, appWidgetManager, appWidgetIds, widgetData)
+        } catch (error: Exception) {
+            Log.e("TrashcanWidget", "aggiornamento del widget fallito", error)
+        }
+    }
+
+    private fun update(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
@@ -51,15 +69,22 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
             // sfondo, altrimenti il nero su un colore scuro e' illeggibile proprio nel
             // caso che conta: di sera, di fretta, guardando lo schermo da lontano.
             //
-            // getLong e non getInt, per due motivi indipendenti che portano allo stesso
-            // errore:
-            //  1. home_widget salva ogni intero Dart come Long. getInt lancia
-            //     ClassCastException, il receiver crolla e il widget resta al layout
-            //     iniziale, cioe' un rettangolo colorato e vuoto. Nessun messaggio
-            //     all'utente: sembra semplicemente che il widget non funzioni.
-            //  2. un ARGB con alpha 0xFF vale piu' di 2^31 e non entra in un Int con
-            //     segno, quindi anche passandolo come Int servirebbe comunque toInt().
-            val stored = widgetData.getLong(KEY_COLOR, 0L).toInt()
+            // ☠ Si legge dalla mappa e si accetta sia Int sia Long. Il canale fra Dart e
+            // Android codifica un intero come Integer se sta in 32 bit con segno e come Long
+            // altrimenti: **il tipo dipende dal valore**. Un ARGB con alpha 0xFF supera
+            // 2^31 e arriva come Long; lo zero che si manda quando stasera non si raccoglie
+            // niente arriva come Integer.
+            //
+            // Quindi getInt() e getLong() sbagliano **a turno**, e non c'e' un momento in
+            // cui si possa dire di aver scelto quello giusto. Peggio: un receiver che lancia
+            // fa cadere l'intero processo dell'app, non solo il widget. Il sintomo e'
+            // "TrashCan continua a bloccarsi", e si presenta la prima sera in cui non si
+            // raccoglie niente, cioe' dopo giorni di funzionamento perfetto.
+            val stored = when (val raw = widgetData.all[KEY_COLOR]) {
+                is Long -> raw.toInt()
+                is Int -> raw
+                else -> 0
+            }
             val background = if (stored == 0) NEUTRAL else stored
             views.setInt(R.id.widget_root, "setBackgroundColor", background)
             val foreground = if (isDark(background)) Color.WHITE else Color.BLACK
