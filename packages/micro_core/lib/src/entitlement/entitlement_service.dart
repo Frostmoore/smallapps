@@ -127,9 +127,18 @@ class EntitlementService extends ChangeNotifier {
       product,
       obfuscatedAccountId: installId.obfuscatedAccountId,
     );
-    // Il busy si spegne quando arriva l'evento, non qui: `buy` ritorna appena il foglio
-    // di pagamento è stato aperto, non quando l'utente ha finito.
-    result.fold(ok: (_) {}, err: _fail);
+    // In caso di successo il busy si spegne quando arriva l'evento, non qui: `buy` ritorna
+    // appena il foglio di pagamento è stato **aperto**, non quando l'utente ha finito.
+    //
+    // ☠ Se invece `buy` fallisce, quell'evento non arriverà **mai**, e senza spegnerlo qui
+    // il bottone "Sblocca Pro" gira all'infinito. Succede più spesso di quanto sembri: il
+    // prodotto non ancora creato su Play, Play Services assenti o non aggiornati, nessun
+    // account Google sul dispositivo, acquisti in-app disabilitati. Chi ci finisce non vede
+    // nessun messaggio e non può nemmeno riprovare, perché il bottone resta disabilitato.
+    result.fold(ok: (_) {}, err: (error) {
+      _setBusy(false);
+      _fail(error);
+    });
     return result;
   }
 

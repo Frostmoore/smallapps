@@ -1,8 +1,6 @@
 {
   "@@locale": "it",
-
   "appTitle": "TrashCan",
-
   "common_save": "Salva",
   "common_cancel": "Annulla",
   "common_delete": "Elimina",
@@ -19,7 +17,6 @@
   "common_today": "Oggi",
   "common_tomorrow": "Domani",
   "common_yesterday": "Ieri",
-
   "home_tonightTitle": "Stasera",
   "home_tonightEmpty": "Stasera non devi buttare nulla",
   "home_nextCollection": "Prossima raccolta",
@@ -31,7 +28,6 @@
   "home_noUpcoming": "Nessuna raccolta in programma",
   "home_noUpcomingHint": "Aggiungi un tipo di rifiuto e i suoi giorni di raccolta per iniziare.",
   "home_calendarPickerLabel": "Calendario",
-
   "onboarding_welcomeTitle": "Non dimenticare più una raccolta",
   "onboarding_welcomeBody": "Imposti i tuoi giorni una volta sola. TrashCan ti ricorda ogni sera cosa portare fuori. Nessun account, nessuna connessione, e il tuo Comune non deve supportare niente.",
   "onboarding_start": "Imposta il calendario",
@@ -45,7 +41,6 @@
   "onboarding_notificationTitle": "Quando vuoi il promemoria?",
   "onboarding_notificationHelp": "Il promemoria arriva la sera prima, così hai ancora tempo per portare fuori il bidone.",
   "onboarding_finish": "Fine",
-
   "waste_organic": "Organico",
   "waste_paper": "Carta",
   "waste_plastic": "Plastica",
@@ -55,7 +50,6 @@
   "waste_garden": "Verde",
   "waste_nappies": "Pannolini",
   "waste_other": "Altro",
-
   "wasteTypes_title": "Tipi di rifiuto",
   "wasteTypes_empty": "Nessun tipo di rifiuto",
   "wasteTypes_emptyHint": "Aggiungi i tipi che raccoglie il tuo Comune.",
@@ -67,7 +61,6 @@
   "wasteTypes_notificationsLabel": "Avvisami per questo tipo",
   "wasteTypes_deleteConfirmTitle": "Eliminare {name}?",
   "wasteTypes_deleteConfirmBody": "Verranno eliminati anche i suoi giorni di raccolta e le eccezioni. L'operazione non si può annullare.",
-
   "rules_title": "Giorni di raccolta",
   "rules_addTitle": "Nuova regola",
   "rules_editTitle": "Modifica regola",
@@ -103,13 +96,10 @@
   "rules_summaryMonthlyNth": "{nth} {weekday} del mese",
   "rules_summaryManual": "{count, plural, =1{1 data specifica} other{{count} date specifiche}}",
   "wasteTypes_scheduleChange": "Cambia",
-
   "day_empty": "Nessuna raccolta in questo giorno.",
-
   "widget_addTitle": "Metti il widget sulla schermata iniziale",
   "widget_addBody": "La raccolta di stasera, senza aprire l'app.",
   "widget_addUnsupported": "Questo launcher non sa aggiungere widget da solo. Tieni premuto sulla schermata iniziale e cerca TrashCan.",
-
   "backup_title": "Backup e condivisione",
   "backup_shareCalendarTitle": "Condividi questo calendario",
   "backup_shareCalendarBody": "Mandalo a un vicino: avra' gli stessi giorni di raccolta senza riscriverli.",
@@ -121,12 +111,11 @@
   "backup_restoreConfirmTitle": "Ripristinare questo file?",
   "backup_restoreSummary": "{calendars} calendari, {types} tipi di rifiuto, {rules} regole.",
   "backup_modeReplace": "Sostituisci tutto",
-  "backup_modeReplaceBody": "Quello che c'e' su questo telefono viene cancellato e rimpiazzato dal file.",
+  "backup_modeReplaceBody": "Quello che c'è su questo telefono viene cancellato e rimpiazzato dal file.",
   "backup_modeMerge": "Aggiungi quello che manca",
-  "backup_modeMergeBody": "I calendari che hai gia' restano come sono.",
+  "backup_modeMergeBody": "I calendari che hai già restano come sono.",
   "backup_restored": "Ripristinato",
   "backup_nothingPicked": "Nessun file scelto.",
-
   "exceptions_title": "Eccezioni",
   "exceptions_skip": "Salta questa raccolta",
   "exceptions_move": "Spostala a un altro giorno",
@@ -145,7 +134,6 @@
   "exceptions_addedSkip": "Raccolta saltata",
   "exceptions_addedMove": "Raccolta spostata",
   "exceptions_addedExtra": "Raccolta straordinaria aggiunta",
-
   "notifications_title": "Promemoria",
   "notifications_enabledLabel": "Promemoria della sera",
   "notifications_timeLabel": "Orario",
@@ -157,14 +145,12 @@
   "notifications_exactAlarmBody": "Android ci lascia scegliere il minuto preciso solo con il tuo permesso. Senza, il promemoria arriva lo stesso, ma il sistema può ritardarlo di qualche ora: per un promemoria serale vuol dire la mattina dopo.",
   "notifications_exactAlarmOpenSettings": "Apri le impostazioni",
   "notifications_inexactWarning": "I promemoria potrebbero arrivare in ritardo: l'orario esatto non è consentito.",
-
   "calendars_title": "Calendari",
   "calendars_addTitle": "Nuovo calendario",
   "calendars_editTitle": "Modifica calendario",
   "calendars_nameLabel": "Nome",
   "calendars_deleteConfirmTitle": "Eliminare {name}?",
   "calendars_deleteConfirmBody": "Verranno eliminati tutti i tipi di rifiuto, le regole e le eccezioni di questo calendario.",
-
   "settings_title": "Impostazioni",
   "settings_appearance": "Aspetto",
   "settings_appColour": "Colore dell'app",
@@ -184,7 +170,6 @@
   "settings_exportLog": "Esporta il log diagnostico",
   "settings_installId": "ID installazione",
   "settings_installIdHelp": "Serve solo a collegare il tuo acquisto a questo dispositivo. Non è un dato personale.",
-
   "restore_title": "Cambio di telefono",
   "restore_playTitle": "Ripristina con l'account Google",
   "restore_playBody": "Se il telefono nuovo usa lo stesso account Google con cui hai comprato, il Pro torna da qui. Nessun codice, niente da annotare.",
@@ -196,10 +181,9 @@
   "restore_codeLabel": "Codice di trasferimento",
   "restore_codeCreated": "Codice: {code}",
   "restore_codeExpires": "Vale una volta sola, e solo fino al {when}.",
-  "restore_codeUnavailable": "Il codice di trasferimento ha bisogno del server delle licenze, che in questa versione non e' configurato. Usa l'account Google.",
-  "restore_done": "Il Pro e' tornato.",
+  "restore_codeUnavailable": "Il codice di trasferimento ha bisogno del server delle licenze, che in questa versione non è configurato. Usa l'account Google.",
+  "restore_done": "Il Pro è tornato.",
   "restore_nothing": "Nessun acquisto precedente trovato su questo account.",
-
   "paywall_headline": "TrashCan Pro",
   "paywall_subhead": "Un pagamento unico. Nessun abbonamento. Tuo per sempre.",
   "paywall_buy": "Sblocca Pro",
@@ -210,7 +194,7 @@
   "paywall_restoredNothing": "Nessun acquisto precedente trovato su questo account.",
   "paywall_unavailable": "Gli acquisti in-app non sono disponibili su questo dispositivo.",
   "paywall_benefitRemindersTitle": "Il promemoria della sera",
-  "paywall_benefitRemindersBody": "TrashCan ti dice cosa portare fuori, la sera prima, cosi' il camion non ti frega piu'.",
+  "paywall_benefitRemindersBody": "TrashCan ti dice cosa portare fuori, la sera prima, così il camion non ti frega più.",
   "paywall_benefitCalendarsTitle": "Tutti i calendari che ti servono",
   "paywall_benefitCalendarsBody": "La seconda casa, casa dei tuoi, l'ufficio. Ognuno con i suoi giorni e i suoi promemoria.",
   "paywall_benefitWidgetTitle": "Widget completo",
@@ -221,11 +205,9 @@
   "paywall_benefitBackupBody": "Sposti tutto su un telefono nuovo con un file.",
   "paywall_benefitThemeTitle": "Come piace a te",
   "paywall_benefitThemeBody": "Colori e icone per ogni tipo di rifiuto.",
-
   "gate_limitReachedTitle": "Questa funzione è di Pro",
   "gate_calendarLimitBody": "La versione gratuita tiene un calendario. Pro ne aggiunge quanti ne vuoi, ognuno con i suoi giorni di raccolta.",
   "gate_seePro": "Vedi cosa include Pro",
-
   "error_generic": "Qualcosa è andato storto.",
   "error_fileUnreadable": "Questo file non è leggibile.",
   "error_fileWrongApp": "Questo backup appartiene a un'altra app.",

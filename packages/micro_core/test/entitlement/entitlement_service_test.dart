@@ -14,12 +14,21 @@ const String sku = 'testapp_pro_lifetime';
 /// passa per una scrittura su disco, e il numero di giri della coda necessari dipende
 /// dalla piattaforma. Aspettare una condizione invece di un numero fisso di giri rende il
 /// test deterministico ovunque.
+/// Aspetta che [condition] diventi vera, o che scada il tempo.
+///
+/// ☠ La condizione puo' essere **asincrona** e viene attesa. Prima accettava solo una
+/// funzione sincrona, e chi doveva leggere da disco lanciava la lettura con `unawaited`
+/// assegnando il risultato a una variabile esterna. Con letture che si accavallano, la
+/// risposta di una lettura vecchia arriva dopo quella nuova e la sovrascrive: la variabile
+/// torna indietro, la condizione non si stabilizza e il test fallisce una volta su tre.
+/// Un test che fallisce a caso e' peggio di un test che non c'e', perche' insegna a
+/// rilanciare invece che a guardare.
 Future<void> waitUntil(
-  bool Function() condition, {
+  FutureOr<bool> Function() condition, {
   Duration timeout = const Duration(seconds: 5),
 }) async {
   final deadline = DateTime.now().add(timeout);
-  while (!condition()) {
+  while (!await condition()) {
     if (DateTime.now().isAfter(deadline)) return;
     await Future<void>.delayed(const Duration(milliseconds: 5));
   }
@@ -311,14 +320,52 @@ void main() {
       // il disco. La finestra fra le due cose e' minima ma esiste, e il test deve
       // verificare la persistenza, non la reattivita'.
       var persistito = Entitlement.free(appId);
-      await waitUntil(() {
-        unawaited(store.read(appId).then((e) => persistito = e));
+      await waitUntil(() async {
+        persistito = await store.read(appId);
         return persistito.isPro;
       });
       service.dispose();
 
       expect(persistito.isPro, isTrue);
       expect(persistito.purchaseToken, isNotNull);
+    });
+
+    test('se il foglio di pagamento non si apre, lo spinner si spegne', () async {
+      // ☠ Questo test esiste per il caso che si presenta **appena si pubblica**: il
+      // prodotto in-app non e' ancora stato creato su Play, oppure il dispositivo del
+      // tester non ha Play Services aggiornati. `buy` fallisce subito e nessun evento di
+      // acquisto arrivera' mai. Il codice spegneva il busy solo sull'evento, quindi il
+      // bottone "Sblocca Pro" restava a girare per sempre, senza messaggio e senza
+      // possibilita' di riprovare.
+      final gateway = FakePurchaseGateway.withProduct(sku);
+      final service = build(gateway: gateway);
+      await service.bootstrap();
+
+      // Il catalogo e' stato caricato, ma da ora in poi lo store non risponde piu'.
+      gateway.outcome = FakeOutcome.unavailable;
+
+      final result = await service.buyPro();
+      await pumpEventQueue();
+
+      expect(result.isErr, isTrue);
+      expect(service.isBusy, isFalse, reason: 'niente spinner infinito');
+      expect(service.lastError, isNotNull, reason: 'e va anche detto a chi guarda');
+      expect(service.isPro, isFalse);
+      service.dispose();
+    });
+
+    test('senza prodotto a catalogo non si accende nemmeno lo spinner', () async {
+      // Il caso di prima, ma un passo prima: su Play il prodotto non esiste ancora, quindi
+      // il catalogo torna vuoto e non c'e' proprio niente da comprare.
+      final service = build(gateway: FakePurchaseGateway());
+      await service.bootstrap();
+
+      final result = await service.buyPro();
+
+      expect(result.isErr, isTrue);
+      expect(service.isBusy, isFalse);
+      expect(service.lastError?.code, BillingErrorCodes.productNotFound);
+      service.dispose();
     });
 
     test('un acquisto annullato non concede niente e non e un errore', () async {
