@@ -59,15 +59,27 @@ abstract final class TrashcanWidget {
 
   static const OccurrenceEngine _engine = OccurrenceEngine();
 
+  /// Quanti giorni elenca la fascia inferiore. **Uguale per tutti.**
+  ///
+  /// ☠ Qui c'era `pro ? 3 : 1`. La versione gratuita mostrava una riga sola, e il
+  /// proprietario, guardando il widget vero sul proprio telefono, l'ha letta come un
+  /// difetto: "e' sbagliato il widget". Non stava sbagliando lui. Una riga in mezzo a meta'
+  /// widget bianca non comunica "funzione a pagamento", comunica "non ha caricato", e chi
+  /// lo pensa non compra, disinstalla.
+  ///
+  /// Il commento che stava qui diceva che una riga sola "lascia vedere cosa si guadagna ad
+  /// averne tre". Era una supposizione, ed e' stata smentita dal primo essere umano che ha
+  /// guardato il widget. Decisione del 2026-09-11: tre giorni per tutti, e il Pro resta
+  /// venduto dai promemoria, dal secondo promemoria, dai calendari multipli, dal backup e
+  /// dal colore dell'app.
+  static const int giorniElencati = 3;
+
   /// Ricalcola il contenuto e lo consegna al sistema.
   ///
-  /// [pro] decide **quanti** giorni elenca la fascia inferiore, non se elencarli: tre col
-  /// Pro, solo la prossima raccolta senza.
-  ///
-  /// ⛑ Perche' non "niente" senza Pro: il widget e' fatto di due fasce, e una meta'
-  /// bianca e vuota non si legge come "funzione a pagamento", si legge come "il widget non
-  /// ha caricato". Una riga sola che dice qualcosa di vero e' un widget che funziona e che
-  /// lascia vedere cosa si guadagna ad averne tre.
+  /// [pro] non incide piu' su quanti giorni si vedono (vedi [giorniElencati]). Resta nella
+  /// firma perche' il chiamante lo ha e perche' il giorno in cui il widget tornera' a
+  /// distinguere qualcosa fra gratuito e Pro — per esempio la scelta del calendario —
+  /// servira' di nuovo, senza cambiare tutte le chiamate.
   static Future<void> publish({
     required AppDatabase db,
     required int? calendarId,
@@ -125,7 +137,7 @@ abstract final class TrashcanWidget {
       iconKey: first?.iconKey,
       calendarName: calendars.length > 1 ? calendar.name : '',
       upcoming: <String>[
-        for (final occurrence in later.take(pro ? 3 : 1))
+        for (final occurrence in later.take(giorniElencati))
           '${DateFormat('EEE d', locale).format(occurrence.date.toLocalMidnight())}   '
               '${bundle?.typeOf(occurrence.wasteTypeId)?.name ?? ''}',
       ],

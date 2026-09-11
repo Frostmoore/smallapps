@@ -86,7 +86,7 @@ Feste, sospensioni e raccolte straordinarie: segni la variazione sul singolo gio
 
 IL WIDGET SULLA SCHERMATA INIZIALE
 
-Stretto e verticale. L'intestazione colorata dice cosa si butta stasera, con la sua icona; sotto, i giorni che vengono. Non serve nemmeno aprire l'app.
+Stretto e verticale. L'intestazione colorata dice cosa si butta stasera, con la sua icona; sotto, i tre giorni successivi. Non serve nemmeno aprire l'app.
 
 I TIPI DI RIFIUTO SONO I TUOI
 
@@ -106,13 +106,12 @@ Nemmeno nella versione gratuita. Non c'è spazio per un banner in un'app che dev
 
 GRATIS, E POI PRO SE TI SERVE
 
-La versione gratuita include un calendario, tipi di rifiuto e regole senza limiti, le eccezioni, il widget con la raccolta di stasera, l'esportazione e il backup.
+La versione gratuita include un calendario, tipi di rifiuto e regole senza limiti, le eccezioni, il widget completo con la raccolta di stasera e i tre giorni successivi, l'esportazione e il backup.
 
 TrashCan Pro si sblocca con un acquisto singolo — nessun abbonamento, nessun rinnovo — e aggiunge:
 • il promemoria della sera prima
 • un secondo promemoria, per le sere in cui al primo non sei in casa
 • calendari multipli: casa, casa al mare, i genitori
-• il widget con i prossimi tre giorni invece di uno
 • il colore dell'app scelto da te, fra dieci
 
 Se cambi telefono lo ripristini dal tuo account Google. Se hai cambiato anche account, dentro l'app c'è un codice di trasferimento.
@@ -163,7 +162,7 @@ Public holidays, suspensions and extra collections: mark the change on that sing
 
 THE HOME SCREEN WIDGET
 
-Narrow and vertical. The coloured header says what goes out tonight, with its icon; below it, the days ahead. You don't even need to open the app.
+Narrow and vertical. The coloured header says what goes out tonight, with its icon; below it, the next three days. You don't even need to open the app.
 
 THE WASTE TYPES ARE YOURS
 
@@ -183,13 +182,12 @@ Not even in the free version. There is no room for a banner in an app that has t
 
 FREE, THEN PRO IF YOU NEED IT
 
-The free version includes one calendar, unlimited waste types and rules, exceptions, the widget showing tonight's collection, export and backup.
+The free version includes one calendar, unlimited waste types and rules, exceptions, the full widget showing tonight's collection and the next three days, export and backup.
 
 TrashCan Pro unlocks with a single purchase — no subscription, no renewal — and adds:
 • the reminder the evening before
 • a second reminder, for the evenings you are not home for the first
 • multiple calendars: home, the holiday house, your parents'
-• the widget showing the next three days instead of one
 • the app colour, chosen by you out of ten
 
 Change phone and you restore it from your Google account. If you changed account too, there is a transfer code inside the app.
@@ -260,9 +258,9 @@ chi tocca "Sblocca Pro" riceve un messaggio invece di uno spinner infinito (vedi
 | ID prodotto | `trashcan_pro_lifetime` |
 | Tipo | Prodotto gestito (una tantum), **non** consumabile |
 | Nome (it) | `TrashCan Pro` |
-| Descrizione (it) | `Sblocca i promemoria, i calendari multipli, il widget completo e il colore dell'app. Un pagamento unico, nessun abbonamento.` |
+| Descrizione (it) | `Sblocca i promemoria della sera, il secondo promemoria, i calendari multipli, il backup completo e il colore dell'app. Un pagamento unico, nessun abbonamento.` |
 | Nome (en) | `TrashCan Pro` |
-| Descrizione (en) | `Unlocks reminders, multiple calendars, the full widget and the app colour. One payment, no subscription.` |
+| Descrizione (en) | `Unlocks evening reminders, the second reminder, multiple calendars, full backup and the app colour. One payment, no subscription.` |
 | Prezzo | **2,99 €** (Italia), prezzi locali automatici altrove |
 | Stato | Attivo |
 

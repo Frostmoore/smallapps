@@ -155,8 +155,8 @@ return [
                                   . 'collection and the following seven days.',
     'trashcan.funzioni.2.titolo' => 'The home screen widget',
     'trashcan.funzioni.2.testo'  => 'Narrow and vertical: the coloured header says what goes '
-                                  . 'out tonight, with its icon; below, the days ahead. You '
-                                  . 'don\'t even need to open the app.',
+                                  . 'out tonight, with its icon; below, the next three days. '
+                                  . 'Free, without opening the app.',
     'trashcan.funzioni.3.titolo' => 'A reminder on time',
     'trashcan.funzioni.3.testo'  => 'One notification at the time you choose, the evening '
                                   . 'before collection. Tap it and it opens that exact day.',
@@ -183,14 +183,13 @@ return [
     'trashcan.prezzi.base.lista' => '<li>One collection calendar</li>'
         . '<li>Unlimited waste types and rules</li>'
         . '<li>Exceptions, skips and extra collections</li>'
-        . '<li>Widget showing tonight\'s collection</li>'
+        . '<li>Widget showing tonight\'s collection and the next three days</li>'
         . '<li>Calendar export and backup</li>'
         . '<li>No advertising</li>',
     'trashcan.prezzi.pro.lista' => '<li>Everything in the base version</li>'
         . '<li><strong>The reminders</strong>: the notification the evening before</li>'
         . '<li>A second reminder, for anyone who ignores the first</li>'
         . '<li>Multiple calendars: home, holiday house, your parents\'</li>'
-        . '<li>Widget showing the next three days instead of one</li>'
         . '<li>The app colour, chosen by you out of ten</li>',
 
     'trashcan.privacy.titolo' => 'Your data stays yours',

@@ -46,12 +46,11 @@ PaywallConfig buildTrashcanPaywall(L l) => PaywallConfig(
       title: l.paywall_benefitNotificationsTitle,
       description: l.paywall_benefitNotificationsBody,
     ),
-    PaywallBenefit(
-      key: FeatureKey.advancedWidget,
-      icon: Icons.widgets_outlined,
-      title: l.paywall_benefitWidgetTitle,
-      description: l.paywall_benefitWidgetBody,
-    ),
+    // ☠ Qui c'era il widget completo. E' uscito dal paywall il 2026-09-11, quando
+    // `advancedWidget` e' passato ad `open()`: il widget mostra tre giorni a tutti. Un
+    // beneficio elencato qui che non corrisponde a nessun blocco e' peggio di uno in meno,
+    // perche' promette una cosa che l'utente ha gia'. Il test in
+    // test/widget/paywall_config_test.dart confronta le due liste e non lo lascia passare.
     PaywallBenefit(
       key: FeatureKey.backupRestore,
       icon: Icons.cloud_download_outlined,

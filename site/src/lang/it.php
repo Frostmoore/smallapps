@@ -162,8 +162,8 @@ return [
                                   . 'raccolta e i sette giorni successivi.',
     'trashcan.funzioni.2.titolo' => 'Il widget sulla home',
     'trashcan.funzioni.2.testo'  => 'Stretto e verticale: l\'intestazione colorata dice '
-                                  . 'cosa si butta stasera, con la sua icona; sotto, i '
-                                  . 'giorni che vengono. Non serve nemmeno aprire l\'app.',
+                                  . 'cosa si butta stasera, con la sua icona; sotto, i tre '
+                                  . 'giorni successivi. Gratis, senza aprire l\'app.',
     'trashcan.funzioni.3.titolo' => 'Promemoria puntuale',
     'trashcan.funzioni.3.testo'  => 'Una notifica all\'ora che scegli, la sera prima della '
                                   . 'raccolta. Toccandola si apre direttamente il giorno '
@@ -192,14 +192,13 @@ return [
     'trashcan.prezzi.base.lista' => '<li>Un calendario della raccolta</li>'
         . '<li>Tipi di rifiuto e regole illimitati</li>'
         . '<li>Eccezioni, salti e raccolte straordinarie</li>'
-        . '<li>Widget con la raccolta di stasera</li>'
+        . '<li>Widget con la raccolta di stasera e i tre giorni successivi</li>'
         . '<li>Esportazione e backup del calendario</li>'
         . '<li>Nessuna pubblicità</li>',
     'trashcan.prezzi.pro.lista' => '<li>Tutto quello che c\'è nella versione base</li>'
         . '<li><strong>I promemoria</strong>: la notifica la sera prima</li>'
         . '<li>Doppio promemoria, per chi al primo non si muove</li>'
         . '<li>Calendari multipli: casa, casa al mare, i genitori</li>'
-        . '<li>Widget con i prossimi tre giorni invece di uno</li>'
         . '<li>Il colore dell\'app scelto da te, fra dieci</li>',
 
     'trashcan.privacy.titolo' => 'I tuoi dati restano tuoi',

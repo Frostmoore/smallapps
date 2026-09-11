@@ -30,9 +30,6 @@ const FeatureLimits trashcanFeatureLimits = <FeatureKey, FeatureLimit>{
   // Piu' di un promemoria per la stessa raccolta, es. 18:00 e 20:00.
   FeatureKey.multipleNotifications: FeatureLimit.locked(),
 
-  // Widget a colori, con scelta del calendario e prossimi tre giorni.
-  FeatureKey.advancedWidget: FeatureLimit.locked(),
-
   // Backup completo e ripristino. Da non confondere con la condivisione di un singolo
   // calendario, che resta gratuita: quella e' un canale di acquisizione (un utente ne
   // porta un altro), il backup e' una comodita' personale. Si regala l'acquisizione e
@@ -55,6 +52,17 @@ const FeatureLimits trashcanFeatureLimits = <FeatureKey, FeatureLimit>{
   // il paywall non la elenca fra i benefici, e prima o poi qualcuno incontra un blocco
   // per qualcosa che l'app non sa fare. Il test in test/widget/paywall_config_test.dart
   // confronta i limiti con i benefici proprio per impedirlo.
+  // ☠ Anche questa era `locked()`: il widget mostrava un giorno solo senza il Pro e tre
+  // con il Pro. Decisione del proprietario, 2026-09-11, presa guardando il widget vero sul
+  // proprio telefono. Una riga sola in mezzo a meta' widget bianca non si legge come
+  // "funzione a pagamento": si legge come "il widget e' rotto", ed e' quello che ha
+  // pensato lui, che l'app l'ha commissionata.
+  //
+  // Il conto commerciale: un widget che sembra rotto costa recensioni, e le recensioni
+  // costano installazioni. Il Pro resta venduto da cinque cose, e quella che vende davvero
+  // e' il promemoria della sera. Questo giorno in piu' non valeva il rischio.
+  FeatureKey.advancedWidget: FeatureLimit.open(),
+
   FeatureKey.csvExport: FeatureLimit.open(),
   FeatureKey.secondaryEntities: FeatureLimit.open(),
   FeatureKey.photos: FeatureLimit.open(),

@@ -509,6 +509,7 @@ percorso interno di `go_router`.
 | chiavi | `keyTonightLabel`, `keyTonightText`, `keyTonightColor`, `keyTonightIcon`, `keyCalendarName`, `keyUpcoming`, `keyUpcomingEmpty` |
 | `newline` | `static const String = '\n'`, il separatore fra le righe dei prossimi giorni |
 | `iconSide` | `static const int = 96`, il lato in pixel del PNG dell'icona |
+| `giorniElencati` | `static const int = 3`, quanti giorni elenca la fascia inferiore. **Uguale per tutti** |
 | `publish` | `static Future<void> publish({required AppDatabase db, required int? calendarId, required bool pro})` |
 | `renderIcon` | `static Future<Uint8List> renderIcon(IconData icon)` — `@visibleForTesting` |
 | `scheduleDailyRefresh` | `static Future<void> scheduleDailyRefresh()` |
@@ -516,6 +517,18 @@ percorso interno di `go_router`.
 Le chiavi **devono** coincidere con le costanti in `TrashcanWidgetProvider.kt`: sono scritte
 a mano in due linguaggi diversi, e una divergenza produce un campo vuoto nel widget senza
 nessun errore da nessuna parte.
+
+☠ Il parametro `pro` di `publish` **non decide più quanti giorni si vedono**. Fino all'11
+settembre 2026 era `pro ? 3 : 1`: la versione gratuita mostrava una riga sola, e il
+proprietario, guardando il widget vero sul proprio telefono, l'ha letta come un difetto
+("è sbagliato il widget"). Non stava sbagliando lui. Una riga in mezzo a metà widget bianca
+non comunica "funzione a pagamento", comunica "non ha caricato", e chi lo pensa disinstalla.
+
+Il commento che stava nel codice sosteneva che una riga sola "lascia vedere cosa si guadagna
+ad averne tre": era una supposizione, smentita dal primo essere umano che ha guardato il
+widget. Il parametro resta nella firma perché il chiamante lo ha già e perché il giorno in
+cui il widget tornerà a distinguere qualcosa fra gratuito e Pro — per esempio la scelta del
+calendario — servirà di nuovo.
 
 `scheduleDailyRefresh` programma un aggiornamento alle 00:05 per i sette giorni successivi.
 Senza, alle 00:01 il widget continua a dire "stasera: organico" riferendosi alla sera
@@ -626,6 +639,7 @@ causa.
 | Dopo un riavvio del telefono i promemoria smettono | gli allarmi non sopravvivono al riavvio senza `RECEIVE_BOOT_COMPLETED` e il boot receiver | `AndroidManifest.xml` |
 | Configuro l'app e dopo due mesi non arriva più niente | niente ripianificava all'avvio: il piano si ricostruiva solo al cambio dei dati | `notificationSyncProvider` |
 | Tocco la notifica e il back esce dall'app | `go` sostituisce lo stack: la pagina del giorno restava senza nulla sotto | `app.dart`, `_openPayload` fa `go(home)` poi `push` |
+| "È sbagliato il widget": la metà inferiore mostra una riga sola e sembra non aver caricato | era il gate `advancedWidget`, `pro ? 3 : 1`. Il difetto non è tecnico ma di lettura: uno spazio bianco con una riga dentro non comunica "a pagamento". L'ha segnalato il proprietario, non un utente, il che vuol dire che un utente l'avrebbe scritto in una recensione | `advancedWidget` è passato a `open()` e `TrashcanWidget.giorniElencati` vale 3 per tutti |
 | Il widget e' squadrato sopra e tondo sotto | `setBackgroundColor` su una view sostituisce il drawable, e con lui gli angoli arrotondati. Il colore si applica tingendo con `setColorFilter` un `ImageView` di sfondo | `TrashcanWidgetProvider.kt` + `widget_header_background.xml` |
 | Il widget resta un rettangolo colorato e vuoto | il receiver crollava leggendo il colore: vedi la riga seguente | `TrashcanWidgetProvider.kt` |
 | "TrashCan continua a bloccarsi", dopo giorni di funzionamento perfetto | il canale fra Dart e Android codifica un intero come **Integer** se sta in 32 bit con segno e come **Long** altrimenti: *il tipo dipende dal valore*. Un ARGB con alpha `0xFF` supera 2³¹ e arriva Long; lo zero che si manda quando stasera non si raccoglie niente arriva Integer. `getInt` e `getLong` sbagliano **a turno**. E un receiver che lancia fa cadere l'intero processo dell'app, non solo il widget | `TrashcanWidgetProvider.kt`: si legge da `widgetData.all[...]` accettando entrambi i tipi, e tutto `onUpdate` sta dentro un `try` |
@@ -664,7 +678,6 @@ Deciso dal proprietario l'11 settembre 2026. La mappa vive in
 | Secondo calendario e oltre | `unlimitedEntities` | uno solo |
 | **I promemoria, tutti** | `notifications` | nessuno |
 | Secondo orario di promemoria | `multipleNotifications` | no |
-| Prossimi tre giorni nel widget | `advancedWidget` | uno solo |
 | Backup completo | `backupRestore` | no (la condivisione di un calendario resta gratuita) |
 | Colore dell'app | `themeCustomization` | verde fisso |
 
