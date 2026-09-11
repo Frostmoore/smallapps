@@ -6,7 +6,8 @@
 > **Mirror pubblico app** (remote `github`): `https://github.com/Frostmoore/smallapps.git`
 > **Repository server** (**solo Gitea**, remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`
 > **Documento creato**: 2026-09-09
-> **Stato**: **F0, F1 e F2 chiuse.** F3 (TrashCan) in corso. 202 test verdi. Vedi §7.
+> **Stato**: **F0, F1, F2 e F3 chiuse** (tranne F3.12, bloccata su Play Console). 224 test
+> verdi: 117 in TrashCan, 107 in micro_core. Vedi §7.
 
 ---
 
@@ -836,6 +837,23 @@ tutte fatte e provate sull'emulatore:
 - [x] **Tutte le notifiche dietro al paywall**, non solo le doppie. Nuova chiave
   `FeatureKey.notifications` in `micro_core`. Il compromesso che comporta e' scritto in
   `feature_limits.dart` e nell'atlante.
+
+**Logo del proprietario, 11 settembre 2026** (branch `v4.1.1`):
+
+- [x] **Icona e splash generate dal logo fornito**, `assets/icons/trashcan_logo.png`
+  (1254x1254). Icona adattiva con fondo `#2E7D5B` e rientro del 18%, livello `monochrome`
+  per i temi di Android 13, icone legacy per tutte le densita'. Splash verde col logo al
+  centro, chiara e scura. Configurazione in `flutter_launcher_icons.yaml` e
+  `flutter_native_splash.yaml`, documentata in `apps/trashcan/codebase_reference.md` §2bis.
+  Verificate sull'emulatore: icona nel drawer e splash catturate a schermo.
+- [x] Su Android 12+ la splash mangiava manico del cestino e simbolo del riciclo: il sistema
+  ritaglia l'immagine con un cerchio che ne lascia il 66% centrale. Risolto con
+  `trashcan_splash_android12.png`, il logo rientrato su tela 1152x1152.
+- [x] `drawable/ic_notification.xml` **non** e' stato sostituito col logo: resta
+  monocromatico, perche' dell'icona di notifica Android usa solo il canale alfa.
+- [x] Difetto trovato dalla suite durante il giro: `EntitlementService` lasciava girare lo
+  spinner "Sblocca Pro" su un acquisto in attesa, perche' il ramo `PurchasePending` spegneva
+  `isBusy` dopo la scrittura invece che prima. Corretto in `micro_core`.
 
 ### F4 — Full Freezer → `v5.0.0`
 

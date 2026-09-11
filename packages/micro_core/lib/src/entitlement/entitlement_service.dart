@@ -209,8 +209,13 @@ class EntitlementService extends ChangeNotifier {
   Future<void> _onPurchaseEvent(PurchaseEvent event) async {
     switch (event) {
       case PurchasePending():
-        await _apply(_current.copyWith(status: ProStatus.pending, productId: event.productId));
+        // ☠ Lo spinner si spegne PRIMA di scrivere, come in tutti gli altri rami. Con
+        // l'ordine inverso l'interfaccia vedeva lo stato "in attesa" mentre `isBusy` era
+        // ancora vero, e soprattutto: se la scrittura nello store fosse lenta o lanciasse,
+        // il bottone "Sblocca Pro" resterebbe a girare su un acquisto che il negozio ha
+        // gia' preso in carico. Un pagamento in attesa di approvazione puo' durare giorni.
         _setBusy(false);
+        await _apply(_current.copyWith(status: ProStatus.pending, productId: event.productId));
 
       case PurchaseCanceled():
         _setBusy(false);

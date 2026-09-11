@@ -9,6 +9,4 @@
 <resources>
     <string name="widget_label">TrashCan</string>
     <string name="widget_description">Tonight\'s collection on your home screen.</string>
-    <!-- Il verde di TrashCan: lo stesso seedColor di MicroAppConfig. -->
-    <color name="ic_launcher_background">#2E7D5B</color>
 </resources>

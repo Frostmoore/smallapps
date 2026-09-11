@@ -1,0 +1,38 @@
+# La schermata di avvio di TrashCan.
+#
+# Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
+#
+# ⚑ Perche' una splash e non una schermata bianca: fra il tocco sull'icona e il primo
+# frame di Flutter passano alcune centinaia di millisecondi, in cui Android mostra la
+# finestra vuota. Senza splash quel momento e' un lampo bianco, che su un tema scuro si
+# nota moltissimo e si legge come un difetto.
+flutter_native_splash:
+  # Lo stesso verde dell'icona adattiva e del tema: l'avvio non deve cambiare colore
+  # a meta' strada.
+  color: "#2E7D5B"
+  image: assets/icons/trashcan_logo.png
+
+  # Su fondo scuro il logo chiaro si vede bene: si tiene lo stesso in entrambi i temi.
+  color_dark: "#16241E"
+  image_dark: assets/icons/trashcan_logo.png
+
+  android: true
+  ios: false
+  web: false
+
+  # ☠ Android 12 ha cambiato il meccanismo: la splash non e' piu' un tema con un drawable
+  # di sfondo ma un'API di sistema, che ritaglia l'immagine in un cerchio e ne mangia il
+  # bordo. Senza questa sezione, sui dispositivi recenti comparirebbe l'icona
+  # dell'applicazione al posto di questa immagine.
+  #
+  # ☠ E qui NON va il logo cosi' com'e'. Il sistema disegna l'immagine in un quadrato di
+  # 240dp e la ritaglia con un cerchio di 160dp, cioe' i due terzi centrali: il logo a
+  # pieno formato perde il manico del cestino in alto e il simbolo del riciclo in basso a
+  # destra. `trashcan_splash_android12.png` e' lo stesso logo montato su una tela
+  # trasparente 1152x1152 con il disegno confinato nei 768x768 centrali, che e' esattamente
+  # la zona che sopravvive al ritaglio. Si rigenera scalando il logo al 66,7% e centrandolo.
+  android_12:
+    color: "#2E7D5B"
+    color_dark: "#16241E"
+    image: assets/icons/trashcan_splash_android12.png
+    image_dark: assets/icons/trashcan_splash_android12.png

@@ -1,0 +1,32 @@
+# Generazione delle icone di TrashCan.
+#
+# Si rigenerano con:  pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons
+#
+# ☠ L'immagine sorgente e' UNA sola, in assets/icons/. Le mipmap generate NON si
+# modificano a mano: al primo rigenero le modifiche sparirebbero senza dire niente.
+#
+# ☠ Questo strumento NON tocca drawable/ic_notification.xml, ed e' giusto cosi': l'icona
+# della barra di stato deve restare monocromatica su fondo trasparente, perche' Android ne
+# usa solo il canale alfa. Dandogli questo PNG a colori si otterrebbe una macchia bianca.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icons/trashcan_logo.png"
+
+  # Icona adattiva. Il primo piano e' il logo, lo sfondo e' il verde del tema.
+  #
+  # ☠ min_sdk_android va dichiarato: sotto la 26 non esistono le icone adattive, e senza
+  # questa riga lo strumento genera solo quelle e i dispositivi vecchi restano senza icona.
+  min_sdk_android: 24
+  adaptive_icon_background: "#2E7D5B"
+  adaptive_icon_foreground: "assets/icons/trashcan_logo.png"
+
+  # ☠ Il ritaglio delle icone adattive mangia il 25% esterno per lato: il disegno deve
+  # stare nel cerchio centrale. Il logo ha gia' un margine suo, questo aggiunge il resto.
+  adaptive_icon_foreground_inset: 18
+
+  # Livello monocromatico per il tema dinamico di Android 13+: senza, TrashCan resta
+  # l'unica icona a colori fra tutte quelle tematizzate dal sistema.
+  adaptive_icon_monochrome: "assets/icons/trashcan_logo.png"
+
+  remove_alpha_ios: false

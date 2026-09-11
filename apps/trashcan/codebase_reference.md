@@ -40,6 +40,7 @@
 | Permessi, receiver, widget nel manifest | `android/app/src/main/AndroidManifest.xml` |
 | La firma di release | `android/app/build.gradle.kts` + `android/key.properties` (non versionato) |
 | Le stringhe tradotte | `lib/l10n/app_en.arb` (template) e `app_it.arb` |
+| L'icona del launcher e la schermata di avvio | §2bis + `flutter_launcher_icons.yaml`, `flutter_native_splash.yaml` |
 
 ---
 
@@ -86,21 +87,94 @@ apps/trashcan/
 │   └── l10n/
 │       ├── app_en.arb                template
 │       └── app_it.arb                italiano, zero chiavi non tradotte
+├── assets/icons/                     sorgenti dei generatori, NON asset a runtime (§2bis)
+│   ├── trashcan_logo.png             il logo, 1254x1254
+│   └── trashcan_splash_android12.png lo stesso logo rientrato per il ritaglio di Android 12
+├── flutter_launcher_icons.yaml       configurazione dell'icona del launcher (§2bis)
+├── flutter_native_splash.yaml        configurazione della schermata di avvio (§2bis)
 ├── android/app/src/main/
 │   ├── AndroidManifest.xml
 │   ├── kotlin/com/smp/trashcan/MainActivity.kt
 │   ├── kotlin/com/smp/trashcan/TrashcanWidgetProvider.kt
 │   └── res/
 │       ├── drawable/ic_notification.xml         icona monocromatica della barra di stato
-│       ├── drawable/ic_launcher_foreground.xml  primo piano dell'icona adattiva
-│       ├── drawable/widget_background.xml       angoli arrotondati del widget
+│       ├── drawable/widget_header_background.xml  angoli in alto, fascia colorata
+│       ├── drawable/widget_body_background.xml    angoli in basso, fondo bianco
 │       ├── layout/trashcan_widget.xml           il layout del widget (solo RemoteViews)
-│       ├── mipmap-anydpi-v26/ic_launcher.xml    icona adattiva + monochrome
+│       ├── xml/trashcan_widget_info.xml
 │       ├── values/strings.xml, values-it/strings.xml
-│       └── xml/trashcan_widget_info.xml
+│       │
+│       │   ↓ da qui in giu': GENERATO, non si modifica a mano (§2bis)
+│       ├── mipmap-*dpi/ic_launcher.png          icona legacy
+│       ├── mipmap-anydpi-v26/ic_launcher.xml    icona adattiva + monochrome
+│       ├── drawable-*dpi/ic_launcher_foreground.png, ic_launcher_monochrome.png
+│       ├── values/colors.xml                    ic_launcher_background
+│       ├── drawable*/launch_background.xml      splash fino ad Android 11
+│       ├── drawable*/background.png             la tinta piatta della splash
+│       └── values-v31/styles.xml, values-night-v31/styles.xml   splash di Android 12+
 ├── test/                             117 test (vedi §9)
 └── integration_test/first_run_test.dart
 ```
+
+---
+
+## 2bis. Icona e schermata di avvio
+
+Il logo è **fornito dall'utente**: `assets/icons/trashcan_logo.png`, 1254x1254 ARGB, un
+cestino verde con un calendario dietro e il simbolo del riciclo in basso a destra. Da quel
+file si generano, con due pacchetti, tutte le risorse Android.
+
+⚠️ **`assets/icons/` non è dichiarato in `pubspec.yaml` sotto `flutter: assets:`, ed è
+giusto così**: quelle immagini sono ingressi dei generatori, non asset letti a runtime.
+Dichiararle le impacchetterebbe nell'APK una seconda volta, a pura perdita.
+
+⚠️ **Tutto ciò che i due comandi scrivono è rigenerabile e non si modifica a mano.** Una
+correzione fatta direttamente su `mipmap-anydpi-v26/ic_launcher.xml` sopravvive fino alla
+prima rigenerazione e poi sparisce, senza che nessuno se ne accorga. Si cambia lo `yaml` e
+si rilancia.
+
+### I due comandi
+
+```
+cd apps/trashcan
+pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons          # icona del launcher
+pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create    # schermata di avvio
+```
+
+### `flutter_launcher_icons.yaml`
+
+| Chiave | Valore | Perché |
+|---|---|---|
+| `image_path` | `assets/icons/trashcan_logo.png` | icona legacy, pre-Android 8 |
+| `adaptive_icon_background` | `#2E7D5B` | il verde del tema: il tondo attorno al logo |
+| `adaptive_icon_foreground` | il logo | il livello che il launcher anima e maschera |
+| `adaptive_icon_foreground_inset` | `18` | il margine dentro la maschera adattiva |
+| `adaptive_icon_monochrome` | il logo | il livello per i temi colorati di Android 13 |
+| `min_sdk_android` | `24` | allineato al `minSdk` del progetto |
+
+`adaptive_icon_foreground_inset: 18` non è estetica: il launcher ritaglia il livello di
+primo piano con una maschera di forma variabile (tondo, quadrotto, goccia, dipende
+dall'OEM) e ne garantisce visibile solo il 66% centrale. Senza rientro il cestino perde il
+manico su metà dei telefoni.
+
+### `flutter_native_splash.yaml`
+
+Fondo `#2E7D5B` in chiaro, `#16241E` in scuro, con il logo al centro in entrambi i casi.
+
+☠ **La sezione `android_12:` usa un'immagine diversa**, `trashcan_splash_android12.png`.
+Da Android 12 la splash non è più un tema con un drawable di sfondo ma un'API di sistema,
+che disegna l'immagine in un quadrato di 240dp e la **ritaglia con un cerchio di 160dp**:
+sopravvivono solo i due terzi centrali. Con il logo a pieno formato, sull'emulatore si
+vedeva il manico del cestino tagliato in alto e il simbolo del riciclo mangiato in basso a
+destra. Il file rimediato è lo stesso logo su una tela trasparente 1152x1152 con il disegno
+confinato nei 768x768 centrali, cioè esattamente la zona che sopravvive. Si rigenera
+scalando il logo al 66,7% e centrandolo.
+
+### Cosa NON deriva dal logo
+
+`drawable/ic_notification.xml` resta **disegnato a mano e monocromatico**, e non va
+sostituito con il logo. Android ignora i colori dell'icona di notifica e ne usa solo il
+canale alfa, ridisegnandola in bianco: il logo, opaco ovunque, diventerebbe una macchia.
 
 ---
 
@@ -520,6 +594,9 @@ causa.
 | Il widget resta un rettangolo colorato e vuoto | il receiver crollava leggendo il colore: vedi la riga seguente | `TrashcanWidgetProvider.kt` |
 | "TrashCan continua a bloccarsi", dopo giorni di funzionamento perfetto | il canale fra Dart e Android codifica un intero come **Integer** se sta in 32 bit con segno e come **Long** altrimenti: *il tipo dipende dal valore*. Un ARGB con alpha `0xFF` supera 2³¹ e arriva Long; lo zero che si manda quando stasera non si raccoglie niente arriva Integer. `getInt` e `getLong` sbagliano **a turno**. E un receiver che lancia fa cadere l'intero processo dell'app, non solo il widget | `TrashcanWidgetProvider.kt`: si legge da `widgetData.all[...]` accettando entrambi i tipi, e tutto `onUpdate` sta dentro un `try` |
 | L'icona nella barra di stato è una macchia bianca | Android usa solo il canale alfa dell'icona: `@mipmap/ic_launcher` è opaca ovunque | `drawable/ic_notification.xml` |
+| La splash taglia il logo: manico del cestino e simbolo del riciclo mangiati | da Android 12 la splash è un'API di sistema che disegna l'immagine in 240dp e la ritaglia con un cerchio di 160dp: resta visibile solo il 66% centrale | `flutter_native_splash.yaml`, la sezione `android_12:` usa `trashcan_splash_android12.png`, il logo rientrato su tela 1152x1152 (§2bis) |
+| `ic_launcher_background` definito due volte, la build si ferma | `flutter_launcher_icons` crea `values/colors.xml` con quel colore, che stava già a mano in `values/strings.xml` | tolto da `strings.xml`: il generatore ha la precedenza |
+| Lo spinner "Sblocca Pro" continua a girare su un acquisto in attesa | il ramo `PurchasePending` spegneva `isBusy` **dopo** aver scritto l'entitlement, al contrario di ogni altro ramo: con una scrittura lenta o che lancia, il bottone non si ferma più, e un pagamento in attesa di approvazione può durare giorni | `micro_core`, `entitlement_service.dart`: `_setBusy(false)` prima di `_apply` |
 | Il testo sul blocco "Stasera" si legge male | `ThemeData.estimateBrightnessForColor` confronta `(luminanza + 0.05)²` con 0.15, cioè passa al bianco sopra 0.337, non 0.5: sui colori di mezzo sceglie il bianco dove ci si aspetta il nero | tavolozza corretta + `palette_contrast_test.dart` |
 | Un widget test resta appeso dieci minuti e muore | `testWidgets` gira in `FakeAsync`, che non fa avanzare l'I/O vero di SQLite; e `pumpAndSettle` non termina perché drift pianifica lavoro di continuo | `test/widget/harness.dart`: si sostituiscono i provider, niente database |
 | Build che si ferma su "Could not close incremental caches" | la compilazione incrementale di Kotlin non regge il locking di Windows | `android/gradle.properties`, `kotlin.incremental=false` |

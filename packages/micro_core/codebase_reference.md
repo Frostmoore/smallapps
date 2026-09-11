@@ -488,6 +488,13 @@ chargeback), non l'assenza di un fatto.
 ☠ **4. `notifyListeners` dopo `dispose`.** Il servizio ha verifiche e sincronizzazioni in
 volo che si concludono dopo la distruzione. Guardia `_disposed`. Trovata dai test.
 
+☠ **4bis. Lo spinner che non si ferma su un acquisto in attesa.** Il ramo
+`PurchasePending` di `_onPurchaseEvent` spegneva `isBusy` **dopo** aver scritto
+l'entitlement, al contrario di ogni altro ramo, che lo spegne per primo. Con una scrittura
+lenta — o che lancia — il bottone "Sblocca Pro" continua a girare su un acquisto che il
+negozio ha gia' preso in carico, e un pagamento in attesa di approvazione puo' durare
+giorni. Ora `_setBusy(false)` viene prima di `_apply`. Trovata dai test.
+
 ☠ **5. Acknowledge entro tre giorni.** Un acquisto non riconosciuto viene **rimborsato
 automaticamente** da Google. `completePurchase` va chiamata dopo aver scritto l'entitlement,
 e va ritentata all'avvio.
