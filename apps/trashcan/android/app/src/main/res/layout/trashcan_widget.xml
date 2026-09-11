@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Il layout del widget.
+
+  Solo LinearLayout e TextView: RemoteViews accetta un sottoinsieme ristretto di view, e
+  un ConstraintLayout qui produrrebbe un widget che non si disegna, senza errori in
+  logcat. Anche gli attributi sono limitati: lo sfondo e i colori del testo si impostano
+  dal provider Kotlin, non da qui, perche' dipendono dal tipo di rifiuto della sera.
+
+  Il testo di "stasera" e' volutamente enorme: l'app viene guardata di sera, di fretta,
+  spesso da un metro di distanza e con le mani occupate. Se non si legge senza mettere a
+  fuoco, il widget non ha fatto il suo lavoro.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:padding="16dp"
+    android:background="@drawable/widget_background">
+
+    <TextView
+        android:id="@+id/widget_calendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:letterSpacing="0.08"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:letterSpacing="0.12"
+        android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/widget_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/widget_next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/widget_upcoming"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="12sp"
+        android:lineSpacingExtra="3dp"
+        android:maxLines="3"
+        android:visibility="gone" />
+
+</LinearLayout>

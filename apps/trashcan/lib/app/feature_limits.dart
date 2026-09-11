@@ -33,12 +33,20 @@ const FeatureLimits trashcanFeatureLimits = <FeatureKey, FeatureLimit>{
   // Colori e icone liberi per ogni tipo di rifiuto.
   FeatureKey.themeCustomization: FeatureLimit.locked(),
 
-  // Esportazione dell'elenco delle raccolte.
-  FeatureKey.csvExport: FeatureLimit.locked(),
 
   // Dichiarate esplicitamente come aperte: TrashCan non le vende e non le limita.
   // Comparire qui evita che l'assert di FeatureGate segnali una chiave dimenticata e
   // rende leggibile, in un colpo d'occhio, cosa NON e' a pagamento.
+  // TrashCan non ha nessuna esportazione in CSV, e quindi non la vende: un elenco di
+  // date di raccolta in un foglio di calcolo non serve a niente a nessuno. Le due
+  // esportazioni che esistono sono la condivisione di un calendario (gratuita, e' un
+  // canale di acquisizione) e il backup completo (Pro, e' una comodita' personale).
+  //
+  // ☠ Questa chiave era `locked()`. Bloccare una funzione che non esiste significa che
+  // il paywall non la elenca fra i benefici, e prima o poi qualcuno incontra un blocco
+  // per qualcosa che l'app non sa fare. Il test in test/widget/paywall_config_test.dart
+  // confronta i limiti con i benefici proprio per impedirlo.
+  FeatureKey.csvExport: FeatureLimit.open(),
   FeatureKey.secondaryEntities: FeatureLimit.open(),
   FeatureKey.photos: FeatureLimit.open(),
   FeatureKey.statistics: FeatureLimit.open(),

@@ -54,15 +54,28 @@ abstract final class WasteIcons {
 /// con `ThemeData.estimateBrightnessForColor`, ma partire da una tavolozza sana evita
 /// il problema alla radice.
 abstract final class WastePalette {
+  /// ☠ Ogni colore qui dentro deve reggere 4.5:1 con il testo che `MicroCard` gli mette
+  /// sopra. Il blocco "Stasera" riempie mezzo schermo con questo colore e ci scrive il nome
+  /// del tipo di rifiuto: un contrasto scarso non produce nessun errore e non si nota sullo
+  /// schermo luminoso di chi lo sceglie, si nota di sera, da lontano, quando serve leggerlo.
+  ///
+  /// Tre colori sono stati scuriti dopo la misurazione (oliva 6D8B3C, verde 4C8B3F, malva
+  /// 9C6B8E): stavano fra 3.88 e 4.28. La verifica sta in
+  /// test/widget/palette_contrast_test.dart e fallisce se se ne aggiunge uno fuori norma.
+  ///
+  /// ☠ La soglia di Flutter non e' quella che sembra: `estimateBrightnessForColor`
+  /// confronta `(luminanza + 0.05)^2` con 0.15, cioe' passa al testo bianco sopra una
+  /// luminanza di 0.337, non di 0.5. Sui colori di mezzo, quindi, sceglie il bianco dove a
+  /// occhio ci si aspetta il nero, ed e' li' che il contrasto crolla.
   static const List<Color> colors = <Color>[
-    Color(0xFF6D8B3C), // verde oliva, organico
+    Color(0xFF627D36), // verde oliva, organico
     Color(0xFF2E6F9E), // blu, carta
     Color(0xFFC9A227), // giallo scuro, plastica
     Color(0xFF3F7A6A), // verde acqua, vetro
     Color(0xFF7A5C3E), // marrone, metalli
     Color(0xFF5A5A5A), // grigio, indifferenziato
-    Color(0xFF4C8B3F), // verde, sfalci
-    Color(0xFF9C6B8E), // malva, pannolini
+    Color(0xFF47813B), // verde, sfalci
+    Color(0xFF946687), // malva, pannolini
     Color(0xFFB05B3B), // terracotta
     Color(0xFF3D5A80), // blu notte
     Color(0xFF8A6D3B), // ocra
@@ -90,13 +103,13 @@ class WastePreset {
 /// deselezionarli tutti e crearne di propri, perche' ogni Comune ha le sue categorie e
 /// i suoi nomi.
 const List<WastePreset> kWastePresets = <WastePreset>[
-  WastePreset(nameKey: 'waste_organic', iconKey: 'compost', color: Color(0xFF6D8B3C)),
+  WastePreset(nameKey: 'waste_organic', iconKey: 'compost', color: Color(0xFF627D36)),
   WastePreset(nameKey: 'waste_paper', iconKey: 'newspaper', color: Color(0xFF2E6F9E)),
   WastePreset(nameKey: 'waste_plastic', iconKey: 'bottle', color: Color(0xFFC9A227)),
   WastePreset(nameKey: 'waste_glass', iconKey: 'glass', color: Color(0xFF3F7A6A)),
   WastePreset(nameKey: 'waste_metal', iconKey: 'metal', color: Color(0xFF7A5C3E)),
   WastePreset(nameKey: 'waste_unsorted', iconKey: 'trash', color: Color(0xFF5A5A5A)),
-  WastePreset(nameKey: 'waste_garden', iconKey: 'grass', color: Color(0xFF4C8B3F)),
-  WastePreset(nameKey: 'waste_nappies', iconKey: 'baby', color: Color(0xFF9C6B8E)),
+  WastePreset(nameKey: 'waste_garden', iconKey: 'grass', color: Color(0xFF47813B)),
+  WastePreset(nameKey: 'waste_nappies', iconKey: 'baby', color: Color(0xFF946687)),
   WastePreset(nameKey: 'waste_other', iconKey: 'other', color: Color(0xFFB05B3B)),
 ];

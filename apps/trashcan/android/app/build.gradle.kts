@@ -1,3 +1,21 @@
+import java.util.Properties
+
+// La firma di release sta fuori dal repository.
+//
+// ☠ android/key.properties e' in .gitignore e NON va committato: contiene il percorso
+// del keystore e la sua password. Il keystore stesso vive in %USERPROFILE%/.android-keys,
+// mai dentro il progetto. Un keystore perso significa non poter piu' aggiornare l'app su
+// Play: Google non lo rigenera e l'applicationId non si riusa.
+//
+// Se il file non c'e', la release si firma con la chiave di debug: serve a far girare
+// `flutter run --release` in locale, e produce un artefatto che Play rifiuta. E' il
+// comportamento voluto, perche' fallire in fase di upload e' meglio che pubblicare
+// firmato male.
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
 plugins {
     id("com.android.application")
     // ☠ Senza questo il Kotlin del modulo app non viene compilato: l'APK si costruisce
@@ -38,11 +56,38 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val path = keystoreProperties.getProperty("storeFile")
+            if (path != null) {
+                storeFile = file(path)
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                // Il keystore e' un PKCS#12 (.p12), non un JKS: senza dichiararlo Gradle
+                // prova a leggerlo come JKS e fallisce con un errore sul formato che non
+                // nomina mai il formato.
+                storeType = "PKCS12"
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (keystoreProperties.getProperty("storeFile") != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+            // Il codice Dart e' gia' compilato in AOT: qui si riduce solo il Java/Kotlin,
+            // che e' poco. isShrinkResources richiede isMinifyEnabled e toglie le risorse
+            // non referenziate, fra cui quelle dei plugin che non usiamo.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Angoli arrotondati per il widget.
+
+  Il colore di riempimento NON si mette qui: lo imposta il provider con
+  setBackgroundColor, perche' dipende dal tipo di rifiuto della sera. Qui resta solo la
+  forma, che e' l'unica cosa che non cambia.
+
+  18dp e' il raggio che Android usa per i widget dalla 12 in poi: un valore diverso si
+  nota subito accanto agli altri widget della schermata.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="18dp" />
+    <solid android:color="#FF2E7D5B" />
+</shape>

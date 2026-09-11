@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  L'icona adattiva, usata da Android 8 in poi.
+
+  I PNG in mipmap-*dpi restano per i dispositivi piu' vecchi: cancellarli farebbe sparire
+  l'icona su Android 7, che minSdk 24 ammette ancora.
+
+  monochrome serve al tema dinamico di Android 13+, che colora l'icona con la tinta del
+  sistema: senza, l'app resta l'unica con l'icona a colori fra tutte quelle tematizzate.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>

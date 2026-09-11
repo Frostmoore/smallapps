@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_label">TrashCan</string>
+    <string name="widget_description">La raccolta di stasera sulla schermata iniziale.</string>
+</resources>

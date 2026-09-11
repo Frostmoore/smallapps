@@ -145,6 +145,10 @@
 
   "day_empty": "No collection on this day.",
 
+  "widget_addTitle": "Add the widget to your home screen",
+  "widget_addBody": "Tonight's collection, without opening the app.",
+  "widget_addUnsupported": "Your launcher cannot add widgets on its own. Press and hold the home screen and look for TrashCan.",
+
   "backup_title": "Backup and sharing",
   "backup_shareCalendarTitle": "Share this calendar",
   "backup_shareCalendarBody": "Send it to a neighbour: they get the same collection days without typing them in again.",

@@ -23,6 +23,8 @@ android/local.properties
 **/android/app/release/
 *.jks
 *.keystore
+*.p12
+*.password.txt
 
 # iOS / macOS (non supportati, ma evitiamo rumore)
 **/ios/Pods/

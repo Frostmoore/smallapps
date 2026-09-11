@@ -314,6 +314,19 @@ con deduplica per token → ripristino silenzioso → sync col server se scaduto
 → verifica col server. Invertire i primi due significa che chi è senza rete paga e non vede
 lo sblocco; saltare il secondo significa che Google rimborsa da solo dopo tre giorni.
 
+**`dispose()` chiude solo la sottoscrizione agli eventi.** Non il gateway, non il client del
+server: quelli arrivano per iniezione e appartengono a chi li costruisce.
+
+☠ Qui c'era `gateway.dispose()`. Il servizio viene ricreato ogni volta che una sua
+dipendenza cambia, e la prima ricreazione avviene **sempre**: all'avvio l'id di installazione
+e' ancora in caricamento e arriva un istante dopo. Il primo servizio chiudeva il gateway, il
+secondo ne riceveva uno gia' chiuso, e da quel momento ogni acquisto falliva con "Bad state:
+Cannot add new events after calling close". Sintomo per l'utente: il bottone "Sblocca Pro"
+gira all'infinito. Cioe' **nessuno puo' comprare**, in app il cui unico ricavo e' quello.
+Nessun crash, nessun avviso, e niente che si noti senza provare a pagare davvero.
+
+**Regola, da qui in avanti: un servizio non chiude niente che non abbia costruito.**
+
 ### `class EntitlementStore`
 
 `const EntitlementStore({required File file})` ·
@@ -397,6 +410,28 @@ Extension `MicroTextTheme` su `TextTheme`: `numeric` · `cardTitle` · `cardMeta
 
 `NotificationIds`: `reservedMax` (999) · `weeklyDigest` (10) · `reorderWarning` (20) ·
 `reorderOverdue` (21) · `forOccurrence(int entityId, CivilDate date, int slot)`
+
+### `abstract interface class NotificationScheduler` e `class RescheduleGuard`
+
+`src/notifications/notification_scheduler.dart`
+
+`NotificationScheduler`: `Future<void> rescheduleAll()` · `Future<void> cancelAll()`.
+
+⛑ Perche' un'interfaccia qui e non una classe per app: tutte e quattro le app
+ripianificano allo stesso modo (ADR-009) e dagli stessi punti, cioe' al ritorno in primo
+piano e dopo ogni modifica ai dati. Una forma comune permette di scrivere quel richiamo una
+volta sola invece di quattro, e soprattutto di non dimenticarne uno: una notifica che non
+viene ripianificata non produce nessun errore, semplicemente non arriva.
+
+`RescheduleGuard(SettingsStore settings, {Duration minInterval = const Duration(hours: 1)})`
+· `bool shouldReschedule({DateTime? now})` · `Future<void> markRescheduled({DateTime? now})`
+
+☠ Ripianificare costa fino a 64 cancellazioni e 64 pianificazioni, ognuna attraverso il
+canale con Android: farlo a ogni ritorno in primo piano rende l'apertura visibilmente lenta
+su un telefono di fascia bassa. Il momento dell'ultima ripianificazione si legge dalle
+preferenze e non da un campo in memoria, perche' l'app viene uccisa e riaperta di continuo e
+un contatore in memoria si azzererebbe proprio nel caso che il controllo dovrebbe coprire.
+Un orologio spostato all'indietro non blocca le ripianificazioni.
 
 ### Backup ed export
 
@@ -496,13 +531,14 @@ niente; il contrario toglierebbe agli utenti gratuiti una funzione che doveva es
 
 ## 9. Catalogo dei test
 
-`pwsh tool/test_all.ps1 -Project micro_core` → **100 test verdi**.
+`pwsh tool/test_all.ps1 -Project micro_core` → **106 test verdi**.
 
 | File | Test | Cosa dimostra |
 |---|---|---|
 | `util/civil_date_test.dart` | 28 | I due cambi d'ora italiani del 2026 non spostano le date; clamp di fine mese e sua non permanenza; regola dei 400 anni; `epochDay` e il suo inverso; intervalli inclusivi; normalizzazione dei fuori intervallo |
 | `gate/feature_gate_test.dart` | 20 | I quattro bordi di ogni tetto (0, max−1, max, max+1); le tre forme di limite; la distinzione fra `allows` e `withinLimit`; gli elenchi per il paywall |
-| `entitlement/entitlement_service_test.dart` | 22 | **ADR-007**: un Pro non si perde offline; solo una revoca dal server lo toglie; la revoca cede a un acquisto successivo; l'acquisto sblocca senza rete; l'acknowledge viene fatto; lo stato finisce su disco; deduplica dei token; i cinque esiti del gateway finto; file corrotto, di un'altra app, o con stati sconosciuti |
+| `entitlement/entitlement_service_test.dart` | 23 | **ADR-007**: un Pro non si perde offline; solo una revoca dal server lo toglie; la revoca cede a un acquisto successivo; l'acquisto sblocca senza rete; l'acknowledge viene fatto; lo stato finisce su disco; deduplica dei token; i cinque esiti del gateway finto; file corrotto, di un'altra app, o con stati sconosciuti; **chiudere il servizio non chiude il gateway ricevuto per iniezione** (verificato contro il codice vecchio, dove fallisce) |
+| `notifications/reschedule_guard_test.dart` | 6 | La prima volta si ripianifica sempre; dentro l'ora no; passata l'ora si'; un orologio spostato indietro non blocca; l'intervallo e' configurabile; lo stato sopravvive alla ricostruzione dello store |
 | `core_modules_test.dart` | 30 | `Money` (somme senza errore di virgola mobile, parsing di ciò che l'utente digita davvero); `CsvWriter` (BOM, separatore, escaping); backup (round-trip, rifiuto di app e schema sbagliati, file inesistente); `AtomicFile` (venti scritture concorrenti); `AppPaths` (i relativi sopravvivono a un cambio di radice); `NotificationIds` (stabilità e unicità); `InstallId` |
 
 ---

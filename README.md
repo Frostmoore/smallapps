@@ -13,8 +13,34 @@ registro di chi ha comprato cosa.
 | **micro_core** | `packages/micro_core/` | Nucleo condiviso: tema, billing, licenze, notifiche, backup | `packages/micro_core/codebase_reference.md` |
 | **License Server** | `server/` — **repo separata** | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
 
-> Gli atlanti elencati sopra **non esistono ancora**: vengono creati alla fine della fase che
+> **Stato al 2026-09-11**: esistono e sono aggiornati gli atlanti di `micro_core`, del
+> License Server e di TrashCan. Gli altri tre vengono creati alla fine della fase che
 > costruisce il rispettivo progetto. Vedi `develop_microapps.md`.
+
+## A che punto siamo
+
+| Fase | Cosa | Stato |
+|---|---|---|
+| F0 | Fondamenta del monorepo, toolchain Flutter locale al progetto | chiusa |
+| F1 | `micro_core`: tema, billing, entitlement, gating, notifiche, backup | chiusa, 106 test |
+| F2 | License Server (Node + Fastify + SQLite), repo separata su Gitea | chiusa, 43 test |
+| **F3** | **TrashCan**, l'app pilota | **chiusa**, 116 test |
+| F4 | Full Freezer | da fare |
+| F5 | Scorte Calore | da fare |
+| F6 | Film Tracker | da fare |
+| F7 | Hardening | da fare |
+| F8 | Deploy e pubblicazione | da fare |
+
+TrashCan e' completa e provata su dispositivo in ogni schermata: wizard iniziale, home,
+tipi di rifiuto e regole con tutte e cinque le forme di ricorrenza, eccezioni, notifiche
+serali, calendari multipli con paywall, backup e condivisione, widget della schermata
+iniziale.
+
+Resta fuori una sola cosa, ed e' bloccata su un'azione che non si puo' fare da qui:
+**la pubblicazione su Play Console** (creazione dell'app, prodotto in-app, canale interno)
+richiede l'account Google Play del proprietario. Da questo lato e' gia' pronto tutto quello
+che serve: firma di release collegata al keystore, regole ProGuard, e un AAB firmato e
+verificato.
 
 ## Repository
 

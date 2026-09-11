@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le stringhe visibili nel selettore di widget di Android.
+
+  Stanno qui e non nei file ARB perche' le legge il sistema, non Flutter: il selettore di
+  widget viene disegnato prima che l'app parta. La traduzione italiana sta in
+  values-it/strings.xml.
+-->
+<resources>
+    <string name="widget_label">TrashCan</string>
+    <string name="widget_description">Tonight\'s collection on your home screen.</string>
+    <!-- Il verde di TrashCan: lo stesso seedColor di MicroAppConfig. -->
+    <color name="ic_launcher_background">#2E7D5B</color>
+</resources>

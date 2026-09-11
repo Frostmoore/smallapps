@@ -811,12 +811,12 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [x] **F3.7** Eccezioni: menu contestuale sulla raccolta (salta, sposta, straordinaria, ripristina), pagina di riepilogo raggiungibile dalle impostazioni. Verificato sull'emulatore
 - [x] **F3.8** Notifiche: `TrashcanScheduler` + 15 test, receiver e permessi nel manifest, pagina promemoria, deep link `/day/:date`. Verificata sull'emulatore: notifica consegnata alle 13:09:03 per un allarme delle 13:09:00
 - [x] **F3.9** Calendari multipli + gating Pro + paywall. Verificato sull'emulatore: il paywall si apre sul secondo calendario, l'acquisto finto sblocca il Pro, il secondo calendario si crea e si commuta dal titolo della home
-- [~] **F3.10** Export/import calendario, backup, condivisione file: `TrashcanBackupSource` con 9 test (andata e ritorno, replaceAll, merge, file storti) e `BackupPage` collegata alle impostazioni. **Manca la verifica sull'emulatore del foglio di condivisione e del selettore di file.**
-- [ ] **F3.11** Widget Android home-screen
-- [ ] **F3.12** Play Console: creazione app, prodotto in-app, canale interno, verifica end-to-end del billing reale contro il server
-- [ ] **F3.13** Test (unit, DB, widget, golden, integrazione)
-- [ ] **F3.14** Rifinitura visiva, onboarding, empty state, accessibilità
-- [x] **F3.15** `apps/trashcan/codebase_reference.md` (prima stesura, da riverificare a fine F3)
+- [x] **F3.10** Export/import calendario, backup, condivisione file: `TrashcanBackupSource` con 9 test. Verificato sull'emulatore: la condivisione produce un file col solo calendario attivo, manifest e conteggi corretti, e lo passa al foglio di sistema
+- [x] **F3.11** Widget Android: `TrashcanWidgetProvider.kt` + layout `RemoteViews`, aggiornato a ogni modifica dei dati e alle 00:05, prossimi tre giorni come funzione Pro, voce nelle impostazioni che lo propone al launcher. Verificato sull'emulatore
+- [~] **F3.12** Play Console. **Bloccata su azione del proprietario**: richiede l'account Google Play, un AAB pubblicato su un canale e alcune ore prima che il prodotto in-app diventi acquistabile. Fatto da qui: firma di release collegata al keystore (`android/key.properties`, non versionato), regole ProGuard, AAB firmato e verificato (`CN=MicroApps`). Restano i passi 1-8 del piano
+- [x] **F3.13** Test: 116 in `apps/trashcan` (40 motore, 34 data layer, 24 servizi, 18 widget) + test di integrazione del primo avvio. **Senza golden**: vedi il debito tecnico nell'atlante, un golden fallisce per il rasterizzatore e non per l'app
+- [x] **F3.14** Rifinitura: icona adattiva con `monochrome`, icona di notifica monocromatica, stati vuoti in ogni lista, tavolozza corretta dopo la misurazione del contrasto (tre colori erano sotto 4.5:1). Restano il testo al 200% e le `Semantics`, elencati nel debito tecnico
+- [x] **F3.15** `apps/trashcan/codebase_reference.md` riscritto a fine fase, con firme estratte dal codice
 - [ ] **F3.16** Rituale di fine fase F3
 
 ### F4 — Full Freezer → `v5.0.0`

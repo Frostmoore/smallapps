@@ -3,451 +3,591 @@
 > Atlante dell'app **TrashCan**, il calendario personale della raccolta differenziata.
 > **Obiettivo**: capire il codice, trovare ciò che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-09-10 · **Versione repo**: `v1.2.0` · **versionName+Code**: `0.1.0+1`
+> **Aggiornato al**: 2026-09-11 · **Fase**: F3 conclusa · **versionName+Code**: `0.1.0+1`
 > **Package Android**: `com.smp.trashcan` (immutabile dopo il primo upload su Play)
 > **SKU Pro**: `trashcan_pro_lifetime` — 2,99 € una tantum
 >
 > Quello che questa app prende da `micro_core` **non è ricopiato qui**: si rimanda a
 > `packages/micro_core/codebase_reference.md`. Una firma copiata in due posti diverge in due
 > settimane.
+>
+> Stato: l'app gira su Android ed è stata percorsa a mano sull'emulatore in ogni schermata.
+> 116 test propri, oltre ai 106 di `micro_core`.
 
 ---
 
 ## 1. Dove sta cosa
 
-| Cerchi… | Vai in |
+| Cerchi… | Vai in… |
 |---|---|
-| Quali giorni passa la raccolta | `lib/domain/recurrence.dart` → `Recurrence` e le 5 sottoclassi |
-| Come si espandono le regole in date concrete | `lib/domain/occurrence_engine.dart` → `OccurrenceEngine` |
-| Cosa butto stasera | `OccurrenceEngine.tonight()` — **restituisce la raccolta di domani**, vedi §6 |
-| Salta / sposta / raccolta straordinaria | `lib/domain/occurrence_engine.dart` → `CollectionException` |
-| Come i giorni finiscono nel database | `lib/domain/recurrence.dart` → `WeekdayMask` |
-| Cosa è a pagamento | `lib/app/feature_limits.dart` → `trashcanFeatureLimits` |
-| appId, SKU, colore, font | `lib/app/app_config.dart` → `buildTrashcanConfig()` |
-| Quale lingua vede l'utente | `lib/app/locale_resolution.dart` → `resolveAppLocale` |
-| I percorsi di navigazione e i deep link | `lib/app/routes.dart` → `Routes` |
-| Icone e colori dei tipi di rifiuto | `lib/app/waste_presets.dart` → `WasteIcons`, `WastePalette`, `kWastePresets` |
-| I testi in italiano e inglese | `lib/l10n/app_it.arb`, `lib/l10n/app_en.arb` |
-| Cosa dimostrano i test | §8 |
-| Cosa **non** esiste ancora | §10 |
+| Quando cade una raccolta | `lib/domain/occurrence_engine.dart` |
+| Le cinque forme di ricorrenza | `lib/domain/recurrence.dart` |
+| Le tabelle del database | `lib/data/tables.dart` |
+| Le query di lettura, il bundle, i mapper riga→dominio | `lib/data/database.dart` |
+| Tutte le scritture sul database | `lib/data/repository.dart` |
+| I provider Riverpod (radice di tutto) | `lib/app/providers.dart` |
+| I percorsi di navigazione | `lib/app/routes.dart` |
+| Cosa è gratis e cosa è Pro | `lib/app/feature_limits.dart` |
+| I testi e i benefici del paywall | `lib/app/paywall_config.dart` |
+| Colori, icone e preset dei tipi di rifiuto | `lib/app/waste_presets.dart` |
+| Italiano sì / italiano no | `lib/app/locale_resolution.dart` |
+| Il piano delle notifiche | `lib/services/trashcan_scheduler.dart` |
+| Il contenuto del widget di sistema | `lib/services/trashcan_widget.dart` |
+| Export, import, backup | `lib/services/trashcan_backup_source.dart` |
+| Il disegno del widget | `android/app/src/main/kotlin/com/smp/trashcan/TrashcanWidgetProvider.kt` |
+| Permessi, receiver, widget nel manifest | `android/app/src/main/AndroidManifest.xml` |
+| La firma di release | `android/app/build.gradle.kts` + `android/key.properties` (non versionato) |
+| Le stringhe tradotte | `lib/l10n/app_en.arb` (template) e `app_it.arb` |
 
 ---
 
 ## 2. Albero dei file
 
+Solo il codice scritto da noi.
+
 ```
 apps/trashcan/
-├─ pubspec.yaml                       version: 0.1.0+1
-├─ l10n.yaml                          config di gen_l10n
-├─ analysis_options.yaml              include: ../../analysis_options.yaml
-├─ codebase_reference.md              questo file
-├─ assets/
-│  ├─ fonts/
-│  │  ├─ Outfit-Variable.ttf          111 KB, tutti i pesi
-│  │  └─ OFL.txt                      SIL Open Font License 1.1
-│  └─ images/                         vuota
-├─ lib/
-│  ├─ app/
-│  │  ├─ app_config.dart              buildTrashcanConfig()
-│  │  ├─ feature_limits.dart          trashcanFeatureLimits
-│  │  ├─ locale_resolution.dart       kSupportedLocales, resolveAppLocale()
-│  │  ├─ routes.dart                  Routes
-│  │  └─ waste_presets.dart           WasteIcons, WastePalette, WastePreset, kWastePresets
-│  ├─ domain/
-│  │  ├─ recurrence.dart              Recurrence + 5 sottoclassi, WeekdayMask
-│  │  └─ occurrence_engine.dart       OccurrenceOrigin, CollectionOccurrence,
-│  │                                  CollectionException, RuleWithExceptions,
-│  │                                  OccurrenceEngine
-│  └─ l10n/
-│     ├─ app_en.arb                   TEMPLATE, 154 chiavi
-│     ├─ app_it.arb                   154 chiavi, zero non tradotte
-│     └─ generated/                   generato, ignorato da git
-└─ test/
-   └─ domain/occurrence_engine_test.dart   40 test
+├── lib/
+│   ├── main.dart                     avvio: config, cartelle, log, preferenze. Niente altro.
+│   ├── app/
+│   │   ├── app.dart                  GoRouter, MaterialApp, ciclo di vita, tocco sulle notifiche
+│   │   ├── app_config.dart           MicroAppConfig di TrashCan (id, SKU, colore, font)
+│   │   ├── feature_limits.dart       cosa è gratis e cosa è Pro (ADR-017)
+│   │   ├── locale_resolution.dart    italiano sui dispositivi italiani, inglese altrove
+│   │   ├── paywall_config.dart       testi e benefici del paywall + showTrashcanPaywall()
+│   │   ├── providers.dart            TUTTI i provider Riverpod
+│   │   ├── routes.dart               i percorsi, in costanti
+│   │   └── waste_presets.dart        icone, tavolozza, preset del wizard
+│   ├── data/
+│   │   ├── tables.dart               le 4 tabelle Drift
+│   │   ├── database.dart             AppDatabase, CalendarBundle, query, mapper riga→dominio
+│   │   ├── database.g.dart           generato da drift_dev (non si modifica a mano)
+│   │   └── repository.dart           tutte le scritture + mapper dominio→riga
+│   ├── domain/
+│   │   ├── recurrence.dart           le 5 ricorrenze, pure, senza database
+│   │   └── occurrence_engine.dart    espansione regole + eccezioni in raccolte concrete
+│   ├── features/
+│   │   ├── backup/backup_page.dart
+│   │   ├── calendars/calendars_page.dart, calendar_editor_page.dart
+│   │   ├── day/day_page.dart         dove porta il tocco su una notifica
+│   │   ├── exceptions/exceptions_page.dart, occurrence_actions.dart
+│   │   ├── home/home_page.dart       "Stasera", prossima raccolta, prossimi 7 giorni
+│   │   ├── notifications/notifications_page.dart
+│   │   ├── onboarding/onboarding_page.dart   il wizard in 4 passi
+│   │   ├── rules/rule_editor_page.dart, rule_summary.dart, weekday_labels.dart
+│   │   ├── settings/settings_page.dart
+│   │   └── waste_types/waste_types_page.dart, waste_type_editor_page.dart
+│   ├── services/
+│   │   ├── trashcan_scheduler.dart   costruisce e consegna il piano delle notifiche
+│   │   ├── trashcan_widget.dart      calcola il contenuto del widget di sistema
+│   │   └── trashcan_backup_source.dart  export/import
+│   └── l10n/
+│       ├── app_en.arb                template
+│       └── app_it.arb                italiano, zero chiavi non tradotte
+├── android/app/src/main/
+│   ├── AndroidManifest.xml
+│   ├── kotlin/com/smp/trashcan/MainActivity.kt
+│   ├── kotlin/com/smp/trashcan/TrashcanWidgetProvider.kt
+│   └── res/
+│       ├── drawable/ic_notification.xml         icona monocromatica della barra di stato
+│       ├── drawable/ic_launcher_foreground.xml  primo piano dell'icona adattiva
+│       ├── drawable/widget_background.xml       angoli arrotondati del widget
+│       ├── layout/trashcan_widget.xml           il layout del widget (solo RemoteViews)
+│       ├── mipmap-anydpi-v26/ic_launcher.xml    icona adattiva + monochrome
+│       ├── values/strings.xml, values-it/strings.xml
+│       └── xml/trashcan_widget_info.xml
+├── test/                             116 test (vedi §9)
+└── integration_test/first_run_test.dart
 ```
 
-**Non esistono ancora** `lib/data/`, `lib/features/`, `lib/services/`, `lib/main.dart`,
-`android/`. Vedi §10.
-
-⚑ **Perché `domain/` non importa Flutter**: i motori di calcolo sono la parte in cui un errore
-è invisibile e costoso. Tenendoli liberi da Flutter si testano in millisecondi, senza
-`WidgetTester`, e si può girare l'intera suite a ogni salvataggio. I 40 test del motore girano
-in meno di un secondo.
-
 ---
 
-## 3. Dipendenze
+## 3. Il database
 
-| Pacchetto | Vincolo | Perché |
+Quattro tabelle, `schemaVersion = 1`. Le date civili sono TEXT `YYYY-MM-DD` (ADR-008), gli
+istanti sono interi in millisecondi UTC.
+
+### `collection_calendars`
+
+| Colonna | Tipo | Vincoli | Significato |
+|---|---|---|---|
+| `id` | INTEGER | PK autoincrement | |
+| `name` | TEXT | 1..60 | "Casa", "Casa al mare" |
+| `notification_time` | TEXT | 5..5, default `20:00` | orario del promemoria, `HH:mm` |
+| `second_notification_time` | TEXT | 5..5, nullable | secondo promemoria, funzione Pro |
+| `enabled` | BOOL | default true | promemoria attivi per questo calendario |
+| `sort_order` | INTEGER | default 0 | |
+| `created_at` | INTEGER | obbligatorio | ms UTC |
+
+L'orario è testo e non due interi: si legge e si scrive sempre insieme, non si interroga mai
+per ora separata dai minuti, e in forma testuale è ispezionabile a occhio in un dump.
+
+### `waste_types`
+
+| Colonna | Tipo | Vincoli | Significato |
+|---|---|---|---|
+| `id` | INTEGER | PK autoincrement | |
+| `calendar_id` | INTEGER | FK → `collection_calendars.id`, ON DELETE CASCADE | |
+| `name` | TEXT | 1..40 | |
+| `icon_key` | TEXT | 1..32 | chiave in `WasteIcons.byKey`, **mai** un codepoint |
+| `color_value` | INTEGER | obbligatorio | ARGB |
+| `notifications_enabled` | BOOL | default true | |
+| `sort_order` | INTEGER | default 0 | |
+
+☠ `icon_key` è una chiave e non un `IconData.codePoint`: salvare il codepoint rompe il tree
+shaking delle icone e in release produce quadrati vuoti.
+
+### `recurrence_rules`
+
+Tabella volutamente larga: molte colonne nullable, di cui solo alcune valide per ciascun
+`kind`. Cinque tabelle separate sarebbero cinque join per un dato che si legge sempre tutto
+insieme e che non supera qualche decina di righe per utente. La larghezza si paga con la
+validazione nel mapper, che è un posto solo.
+
+| Colonna | Tipo | Valido per | Significato |
+|---|---|---|---|
+| `id` | INTEGER | | PK |
+| `waste_type_id` | INTEGER | | FK → `waste_types.id`, CASCADE |
+| `kind` | TEXT 1..24 | | `weekly` \| `everyNWeeks` \| `monthlyDay` \| `monthlyNthWeekday` \| `manual` |
+| `weekdays_mask` | INTEGER, default 0 | weekly, everyNWeeks | bit 0 = lunedì, bit 6 = domenica |
+| `interval_weeks` | INTEGER nullable | everyNWeeks | ≥ 2 |
+| `anchor_date` | TEXT nullable | everyNWeeks | fissa la fase del ciclo |
+| `day_of_month` | INTEGER nullable | monthlyDay | 1..31, clamp a fine mese |
+| `nth_of_month` | INTEGER nullable | monthlyNthWeekday | 1..5 oppure **-1 = l'ultimo** |
+| `weekday` | INTEGER nullable | monthlyNthWeekday | 1..7 |
+| `manual_dates_csv` | TEXT nullable | manual | date `YYYY-MM-DD` separate da virgola |
+| `start_date` | TEXT 10..10 | tutti | obbligatoria |
+| `end_date` | TEXT nullable | tutti | |
+
+### `collection_exceptions`
+
+La data class generata si chiama **`ExceptionRow`**, non `CollectionException`: il nome
+naturale collide con la classe di dominio omonima, e due tipi con lo stesso nome nello stesso
+file sono attrito che si paga a ogni import per anni.
+
+| Colonna | Tipo | Significato |
 |---|---|---|
-| `flutter` | sdk | |
-| `flutter_localizations` | sdk | ADR-011 |
-| `meta` | `^1.19.0` | `@immutable` |
-| `micro_core` | `path: ../../packages/micro_core` | nucleo condiviso |
-| `flutter_test`, `integration_test` | sdk (dev) | |
-| `flutter_lints` | `^5.0.0` (dev) | |
+| `id` | INTEGER | PK |
+| `waste_type_id` | INTEGER | FK → `waste_types.id`, CASCADE |
+| `original_date` | TEXT nullable | la data prevista dalla regola |
+| `replacement_date` | TEXT nullable | la data nuova |
+| `skipped` | BOOL default false | |
+| `note` | TEXT nullable | |
+| `created_at` | INTEGER | ms UTC |
 
-**Ancora da aggiungere** (F3.2 in poi): `flutter_riverpod`, `go_router`, `drift`,
-`sqlite3_flutter_libs`, `drift_dev`, `build_runner`, `home_widget`, `in_app_review`.
+Tre combinazioni ammesse, e nessun'altra:
 
----
-
-## 4. Localizzazione
-
-Implementa ADR-011: **italiano sui dispositivi italiani, inglese su tutti gli altri.**
-
-### `lib/app/locale_resolution.dart`
-
-| Membro | Firma |
-|---|---|
-| | `const List<Locale> kSupportedLocales` = `[Locale('en'), Locale('it')]` |
-| | `Locale resolveAppLocale(List<Locale>? deviceLocales, Iterable<Locale> supported)` |
-
-Comportamento: se una qualunque delle lingue preferite del dispositivo ha `languageCode == 'it'`
-restituisce `Locale('it')`; in ogni altro caso `Locale('en')`. Si guarda solo il codice lingua,
-così `it`, `it_IT` e `it_CH` ricevono tutti l'italiano.
-
-☠ **L'ordine di `kSupportedLocales` non è estetico.** Quando il dispositivo non corrisponde a
-nessuna lingua supportata, Flutter ripiega sul **primo** elemento della lista. Con `it` per
-primo, un utente tedesco riceverebbe l'italiano.
-
-⚑ **Perché non si segue tutta la lista di preferenze del dispositivo**: un utente con
-preferenze `[de, it, en]` riceverebbe l'italiano perché precede l'inglese. È difendibile in
-astratto, ma sorprende: chi ha il telefono in tedesco si aspetta l'inglese come ripiego.
-
-### `l10n.yaml`
-
-| Chiave | Valore | Perché |
-|---|---|---|
-| `arb-dir` | `lib/l10n` | |
-| `template-arb-file` | **`app_en.arb`** | `gen_l10n` garantisce la completezza del solo template e ci ripiega per le chiavi mancanti altrove. Essendo l'inglese la lingua di ripiego, una chiave dimenticata deve produrre una parola inglese in un'app italiana, non il contrario |
-| `output-class` | `L` | |
-| `output-dir` | `lib/l10n/generated` | ignorata da git, si rigenera |
-| `untranslated-messages-file` | `lib/l10n/untranslated.json` | elenca a ogni build le chiavi senza traduzione italiana |
-| `nullable-getter` | `false` | |
-
-**Stato**: 154 chiavi per lingua, `untranslated.json` vuoto.
-
-Prefissi delle chiavi: `common_`, `home_`, `onboarding_`, `waste_`, `wasteTypes_`, `rules_`,
-`exceptions_`, `notifications_`, `calendars_`, `settings_`, `paywall_`, `gate_`, `error_`.
+| Forma | `original_date` | `replacement_date` | `skipped` |
+|---|---|---|---|
+| salta | valorizzata | null | true |
+| sposta | valorizzata | valorizzata | false |
+| straordinaria | null | valorizzata | false |
 
 ---
 
-## 5. `lib/domain/recurrence.dart`
+## 4. `lib/domain/` — il cuore, senza database
 
 ### `sealed class Recurrence`
 
-| Membro | Firma | Note |
+| Membro | Firma | Effetto |
 |---|---|---|
 | costruttore | `const Recurrence({required CivilDate startDate, CivilDate? endDate})` | |
-| | `final CivilDate startDate` | prima data possibile |
-| | `final CivilDate? endDate` | `null` = non scade |
-| | `bool occursOn(CivilDate date)` | controlla la finestra, poi delega a `matches` |
-| | `@protected bool matches(CivilDate date)` | il criterio della sottoclasse |
-| | `Iterable<CivilDate> occurrencesIn(CivilDate from, CivilDate to)` | inclusivo, scandisce giorno per giorno |
+| `startDate` | `final CivilDate` | prima data in cui la regola vale |
+| `endDate` | `final CivilDate?` | ultima, inclusa |
+| `occursOn` | `bool occursOn(CivilDate date)` | `matches` **e** dentro l'intervallo |
+| `matches` | `bool matches(CivilDate date)` | astratto: la forma della ricorrenza |
+| `occurrencesIn` | `Iterable<CivilDate> occurrencesIn(CivilDate from, CivilDate to)` | |
 
-⚑ **Perché `occurrencesIn` scandisce i giorni invece di calcolare**: per le finestre in gioco
-(60 giorni per le notifiche, un anno per la vista mensile) sono qualche centinaio di confronti
-interi per regola. Non vale la pena di ottimizzare a scapito della leggibilità di un calcolo
-che deve essere **ovviamente** corretto.
+Le cinque sottoclassi:
 
-### Le cinque sottoclassi
-
-| Classe | Costruttore | Quando |
+| Classe | Campi propri | Note |
 |---|---|---|
-| `WeeklyRecurrence` | `const WeeklyRecurrence({required Set<int> weekdays, required CivilDate startDate, CivilDate? endDate})` | "organico lunedì e giovedì" — il caso più comune |
-| `EveryNWeeksRecurrence` | `EveryNWeeksRecurrence({required Set<int> weekdays, required int intervalWeeks, required CivilDate anchorDate, required CivilDate startDate, CivilDate? endDate})` | "carta a mercoledì alterni" |
-| `MonthlyDayRecurrence` | `const MonthlyDayRecurrence({required int dayOfMonth, required CivilDate startDate, CivilDate? endDate})` | "il 15 di ogni mese" |
-| `MonthlyNthWeekdayRecurrence` | `const MonthlyNthWeekdayRecurrence({required int nth, required int weekday, required CivilDate startDate, CivilDate? endDate})` | "l'ultimo venerdì del mese" (`nth == -1`) |
-| `ManualDatesRecurrence` | `ManualDatesRecurrence({required Iterable<CivilDate> dates, required CivilDate startDate, CivilDate? endDate})` | elenco di date pubblicato dal Comune |
+| `WeeklyRecurrence` | `Set<int> weekdays` | |
+| `EveryNWeeksRecurrence` | `Set<int> weekdays`, `int intervalWeeks` (≥2), `CivilDate anchor` | il costruttore prende `anchorDate:`, il campo si chiama `anchor` |
+| `MonthlyDayRecurrence` | `int dayOfMonth` | clamp a fine mese |
+| `MonthlyNthWeekdayRecurrence` | `int nth` (1..5 o -1), `int weekday` | |
+| `ManualDatesRecurrence` | `Set<CivilDate> dates` | il costruttore prende un `Iterable` |
 
-`weekdays` usa `DateTime.monday`…`DateTime.sunday`. `nth` vale 1..5 oppure −1.
-`EveryNWeeksRecurrence` ha `assert(intervalWeeks >= 2)`: con intervallo 1 si usa
-`WeeklyRecurrence`.
-
-⚑ **Perché `anchorDate` esiste**: "la carta si raccoglie i mercoledì alterni" è ambiguo finché
-non si sa **quale** mercoledì. L'ancora è la data che l'utente indica come prossima raccolta.
-Il ciclo si calcola contando le settimane rispetto a quella, **in entrambe le direzioni**, così
-il calendario mostra correttamente anche il passato.
-
-☠ **Non si usa il numero di settimana ISO.** Cambia significato a cavallo dell'anno: la
-settimana 1 del 2027 ripartirebbe da capo e produrrebbe un salto o un raddoppio tra dicembre e
-gennaio. Il test `a cavallo del 31 dicembre non si salta ne si raddoppia` verifica che
-l'intervallo resti di 14 giorni esatti attraverso il capodanno.
-
-⚑ **Perché il modulo funziona anche all'indietro**: in Dart `%` con divisore positivo
-restituisce sempre un risultato non negativo, quindi `weeksApart % intervalWeeks == 0` vale
-anche per le settimane precedenti all'ancora. Chi portasse questo codice in un linguaggio dove
-`%` conserva il segno del dividendo (C, Java, JavaScript) romperebbe le date passate senza
-accorgersene.
+⚑ `EveryNWeeksRecurrence` non usa il numero di settimana ISO: cambia significato a cavallo
+dell'anno e produrrebbe un salto o un raddoppio fra dicembre e gennaio. Usa invece la
+distanza in settimane dall'ancora, in entrambe le direzioni.
 
 ### `abstract final class WeekdayMask`
 
-| Firma | Effetto |
+| Metodo | Firma |
 |---|---|
-| `static int fromSet(Set<int> weekdays)` | Bit 0 = lunedì, bit 6 = domenica |
-| `static Set<int> toSet(int mask)` | Inverso |
-
-⚑ **Perché una bitmask in colonna invece di una tabella figlia**: sono al massimo sette valori,
-non si interrogano mai singolarmente, e una colonna intera evita una join a ogni lettura del
-calendario.
-
----
-
-## 6. `lib/domain/occurrence_engine.dart`
-
-### `enum OccurrenceOrigin { regular, moved, extra }`
-
-Da dove viene una raccolta comparsa nel calendario.
-
-### `class CollectionOccurrence`
-
-| Membro | Firma |
-|---|---|
-| costruttore | `const CollectionOccurrence({required int wasteTypeId, required CivilDate date, required OccurrenceOrigin origin, CivilDate? originalDate, String? note})` |
-| | `bool get isRegular` |
-
-`originalDate` è valorizzato solo per le raccolte spostate: è la data in cui sarebbe caduta
-senza eccezione.
-
-### `class CollectionException`
-
-Le tre forme ammesse, e nessun'altra:
-
-| Caso | `originalDate` | `replacementDate` | `skipped` |
-|---|---|---|---|
-| Salta | data | `null` | `true` |
-| Sposta | data | data | `false` |
-| Straordinaria | `null` | data | `false` |
-
-| Firma | Effetto |
-|---|---|
-| `const CollectionException({required int id, required int wasteTypeId, CivilDate? originalDate, CivilDate? replacementDate, bool skipped = false, String? note})` | |
-| `factory CollectionException.skip({required int id, required int wasteTypeId, required CivilDate date, String? note})` | |
-| `factory CollectionException.move({required int id, required int wasteTypeId, required CivilDate from, required CivilDate to, String? note})` | |
-| `factory CollectionException.extra({required int id, required int wasteTypeId, required CivilDate date, String? note})` | |
-| `bool get isSkip` / `isMove` / `isExtra` / `isWellFormed` | |
-
-☠ Un'eccezione malformata (combinazione di campi non prevista) viene **ignorata**, non fa
-lanciare. Un record storto nel database non deve rendere inutilizzabile il calendario.
-
-### `class RuleWithExceptions`
-
-`const RuleWithExceptions({required int wasteTypeId, required Recurrence recurrence, List<CollectionException> exceptions = const [], int sortOrder = 0})`
+| `fromSet` | `static int fromSet(Set<int> weekdays)` |
+| `toSet` | `static Set<int> toSet(int mask)` |
 
 ### `class OccurrenceEngine`
 
-| Firma | Effetto |
+`const OccurrenceEngine()`.
+
+| Metodo | Firma |
 |---|---|
-| `const OccurrenceEngine()` | senza stato |
-| `List<CollectionOccurrence> expand({required List<RuleWithExceptions> rules, required CivilDate from, required CivilDate to})` | tutte le raccolte nella finestra, ordinate |
-| `List<CollectionOccurrence> onDate(CivilDate date, {required List<RuleWithExceptions> rules})` | |
-| `List<CollectionOccurrence> tonight({required List<RuleWithExceptions> rules, CivilDate? today})` | **la raccolta di domani**, vedi sotto |
-| `CollectionOccurrence? next({required List<RuleWithExceptions> rules, CivilDate? from, int horizonDays = 400})` | |
-| `List<CollectionOccurrence> nextN(int count, {required List<RuleWithExceptions> rules, CivilDate? from, int horizonDays = 800})` | |
+| `expand` | `List<CollectionOccurrence> expand({required List<RuleWithExceptions> rules, required CivilDate from, required CivilDate to})` |
+| `onDate` | `List<CollectionOccurrence> onDate(CivilDate date, {required List<RuleWithExceptions> rules})` |
+| `tonight` | `List<CollectionOccurrence> tonight({required List<RuleWithExceptions> rules, CivilDate? today})` |
+| `next` | `CollectionOccurrence? next({required List<RuleWithExceptions> rules, CivilDate? from})` |
+| `nextN` | `List<CollectionOccurrence> nextN(int count, {required List<RuleWithExceptions> rules, CivilDate? from, int horizonDays = 800})` |
 
-#### L'ordine delle fasi di `expand` è vincolante
+`CollectionOccurrence`: `wasteTypeId`, `date`, `origin` (`regular` \| `moved` \| `extra`),
+`originalDate` (per le spostate), `note`.
 
-1. genera le occorrenze base dalle regole;
-2. applica i **salti**, togliendo le date annullate;
-3. applica gli **spostamenti**, togliendo l'originale e aggiungendo la nuova data;
-4. aggiunge le **straordinarie**;
-5. deduplica per `(tipo, data)` con priorità `extra` > `moved` > `regular`;
-6. ordina per data, poi per `sortOrder` del tipo, poi per `wasteTypeId`.
-
-☠ **Il passo 2 deve precedere il 3.** Uno spostamento su una data già saltata non deve far
-riapparire la raccolta. Invertendo i due passi si otterrebbe quel comportamento, che è
-sbagliato e quasi impossibile da diagnosticare a posteriori. Il test
-`salta e sposta la stessa data: prevale il salto` lo blocca.
-
-☠ **Uno spostamento verso una data fuori finestra fa sparire comunque l'originale.** È
-corretto: quel giorno la raccolta non c'è più, indipendentemente da dove sia finita.
-
-☠ **Uno spostamento da una data che la regola non genera non inventa raccolte.** L'aggiunta
-avviene solo se `recurrence.occursOn(originalDate)`.
-
-#### `tonight()` restituisce la raccolta di DOMANI
-
-`tonight() == onDate(today.addDays(1))`. Non è un errore: **stasera si porta fuori quello che
-raccolgono domani mattina.** È la regola di prodotto più importante dell'app, sembra sbagliata
-a chi legge il codice di sfuggita, e prima o poi qualcuno vorrà "correggerla". Il commento nel
-sorgente e il test `tonight mostra la raccolta di DOMANI` esistono per impedirlo.
-
-☠ **Trappola di prestazioni, ancora da disinnescare.** `expand` è O(giorni × regole) e alloca
-un oggetto per ogni raccolta: `next()` con orizzonte 400 giorni ne costruisce qualche centinaio.
-È irrilevante una volta, **disastroso se chiamato a ogni frame**. Quando si scriverà la home
-(F3.5), le occorrenze devono venire da un provider che le calcola una volta sola e le ricalcola
-solo quando cambiano i dati o la data. **Nessun `build` deve chiamare `expand`, `next` o
-`tonight` direttamente.**
+`RuleWithExceptions`: `wasteTypeId`, `recurrence`, `exceptions`, `sortOrder`.
 
 ---
 
-## 7. `lib/app/`
+## 5. `lib/data/`
 
-### `app_config.dart`
-
-`MicroAppConfig buildTrashcanConfig()` → `MicroAppConfig.fromEnvironment(...)` con:
-
-| Campo | Valore |
-|---|---|
-| `appId` | `trashcan` |
-| `appName` | `TrashCan` |
-| `proSku` | `trashcan_pro_lifetime` — **immutabile dopo la pubblicazione** |
-| `seedColor` | `#2E7D5B` |
-| `fontFamily` | `Outfit` |
-| `defaultBrightness` | `Brightness.light` |
-
-La classe `MicroAppConfig` sta in `micro_core`: qui ci sono solo i valori.
-
-### `feature_limits.dart`
-
-`const FeatureLimits trashcanFeatureLimits`.
-
-| FeatureKey | Limite | Cosa significa per l'utente |
-|---|---|---|
-| `unlimitedEntities` | `count(freeMax: 1)` | Un calendario gratis, illimitati con Pro |
-| `multipleNotifications` | `locked()` | Un solo orario di promemoria nel piano gratuito |
-| `advancedWidget` | `locked()` | Widget a colori, scelta del calendario, prossimi tre giorni |
-| `backupRestore` | `locked()` | Backup completo e ripristino |
-| `themeCustomization` | `locked()` | Colori e icone liberi |
-| `csvExport` | `locked()` | |
-| `secondaryEntities`, `photos`, `statistics`, `fullHistory`, `pdfReport`, `calendarSync`, `customCategories` | `open()` | TrashCan non le vende e non le limita |
-
-⚑ **Perché il piano gratuito è così generoso**: TrashCan gratuito deve essere l'app migliore
-della categoria, altrimenti non viene installata e non c'è nessuno a cui vendere il Pro.
-Restano gratuiti tipi di rifiuto, regole ed eccezioni illimitati, il promemoria serale, il
-widget di base e la condivisione del calendario.
-
-⚑ **Perché la condivisione di un calendario è gratuita e il backup no**: la condivisione è un
-canale di acquisizione, un utente ne porta un altro. Il backup è una comodità personale.
-Regalare l'acquisizione e vendere la comodità è il verso giusto.
-
-⚑ **Perché le sette funzioni aperte sono dichiarate esplicitamente**: non è ridondanza. Evita
-l'`assert` di `FeatureGate` sulle chiavi non dichiarate e rende leggibile in un colpo d'occhio
-cosa **non** è a pagamento.
-
-### `routes.dart`
-
-`abstract final class Routes` — costanti `static const String`: `home`, `onboarding`,
-`calendars`, `calendarNew`, `calendarEdit`, `wasteTypes`, `wasteTypeNew`, `wasteTypeEdit`,
-`rules`, `ruleNew`, `ruleEdit`, `exceptions`, `day`, `settings`, `notifications`, `about`,
-`paywall`, `scheme` (= `'trashcan'`).
-
-Helper: `static String dayOf(String isoDate)`, `static String wasteTypeEditOf(int id)`,
-`static String rulesOf(int wasteTypeId)`.
-
-⚑ **Perché costanti e non stringhe sparse**: notifiche e widget Android aprono l'app con un
-deep link (`trashcan://day/2026-09-10`). Un percorso scritto a mano in due posti diverge, e il
-sintomo è un tap sulla notifica che non porta da nessuna parte.
-
-### `waste_presets.dart`
+### `class AppDatabase extends _$AppDatabase`
 
 | Membro | Firma |
 |---|---|
-| | `abstract final class WasteIcons` — `static const Map<String, IconData> byKey` (22 icone), `static IconData resolve(String? key)`, `static List<String> get allKeys` |
-| | `abstract final class WastePalette` — `static const List<Color> colors` (12 colori) |
-| | `class WastePreset` — `const WastePreset({required String nameKey, required String iconKey, required Color color})` |
-| | `const List<WastePreset> kWastePresets` (9 preset) |
+| apertura normale | `factory AppDatabase.open()` |
+| in memoria, per i test | `factory AppDatabase.memory()` |
+| versione | `int get schemaVersion => 1` |
 
-☠ **Il database salva `iconKey`, mai `IconData.codePoint`.** Salvare il codepoint e
-ricostruire l'icona con `IconData(codePoint, fontFamily: 'MaterialIcons')` rompe il tree
-shaking delle icone: il compilatore non riesce più a sapere quali glifi servono, e in release
-Flutter o le rimuove tutte, lasciando quadrati vuoti, oppure obbliga a disattivare
-l'ottimizzazione e a imbarcare l'intero font. Con una mappa costante di riferimenti letterali
-il tree shaking funziona e l'APK resta piccolo.
+### `class CalendarBundle`
 
-☠ `WasteIcons.resolve` **non lancia** su chiave sconosciuta: restituisce `Icons.category`. Una
-chiave sconosciuta può arrivare da un calendario importato da una versione più recente
-dell'app, e in quel caso l'utente deve vedere un'icona generica, non un crash.
+`const CalendarBundle({required CollectionCalendar calendar, required List<WasteType> wasteTypes, required List<RuleWithExceptions> rules})`
+più `WasteType? typeOf(int id)`.
 
-⚑ **Perché i colori della tavolozza sono tutti scuri**: la card "Stasera" usa il colore del
-tipo come sfondo del testo più importante dell'app, che deve leggersi a un metro di distanza.
-Un giallo chiaro lo renderebbe illeggibile.
+### `extension AppDatabaseQueries on AppDatabase`
+
+| Metodo | Firma | Note |
+|---|---|---|
+| `watchCalendars` | `Stream<List<CollectionCalendar>> watchCalendars()` | |
+| `allCalendars` | `Future<List<CollectionCalendar>> allCalendars()` | serve al pianificatore: copre **tutti** i calendari |
+| `countCalendars` | `Future<int> countCalendars()` | |
+| `watchWasteTypes` | `Stream<List<WasteType>> watchWasteTypes(int calendarId)` | |
+| `watchAnyChange` | `Stream<void> watchAnyChange()` | un segnale a ogni modifica di una delle 4 tabelle |
+| `watchBundle` | `Stream<CalendarBundle?> watchBundle(int calendarId)` | vedi la trappola in §10 |
+| `loadBundle` | `Future<CalendarBundle?> loadBundle(int calendarId)` | |
+
+### `extension RecurrenceRuleMapper on RecurrenceRule`
+
+`Recurrence? toDomain()` — `null` se la riga è incoerente col proprio `kind`. **Non lancia**:
+una riga storta, arrivata da un import o da una versione futura, deve far sparire quella
+regola, non rendere l'app inutilizzabile.
+
+### `extension CollectionExceptionMapper on ExceptionRow`
+
+`CollectionException? toDomain()` — `null` se la riga non è una delle tre forme ammesse.
+
+### `class TrashcanRepository`
+
+`const TrashcanRepository(AppDatabase db)`. **Tutte** le scritture passano da qui.
+
+| Metodo | Firma |
+|---|---|
+| `createCalendar` | `Future<int> createCalendar({required String name, String notificationTime = '20:00'})` |
+| `renameCalendar` | `Future<void> renameCalendar(int id, String name)` |
+| `setCalendarNotification` | `Future<void> setCalendarNotification(int id, {required String time, String? secondTime, bool? enabled})` |
+| `deleteCalendar` | `Future<void> deleteCalendar(int id)` |
+| `createWasteType` | `Future<int> createWasteType({required int calendarId, required String name, required String iconKey, required int colorValue, int? sortOrder})` |
+| `updateWasteType` | `Future<void> updateWasteType(int id, {String? name, String? iconKey, int? colorValue, bool? notificationsEnabled})` |
+| `deleteWasteType` | `Future<void> deleteWasteType(int id)` |
+| `reorderWasteTypes` | `Future<void> reorderWasteTypes(List<int> orderedIds)` |
+| `setWeeklyRule` | `Future<void> setWeeklyRule({required int wasteTypeId, required Set<int> weekdays, CivilDate? startDate, CivilDate? endDate})` |
+| `setEveryNWeeksRule` | `Future<void> setEveryNWeeksRule({required int wasteTypeId, required Set<int> weekdays, required int intervalWeeks, required CivilDate anchorDate, CivilDate? startDate, CivilDate? endDate})` |
+| `setMonthlyDayRule` | `Future<void> setMonthlyDayRule({required int wasteTypeId, required int dayOfMonth, CivilDate? startDate, CivilDate? endDate})` |
+| `setMonthlyNthWeekdayRule` | `Future<void> setMonthlyNthWeekdayRule({required int wasteTypeId, required int nth, required int weekday, CivilDate? startDate, CivilDate? endDate})` |
+| `setManualDatesRule` | `Future<void> setManualDatesRule({required int wasteTypeId, required List<CivilDate> dates, CivilDate? startDate, CivilDate? endDate})` |
+| `setRule` | `Future<void> setRule({required int wasteTypeId, required Recurrence recurrence})` |
+| `clearRules` | `Future<void> clearRules(int wasteTypeId)` |
+| `ruleOf` | `Future<Recurrence?> ruleOf(int wasteTypeId)` |
+| `skipCollection` | `Future<int> skipCollection({required int wasteTypeId, required CivilDate date, String? note})` |
+| `moveCollection` | `Future<int> moveCollection({required int wasteTypeId, required CivilDate from, required CivilDate to, String? note})` |
+| `addExtraCollection` | `Future<int> addExtraCollection({required int wasteTypeId, required CivilDate date, String? note})` |
+| `removeException` | `Future<void> removeException(int id)` |
+| `watchExceptions` | `Stream<List<ExceptionRow>> watchExceptions(int calendarId)` |
+| `createCalendarFromWizard` | `Future<int> createCalendarFromWizard({required String name, required String notificationTime, required List<WizardWasteType> types})` |
+
+Tutte le `set*Rule` e `setRule` **sostituiscono** le regole esistenti del tipo, in
+transazione: nella UI c'è un solo insieme di giorni, non una collezione di regole
+sovrapposte.
+
+`class WizardWasteType`: `name`, `iconKey`, `colorValue`, `Set<int> weekdays`, più
+`copyWith({Set<int>? weekdays, String? name})`.
+
+### `extension RecurrenceToRow on Recurrence`
+
+`RecurrenceRulesCompanion toCompanion(int wasteTypeId)` — l'inverso di `toDomain()`. Le due
+direzioni vivono in file diversi: la lettura deve tollerare righe storte, la scrittura parte
+da un oggetto valido per costruzione. **Se tocchi una, controlla l'altra.**
 
 ---
 
-## 8. Font
+## 6. `lib/app/providers.dart`
 
-`assets/fonts/Outfit-Variable.ttf`, 111 KB, dichiarato una volta sola nel `pubspec.yaml`.
+Da sovrascrivere in `main()`, altrimenti l'app non parte: `appConfigProvider`,
+`appPathsProvider`, `settingsProvider`.
 
-⚑ **Perché un font variabile**: un solo file copre tutti i pesi da 100 a 900, contro i circa
-190 KB di quattro istanze statiche.
+| Provider | Tipo | Cosa espone |
+|---|---|---|
+| `databaseProvider` | `Provider<AppDatabase>` | apre e chiude il database |
+| `repositoryProvider` | `Provider<TrashcanRepository>` | |
+| `installIdProvider` | `FutureProvider<InstallId>` | |
+| `purchaseGatewayProvider` | `Provider<PurchaseGateway>` | Play o finto, secondo `BILLING` |
+| `entitlementProvider` | `NotifierProvider<EntitlementNotifier, EntitlementView>` | `.notifier.service` per le azioni |
+| `isProProvider` | `Provider<bool>` | |
+| `featureGateProvider` | `Provider<FeatureGate>` | |
+| `backupServiceProvider` | `Provider<BackupService>` | |
+| `themeModeProvider` | `NotifierProvider<ThemeModeNotifier, ThemeMode>` | `.set(mode)` |
+| `onboardingDoneProvider` | `Provider<bool>` | |
+| `selectedCalendarProvider` | `NotifierProvider<SelectedCalendar, int?>` | `.select(id)` |
+| `calendarsProvider` | `StreamProvider<List<CollectionCalendar>>` | |
+| `activeCalendarProvider` | `Provider<CollectionCalendar?>` | il selezionato, o il primo |
+| `activeBundleProvider` | `StreamProvider<CalendarBundle?>` | |
+| `occurrencesProvider` | `Provider<List<CollectionOccurrence>>` | 120 giorni, calcolati **una volta** |
+| `tonightProvider` | `Provider<List<CollectionOccurrence>>` | le raccolte di **domani** |
+| `nextOccurrenceProvider` | `Provider<CollectionOccurrence?>` | la prima dopo stasera |
+| `upcomingWeekProvider` | `Provider<List<CollectionOccurrence>>` | i prossimi 7 giorni |
+| `notificationServiceProvider` | `FutureProvider<NotificationService>` | creato al primo uso, non in `main()` |
+| `schedulerProvider` | `Provider<TrashcanScheduler>` | |
+| `notificationSyncProvider` | `Provider<void>` | tiene notifiche **e** widget allineati ai dati |
+| `notificationsEnabledProvider` | `NotifierProvider<NotificationsEnabled, bool>` | `.set(value)` |
 
-☠ **Google Fonts non serve più TTF statici via API.** Con uno user agent Internet Explorer
-restituisce **EOT**, con uno Android vecchio restituisce **WOFF**: Flutter non legge nessuno dei
-due. Il file qui viene dal repository ufficiale `google/fonts`, insieme alla sua licenza
-(`OFL.txt`, SIL Open Font License 1.1, che ne consente l'uso commerciale purché il testo della
-licenza sia incluso nell'app).
+`EntitlementView` è un valore immutabile con `entitlement`, `busy`, `storeAvailable`,
+`product`, `error`, più `isPro` e `isPending`. Esiste perché `EntitlementService` è un
+`ChangeNotifier` e Riverpod 3 ha spostato `ChangeNotifierProvider` fra le API legacy:
+rispecchiarlo in un valore rende esplicito **cosa** fa ridisegnare la UI.
 
-☠ **I pesi si ottengono con `FontVariation`, non dichiarando lo stesso file quattro volte.**
-Flutter non interpola da solo: quattro dichiarazioni dello stesso file darebbero sempre
-l'istanza predefinita. La configurazione andrà in `MicroTheme` quando verrà scritto (F1.5).
+`appVersion` è la costante `'0.1.0'` in questo file: compare nel backup, nelle chiamate al
+server e nella schermata delle informazioni. Tenerla in tre posti garantirebbe che divergano.
+
+---
+
+## 7. Le rotte
+
+Dichiarate in `lib/app/routes.dart`, registrate in `lib/app/app.dart`.
+
+| Costante | Percorso | Pagina |
+|---|---|---|
+| `Routes.home` | `/` | `HomePage` |
+| `Routes.onboarding` | `/onboarding` | `OnboardingPage` |
+| `Routes.calendars` | `/calendars` | `CalendarsPage` |
+| `Routes.calendarNew` | `/calendars/new` | `CalendarEditorPage` |
+| `Routes.calendarEdit` | `/calendars/:calendarId/edit` | `CalendarEditorPage` |
+| `Routes.wasteTypes` | `/waste-types` | `WasteTypesPage` |
+| `Routes.wasteTypeNew` | `/waste-types/new` | `WasteTypeEditorPage` |
+| `Routes.wasteTypeEdit` | `/waste-types/:wasteTypeId/edit` | `WasteTypeEditorPage` |
+| `Routes.day` | `/day/:date` (+ `?calendar=<id>`) | `DayPage` — **bersaglio delle notifiche** |
+| `Routes.exceptions` | `/exceptions` | `ExceptionsPage` |
+| `Routes.settings` | `/settings` | `SettingsPage` |
+| `Routes.notifications` | `/settings/notifications` | `NotificationsPage` |
+| `Routes.backup` | `/settings/backup` | `BackupPage` |
+
+Helper: `Routes.dayOf(String iso)`, `Routes.calendarEditOf(int id)`,
+`Routes.wasteTypeEditOf(int id)`, `Routes.rulesOf(int wasteTypeId)`.
+
+Un `redirect` porta all'onboarding chi non l'ha completato, da qualunque punto entri, e
+riporta alla home chi lo ha già fatto.
+
+**Non ha una rotta**: l'editor delle regole. È un sotto-passaggio che restituisce un valore
+al chiamante, non una destinazione raggiungibile da un deep link. Si apre con
+`Navigator.push` e restituisce un `RuleEditorResult`, il cui campo `recurrence` a `null`
+significa "togli i giorni di raccolta" e va distinto dall'annullamento (pop senza valore).
+
+---
+
+## 8. `lib/services/`
+
+### `class TrashcanScheduler implements NotificationScheduler`
+
+`TrashcanScheduler({required AppDatabase db, required SettingsStore settings, required FeatureGate gate, required String appName, NotificationService? notifications})`
+
+| Membro | Firma | Effetto |
+|---|---|---|
+| `horizonDays` | `static const int = 60` | |
+| `maxScheduled` | `static const int = 64` | il limite di Android |
+| `isReady` | `bool get isReady` | c'è un servizio a cui consegnare |
+| `rescheduleAll` | `Future<void> rescheduleAll()` | ricalcola e sostituisce |
+| `rescheduleIfStale` | `Future<void> rescheduleIfStale()` | solo se è passata un'ora |
+| `cancelAll` | `Future<void> cancelAll()` | |
+| `computeSchedule` | `Future<List<ScheduledNotification>> computeSchedule({CivilDate? today, DateTime? now})` | **puro**: non tocca il plugin |
+| `timesFor` | `List<TimeOfDay> timesFor(CollectionCalendar calendar)` | uno gratis, due col Pro |
+
+Funzioni di modulo: `TimeOfDay? parseTime(String?)` (non lancia mai),
+`String formatTime(TimeOfDay)`.
+
+Costante di modulo: `const MicroNotificationChannel trashcanChannel` — un canale solo, perché
+su Android l'utente può silenziare i canali singolarmente e spezzare i promemoria in più
+canali offrirebbe un modo di silenziarne metà senza accorgersene.
+
+Regole del piano: una notifica **per giorno e per calendario**, non per tipo; la sera
+**prima** della raccolta; niente notifiche nel passato; id derivati da
+`NotificationIds.forOccurrence(calendarId, date, slot)` perché la ripianificazione
+sovrascriva invece di accumulare; ordinato per istante e troncato a 64; titolo col nome del
+calendario solo se ce n'è più d'uno; payload `/day/YYYY-MM-DD?calendar=<id>`, cioè il
+percorso interno di `go_router`.
+
+### `abstract final class TrashcanWidget`
+
+| Membro | Firma |
+|---|---|
+| `qualifiedName` | `static const String = 'com.smp.trashcan.TrashcanWidgetProvider'` |
+| chiavi | `keyTonightLabel`, `keyTonightText`, `keyTonightColor`, `keyNextText`, `keyCalendarName`, `keyUpcoming`, `keyShowUpcoming` |
+| `publish` | `static Future<void> publish({required AppDatabase db, required int? calendarId, required bool pro})` |
+| `scheduleDailyRefresh` | `static Future<void> scheduleDailyRefresh()` |
+
+Le chiavi **devono** coincidere con le costanti in `TrashcanWidgetProvider.kt`: sono scritte
+a mano in due linguaggi diversi, e una divergenza produce un campo vuoto nel widget senza
+nessun errore da nessuna parte.
+
+`scheduleDailyRefresh` programma un aggiornamento alle 00:05 per i sette giorni successivi.
+Senza, alle 00:01 il widget continua a dire "stasera: organico" riferendosi alla sera
+precedente, cioè proprio la mattina, quando lo si guarda uscendo di casa.
+
+### `class TrashcanBackupSource implements BackupSource`
+
+`const TrashcanBackupSource(AppDatabase db, {int? onlyCalendarId})`
+
+| Membro | Firma |
+|---|---|
+| `schemaId` | `String get schemaId => 'trashcan'` |
+| `schemaVersion` | `int get schemaVersion => 1` |
+| `exportPayload` | `Future<Map<String, Object?>> exportPayload()` |
+| `importPayload` | `Future<void> importPayload(Map<String, Object?> payload, {required ImportMode mode})` |
+| `imagePaths` | `Future<List<String>> imagePaths()` → sempre vuoto |
+| `counts` | `Future<Map<String, int>> counts()` → chiavi `calendars`, `wasteTypes`, `rules` |
+
+Il payload è **annidato** (calendari → tipi → regole ed eccezioni) e non una copia delle
+tabelle: gli id di riga non significano niente fuori da questo dispositivo, e un formato
+piatto legato da id costringerebbe l'import a rimapparli. Un solo errore di rimappatura
+attacca una regola al tipo di rifiuto sbagliato, e il sintomo non è un errore ma un
+calendario che dice bugie.
+
+L'import gira in **una sola transazione**: `replaceAll` cancella prima di scrivere, e
+un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 
 ---
 
 ## 9. Catalogo dei test
 
-`pwsh tool/test_all.ps1 -Project trashcan` → **40 test, tutti verdi**.
+116 test in `apps/trashcan/`, oltre ai 106 di `micro_core`.
 
-### `test/domain/occurrence_engine_test.dart`
-
-| Gruppo | Test | Cosa dimostra |
+| File | N. | Cosa dimostra |
 |---|---|---|
-| settimanale | 5 | Espansione base su 4 settimane; `startDate` e `endDate` delimitano; finestra invertita restituisce lista vuota senza errori; nessuna regola, nessuna occorrenza |
-| ogni N settimane | 4 | L'ancora determina la parità; il ciclo vale anche **prima** dell'ancora; a cavallo del 31 dicembre l'intervallo resta di 14 giorni esatti; cadenza di 3 settimane su due giorni |
-| mensile per giorno | 3 | Il 31 fa il clamp a 28/29/30 nei mesi corti; in febbraio bisestile cade il 29; un giorno che esiste sempre non viene toccato |
-| mensile per ennesimo | 3 | Primo lunedì; ultimo venerdì (`nth == -1`); il quinto lunedì di un mese che ne ha quattro non produce nulla |
-| date manuali | 1 | Solo le date elencate, ordinate |
-| eccezioni | 8 | Salta; sposta con `origin: moved` e `originalDate`; **salta e sposta insieme: prevale il salto**; spostamento fuori finestra fa sparire comunque l'originale; spostamento da una data non prevista non inventa raccolte; straordinaria con nota; straordinaria che coincide con un'ordinaria resta una sola; eccezione malformata ignorata |
-| ordinamento e più regole | 3 | `sortOrder` decide a parità di data; regole diverse si fondono cronologicamente; due regole sullo stesso tipo lo stesso giorno non si duplicano |
-| ora legale (ADR-008) | 3 | I due cambi d'ora italiani del 2026 non spostano le raccolte; una cadenza quindicinale attraverso il cambio resta di 14 giorni |
-| anno bisestile | 1 | Il 29 febbraio è un giorno come gli altri |
-| tonight, next, nextN | 7 | `tonight` mostra **domani**; vuoto quando domani non raccolgono; `next` include oggi; `next` restituisce `null` oltre l'orizzonte; `nextN` restituisce esattamente il numero richiesto; con regola mensile guarda oltre l'anno; `count` zero o negativo dà lista vuota |
-| bitmask | 2 | Round-trip su tutte le 128 combinazioni; lunedì è il bit 0, domenica il bit 6 |
+| `test/domain/occurrence_engine_test.dart` | 40 | le cinque ricorrenze su casi reali (cambio mese, anno bisestile, ultimo venerdì), le tre eccezioni, la precedenza fra regola ed eccezione, la bitmask |
+| `test/data/database_test.dart` | 19 | foreign key attive e cascata, mapper riga→dominio delle 5 forme, righe storte scartate senza far cadere il resto, conteggi e stream |
+| `test/data/recurrence_roundtrip_test.dart` | 7 | andata e ritorno dominio↔tabella per tutte e 5 le forme; l'ancora e il `-1 = ultimo` sopravvivono; `setRule` sostituisce invece di affiancare |
+| `test/data/watch_bundle_test.dart` | 5 | lo stream del calendario riemette su **tutte** le tabelle: tipo aggiunto, regola cambiata, eccezione aggiunta, lista riordinata, calendario rinominato |
+| `test/data/orphan_exceptions_test.dart` | 3 | le eccezioni di un tipo **senza regola** arrivano fino al motore; la ricorrenza sintetica non genera date di suo; nessun duplicato per i tipi che una regola ce l'hanno |
+| `test/services/trashcan_scheduler_test.dart` | 15 | la sera prima, all'orario giusto; una notifica per giorno con tutti i tipi; tipo silenziato e calendario disattivato esclusi; raccolta saltata senza promemoria; niente nel passato; secondo orario solo col Pro; troncatura a 64 e ordine; titolo col nome del calendario solo se ce n'è più d'uno; id stabili; payload; `parseTime` che non lancia |
+| `test/services/trashcan_backup_source_test.dart` | 9 | giro completo su un database vuoto; `replaceAll` cancella; `mergeKeepExisting` non duplica; export di un solo calendario; conteggi veri; quattro casi di file storto |
+| `test/widget/home_page_test.dart` | 6 | la home nei tre stati (niente / uno / tre tipi), lo stato vuoto, la prossima raccolta con la sera giusta, il nome del calendario nel titolo |
+| `test/widget/paywall_config_test.dart` | 6 | **ogni funzione bloccata è venduta**; i calendari stanno per primi; nessun duplicato; nessun testo vuoto; il bottone regge un prezzo assente |
+| `test/widget/palette_contrast_test.dart` | 6 | ogni colore della tavolozza **e ogni preset** regge 4.5:1 col testo che ci va sopra; i preset usano colori della tavolozza; nessun duplicato |
 
-### Come sono state validate le date dei test
+`test/widget/harness.dart` non contiene test: è l'impalcatura che monta una pagina
+sostituendo i provider che legge.
 
-Le 16 assunzioni sui giorni della settimana e le 8 sequenze attese sono state verificate con
-uno script Dart indipendente, prima di far girare i test. Serve a separare due fallimenti che
-altrimenti si confondono: un rosso significa che il motore è sbagliato, non che le date attese
-lo erano.
+`integration_test/first_run_test.dart` percorre wizard → home → dati scritti, sul
+dispositivo: `flutter test integration_test/first_run_test.dart -d <device>`.
 
-Fatti verificati: 2026-09-07 lunedì, 2026-09-09 mercoledì, 2026-03-29 e 2026-10-25 domeniche
-(i due cambi d'ora italiani), 2026-12-25 venerdì, 2024-02-29 giovedì; settembre 2026 ha quattro
-lunedì e non cinque.
+### Come si eseguono
+
+```
+pwsh tool/fl.ps1 test                 # dalla cartella dell'app
+pwsh tool/test_all.ps1                # tutto il monorepo
+```
 
 ---
 
-## 10. Cosa NON esiste ancora
+## 10. Trappole già disinnescate
 
-| Non esiste | Sottofase |
-|---|---|
-| `lib/main.dart` e l'avvio dell'app | F3.1 |
-| Il tema (dipende da `MicroTheme`, F1.5) | F3.1 |
-| Il router `go_router` | F3.1 |
-| La cartella `android/` e il manifest | F3.1 |
-| Lo strato dati Drift: tabelle, DAO, migrazioni | F3.2 |
-| Il wizard di setup iniziale | F3.4 |
-| La home | F3.5 |
-| CRUD di tipi di rifiuto e regole, con anteprima live delle prossime sei date | F3.6 |
-| L'interfaccia per le eccezioni | F3.7 |
-| `TrashcanScheduler` e le notifiche | F3.8 |
-| Calendari multipli e paywall | F3.9 |
-| Export, import, backup | F3.10 |
-| Il widget Android | F3.11 |
-| Test di widget, golden, integrazione | F3.13 |
-| Icona dell'app e icona di notifica | F3.14 |
+Ognuna è costata tempo almeno una volta. Sono elencate perché il sintomo non nomina mai la
+causa.
 
-**Il cervello esiste, il corpo no.** Oggi ci sono il motore delle ricorrenze, le traduzioni, le
-rotte, i limiti Pro e la configurazione. Non c'è ancora niente che si possa eseguire.
+| Sintomo | Causa | Dove |
+|---|---|---|
+| "Activity class does not exist" con la classe presente nel dex | l'emulatore era in `RUNNING_LOCKED`: con lo storage utente bloccato il package manager nasconde i componenti non direct-boot-aware | ambiente, non codice: serve un cold boot |
+| `fl.ps1 build apk --debug` costruisce una **release** | con `-File`, PowerShell lega ogni token che inizia per trattino a un nome di parametro: `--debug` finiva in un `param()` inesistente | `tool/fl.ps1`: niente `param()`, si usa `$args` |
+| Modifico una regola e lo schermo non cambia fino al riavvio | `watchBundle` osservava solo `collection_calendars`; drift invalida uno stream in base alle tabelle **della query osservata**, non a quelle lette nella callback | `database.dart`: `watchBundle` osserva tutte e quattro |
+| Aggiungo una raccolta straordinaria e sparisce | `_rulesFor` costruiva la lista dalle sole righe di `recurrence_rules`: un tipo senza regola non compariva, e con lui le sue eccezioni | `database.dart`: ricorrenza sintetica vuota |
+| Il bottone "Sblocca Pro" gira all'infinito | `EntitlementService.dispose()` chiudeva il gateway ricevuto per iniezione; il servizio si ricrea a ogni avvio (appena arriva l'id di installazione) e il secondo ne riceveva uno già chiuso | `micro_core`: un servizio non chiude ciò che non ha costruito |
+| La notifica non arriva mai, nessun errore | mancavano `ScheduledNotificationReceiver` e `ScheduledNotificationBootReceiver` nel manifest | `AndroidManifest.xml` |
+| Dopo un riavvio del telefono i promemoria smettono | gli allarmi non sopravvivono al riavvio senza `RECEIVE_BOOT_COMPLETED` e il boot receiver | `AndroidManifest.xml` |
+| Configuro l'app e dopo due mesi non arriva più niente | niente ripianificava all'avvio: il piano si ricostruiva solo al cambio dei dati | `notificationSyncProvider` |
+| Tocco la notifica e il back esce dall'app | `go` sostituisce lo stack: la pagina del giorno restava senza nulla sotto | `app.dart`, `_openPayload` fa `go(home)` poi `push` |
+| Il widget resta un rettangolo colorato e vuoto | `home_widget` salva ogni intero Dart come **Long**: `getInt` lancia `ClassCastException` e il receiver crolla. In più un ARGB con alpha `0xFF` non entra in un Int con segno | `TrashcanWidgetProvider.kt`: `getLong(...).toInt()` |
+| L'icona nella barra di stato è una macchia bianca | Android usa solo il canale alfa dell'icona: `@mipmap/ic_launcher` è opaca ovunque | `drawable/ic_notification.xml` |
+| Il testo sul blocco "Stasera" si legge male | `ThemeData.estimateBrightnessForColor` confronta `(luminanza + 0.05)²` con 0.15, cioè passa al bianco sopra 0.337, non 0.5: sui colori di mezzo sceglie il bianco dove ci si aspetta il nero | tavolozza corretta + `palette_contrast_test.dart` |
+| Un widget test resta appeso dieci minuti e muore | `testWidgets` gira in `FakeAsync`, che non fa avanzare l'I/O vero di SQLite; e `pumpAndSettle` non termina perché drift pianifica lavoro di continuo | `test/widget/harness.dart`: si sostituiscono i provider, niente database |
+| Build che si ferma su "Could not close incremental caches" | la compilazione incrementale di Kotlin non regge il locking di Windows | `android/gradle.properties`, `kotlin.incremental=false` |
+| Il PC resta senza RAM | il template Flutter chiede `-Xmx8G` e 4 GB di metaspace per i demoni di build | `android/gradle.properties`: 2 GB + 1 GB |
+| `RadioListTile` deprecato | `groupValue`/`onChanged` sui singoli tile sono deprecati da Flutter 3.32 | `settings_page.dart`, si usa `RadioGroup` |
+| `ReorderableListView` sposta una posizione più in là | `onReorder` consegna un `newIndex` già incrementato | `waste_types_page.dart`, si usa `onReorderItem` |
+
+### Regole non negoziabili
+
+1. **`icon_key` è una chiave, mai un codepoint.**
+2. **Le date civili sono `CivilDate`**, mai `DateTime`: un `DateTime` porta con sé un fuso, e
+   una raccolta "del 12 settembre" non ha un fuso.
+3. **Tutte le scritture passano dal repository.** Quasi ognuna tocca più tabelle e deve
+   restare coerente.
+4. **Nessuna pagina scrive `if (isPro)`**: si passa da `FeatureGate` (ADR-017).
+5. **Ogni colore nuovo nella tavolozza va verificato** dal test del contrasto.
+6. **`android/key.properties` non si committa**, e il keystore non entra mai nel repository.
+7. **`applicationId` e `proSku` sono immutabili** dopo il primo upload su Play.
 
 ---
 
-## 11. Debito tecnico aperto
+## 11. Cosa NON esiste ancora
 
-| Voce | Perché | Quando |
+Per non farlo cercare invano.
+
+- **Nessuna sincronizzazione col License Server in esercizio.** Il client c'è in
+  `micro_core`, ma `serverEnabled` è falso finché non c'è un dominio.
+- **Nessuna esportazione in CSV.** `FeatureKey.csvExport` è dichiarata `open()` proprio per
+  dire che non è una funzione di quest'app.
+- **Nessun golden test.** Scelta deliberata: vedi §12.
+- **Nessuna vista mensile a calendario.** Le eccezioni si creano dalla home e dalla pagina
+  del giorno.
+- **Nessun terzo orario di promemoria.** La tabella ne prevede due.
+- **Nessuna app su Play Console.** Vedi §12.
+- **Nessun test di migrazione dello schema** (F3.2.6): con `schemaVersion = 1` non c'è ancora
+  niente da migrare, ma il test va scritto **prima** della versione 2.
+
+---
+
+## 12. Debito tecnico aperto
+
+| Voce | Perché è rimandato | Quando va affrontato |
 |---|---|---|
-| `expand` chiamabile da `build` senza protezioni | Il provider che lo incapsula non esiste ancora | F3.5, obbligatorio prima della home |
-| `WeeklyRecurrence.weekdays` è un `Set` mutabile in un costruttore `const` | Renderlo non modificabile impedirebbe il `const`, comodo nei test | Se emerge un bug da mutazione condivisa |
-| `sortOrder` duplicato se due regole dello stesso tipo lo dichiarano diverso | Vince l'ultima. Caso raro e senza conseguenze visibili | Quando esisterà l'editor delle regole |
-| `assets/images/` è vuota ma dichiarata nel pubspec | Serve un `.gitkeep` perché la cartella esista | Sparisce quando arrivano le prime immagini |
+| **F3.12, Play Console** | richiede l'account Google Play del proprietario, un AAB pubblicato su un canale e alcune ore di attesa prima che il prodotto in-app diventi acquistabile. Nessuno di questi passi è eseguibile da qui | prima di qualunque pubblicazione; è il collo di bottiglia della fase F8 |
+| **Golden test della home** | un golden fallisce per il rasterizzatore, la versione del font o il sistema operativo, cioè per motivi che non sono difetti dell'app. I 6 widget test della home già verificano il contenuto nei tre stati | se e quando ci sarà una CI con una sola piattaforma fissa |
+| **Test di migrazione dello schema** | `schemaVersion = 1`: non c'è nulla da migrare | insieme alla prima modifica delle tabelle, non dopo |
+| **`pub cache` condivisa col sistema** | `package_config.json` risolve i pacchetti dalla cache utente invece che da `.flutter/.pub-cache`. Non è pericoloso (i pacchetti sono versionati per risoluzione, l'SDK no) ma tradisce l'isolamento dichiarato in ADR-002 | quando si tocca la toolchain |
+| **Testo ingrandito al 200%** | verificato a occhio, non misurato. Il blocco "Stasera" usa `displaySmall` e può traboccare | in F7 (hardening), con un widget test a scala del testo alta |
+| **`Semantics` sulle card** | le pagine sono navigabili con TalkBack perché usano widget standard, ma il blocco "Stasera" non ha un'etichetta unica che lo legga come una frase | in F7 |
+| **Limite Pro aggirabile via import** | importare un backup con più calendari li crea anche senza Pro. Il backup completo è già dietro al paywall, quindi serve il file di qualcun altro | prima della pubblicazione, se si vuole chiudere il buco |
+| **Il widget non sceglie il calendario** | mostra sempre quello attivo nell'app. Il piano prevedeva la scelta del calendario come funzione Pro | quando qualcuno avrà davvero due calendari e lo chiederà |
+
+---
+
+## 13. Configurazione
+
+| Chiave | Dove | Default | Significato |
+|---|---|---|---|
+| `BILLING` | `--dart-define` | `play` | `fake` usa `FakePurchaseGateway`; una release compilata con `fake` fallisce all'avvio |
+| `MA_LICENSE_URL` | `--dart-define` | vuoto | base URL del License Server; se vuoto, `serverEnabled` è falso |
+| `applicationId` | `android/app/build.gradle.kts` | `com.smp.trashcan` | **immutabile** dopo il primo upload |
+| `minSdk` | idem | 24 | |
+| `proSku` | `lib/app/app_config.dart` | `trashcan_pro_lifetime` | **immutabile**: uno SKU pubblicato non si cancella né si riusa |
+| `storeFile`, `storePassword`, `keyAlias`, `keyPassword` | `android/key.properties` | assenti | se il file manca, la release si firma con la chiave di debug e Play la rifiuta: è voluto, perché fallire in fase di upload è meglio che pubblicare firmato male |
+| `org.gradle.jvmargs` | `android/gradle.properties` | `-Xmx2G` | tetto ai demoni di build |
+| `kotlin.daemon.jvmargs` | idem | `-Xmx1G` | |
+| `kotlin.incremental` | idem | `false` | vedi le trappole |
+
+### Comandi
+
+```
+pwsh tool/fl.ps1 pub get
+pwsh tool/fl.ps1 test
+pwsh tool/fl.ps1 analyze lib test
+pwsh tool/fl.ps1 run -d emulator-5554 --dart-define=BILLING=fake
+pwsh tool/fl.ps1 build appbundle --release
+```

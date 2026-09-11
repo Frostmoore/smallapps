@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  La descrizione del widget per il selettore di sistema.
+
+  minWidth 250dp x minHeight 70dp e' la misura 4x1 sulla griglia standard: la formula di
+  Android e' 70*n - 30, quindi 4 colonne fanno 250dp e 1 riga 40dp. Si chiede 70dp di
+  altezza per lasciare respiro alla riga "prossima raccolta".
+
+  updatePeriodMillis resta 0: il sistema ignora comunque valori sotto i 30 minuti, e gli
+  aggiornamenti veri li pilota l'app (a ogni modifica dei dati) piu' un allarme alle 00:05.
+  Lasciarlo diverso da zero significherebbe svegliare il telefono per ridisegnare qualcosa
+  che non e' cambiato.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="70dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/trashcan_widget"
+    android:previewLayout="@layout/trashcan_widget"
+    android:description="@string/widget_description"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />

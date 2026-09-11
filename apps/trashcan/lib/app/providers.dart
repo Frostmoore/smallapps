@@ -8,6 +8,7 @@ import '../data/database.dart';
 import '../data/repository.dart';
 import '../domain/occurrence_engine.dart';
 import '../services/trashcan_scheduler.dart';
+import '../services/trashcan_widget.dart';
 import 'feature_limits.dart';
 
 /// I provider radice dell'app.
@@ -301,7 +302,10 @@ final upcomingWeekProvider = Provider<List<CollectionOccurrence>>((ref) {
 /// non e' pronto, e il pianificatore semplicemente non consegna niente in quell'istante.
 final notificationServiceProvider = FutureProvider<NotificationService>((ref) async {
   final service = await NotificationService.create(
-    androidIconResource: '@mipmap/ic_launcher',
+    // ☠ L'icona della barra di stato deve essere monocromatica su fondo trasparente:
+    // Android ne usa solo il canale alfa e la ridisegna in bianco. Con @mipmap/ic_launcher,
+    // che e' opaca su tutta la superficie, il risultato e' una macchia bianca senza forma.
+    androidIconResource: '@drawable/ic_notification',
     channels: const <MicroNotificationChannel>[trashcanChannel],
   );
   ref.onDispose(service.dispose);
@@ -320,7 +324,14 @@ final schedulerProvider = Provider<TrashcanScheduler>(
   ),
 );
 
-/// Tiene il piano delle notifiche allineato ai dati, senza che nessuno debba ricordarsene.
+/// Tiene allineato ai dati tutto cio' che vive **fuori** dall'app: il piano delle
+/// notifiche e il contenuto del widget.
+///
+/// ⛑ Perche' insieme e non due collegamenti separati: sono la stessa domanda ("cosa si
+/// raccoglie e quando") posta da due posti diversi, e cambiano sempre insieme. Due
+/// sottoscrizioni distinte allo stesso flusso di modifiche vorrebbero dire due debounce da
+/// tenere allineati e la possibilita' concreta che il widget dica una cosa e la notifica
+/// un'altra.
 ///
 /// La ripianificazione e' ritardata di mezzo secondo perche' una singola azione dell'utente
 /// puo' produrre piu' scritture (creare un tipo e la sua regola, riordinare dieci righe):
@@ -328,6 +339,11 @@ final schedulerProvider = Provider<TrashcanScheduler>(
 final notificationSyncProvider = Provider<void>((ref) {
   final scheduler = ref.watch(schedulerProvider);
   final db = ref.watch(databaseProvider);
+  final calendarId = ref.watch(activeCalendarProvider)?.id;
+  final pro = ref.watch(isProProvider);
+
+  Future<void> refreshWidget() =>
+      TrashcanWidget.publish(db: db, calendarId: calendarId, pro: pro);
 
   // ☠ Una passata all'avvio, appena il servizio e' pronto. Senza, il piano si
   // ricostruiva solo quando i dati cambiavano: chi installa l'app, la configura e poi non
@@ -335,12 +351,15 @@ final notificationSyncProvider = Provider<void>((ref) {
   // ripristinava un backup non riceveva niente e basta. Costa una ripianificazione per
   // avvio, cioe' quello che il guardiano dell'ora considera comunque accettabile.
   if (scheduler.isReady) unawaited(scheduler.rescheduleAll());
+  unawaited(refreshWidget());
+  unawaited(TrashcanWidget.scheduleDailyRefresh());
 
   Timer? debounce;
   final subscription = db.watchAnyChange().listen((_) {
     debounce?.cancel();
     debounce = Timer(const Duration(milliseconds: 500), () {
       unawaited(scheduler.rescheduleAll());
+      unawaited(refreshWidget());
     });
   });
 

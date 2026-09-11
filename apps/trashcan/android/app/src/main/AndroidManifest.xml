@@ -39,6 +39,22 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Il widget della schermata iniziale. Vedi TrashcanWidgetProvider.kt.
+             exported="true" e' obbligatorio: chi manda APPWIDGET_UPDATE e' il sistema,
+             che e' un'altra applicazione. Con false il widget si puo' aggiungere ma non
+             si aggiorna mai, e non compare nessun errore. -->
+        <receiver
+            android:name=".TrashcanWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/trashcan_widget_info" />
+        </receiver>
+
         <!-- Senza questi due receiver il plugin non ha nessuno a cui consegnare la
              notifica quando l'allarme scatta: l'app si costruisce, si installa, pianifica
              senza errori, e poi la notifica non arriva mai. Nessun messaggio, nessun log:

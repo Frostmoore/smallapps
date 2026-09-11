@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../../app/providers.dart';
 import '../../app/routes.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../services/trashcan_widget.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
+
+  /// Chiede al launcher di aggiungere il widget.
+  ///
+  /// ☠ Non tutti i launcher lo supportano, e chi non lo supporta non restituisce un
+  /// errore: semplicemente non succede niente. Si controlla prima e si spiega come fare a
+  /// mano, altrimenti l'utente tocca, non vede niente e conclude che l'app e' rotta.
+  static Future<void> _pinWidget(BuildContext context, L l) async {
+    final supported = await HomeWidget.isRequestPinWidgetSupported() ?? false;
+    if (!context.mounted) return;
+    if (!supported) {
+      MicroSnack.show(context, l.widget_addUnsupported);
+      return;
+    }
+    await HomeWidget.requestPinWidget(qualifiedAndroidName: TrashcanWidget.qualifiedName);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -68,6 +85,16 @@ class SettingsPage extends ConsumerWidget {
                 subtitle: l.notifications_enabledLabel,
                 leading: const Icon(Icons.notifications_outlined),
                 onTap: () => context.push(Routes.notifications),
+              ),
+            ),
+            MicroSpacing.gapS,
+            MicroCard(
+              padding: EdgeInsets.zero,
+              child: MicroListTile(
+                title: l.widget_addTitle,
+                subtitle: l.widget_addBody,
+                leading: const Icon(Icons.widgets_outlined),
+                onTap: () => _pinWidget(context, l),
               ),
             ),
             MicroSpacing.gapS,
