@@ -3,7 +3,7 @@
 > Atlante dell'app **TrashCan**, il calendario personale della raccolta differenziata.
 > **Obiettivo**: capire il codice, trovare ciò che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-09-11 · **Fase**: F3 conclusa · **versionName+Code**: `0.1.0+1`
+> **Aggiornato al**: 2026-09-11 · **Fase**: F3 conclusa · **versionName+Code**: `1.0.0+2`
 > **Package Android**: `com.smp.trashcan` (immutabile dopo il primo upload su Play)
 > **SKU Pro**: `trashcan_pro_lifetime` — 2,99 € una tantum
 >
@@ -620,6 +620,47 @@ dispositivo: `flutter test integration_test/first_run_test.dart -d <device>`.
 pwsh tool/fl.ps1 test                 # dalla cartella dell'app
 pwsh tool/test_all.ps1                # tutto il monorepo
 ```
+
+---
+
+## 9bis. Come si costruisce il pacchetto da caricare
+
+```
+pwsh tool/build_release.ps1 -App trashcan
+```
+
+Fa quattro cose in un comando, nell'ordine giusto: alza il `versionCode`, recupera dal
+server il segreto HMAC dell'app, compila il bundle di release passando l'indirizzo del
+License Server e il segreto, copia il risultato in `apps/trashcan/store/` e **verifica che
+sia firmato**. Il pacchetto finisce in `store/trashcan-<versione>-<codice>.aab`.
+
+Con `-NoBump` non tocca il `versionCode`: serve solo a ricostruire lo stesso numero dopo
+aver corretto qualcosa in un pacchetto **non ancora caricato**.
+
+☠ **Il `versionCode` non si riusa mai.** Play rifiuta un numero già visto e quel numero non
+si libera più, nemmeno cancellando la versione. Per questo lo script lo alza da solo: chi lo
+fa a mano prima o poi ricostruisce sullo stesso numero e se ne accorge davanti al
+caricamento rifiutato.
+
+☠ **Si usa `--dart-define-from-file`, non `--dart-define`.** `tool/fl.ps1` chiama un file
+batch di Windows, che spezza gli argomenti **sui due punti**: `MA_LICENSE_URL=https://...`
+arriva a Flutter tagliato in due e il build muore con `Target file //lic.smpmicroapps.it not
+found`. Anche il percorso del file dei define va **relativo**, perché `C:\...` contiene a
+sua volta due punti.
+
+☠ **Il file dei define contiene il segreto e viene cancellato sempre**, anche quando la
+compilazione fallisce (è in un `finally`). È anche in `.gitignore`, ma la cancellazione non
+dipende da quello.
+
+⚑ Senza `MA_LICENSE_URL` e `MA_APP_SECRET` l'app si compila lo stesso e funziona, ma
+`serverEnabled` è falso: niente verifica dell'acquisto lato server e niente codice di
+trasferimento. È un guasto silenzioso, ed è il motivo per cui la compilazione passa da uno
+script invece che da un comando ricordato a memoria.
+
+⚑ Il bundle pesa 68 MB perché contiene tre architetture più i simboli di debug, che Play usa
+per i rapporti di crash e non scarica sui telefoni. Il download reale per l'utente è intorno
+ai 12 MB. **Il file non è versionato**: sessantotto megabyte per pacchetto nella storia di
+git non si tolgono più.
 
 ---
 

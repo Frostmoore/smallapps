@@ -1,7 +1,7 @@
 # Scheda Play Store — TrashCan
 
 > Tutto quello che serve per compilare Play Console, pronto da incollare.
-> **Aggiornato al**: 2026-09-11 · **Versione**: `1.0.0+1` · **Pacchetto**: `com.smp.trashcan`
+> **Aggiornato al**: 2026-09-11 · **Versione**: `1.0.0+2` · **Pacchetto**: `com.smp.trashcan`
 >
 > ⚑ Questo file contiene **solo testo**. Il pacchetto firmato e le immagini stanno nella
 > stessa cartella. Nessun segreto: il segreto HMAC dell'app vive solo in
@@ -13,7 +13,7 @@
 
 | File | Dove va in Play Console |
 |---|---|
-| `trashcan-1.0.0-1.aab` | Versione → Test interno → Carica |
+| `trashcan-1.0.0-2.aab` | Versione → Test interno → Carica |
 | `icona-512.png` | Scheda del negozio → Icona dell'app |
 | `testata-1024x500-it.png` | Scheda del negozio (italiano) → Immagine in evidenza |
 | `testata-1024x500-en.png` | Scheda del negozio (inglese) → Immagine in evidenza |
