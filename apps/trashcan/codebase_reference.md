@@ -12,7 +12,7 @@
 > settimane.
 >
 > Stato: l'app gira su Android ed è stata percorsa a mano sull'emulatore in ogni schermata.
-> 117 test propri, oltre ai 107 di `micro_core`.
+> 122 test propri, oltre ai 107 di `micro_core`.
 
 ---
 
@@ -112,7 +112,7 @@ apps/trashcan/
 │       ├── drawable*/launch_background.xml      splash fino ad Android 11
 │       ├── drawable*/background.png             la tinta piatta della splash
 │       └── values-v31/styles.xml, values-night-v31/styles.xml   splash di Android 12+
-├── test/                             117 test (vedi §9)
+├── test/                             122 test (vedi §9)
 └── integration_test/first_run_test.dart
 ```
 
@@ -506,8 +506,11 @@ percorso interno di `go_router`.
 | Membro | Firma |
 |---|---|
 | `qualifiedName` | `static const String = 'com.smp.trashcan.TrashcanWidgetProvider'` |
-| chiavi | `keyTonightLabel`, `keyTonightText`, `keyTonightColor`, `keyNextText`, `keyCalendarName`, `keyUpcoming`, `keyShowUpcoming` |
+| chiavi | `keyTonightLabel`, `keyTonightText`, `keyTonightColor`, `keyTonightIcon`, `keyCalendarName`, `keyUpcoming`, `keyUpcomingEmpty` |
+| `newline` | `static const String = '\n'`, il separatore fra le righe dei prossimi giorni |
+| `iconSide` | `static const int = 96`, il lato in pixel del PNG dell'icona |
 | `publish` | `static Future<void> publish({required AppDatabase db, required int? calendarId, required bool pro})` |
+| `renderIcon` | `static Future<Uint8List> renderIcon(IconData icon)` — `@visibleForTesting` |
 | `scheduleDailyRefresh` | `static Future<void> scheduleDailyRefresh()` |
 
 Le chiavi **devono** coincidere con le costanti in `TrashcanWidgetProvider.kt`: sono scritte
@@ -517,6 +520,38 @@ nessun errore da nessuna parte.
 `scheduleDailyRefresh` programma un aggiornamento alle 00:05 per i sette giorni successivi.
 Senza, alle 00:01 il widget continua a dire "stasera: organico" riferendosi alla sera
 precedente, cioè proprio la mattina, quando lo si guarda uscendo di casa.
+
+#### L'icona di "stasera", nel widget
+
+L'intestazione mostra l'icona del tipo di rifiuto accanto al nome, **la stessa della card
+"Stasera" della home**. Con più tipi la stessa sera, icona e colore vengono entrambi dal
+primo: prenderli da due tipi diversi darebbe un'intestazione arancione con l'icona del
+vetro, che è peggio che non avere l'icona.
+
+⚑ **Perché un PNG disegnato a runtime e non un vector drawable.** L'icona è un glifo del
+font Material, scelto per chiave in `WasteIcons`. `RemoteViews` non sa disegnare glifi: sa
+mostrare un drawable o un bitmap. Ricopiare le ventidue icone in altrettanti vector drawable
+sotto `res/` darebbe **due cataloghi da tenere allineati a mano**, e la prima icona aggiunta
+in Dart e dimenticata in `res/` darebbe un widget con un quadrato vuoto. `renderIcon`
+disegna invece il glifo dallo stesso font e dalla stessa mappa che usa la card: per
+costruzione non possono divergere.
+
+Il percorso del PNG viaggia sotto `keyTonightIcon` (lo scrive `HomeWidget.saveFile`, che
+salva il file e mette **il percorso** nella chiave). Stringa vuota significa "niente da
+buttare stasera", e il provider nasconde l'`ImageView`.
+
+☠ Il glifo si disegna **bianco su trasparente**. È il provider Kotlin a tingerlo con
+`setColorFilter`, con lo stesso colore che calcola per il testo dell'intestazione. Se lo
+colorasse Dart, la scelta fra testo chiaro e testo scuro starebbe in due posti e prima o poi
+divergerebbero, dando un'icona nera su fondo nero senza nessun errore.
+
+☠ `renderIcon` legge `codePoint` da un `IconData` **costante**. Non si costruisca mai un
+`IconData` da un codepoint calcolato: il tree shaking delle icone analizza le istanze
+costanti, e con una dinamica Flutter o rimuove tutti i glifi, lasciando quadrati vuoti in
+release, o imbarca il font intero.
+
+☠ `ui.TextDirection.ltr` e non `TextDirection.ltr`: `package:intl`, importato nello stesso
+file, esporta una classe omonima con costanti diverse, e senza prefisso vince quella.
 
 ### `class TrashcanBackupSource implements BackupSource`
 
@@ -544,7 +579,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 
 ## 9. Catalogo dei test
 
-117 test in `apps/trashcan/`, oltre ai 107 di `micro_core`.
+122 test in `apps/trashcan/`, oltre ai 107 di `micro_core`.
 
 | File | N. | Cosa dimostra |
 |---|---|---|
@@ -557,6 +592,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 | `test/services/trashcan_backup_source_test.dart` | 9 | giro completo su un database vuoto; `replaceAll` cancella; `mergeKeepExisting` non duplica; export di un solo calendario; conteggi veri; quattro casi di file storto |
 | `test/widget/home_page_test.dart` | 6 | la home nei tre stati (niente / uno / tre tipi), lo stato vuoto, la prossima raccolta con la sera giusta, il nome del calendario nel titolo |
 | `test/widget/paywall_config_test.dart` | 6 | **ogni funzione bloccata è venduta**; i calendari stanno per primi; nessun duplicato; nessun testo vuoto; il bottone regge un prezzo assente |
+| `test/services/trashcan_widget_icon_test.dart` | 5 | tutte e ventidue le icone si disegnano e non escono vuote; il glifo non riempie il riquadro (sarebbe il "tofu" del font mancante); esce bianco, perche' a tingerlo e' il provider; una chiave sconosciuta ripiega su un'icona vera; ogni preset del wizard punta a una chiave che esiste |
 | `test/widget/palette_contrast_test.dart` | 6 | ogni colore della tavolozza **e ogni preset** regge 4.5:1 col testo che ci va sopra; i preset usano colori della tavolozza; nessun duplicato |
 
 `test/widget/harness.dart` non contiene test: è l'impalcatura che monta una pagina

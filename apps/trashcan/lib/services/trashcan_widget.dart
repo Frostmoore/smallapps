@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../app/locale_resolution.dart';
+import '../app/waste_presets.dart';
 import '../data/database.dart';
 import '../domain/occurrence_engine.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -35,9 +39,16 @@ abstract final class TrashcanWidget {
   static const String keyTonightLabel = 'tonight_label';
   static const String keyTonightText = 'tonight_text';
   static const String keyTonightColor = 'tonight_color';
+  static const String keyTonightIcon = 'tonight_icon';
   static const String keyCalendarName = 'calendar_name';
   static const String keyUpcoming = 'upcoming';
   static const String keyUpcomingEmpty = 'upcoming_empty';
+
+  /// Il lato del PNG dell'icona, in pixel.
+  ///
+  /// Fisso e generoso: il widget lo rimpicciolisce a 26dp, ma la stessa immagine deve
+  /// reggere anche uno schermo a densità 3x senza sgranarsi, e 96 px bastano.
+  static const int iconSide = 96;
 
   /// Il separatore fra le righe dei prossimi giorni.
   ///
@@ -73,6 +84,7 @@ abstract final class TrashcanWidget {
         label: l.home_tonightTitle.toUpperCase(),
         text: l.home_tonightEmpty,
         color: null,
+        iconKey: null,
         calendarName: '',
         upcoming: const <String>[],
         emptyText: l.home_noUpcoming,
@@ -97,9 +109,12 @@ abstract final class TrashcanWidget {
         if (bundle?.typeOf(occurrence.wasteTypeId)?.name case final name?) name,
     ];
 
-    final accent = tonight.isEmpty
-        ? null
-        : bundle?.typeOf(tonight.first.wasteTypeId)?.colorValue;
+    // Colore e icona vengono dallo **stesso** tipo, il primo di stasera, esattamente come
+    // nella card della home: con piu' tipi la stessa sera si mostra l'icona del primo e si
+    // elencano tutti i nomi. Prenderli da due tipi diversi darebbe un'intestazione arancione
+    // con l'icona del vetro, che e' peggio che non avere l'icona.
+    final first = tonight.isEmpty ? null : bundle?.typeOf(tonight.first.wasteTypeId);
+    final accent = first?.colorValue;
 
     final later = occurrences.where((o) => o.date.isAfter(tomorrow)).toList();
 
@@ -107,6 +122,7 @@ abstract final class TrashcanWidget {
       label: l.home_tonightTitle.toUpperCase(),
       text: names.isEmpty ? l.home_tonightEmpty : names.join(', '),
       color: accent,
+      iconKey: first?.iconKey,
       calendarName: calendars.length > 1 ? calendar.name : '',
       upcoming: <String>[
         for (final occurrence in later.take(pro ? 3 : 1))
@@ -121,6 +137,7 @@ abstract final class TrashcanWidget {
     required String label,
     required String text,
     required int? color,
+    required String? iconKey,
     required String calendarName,
     required List<String> upcoming,
     required String emptyText,
@@ -130,10 +147,85 @@ abstract final class TrashcanWidget {
     // Il colore viaggia come intero ARGB. 0 significa "usa il colore neutro": il provider
     // lo interpreta, il layout non ha logica.
     await HomeWidget.saveWidgetData<int>(keyTonightColor, color ?? 0);
+    await _writeIcon(iconKey);
     await HomeWidget.saveWidgetData<String>(keyCalendarName, calendarName);
     await HomeWidget.saveWidgetData<String>(keyUpcoming, upcoming.join(newline));
     await HomeWidget.saveWidgetData<String>(keyUpcomingEmpty, emptyText);
     await HomeWidget.updateWidget(qualifiedAndroidName: qualifiedName);
+  }
+
+  /// Disegna l'icona del tipo di rifiuto in un PNG e ne consegna il percorso al widget.
+  ///
+  /// ⚑ **Perché un PNG e non un vector drawable.** L'icona nella card della home è un glifo
+  /// del font Material, scelto per chiave in [WasteIcons]. `RemoteViews` non sa disegnare
+  /// glifi: sa mostrare un drawable o un bitmap. Ricopiare le ventidue icone Material come
+  /// altrettanti vector drawable in `res/` significherebbe due cataloghi da tenere allineati
+  /// a mano, e la prima icona aggiunta in Dart e dimenticata in `res/` darebbe un widget con
+  /// un quadrato vuoto. Qui invece il glifo viene disegnato a runtime **dallo stesso font e
+  /// dalla stessa mappa** che usa la card: per costruzione non possono divergere.
+  ///
+  /// ⚑ Il glifo si disegna **bianco su trasparente**, non già del colore giusto: il provider
+  /// Kotlin lo tinge con `setColorFilter`, lo stesso colore che calcola per il testo
+  /// dell'intestazione. Così la scelta fra testo chiaro e testo scuro resta in un posto solo.
+  ///
+  /// ☠ Un fallimento qui non deve far fallire l'aggiornamento: l'icona è un ornamento, il
+  /// nome di cosa si butta è l'informazione. Se il disegno non riesce si svuota la chiave e
+  /// il provider nasconde l'immagine.
+  static Future<void> _writeIcon(String? iconKey) async {
+    if (iconKey == null) {
+      await HomeWidget.saveWidgetData<String>(keyTonightIcon, '');
+      return;
+    }
+    try {
+      final bytes = await renderIcon(WasteIcons.resolve(iconKey));
+      // saveFile scrive il PNG e salva **il percorso** sotto la chiave: è il percorso che
+      // il provider legge.
+      await HomeWidget.saveFile(keyTonightIcon, bytes, extension: 'png');
+    } on Object catch (error) {
+      MicroLog.d('icona del widget non disegnata: $error');
+      await HomeWidget.saveWidgetData<String>(keyTonightIcon, '');
+    }
+  }
+
+  /// Il glifo [icon] disegnato bianco su trasparente, in un PNG di [iconSide] px di lato.
+  ///
+  /// ☠ Si legge `codePoint` da un `IconData` **costante**, preso da `WasteIcons.byKey`. Non
+  /// si costruisca mai un `IconData` da un codepoint calcolato: il tree shaking delle icone
+  /// analizza le istanze costanti, e con una dinamica Flutter o rimuove tutti i glifi,
+  /// lasciando quadrati vuoti in release, o imbarca il font intero.
+  @visibleForTesting
+  static Future<Uint8List> renderIcon(IconData icon) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    final painter = TextPainter(
+      // ☠ `ui.TextDirection` e non `TextDirection`: `package:intl` esporta una classe con
+      // lo stesso nome e costanti diverse (`LTR`), e senza prefisso vince quella.
+      textDirection: ui.TextDirection.ltr,
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          fontSize: iconSide.toDouble(),
+          color: const Color(0xFFFFFFFF),
+        ),
+      ),
+    )..layout();
+
+    painter.paint(
+      canvas,
+      ui.Offset((iconSide - painter.width) / 2, (iconSide - painter.height) / 2),
+    );
+
+    final image = await recorder.endRecording().toImage(iconSide, iconSide);
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) throw StateError('il glifo non si è convertito in PNG');
+      return data.buffer.asUint8List();
+    } finally {
+      image.dispose();
+      painter.dispose();
+    }
   }
 
   /// Programma un aggiornamento poco dopo la mezzanotte.

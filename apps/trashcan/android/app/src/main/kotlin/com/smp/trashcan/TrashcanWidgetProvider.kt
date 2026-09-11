@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
 import android.view.View
@@ -91,6 +92,30 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
             views.setTextColor(R.id.widget_label, translucent(foreground))
             views.setTextColor(R.id.widget_calendar, translucent(foreground))
 
+            // L'icona del tipo di rifiuto, la stessa della card "Stasera" nell'app. Arriva
+            // come percorso di un PNG che il lato Dart ha disegnato dal glifo Material:
+            // RemoteViews non disegna glifi, e duplicare le icone in vector drawable
+            // significherebbe due cataloghi da tenere allineati a mano.
+            //
+            // ☠ Il glifo nel PNG e' bianco su trasparente e si tinge qui con lo **stesso**
+            // `foreground` del testo. Se lo colorasse Dart, la scelta fra chiaro e scuro
+            // starebbe in due posti e prima o poi divergerebbero, dando un'icona nera su
+            // fondo nero senza che niente segnali un errore.
+            //
+            // ☠ Il bitmap si carica dentro il try esterno ma si verifica comunque: il file
+            // puo' essere stato cancellato da una pulizia dello spazio, e `decodeFile`
+            // restituisce null invece di lanciare. Con un null passato a setImageViewBitmap
+            // l'icona resterebbe quella dell'aggiornamento precedente, cioe' sbagliata.
+            val iconPath = widgetData.getString(KEY_ICON, "").orEmpty()
+            val icon = if (iconPath.isEmpty()) null else BitmapFactory.decodeFile(iconPath)
+            if (icon != null) {
+                views.setImageViewBitmap(R.id.widget_icon, icon)
+                views.setInt(R.id.widget_icon, "setColorFilter", foreground)
+                views.setViewVisibility(R.id.widget_icon, View.VISIBLE)
+            } else {
+                views.setViewVisibility(R.id.widget_icon, View.GONE)
+            }
+
             // Il corpo: i prossimi giorni, o una riga che spiega che non ce ne sono. Una
             // meta' bianca e vuota si legge come "il widget non ha caricato".
             val upcoming = widgetData.getString(KEY_UPCOMING, "").orEmpty()
@@ -128,6 +153,7 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
         const val KEY_LABEL = "tonight_label"
         const val KEY_TEXT = "tonight_text"
         const val KEY_COLOR = "tonight_color"
+        const val KEY_ICON = "tonight_icon"
         const val KEY_CALENDAR = "calendar_name"
         const val KEY_UPCOMING = "upcoming"
         const val KEY_EMPTY = "upcoming_empty"
