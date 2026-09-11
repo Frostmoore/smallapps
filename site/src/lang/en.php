@@ -38,6 +38,7 @@ return [
     'nav.principale'  => 'Main',
     'nav.apri'        => 'Open the menu',
     'nav.chiudi'      => 'Close the menu',
+    'nav.mostra_app'  => 'Show the apps',
 
     // ── Footer ──────────────────────────────────────────────────────────────
     'footer.blurb'       => 'Small Android apps that do one thing and do it well. Free in '

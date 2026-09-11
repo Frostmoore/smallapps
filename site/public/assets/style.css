@@ -127,7 +127,17 @@ a:hover { color: var(--accent); }
 
 .nav__voce { position: relative; }
 
-.nav__voce > a {
+.nav__riga { display: flex; align-items: center; }
+
+/*
+  Il bottoncino che apre il sottomenu esiste solo dentro il pannello del panino: sopra la
+  soglia il pannello si apre passandoci sopra o entrandoci da tastiera, e qui sarebbe un
+  doppione che ruba spazio alla barra.
+*/
+.nav__interruttore { display: none; }
+
+.nav__voce > a,
+.nav__riga > a {
   display: inline-block;
   color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
@@ -135,10 +145,11 @@ a:hover { color: var(--accent); }
   padding-block: 0.5rem;
   white-space: nowrap;
 }
-.nav__voce > a:hover { color: #fff; text-decoration: underline; }
+.nav__voce > a:hover,
+.nav__riga > a:hover { color: #fff; text-decoration: underline; }
 
 /* La freccina che annuncia il sottomenu: senza, nessuno sa che c'e' qualcosa sotto. */
-.nav__voce--conSottomenu > a::after {
+.nav__voce--conSottomenu .nav__riga > a::after {
   content: "";
   display: inline-block;
   width: 0.38em;
@@ -676,21 +687,63 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
     gap: 0;
   }
 
-  .js .nav__voce > a {
+  .js .nav__voce > a,
+  .js .nav__riga > a {
     display: block;
+    flex: 1 1 auto;
     padding: 0.85rem 0.25rem;
     font-size: 1.05rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   }
 
-  /* Nel pannello non c'e' niente da aprire: il sottomenu e' gia' li'. */
-  .js .nav__voce--conSottomenu > a::after { display: none; }
+  .js .nav__voce { border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
 
+  /* Nel pannello la freccina sta sul bottone, non appiccicata al testo del link. */
+  .js .nav__voce--conSottomenu .nav__riga > a::after { display: none; }
+
+  /*
+    ⚑ Un bersaglio da 44 pixel, non una freccina piccola accanto al testo. E' la misura
+    minima consigliata per un elemento da toccare: sotto, chi ha le dita grosse o la mano
+    ferma poco centra il link accanto e finisce su un'altra pagina.
+  */
+  .js .nav__interruttore {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+  }
+  .js .nav__interruttore:hover { color: #fff; }
+
+  .js .nav__freccia {
+    display: block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform 0.18s ease;
+  }
+
+  /* Aperta, la freccia punta in su: dice che quel bottone adesso richiude. */
+  .js .nav__voce--aperta .nav__freccia { transform: translateY(2px) rotate(-135deg); }
+
+  /*
+    ☠ Chiuso di partenza. Prima il sottomenu era sempre aperto dentro il pannello: con una
+    app sola sembrava una scelta ragionevole, ma con quattro il pannello diventa una lista
+    lunga in cui le voci principali si perdono fra quelle secondarie, e l'utente non ha modo
+    di richiuderla.
+  */
   .js .sottomenu {
     position: static;
-    display: block;
+    display: none;
     min-width: 0;
-    margin: 0 0 0 0.25rem;
+    margin: 0 0 0.6rem 0.25rem;
     padding: 0;
     background: none;
     border: none;
@@ -698,6 +751,20 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
     border-radius: 0;
     box-shadow: none;
   }
+
+  .js .nav__voce--aperta > .sottomenu { display: block; }
+
+  /*
+    ☠ Dentro il pannello l'apertura la comanda **solo** il bottone. Senza questa riga
+    resterebbe attivo anche `:hover` del desktop, e su Android il tocco produce hover: il
+    sottomenu si aprirebbe da solo sfiorando la voce, e il bottone sembrerebbe non fare
+    niente.
+  */
+  .js .nav__voce--conSottomenu:hover > .sottomenu,
+  .js .nav__voce--conSottomenu:focus-within > .sottomenu { display: none; }
+
+  .js .nav__voce--aperta:hover > .sottomenu,
+  .js .nav__voce--aperta:focus-within > .sottomenu { display: block; }
 
   .js .sottomenu a {
     padding: 0.7rem 0.9rem;

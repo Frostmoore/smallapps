@@ -262,9 +262,27 @@ app, cioè esattamente quello che il sottomenù avrebbe mostrato.
 
 ### Sotto gli 860 pixel
 
-Compare il bottone a panino e la navigazione diventa un pannello sotto la barra, con il
-sottomenù già aperto e rientrato: con una voce sola, costringere a un tocco in più sarebbe
-solo fastidio.
+Compare il bottone a panino e la navigazione diventa un pannello sotto la barra. Il
+sottomenù è **a tendina, chiuso di partenza**, e si apre con un bottoncino a freccia sulla
+destra della riga "Le app".
+
+☠ **Il bottoncino è separato dal link, non è il link che fa da interruttore.** "Le app" deve
+continuare a portare al catalogo: trasformarlo in un interruttore gli toglierebbe la
+destinazione, e chi tocca il nome di una sezione si aspetta di andarci. Il bottone fa una
+cosa sola e la dichiara con `aria-expanded`.
+
+⚑ Il bersaglio del bottoncino è 44 pixel, non la freccina disegnata. È la misura minima
+consigliata per un elemento da toccare: sotto, chi ha le dita grosse o la mano ferma poco
+centra il link accanto e finisce su un'altra pagina.
+
+☠ Dentro il pannello l'apertura la comanda **solo** il bottone: le regole `:hover` e
+`:focus-within` del desktop vengono disattivate. Su Android il tocco produce hover, quindi
+senza disattivarle il sottomenù si aprirebbe da solo sfiorando la voce e il bottone
+sembrerebbe non fare niente.
+
+⚑ Chiuso di partenza e non aperto: con una app sola sembrava ragionevole lasciarlo aperto,
+ma con quattro il pannello diventa una lista lunga in cui le voci principali si perdono fra
+quelle secondarie, e non c'è modo di richiuderla.
 
 ⚑ **La soglia è 860 e non 560.** Il punto in cui serve il panino è quello in cui il contenuto
 non entra, non quello in cui comincia un telefono: sotto quella larghezza le tre voci, le due
@@ -292,6 +310,7 @@ Quaranta righe, nessuna libreria. Fa cinque cose:
 | Toglie `hidden` dal bottone | È lui a dichiarare che il menù si può aprire |
 | Apre e chiude, aggiornando `aria-expanded` e `aria-label` | Le due etichette arrivano tradotte in attributi `data-`: il JavaScript non conosce nessuna lingua |
 | Chiude dopo il clic su una voce | ☠ Quasi tutti i link sono ancore verso la **stessa** pagina (`/#app`, `#personalizzato`). Senza, il pannello resta aperto sopra il contenuto a cui si è appena saltati, e sembra che il link non abbia funzionato |
+| Apre e chiude il sottomenù delle app col bottoncino a freccia | ☠ Il gestore che chiude il pannello al clic controlla che sia un **link**: il bottoncino vive nello stesso pannello, e chiuderlo al suo clic farebbe sparire il sottomenù nello stesso istante in cui si apre |
 | `Esc` chiude e riporta il fuoco sul bottone | Altrimenti il fuoco resta dentro un pannello chiuso |
 | Al ridimensionamento richiude se il bottone non è più visibile | Ruotando il telefono il pannello sparisce per via del CSS, ma `aria-expanded` resterebbe `true` e uno screen reader annuncerebbe un menù aperto che non c'è |
 
@@ -472,6 +491,7 @@ dell'hash SHA-256, per un'ora.
 | Il sottomenù si richiude mentre ci si sposta col puntatore | uno stacco fra la voce e il pannello: il puntatore esce dall'area in `:hover` e il pannello sparisce prima di essere raggiunto | `.sottomenu { top: 100%; }`, senza margine |
 | Il fuoco da tastiera sparisce dentro un pannello invisibile | il sottomenù si apriva col solo `:hover`: le voci restavano focalizzabili ma non visibili | aggiunto `:focus-within` |
 | Il pannello del panino resta aperto sopra il contenuto | quasi tutte le voci sono ancore verso la stessa pagina: il salto avviene, ma il pannello lo copre e sembra che il link non funzioni | `menu.js` chiude dopo il clic su una voce |
+| Nel pannello il sottomenù si apriva da solo sfiorando la voce, e il bottoncino sembrava inerte | su Android il tocco produce `:hover`, e le regole del desktop restavano attive anche dentro il pannello | dentro la media query `:hover` e `:focus-within` sono disattivate: apre solo il bottone |
 | L'icona su iOS è un quadrato nero | iOS non gestisce la trasparenza nell'apple-touch-icon e la compone su nero | `apple-touch-icon.png` ha il fondo pieno verde scuro |
 | Uno script che parte da PowerShell verso `bash -s` dà `syntax error: unexpected end of file` | le fini riga di Windows: `\r` finisce dentro i comandi | si scrive lo script in un file con fini riga Unix e si passa da `ssh ... "cat > file && bash file"` |
 

@@ -41,9 +41,29 @@
   // sono ancore verso un punto della **stessa** pagina (`/#app`, `#personalizzato`). Senza
   // questa riga il pannello resta aperto sopra il contenuto a cui si e' appena saltati, e
   // sembra che il link non abbia funzionato.
+  //
+  // ☠ Si controlla che sia un **link**: il bottoncino che apre il sottomenu delle app vive
+  // dentro lo stesso pannello, e chiuderlo al suo clic renderebbe il sottomenu impossibile
+  // da vedere, perche' sparirebbe nello stesso istante in cui si apre.
   menu.addEventListener('click', function (evento) {
     if (evento.target.closest('a')) imposta(false);
   });
+
+  // Il sottomenu delle app dentro il pannello.
+  //
+  // ⚑ A tendina e non sempre aperto: con quattro app in catalogo il pannello diventerebbe
+  // una lista lunga in cui le voci principali si perdono fra quelle secondarie. Chiuso di
+  // partenza, il menu resta leggibile a colpo d'occhio qualunque cosa contenga.
+  var interruttore = menu.querySelector('.nav__interruttore');
+  var voceApp = menu.querySelector('.nav__voce--conSottomenu');
+
+  if (interruttore && voceApp) {
+    interruttore.addEventListener('click', function () {
+      var aperto = interruttore.getAttribute('aria-expanded') !== 'true';
+      interruttore.setAttribute('aria-expanded', aperto ? 'true' : 'false');
+      voceApp.classList.toggle('nav__voce--aperta', aperto);
+    });
+  }
 
   // Esc chiude e riporta il fuoco sul bottone, altrimenti resta dentro un pannello chiuso.
   document.addEventListener('keydown', function (evento) {

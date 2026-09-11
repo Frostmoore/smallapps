@@ -42,6 +42,7 @@ return [
     'nav.principale'  => 'Principale',
     'nav.apri'        => 'Apri il menu',
     'nav.chiudi'      => 'Chiudi il menu',
+    'nav.mostra_app'  => 'Mostra le app',
 
     // ── Pie' di pagina ──────────────────────────────────────────────────────
     'footer.blurb'       => 'App piccole per Android, che fanno una cosa sola e la fanno '

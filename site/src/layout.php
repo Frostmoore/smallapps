@@ -91,7 +91,7 @@ function pagina_inizio(string $chiaveTitolo, string $chiaveDescrizione, string $
 <link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/assets/img/favicon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/style.css?v=5">
 
 <?php
 // ⚑ Uno script di due righe, inline e nel `<head>`, che marca il documento come "con
@@ -103,7 +103,7 @@ function pagina_inizio(string $chiaveTitolo, string $chiaveDescrizione, string $
 // pagina in versione senza JavaScript, con lo stesso sfarfallio che si voleva evitare.
 ?>
 <script>document.documentElement.className += ' js';</script>
-<script src="/assets/menu.js?v=1" defer></script>
+<script src="/assets/menu.js?v=2" defer></script>
 </head>
 <body>
 
@@ -137,14 +137,34 @@ function pagina_inizio(string $chiaveTitolo, string $chiaveDescrizione, string $
       <ul class="nav__lista">
         <?php
         // "Le app" con il suo sottomenu. Sul desktop si apre passandoci sopra o entrandoci
-        // da tastiera; dentro il panino resta aperto, perche' con una voce sola costringere
-        // a un tocco in piu' sarebbe solo fastidioso.
+        // da tastiera; dentro il panino si apre col bottoncino a freccia.
         $pubblicate = array_filter(catalogo(), static fn (array $a): bool => $a['pubblicata']);
         ?>
         <li class="nav__voce nav__voce--conSottomenu">
-          <a href="<?= e(url_per($lingua, '/')) ?>#app"><?= t('nav.app') ?></a>
+          <div class="nav__riga">
+            <a href="<?= e(url_per($lingua, '/')) ?>#app"><?= t('nav.app') ?></a>
+
+            <?php
+            // ☠ Un bottone **separato** dal link, non il link che fa da interruttore.
+            // "Le app" deve continuare a portare al catalogo: trasformarlo in un
+            // interruttore toglierebbe la sua destinazione, e chi tocca il nome di una
+            // sezione si aspetta di andarci. Il bottone fa una cosa sola, aprire, e lo
+            // dichiara con `aria-expanded`.
+            //
+            // Esiste solo nel pannello del panino: sopra la soglia il pannello si apre
+            // passandoci sopra o entrandoci da tastiera, e il bottone sarebbe un doppione.
+            ?>
+            <?php if ($pubblicate !== []): ?>
+              <button class="nav__interruttore" type="button"
+                      aria-expanded="false" aria-controls="sottomenu-app"
+                      aria-label="<?= e(t('nav.mostra_app')) ?>">
+                <span class="nav__freccia" aria-hidden="true"></span>
+              </button>
+            <?php endif; ?>
+          </div>
+
           <?php if ($pubblicate !== []): ?>
-            <ul class="sottomenu">
+            <ul class="sottomenu" id="sottomenu-app">
               <?php foreach ($pubblicate as $slug => $app): ?>
                 <li>
                   <a href="<?= e(url_per($lingua, '/' . $slug)) ?>">
