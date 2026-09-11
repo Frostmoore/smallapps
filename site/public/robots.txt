@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Il modulo di contatto non ha niente da indicizzare e ogni scansione consuma il limite
+# di invii per indirizzo IP.
+Disallow: /contatti?
+
+Sitemap: https://smpmicroapps.it/sitemap.xml

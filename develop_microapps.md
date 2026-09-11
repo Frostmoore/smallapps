@@ -926,15 +926,42 @@ tutte fatte e provate sull'emulatore:
 ### F8 — Deploy e pubblicazione → `v9.0.0`
 
 - [x] **F8.1** Accesso SSH a `clawserver` verificato (anticipata il 2026-09-09)
-- [ ] **F8.2** Ricognizione di `clawserver`: reverse proxy, porte, Docker, spazio, convivenza con OpenClaw
-- [ ] **F8.3** Deploy del License Server in Docker, con volume persistente e healthcheck
-- [ ] **F8.4** TLS, dominio, reverse proxy, hardening di rete
+- [x] **F8.2** Ricognizione di `clawserver` (anticipata l'11 settembre 2026): nginx con quattro vhost, php-fpm 8.3 e 8.4, Docker, nessun MTA installato. OpenClaw vive su `hesclaw.ovh` e `wa-webhook.hesclaw.ovh` e non si tocca
+- [x] **F8.3** Deploy del License Server in Docker (anticipata l'11 settembre 2026): container `microapps-license-server` su `127.0.0.1:8087`, volume persistente, `/healthz` verde
+- [x] **F8.4** TLS e reverse proxy (anticipata l'11 settembre 2026): `lic.smpmicroapps.it` e `smpmicroapps.it` + `www` con certificato Let's Encrypt e redirect da HTTP, rinnovo automatico attivo
 - [ ] **F8.5** Backup del database del server e verifica del ripristino
 - [ ] **F8.6** Service account Google Play e collegamento Android Publisher API
 - [ ] **F8.7** Pub/Sub per le Real-time Developer Notifications
 - [ ] **F8.8** Release chiuse (closed testing) delle quattro app, 14 giorni di test
 - [ ] **F8.9** Pubblicazione in produzione, monitoraggio della prima settimana
 - [ ] **F8.10** Rituale di fine fase F8
+
+**Vetrina pubblica, 11 settembre 2026** (branch `v4.2.0`). Richiesta del proprietario, fatta
+e verificata online su <https://smpmicroapps.it>:
+
+- [x] **Home** con titolo grande e stilizzato, descrizione breve e griglia di card, una per
+  ogni microapp del monorepo. Le app non ancora fatte restano in griglia, in grigio, con
+  l'etichetta "In arrivo" e senza link: la card non e' un `<a>`, perche' un link che non
+  porta da nessuna parte si legge come un sito rotto. **Regola permanente: ogni microapp
+  nuova aggiunge la sua voce in `site/src/apps.php` nello stesso giro in cui nasce.**
+- [x] **Pagina di TrashCan** con descrizione commerciale, confronto Base/Pro, sezione sulla
+  privacy e richiamo alla segnalazione dei problemi. Il bottone di Google Play e' spento
+  finche' `suPlay` non passa a `true` in `site/src/apps.php`.
+- [x] **Modulo di contatto** unico con selettore di argomento, che copre sviluppo su misura,
+  segnalazione bug e domande. Token CSRF, trappola per i robot, limite di cinque invii
+  all'ora per IP, consenso privacy obbligatorio. **Salva prima e notifica dopo**: un guasto
+  SMTP non fa perdere il messaggio.
+- [x] **Cinque pagine legali**: note legali (impressum), informativa privacy artt. 13-14
+  GDPR, cookie policy, condizioni di servizio, limitazione di responsabilita'. Linkate dal
+  pie' di **ogni** pagina.
+- [x] **Zero terze parti**: niente font di Google, niente CDN, niente analytics. Per questo
+  il sito non ha bisogno del banner dei cookie e la CSP puo' essere `default-src 'self'`.
+- [x] Vhost nginx nuovo, senza toccare quelli esistenti. Risolve anche il sintomo per cui
+  `smpmicroapps.it` mostrava flamingnews: mancando un `server` block con quel nome, nginx
+  serviva il primo blocco caricato.
+- [ ] **SMTP da configurare**: sul server non c'e' nessun MTA. Finche' non si compilano le
+  credenziali in `/var/www/smpmicroapps/config.local.php`, i messaggi si salvano in
+  `/var/www/smpmicroapps/var/contatti.jsonl` e non arriva nessuna notifica.
 
 ---
 

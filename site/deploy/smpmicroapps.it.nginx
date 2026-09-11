@@ -1,0 +1,98 @@
+# La vetrina su smpmicroapps.it.
+#
+# Va copiato in /etc/nginx/sites-available/smpmicroapps.it e collegato in sites-enabled.
+# Il blocco HTTPS e il redirect da HTTP li aggiunge certbot:
+#
+#     sudo certbot --nginx -d smpmicroapps.it -d www.smpmicroapps.it
+#
+# ☠ NON toccare gli altri file di sites-available: su questo server vivono anche
+# hesclaw.ovh e wa-webhook.hesclaw.ovh, che appartengono a OpenClaw. Si aggiunge un file
+# nuovo, non si modifica niente di esistente.
+#
+# ☠ lic.smpmicroapps.it ha gia' il suo vhost, che inoltra al container del License Server
+# sulla porta 8087. Questo file riguarda solo l'apice e il www: i due non si toccano.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name smpmicroapps.it www.smpmicroapps.it;
+
+    # La radice e' `public/`, non la cartella del progetto: `src/`, `config.local.php` e
+    # `var/` restano fuori dall'albero servito. E' l'unica difesa che conta per un file che
+    # contiene la password SMTP.
+    root /var/www/smpmicroapps/public;
+    index index.php;
+    charset utf-8;
+
+    access_log /var/log/nginx/smpmicroapps-access.log;
+    error_log  /var/log/nginx/smpmicroapps-error.log warn;
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 512;
+    gzip_types text/plain text/css application/xml application/javascript image/svg+xml;
+
+    # Intestazioni di sicurezza.
+    #
+    # La CSP puo' essere cosi' stretta perche' il sito non carica niente da fuori: nessun
+    # font, nessun CDN, nessun analytics. `script-src 'self'` basta perche' l'unico script
+    # e' quello inline della pagina contatti... che pero' e' inline, quindi va consentito
+    # esplicitamente con l'hash, non con 'unsafe-inline'.
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data:; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'" always;
+
+    # Le URL pulite: /trashcan serve trashcan.php, /legale/privacy serve privacy.php.
+    #
+    # ☠ NON si scrive `try_files $uri $uri.php $uri/ =404`. Sembra funzionare e invece e'
+    # un disastro: quando try_files trova un file **intermedio** lo serve da questo blocco,
+    # che non ha nessun handler FastCGI, quindi nginx restituisce il **codice sorgente PHP**
+    # invece di eseguirlo. Con una GET si vede una pagina di testo che somiglia vagamente a
+    # quella giusta, e con una POST si prende 405, perche' un file statico non accetta POST.
+    # Solo l'ultimo argomento di try_files rientra nel confronto delle location.
+    #
+    # Con `@php` e una `rewrite ... last` l'URI riscritto ripassa dal confronto delle
+    # location e finisce nel blocco PHP, che e' quello che deve eseguirlo.
+    location / {
+        try_files $uri $uri/ @php;
+    }
+
+    location @php {
+        rewrite ^(.*)$ $1.php last;
+    }
+
+    location = /sitemap.xml {
+        rewrite ^ /sitemap.php last;
+    }
+
+    location ~ \.php$ {
+        # ☠ Questo try_files non e' ridondante: senza, un indirizzo inventato che finisce
+        # per .php arriverebbe comunque a php-fpm, che risponderebbe con la sua pagina
+        # "File not found" al posto di un 404 pulito. E' anche la difesa classica contro
+        # l'esecuzione di file caricati con un nome che contiene .php.
+        try_files $uri =404;
+
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_read_timeout 60;
+    }
+
+    # Le risorse statiche cambiano di rado e hanno il numero di versione nella query.
+    location ~* \.(css|js|png|jpg|jpeg|svg|webp|ico|woff2)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+        access_log off;
+        try_files $uri =404;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; return 204; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    # Niente file nascosti, tranne la verifica di Let's Encrypt.
+    location ~ /\.(?!well-known).* { deny all; }
+
+    client_max_body_size 256k;
+}

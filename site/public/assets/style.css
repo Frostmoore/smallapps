@@ -1,0 +1,536 @@
+/*
+  Il foglio di stile della vetrina.
+
+  ⚑ Un file solo, servito dalla stessa origine. Niente framework, niente CDN, niente font
+  esterni: il sito deve poter dire nella cookie policy che non contatta nessun terzo, e
+  ogni risorsa caricata da fuori renderebbe quella frase falsa.
+
+  ⚑ La pila di font e' quella di sistema. Un font caricato da Google manderebbe a Google
+  l'IP di ogni visitatore; uno self-hosted costerebbe due richieste in piu' e un salto di
+  layout. Il carattere di sistema e' gia' sul dispositivo e si disegna al primo frame.
+*/
+
+/* ─── Tavolozza ───────────────────────────────────────────────────────────── */
+
+:root {
+  --ink:        #101713;
+  --ink-soft:   #45514a;
+  --ink-faint:  #6f7c75;
+  --line:       #e2e7e3;
+  --surface:    #ffffff;
+  --canvas:     #f6f8f6;
+  --accent:     #2e7d5b;
+  --accent-dk:  #1f5a41;
+  --accent-lt:  #e8f3ee;
+  --deep:       #10241b;
+  --radius:     16px;
+  --radius-s:   10px;
+  --wrap:       1120px;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+          Arial, "Noto Sans", sans-serif;
+}
+
+/* ─── Fondamenta ──────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--accent-dk); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--accent); }
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.wrap { width: min(100% - 2.5rem, var(--wrap)); margin-inline: auto; }
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  background: var(--ink);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  z-index: 100;
+}
+.skip:focus { left: 1rem; top: 1rem; }
+
+/* ─── Barra superiore ─────────────────────────────────────────────────────── */
+
+.topbar {
+  background: var(--deep);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 66px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand__mark {
+  width: 22px; height: 22px;
+  border-radius: 7px;
+  background: linear-gradient(140deg, #6fd6a4, var(--accent));
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.brand__name span { color: #7fd7ab; font-weight: 500; }
+
+.nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+
+.nav a {
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding-block: 0.4rem;
+}
+.nav a:hover { color: #fff; text-decoration: underline; }
+
+/* ─── Hero ────────────────────────────────────────────────────────────────── */
+
+.hero {
+  background:
+    radial-gradient(1100px 480px at 12% -10%, rgba(111, 214, 164, 0.22), transparent 60%),
+    radial-gradient(900px 420px at 92% 0%, rgba(46, 125, 91, 0.30), transparent 62%),
+    var(--deep);
+  color: #fff;
+  padding-block: clamp(3.5rem, 11vw, 7rem);
+}
+
+.hero--slim { padding-block: clamp(2.5rem, 7vw, 4rem); }
+
+.hero p, .hero li { color: rgba(255, 255, 255, 0.86); }
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #7fd7ab !important;
+  margin: 0 0 1rem;
+}
+
+/*
+  Il titolo grande.
+
+  clamp() invece di media query: la dimensione scala con la finestra senza scalini, e su un
+  telefono stretto resta leggibile invece di andare a capo in mezzo a una parola.
+  `text-wrap: balance` distribuisce le righe in modo che l'ultima non resti orfana; i
+  browser che non lo conoscono lo ignorano e basta.
+*/
+.display {
+  font-size: clamp(2.6rem, 8.5vw, 5.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  margin: 0 0 1.25rem;
+  text-wrap: balance;
+  background: linear-gradient(96deg, #ffffff 18%, #9fe8c4 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.display--s { font-size: clamp(2rem, 5.5vw, 3.2rem); }
+
+.lede {
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+  max-width: 46ch;
+  margin: 0 0 2rem;
+  text-wrap: pretty;
+}
+
+.meta { font-size: 0.9rem; color: rgba(255, 255, 255, 0.62) !important; margin: 0; }
+
+.hero__actions { display: flex; flex-wrap: wrap; gap: 0.85rem; }
+
+/* ─── Bottoni ─────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 650;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: none; }
+
+.btn--primary { background: var(--accent); color: #fff; }
+.btn--primary:hover { background: #35906a; color: #fff; }
+
+.btn--ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+.btn--dark { background: var(--ink); color: #fff; }
+.btn--dark:hover { background: #23302a; color: #fff; }
+
+.btn[aria-disabled="true"] {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.18);
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ─── Sezioni ─────────────────────────────────────────────────────────────── */
+
+.section { padding-block: clamp(3rem, 7vw, 5rem); }
+.section--tint { background: var(--surface); border-block: 1px solid var(--line); }
+
+.section__head { max-width: 62ch; margin-bottom: 2.5rem; }
+
+h2.title {
+  font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin: 0 0 0.75rem;
+  text-wrap: balance;
+}
+
+h3.subtitle {
+  font-size: 1.2rem;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.5rem;
+}
+
+.section__head p { color: var(--ink-soft); margin: 0; font-size: 1.08rem; }
+
+/* ─── Griglia delle app ───────────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.6rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* La fascia colorata in cima: l'accento dell'app, come nell'app stessa. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--card-accent, var(--accent));
+}
+
+a.card:hover {
+  border-color: var(--card-accent, var(--accent));
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(16, 36, 27, 0.10);
+}
+
+.card__logo {
+  width: 58px; height: 58px;
+  border-radius: 15px;
+  object-fit: cover;
+  background: var(--accent-lt);
+}
+
+/* Il segnaposto per chi non ha ancora un logo: l'iniziale su fondo dell'accento. */
+.card__logo--letter {
+  display: grid;
+  place-items: center;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--card-accent, var(--accent));
+  letter-spacing: -0.02em;
+}
+
+.card__name { font-size: 1.3rem; margin: 0; letter-spacing: -0.02em; }
+.card__claim { margin: 0; font-weight: 600; color: var(--card-accent, var(--accent)); }
+.card__text { margin: 0; color: var(--ink-soft); font-size: 0.98rem; }
+
+.card__foot {
+  margin-top: auto;
+  padding-top: 0.4rem;
+  font-weight: 650;
+  font-size: 0.95rem;
+  color: var(--card-accent, var(--accent));
+}
+
+/*
+  Le app non ancora fatte.
+
+  ⚑ Grigie ma NON invisibili, e senza link. `filter: grayscale` da solo non basta: senza
+  togliere il puntatore e senza l'etichetta, un visitatore ci clicca sopra, non succede
+  niente e pensa che il sito sia rotto. Il tag "In arrivo" e il cursore normale dicono
+  prima del clic che non c'e' niente da aprire.
+*/
+.card--soon {
+  background: #f2f4f2;
+  border-style: dashed;
+  color: var(--ink-faint);
+}
+.card--soon .card__name { color: var(--ink-soft); }
+.card--soon .card__claim,
+.card--soon .card__foot { color: var(--ink-faint); }
+.card--soon .card__logo--letter { background: #b9c2bc; }
+.card--soon::before { background: #cfd6d1; }
+
+.tag {
+  align-self: flex-start;
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #e4e8e5;
+  color: var(--ink-soft);
+}
+
+.tag--live { background: var(--accent-lt); color: var(--accent-dk); }
+
+/* ─── Elenchi di argomenti ────────────────────────────────────────────────── */
+
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+
+.feature { padding: 0; }
+.feature h3 { font-size: 1.12rem; margin: 0 0 0.4rem; letter-spacing: -0.015em; }
+.feature p { margin: 0; color: var(--ink-soft); font-size: 0.99rem; }
+
+.feature__num {
+  display: inline-grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: var(--accent-lt);
+  color: var(--accent-dk);
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-bottom: 0.7rem;
+}
+
+/* ─── Riquadro prezzo ─────────────────────────────────────────────────────── */
+
+.price {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.25rem;
+}
+
+.plan {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+}
+.plan--pro { border-color: var(--accent); box-shadow: 0 10px 30px rgba(46, 125, 91, 0.10); }
+
+.plan h3 { margin: 0 0 0.25rem; font-size: 1.2rem; }
+.plan__price { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 1rem; }
+.plan__price small { font-size: 0.95rem; font-weight: 500; color: var(--ink-faint); }
+
+.ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.ticks li { padding-left: 1.7rem; position: relative; color: var(--ink-soft); }
+.ticks li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.55em;
+  width: 0.65rem; height: 0.35rem;
+  border-left: 2.5px solid var(--accent);
+  border-bottom: 2.5px solid var(--accent);
+  transform: rotate(-45deg);
+}
+
+/* ─── Prosa (pagine legali) ───────────────────────────────────────────────── */
+
+.prose { max-width: 76ch; padding-block: clamp(2.5rem, 6vw, 4rem); }
+.prose h2 { font-size: 1.45rem; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+.prose h3 { font-size: 1.1rem; margin: 1.75rem 0 0.5rem; }
+.prose p, .prose li { color: var(--ink-soft); }
+.prose ul, .prose ol { padding-left: 1.3rem; display: grid; gap: 0.45rem; }
+.prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
+.prose th, .prose td { text-align: left; padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose th { background: var(--surface); font-weight: 700; color: var(--ink); }
+.prose .box {
+  background: var(--accent-lt);
+  border: 1px solid #cfe5da;
+  border-radius: var(--radius-s);
+  padding: 1.1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+.prose .box p:last-child { margin-bottom: 0; }
+
+.toc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 1.1rem 1.35rem; }
+.toc ol { margin: 0.5rem 0 0; }
+
+/* Le tabelle non devono far scorrere la pagina in orizzontale. */
+.scroll-x { overflow-x: auto; }
+
+/* ─── Modulo ──────────────────────────────────────────────────────────────── */
+
+.form { display: grid; gap: 1.1rem; max-width: 36rem; }
+
+.field { display: grid; gap: 0.35rem; }
+.field > label { font-weight: 650; font-size: 0.95rem; }
+.field small { color: var(--ink-faint); font-size: 0.86rem; }
+
+input[type="text"], input[type="email"], select, textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid #cdd6d0;
+  border-radius: var(--radius-s);
+  padding: 0.7rem 0.85rem;
+  width: 100%;
+}
+textarea { min-height: 9rem; resize: vertical; }
+
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+.check { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.93rem; color: var(--ink-soft); }
+.check input { margin-top: 0.3rem; flex: 0 0 auto; }
+
+/*
+  Il campo trappola per i robot.
+
+  ☠ NON si nasconde con `display: none`: i robot piu' accorti ignorano i campi con
+  display none proprio perche' sanno che sono trappole. Spostarlo fuori schermo e
+  toglierlo dall'ordine di tabulazione lo rende invisibile a una persona e compilabile da
+  un robot che legge l'HTML.
+*/
+.trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px; height: 1px;
+  overflow: hidden;
+}
+
+.alert {
+  border-radius: var(--radius-s);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid;
+}
+.alert--err { background: #fdeceb; border-color: #f1b9b4; color: #7d241c; }
+.alert--ok  { background: var(--accent-lt); border-color: #cfe5da; color: var(--accent-dk); }
+.alert ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+
+/* ─── Striscia di richiamo ────────────────────────────────────────────────── */
+
+.cta {
+  background: var(--deep);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: clamp(2rem, 5vw, 3rem);
+  display: grid;
+  gap: 1.25rem;
+}
+.cta h2 { margin: 0; font-size: clamp(1.5rem, 3.2vw, 2.1rem); letter-spacing: -0.025em; }
+.cta p { margin: 0; color: rgba(255, 255, 255, 0.82); max-width: 56ch; }
+
+/* ─── Pie' di pagina ──────────────────────────────────────────────────────── */
+
+.footer { background: var(--deep); color: rgba(255, 255, 255, 0.78); padding-block: 3rem 2rem; margin-top: 0; }
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 2rem;
+  padding-bottom: 2.25rem;
+}
+.footer__col--wide { grid-column: span 2; min-width: 0; }
+@media (max-width: 620px) { .footer__col--wide { grid-column: auto; } }
+
+.footer__brand { font-weight: 800; font-size: 1.15rem; color: #fff; margin: 0 0 0.6rem; letter-spacing: -0.02em; }
+.footer__brand span { color: #7fd7ab; font-weight: 500; }
+.footer__blurb { margin: 0; font-size: 0.95rem; max-width: 40ch; }
+
+.footer__title {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: #7fd7ab;
+  margin: 0 0 0.8rem;
+}
+
+.footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; font-size: 0.95rem; }
+.footer__list a { color: rgba(255, 255, 255, 0.82); text-decoration: none; }
+.footer__list a:hover { color: #fff; text-decoration: underline; }
+.footer__list em { font-style: normal; color: rgba(255, 255, 255, 0.5); font-size: 0.85em; }
+.footer__soon { color: rgba(255, 255, 255, 0.45); }
+
+.footer__legal {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 1.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+.footer__legal p { margin: 0 0 0.35rem; }
+.footer__legal strong { color: rgba(255, 255, 255, 0.8); }
+
+/* ─── Schermo stretto ─────────────────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  .topbar__inner { min-height: 0; padding-block: 0.7rem; }
+  .nav { gap: 1rem; width: 100%; }
+  .btn { width: 100%; }
+  .hero__actions .btn { width: auto; flex: 1 1 12rem; }
+}

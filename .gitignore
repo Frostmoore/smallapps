@@ -64,3 +64,7 @@ memory/
 # Localizzazioni generate da gen-l10n: si rigenerano a ogni pub get
 **/lib/l10n/generated/
 **/lib/l10n/untranslated.json
+
+# Vetrina: credenziali SMTP e messaggi ricevuti vivono solo sul server
+site/config.local.php
+site/var/
