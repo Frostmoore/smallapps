@@ -61,11 +61,20 @@ class TrashcanScheduler implements NotificationScheduler {
     await settings.remove(SettingKeys.lastRescheduleAt);
   }
 
+  /// `true` se il piano dell'utente comprende i promemoria.
+  ///
+  /// ☠ Il controllo sta **qui**, nel punto in cui il piano viene consegnato ad Android, e
+  /// non solo nella pagina delle impostazioni. Una notifica gia' pianificata sopravvive
+  /// alla scadenza del diritto: se si gating-asse solo l'interfaccia, chi compra, si fa
+  /// rimborsare e poi disinstalla la pagina continuerebbe a ricevere promemoria per i
+  /// sessanta giorni successivi.
+  bool get _allowed => gate.allows(FeatureKey.notifications);
+
   @override
   Future<void> rescheduleAll() async {
     final service = notifications;
     if (service == null) return;
-    if (!settings.getBool(SettingKeys.notificationsEnabled, orElse: true)) {
+    if (!_allowed || !settings.getBool(SettingKeys.notificationsEnabled, orElse: true)) {
       await service.cancelAll();
       return;
     }
@@ -86,6 +95,7 @@ class TrashcanScheduler implements NotificationScheduler {
 
   /// Il piano completo, ordinato per istante e troncato a [maxScheduled].
   Future<List<ScheduledNotification>> computeSchedule({CivilDate? today, DateTime? now}) async {
+    if (!_allowed) return const <ScheduledNotification>[];
     final base = today ?? CivilDate.today();
     final moment = now ?? DateTime.now();
     final l = lookupL(

@@ -35,18 +35,28 @@ abstract final class TrashcanWidget {
   static const String keyTonightLabel = 'tonight_label';
   static const String keyTonightText = 'tonight_text';
   static const String keyTonightColor = 'tonight_color';
-  static const String keyNextText = 'next_text';
   static const String keyCalendarName = 'calendar_name';
   static const String keyUpcoming = 'upcoming';
-  static const String keyShowUpcoming = 'show_upcoming';
+  static const String keyUpcomingEmpty = 'upcoming_empty';
+
+  /// Il separatore fra le righe dei prossimi giorni.
+  ///
+  /// In una costante e non scritto a mano dentro `join`: l'a capo dentro un letterale Dart
+  /// e' facilissimo da rompere con una sostituzione automatica, e il sintomo e' un widget
+  /// che elenca i giorni tutti su una riga sola.
+  static const String newline = '\n';
 
   static const OccurrenceEngine _engine = OccurrenceEngine();
 
   /// Ricalcola il contenuto e lo consegna al sistema.
   ///
-  /// [pro] decide se il widget mostra anche i prossimi giorni: è l'unica differenza fra
-  /// la versione gratuita e quella a pagamento, e si decide qui invece che nel layout
-  /// perché il provider Kotlin non sa niente di acquisti.
+  /// [pro] decide **quanti** giorni elenca la fascia inferiore, non se elencarli: tre col
+  /// Pro, solo la prossima raccolta senza.
+  ///
+  /// ⛑ Perche' non "niente" senza Pro: il widget e' fatto di due fasce, e una meta'
+  /// bianca e vuota non si legge come "funzione a pagamento", si legge come "il widget non
+  /// ha caricato". Una riga sola che dice qualcosa di vero e' un widget che funziona e che
+  /// lascia vedere cosa si guadagna ad averne tre.
   static Future<void> publish({
     required AppDatabase db,
     required int? calendarId,
@@ -63,10 +73,9 @@ abstract final class TrashcanWidget {
         label: l.home_tonightTitle.toUpperCase(),
         text: l.home_tonightEmpty,
         color: null,
-        next: '',
         calendarName: '',
         upcoming: const <String>[],
-        showUpcoming: false,
+        emptyText: l.home_noUpcoming,
       );
       return;
     }
@@ -77,9 +86,9 @@ abstract final class TrashcanWidget {
     final today = CivilDate.today();
     final occurrences = bundle == null
         ? const <CollectionOccurrence>[]
-        : _engine.expand(rules: bundle.rules, from: today, to: today.addDays(10));
+        : _engine.expand(rules: bundle.rules, from: today, to: today.addDays(21));
 
-    // "Stasera" è la raccolta di **domani**: il bidone si porta fuori la sera prima.
+    // "Stasera" e' la raccolta di **domani**: il bidone si porta fuori la sera prima.
     final tomorrow = today.addDays(1);
     final tonight = occurrences.where((o) => o.date == tomorrow).toList();
 
@@ -92,26 +101,19 @@ abstract final class TrashcanWidget {
         ? null
         : bundle?.typeOf(tonight.first.wasteTypeId)?.colorValue;
 
-    final next = occurrences.where((o) => o.date.isAfter(tomorrow)).firstOrNull;
-    final nextText = next == null
-        ? ''
-        : l.home_nextIn(
-            bundle?.typeOf(next.wasteTypeId)?.name ?? '',
-            _eveningLabel(l, locale, next.date),
-          );
+    final later = occurrences.where((o) => o.date.isAfter(tomorrow)).toList();
 
     await _write(
       label: l.home_tonightTitle.toUpperCase(),
       text: names.isEmpty ? l.home_tonightEmpty : names.join(', '),
       color: accent,
-      next: nextText,
       calendarName: calendars.length > 1 ? calendar.name : '',
       upcoming: <String>[
-        for (final occurrence in occurrences.where((o) => o.date.isAfter(tomorrow)).take(3))
-          '${DateFormat('EEE d', locale).format(occurrence.date.toLocalMidnight())}  '
+        for (final occurrence in later.take(pro ? 3 : 1))
+          '${DateFormat('EEE d', locale).format(occurrence.date.toLocalMidnight())}   '
               '${bundle?.typeOf(occurrence.wasteTypeId)?.name ?? ''}',
       ],
-      showUpcoming: pro,
+      emptyText: l.home_noUpcoming,
     );
   }
 
@@ -119,20 +121,18 @@ abstract final class TrashcanWidget {
     required String label,
     required String text,
     required int? color,
-    required String next,
     required String calendarName,
     required List<String> upcoming,
-    required bool showUpcoming,
+    required String emptyText,
   }) async {
     await HomeWidget.saveWidgetData<String>(keyTonightLabel, label);
     await HomeWidget.saveWidgetData<String>(keyTonightText, text);
-    // Il colore viaggia come intero ARGB. `null` significa "usa il colore neutro del
-    // tema": il provider lo interpreta, il layout non ha logica.
+    // Il colore viaggia come intero ARGB. 0 significa "usa il colore neutro": il provider
+    // lo interpreta, il layout non ha logica.
     await HomeWidget.saveWidgetData<int>(keyTonightColor, color ?? 0);
-    await HomeWidget.saveWidgetData<String>(keyNextText, next);
     await HomeWidget.saveWidgetData<String>(keyCalendarName, calendarName);
-    await HomeWidget.saveWidgetData<String>(keyUpcoming, upcoming.join('\n'));
-    await HomeWidget.saveWidgetData<bool>(keyShowUpcoming, showUpcoming && upcoming.isNotEmpty);
+    await HomeWidget.saveWidgetData<String>(keyUpcoming, upcoming.join(newline));
+    await HomeWidget.saveWidgetData<String>(keyUpcomingEmpty, emptyText);
     await HomeWidget.updateWidget(qualifiedAndroidName: qualifiedName);
   }
 
@@ -157,16 +157,5 @@ abstract final class TrashcanWidget {
       // messo il widget sulla schermata. Non e' un difetto, ed e' il caso normale.
       MicroLog.d('aggiornamenti del widget non programmati: $error');
     }
-  }
-
-  /// "questa sera", "domani sera", "giovedì sera".
-  static String _eveningLabel(L l, String locale, CivilDate collectionDate) {
-    final evening = collectionDate.addDays(-1);
-    final today = CivilDate.today();
-    if (evening == today) return l.home_whenThisEvening;
-    if (evening == today.addDays(1)) return l.home_whenTomorrowEvening;
-    return l.home_whenOnWeekdayEvening(
-      DateFormat('EEEE', locale).format(evening.toLocalMidnight()),
-    );
   }
 }

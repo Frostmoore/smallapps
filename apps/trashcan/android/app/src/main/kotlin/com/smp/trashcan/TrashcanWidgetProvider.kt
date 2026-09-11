@@ -14,6 +14,9 @@ import es.antonborri.home_widget.HomeWidgetProvider
 /**
  * Il widget della schermata iniziale di TrashCan.
  *
+ * Due fasce: sopra, su fondo colorato del tipo di rifiuto, cosa si butta stasera in grande;
+ * sotto, su fondo bianco, i prossimi giorni in piccolo.
+ *
  * Non decide niente: legge le stringhe gia' pronte che il lato Dart ha salvato
  * (vedi lib/services/trashcan_widget.dart) e le mette nel layout. Tutta la logica di
  * calendario, di lingua e di Pro sta in Dart, dove e' testabile.
@@ -31,7 +34,7 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
         widgetData: SharedPreferences,
     ) {
         // ☠ Tutto dentro un try. Android esegue onUpdate in un BroadcastReceiver, e
-        // un'eccezione qui non rompe il widget: fa cadere il processo dell'app con
+        // un'eccezione li' non rompe il widget: fa cadere il processo dell'app con
         // "TrashCan continua a bloccarsi". Un widget che resta indietro di un aggiornamento
         // e' un fastidio; un'app che non si apre piu' e' una disinstallazione.
         try {
@@ -53,10 +56,6 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
             views.setTextViewText(R.id.widget_label, widgetData.getString(KEY_LABEL, "") ?: "")
             views.setTextViewText(R.id.widget_text, widgetData.getString(KEY_TEXT, "") ?: "")
 
-            val next = widgetData.getString(KEY_NEXT, "").orEmpty()
-            views.setTextViewText(R.id.widget_next, next)
-            views.setViewVisibility(R.id.widget_next, if (next.isEmpty()) View.GONE else View.VISIBLE)
-
             val calendarName = widgetData.getString(KEY_CALENDAR, "").orEmpty()
             views.setTextViewText(R.id.widget_calendar, calendarName)
             views.setViewVisibility(
@@ -65,43 +64,46 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
             )
 
             // Il colore arriva come intero ARGB; 0 significa "nessun tipo stasera", e si
-            // usa il verde neutro. Il testo va scelto in base alla luminosita' dello
-            // sfondo, altrimenti il nero su un colore scuro e' illeggibile proprio nel
-            // caso che conta: di sera, di fretta, guardando lo schermo da lontano.
+            // usa il verde neutro.
             //
             // ☠ Si legge dalla mappa e si accetta sia Int sia Long. Il canale fra Dart e
             // Android codifica un intero come Integer se sta in 32 bit con segno e come Long
             // altrimenti: **il tipo dipende dal valore**. Un ARGB con alpha 0xFF supera
             // 2^31 e arriva come Long; lo zero che si manda quando stasera non si raccoglie
-            // niente arriva come Integer.
-            //
-            // Quindi getInt() e getLong() sbagliano **a turno**, e non c'e' un momento in
-            // cui si possa dire di aver scelto quello giusto. Peggio: un receiver che lancia
-            // fa cadere l'intero processo dell'app, non solo il widget. Il sintomo e'
-            // "TrashCan continua a bloccarsi", e si presenta la prima sera in cui non si
-            // raccoglie niente, cioe' dopo giorni di funzionamento perfetto.
+            // niente arriva come Integer. getInt() e getLong() sbagliano a turno.
             val stored = when (val raw = widgetData.all[KEY_COLOR]) {
                 is Long -> raw.toInt()
                 is Int -> raw
                 else -> 0
             }
-            val background = if (stored == 0) NEUTRAL else stored
-            views.setInt(R.id.widget_root, "setBackgroundColor", background)
-            val foreground = if (isDark(background)) Color.WHITE else Color.BLACK
+            val header = if (stored == 0) NEUTRAL else stored
+
+            // ☠ Il colore si applica tingendo l'ImageView di sfondo, non con
+            // setBackgroundColor sulla view: quest'ultimo sostituisce il drawable e con lui
+            // gli angoli arrotondati in alto, e il widget viene fuori squadrato sopra e
+            // tondo sotto.
+            views.setInt(R.id.widget_header_bg, "setColorFilter", header)
+
+            // Il testo va scelto in base alla luminosita' dello sfondo: il nero su un colore
+            // scuro e' illeggibile proprio nel caso che conta, di sera e da lontano.
+            val foreground = if (isDark(header)) Color.WHITE else Color.BLACK
             views.setTextColor(R.id.widget_text, foreground)
             views.setTextColor(R.id.widget_label, translucent(foreground))
-            views.setTextColor(R.id.widget_next, translucent(foreground))
             views.setTextColor(R.id.widget_calendar, translucent(foreground))
-            views.setTextColor(R.id.widget_upcoming, translucent(foreground))
 
-            // I prossimi giorni sono la parte Pro. Chi non ha il Pro non vede una riga
-            // vuota: vede un widget piu' corto, che e' il comportamento giusto.
-            val showUpcoming = widgetData.getBoolean(KEY_SHOW_UPCOMING, false)
+            // Il corpo: i prossimi giorni, o una riga che spiega che non ce ne sono. Una
+            // meta' bianca e vuota si legge come "il widget non ha caricato".
             val upcoming = widgetData.getString(KEY_UPCOMING, "").orEmpty()
+            val hasUpcoming = upcoming.isNotEmpty()
             views.setTextViewText(R.id.widget_upcoming, upcoming)
             views.setViewVisibility(
                 R.id.widget_upcoming,
-                if (showUpcoming && upcoming.isNotEmpty()) View.VISIBLE else View.GONE,
+                if (hasUpcoming) View.VISIBLE else View.GONE,
+            )
+            views.setTextViewText(R.id.widget_empty, widgetData.getString(KEY_EMPTY, "") ?: "")
+            views.setViewVisibility(
+                R.id.widget_empty,
+                if (hasUpcoming) View.GONE else View.VISIBLE,
             )
 
             // Toccare il widget apre l'app. FLAG_IMMUTABLE e' obbligatorio da Android 12:
@@ -126,12 +128,11 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
         const val KEY_LABEL = "tonight_label"
         const val KEY_TEXT = "tonight_text"
         const val KEY_COLOR = "tonight_color"
-        const val KEY_NEXT = "next_text"
         const val KEY_CALENDAR = "calendar_name"
         const val KEY_UPCOMING = "upcoming"
-        const val KEY_SHOW_UPCOMING = "show_upcoming"
+        const val KEY_EMPTY = "upcoming_empty"
 
-        /** Il verde del tema, per quando stasera non si raccoglie niente. */
+        /** Il verde di TrashCan, per quando stasera non si raccoglie niente. */
         const val NEUTRAL = 0xFF2E7D5B.toInt()
 
         fun isDark(color: Int): Boolean {
@@ -141,6 +142,7 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
             return luminance < 150
         }
 
-        fun translucent(color: Int): Int = Color.argb(190, Color.red(color), Color.green(color), Color.blue(color))
+        fun translucent(color: Int): Int =
+            Color.argb(190, Color.red(color), Color.green(color), Color.blue(color))
     }
 }

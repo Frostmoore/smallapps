@@ -14,6 +14,7 @@ import '../features/exceptions/exceptions_page.dart';
 import '../features/home/home_page.dart';
 import '../features/notifications/notifications_page.dart';
 import '../features/onboarding/onboarding_page.dart';
+import '../features/restore/restore_page.dart';
 import '../features/settings/settings_page.dart';
 import '../features/waste_types/waste_type_editor_page.dart';
 import '../features/waste_types/waste_types_page.dart';
@@ -59,6 +60,7 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
     GoRoute(path: Routes.notifications, builder: (_, __) => const NotificationsPage()),
     GoRoute(path: Routes.backup, builder: (_, __) => const BackupPage()),
+    GoRoute(path: Routes.restore, builder: (_, __) => const RestorePage()),
   ],
   // Chi non ha ancora fatto il wizard viene portato lì, da qualunque punto entri:
   // anche da un deep link, che altrimenti mostrerebbe una home vuota e incomprensibile.
@@ -130,6 +132,7 @@ class _TrashcanAppState extends ConsumerState<TrashcanApp> {
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(appConfigProvider);
+    final seed = ref.watch(seedColorProvider);
     // Tiene in vita il collegamento fra le modifiche ai dati e il piano delle notifiche.
     ref.watch(notificationSyncProvider);
     // Il router si costruisce una volta sola: ricrearlo a ogni build azzererebbe la
@@ -140,8 +143,10 @@ class _TrashcanAppState extends ConsumerState<TrashcanApp> {
       title: config.appName,
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      theme: MicroTheme.light(seed: config.seedColor, fontFamily: config.fontFamily),
-      darkTheme: MicroTheme.dark(seed: config.seedColor, fontFamily: config.fontFamily),
+      // Il seme viene dalle preferenze, non dalla configurazione: e' la personalizzazione
+      // Pro. `config.seedColor` resta il valore di partenza, dentro AppSeeds.fallback.
+      theme: MicroTheme.light(seed: seed, fontFamily: config.fontFamily),
+      darkTheme: MicroTheme.dark(seed: seed, fontFamily: config.fontFamily),
       themeMode: ref.watch(themeModeProvider),
       supportedLocales: kSupportedLocales,
       localizationsDelegates: const [

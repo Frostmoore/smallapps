@@ -228,6 +228,8 @@
 
   "settings_title": "Settings",
   "settings_appearance": "Appearance",
+  "settings_appColour": "App colour",
+  "settings_appColourBody": "Choose the colour TrashCan wears.",
   "settings_calendar": "Calendar",
   "settings_themeSystem": "Follow the system",
   "settings_themeLight": "Light",
@@ -247,6 +249,27 @@
   "settings_installId": "Installation ID",
   "settings_installIdHelp": "Only used to link your purchase to this device. It is not a personal identifier.",
 
+  "restore_title": "Change of phone",
+  "restore_playTitle": "Restore with your Google account",
+  "restore_playBody": "If the new phone uses the same Google account you bought with, Pro comes back from here. No code, nothing to write down.",
+  "restore_playAction": "Restore purchase",
+  "restore_codeTitle": "Move it to another account",
+  "restore_codeBody": "Only if the new phone uses a different Google account. Generate a code here, then type it in over there.",
+  "restore_codeCreate": "Generate a code",
+  "restore_codeEnter": "I have a code",
+  "restore_codeLabel": "Transfer code",
+  "restore_codeCreated": "Code: {code}",
+  "@restore_codeCreated": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "restore_codeExpires": "It works once, and only until {when}.",
+  "@restore_codeExpires": {
+    "placeholders": { "when": { "type": "String" } }
+  },
+  "restore_codeUnavailable": "The transfer code needs the licence server, which is not configured in this build. Use your Google account instead.",
+  "restore_done": "Pro is back.",
+  "restore_nothing": "No previous purchase found on this account.",
+
   "paywall_headline": "TrashCan Pro",
   "paywall_subhead": "One payment. No subscription. Yours forever.",
   "paywall_buy": "Unlock Pro",
@@ -259,6 +282,8 @@
   "paywall_thanks": "Thank you. Pro is unlocked.",
   "paywall_restoredNothing": "No previous purchase found on this account.",
   "paywall_unavailable": "In-app purchases are not available on this device.",
+  "paywall_benefitRemindersTitle": "The evening reminder",
+  "paywall_benefitRemindersBody": "TrashCan tells you what to take out, the evening before, so the truck never catches you out.",
   "paywall_benefitCalendarsTitle": "As many calendars as you need",
   "paywall_benefitCalendarsBody": "A second home, your parents' place, the office. Each with its own days and reminders.",
   "paywall_benefitWidgetTitle": "Full home screen widget",

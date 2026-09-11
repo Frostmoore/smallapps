@@ -1,27 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Il primo piano dell'icona adattiva.
+  Il primo piano dell'icona adattiva: un cestino davanti a un calendario.
 
   Il viewport e' 108x108 e non 24x24: Android ritaglia le icone adattive in forme diverse
-  (cerchio, quadrato con angoli, goccia) e i 18dp esterni per lato possono sparire. La
-  figura sta dentro il riquadro centrale di 72x72, cioe' fra 18 e 90, altrimenti su un
-  launcher che ritaglia a cerchio il bidone viene tagliato.
+  (cerchio, quadrato con angoli, goccia) e i 18dp esterni per lato possono sparire. Tutta
+  la figura sta nel riquadro centrale, fra 22 e 86.
 
-  Il bidone e' disegnato in una griglia 24x24 e riportato al centro con un group che
-  trasla di 30 e scala di 2: 24 * 2 = 48, centrato in 108 significa partire da 30.
+  ☠ Il calendario e' un TELAIO, non un rettangolo pieno. La prima versione lo riempiva di
+  bianco e a 48dp, che e' la dimensione a cui l'icona si vede davvero, restava una macchia
+  chiara con dentro qualcosa di indistinto. Un contorno spesso con la fascia superiore piena
+  si legge come calendario anche a un quarto della dimensione.
+
+  ☠ Attorno al cestino c'e' un alone del colore di FONDO, non bianco: serve a staccarlo dal
+  telaio, e in modalita' monochrome Android ridisegna tutto con la tinta del sistema, dove
+  un alone bianco diventerebbe un buco.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group
-        android:translateX="30"
-        android:translateY="30"
-        android:scaleX="2"
-        android:scaleY="2">
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M6,19c0,1.1 0.9,2 2,2h8c1.1,0 2,-0.9 2,-2V7H6v12zM19,4h-3.5l-1,-1h-5l-1,1H5v2h14V4z" />
-    </group>
+
+    <!-- Anelli del calendario. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M36,20 h7 v12 h-7 z M65,20 h7 v12 h-7 z" />
+
+    <!-- Telaio del calendario: contorno spesso con la fascia superiore piena. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M22,28 h64 a5,5 0 0 1 5,5 v53 a5,5 0 0 1 -5,5 h-64 a5,5 0 0 1 -5,-5 v-53 a5,5 0 0 1 5,-5 z M24,46 v38 a1,1 0 0 0 1,1 h58 a1,1 0 0 0 1,-1 v-38 z" />
+
+    <!-- Alone: stacca il cestino dal telaio. -->
+    <path
+        android:fillColor="#FF2E7D5B"
+        android:pathData="M36,46 h36 v8 h-5 v34 a7,7 0 0 1 -7,7 h-12 a7,7 0 0 1 -7,-7 v-34 h-5 z M47,38 h14 v9 h-14 z" />
+
+    <!-- Il cestino: sagoma piena, con due scanalature. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M41,58 h26 v27 a4,4 0 0 1 -4,4 h-18 a4,4 0 0 1 -4,-4 z M38,51 h32 v5 h-32 z M49,43 h10 v6 h-10 z" />
+    <path
+        android:fillColor="#FF2E7D5B"
+        android:pathData="M48,64 h3 v18 h-3 z M56,64 h3 v18 h-3 z" />
 </vector>

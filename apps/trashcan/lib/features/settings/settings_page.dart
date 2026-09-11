@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../../app/app_themes.dart';
+import '../../app/paywall_config.dart';
 import '../../app/providers.dart';
 import '../../app/routes.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -11,6 +15,15 @@ import '../../services/trashcan_widget.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
+
+  /// Applica il colore scelto, o apre il paywall se non se ne ha diritto.
+  static Future<void> _pickSeed(BuildContext context, WidgetRef ref, Color color) async {
+    if (!ref.read(featureGateProvider).allows(FeatureKey.themeCustomization)) {
+      await showTrashcanPaywall(context, ref, highlight: FeatureKey.themeCustomization);
+      return;
+    }
+    await ref.read(seedColorProvider.notifier).set(color);
+  }
 
   /// Chiede al launcher di aggiungere il widget.
   ///
@@ -31,6 +44,8 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
     final mode = ref.watch(themeModeProvider);
+    final gate = ref.watch(featureGateProvider);
+    final seed = ref.watch(seedColorProvider);
     final entitlement = ref.watch(entitlementProvider);
     final installId = ref.watch(installIdProvider).value;
 
@@ -64,6 +79,41 @@ class SettingsPage extends ConsumerWidget {
                       ),
                   ],
                 ),
+              ),
+            ),
+            MicroSpacing.gapXL,
+            MicroSectionHeader(
+              title: l.settings_appColour,
+              trailing: gate.allows(FeatureKey.themeCustomization)
+                  ? null
+                  : const ProBadge(compact: true),
+            ),
+            MicroCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.settings_appColourBody,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  MicroSpacing.gapL,
+                  Wrap(
+                    spacing: MicroSpacing.s,
+                    runSpacing: MicroSpacing.s,
+                    children: [
+                      for (final entry in AppSeeds.all)
+                        _SeedSwatch(
+                          color: entry.color,
+                          selected: entry.color.toARGB32() == seed.toARGB32(),
+                          // ⛑ Il cancello sta sul tocco, non sull'aspetto: le pastiglie si
+                          // vedono tutte anche senza Pro. Nasconderle vorrebbe dire che
+                          // nessuno sa che la personalizzazione esiste, e una funzione che
+                          // nessuno vede non si vende.
+                          onTap: () => unawaited(_pickSeed(context, ref, entry.color)),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
             MicroSpacing.gapXL,
@@ -109,6 +159,16 @@ class SettingsPage extends ConsumerWidget {
             ),
             MicroSpacing.gapXL,
             MicroSectionHeader(title: l.paywall_headline),
+            MicroCard(
+              padding: EdgeInsets.zero,
+              child: MicroListTile(
+                title: l.restore_title,
+                subtitle: l.restore_playBody,
+                leading: const Icon(Icons.phonelink_setup_outlined),
+                onTap: () => context.push(Routes.restore),
+              ),
+            ),
+            MicroSpacing.gapS,
             MicroCard(
               child: Row(
                 children: [
@@ -158,4 +218,34 @@ class SettingsPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+
+/// Una pastiglia di colore nel selettore del tema.
+class _SeedSwatch extends StatelessWidget {
+  const _SeedSwatch({required this.color, required this.selected, required this.onTap});
+
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(22),
+    child: Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: selected
+            ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3)
+            : null,
+      ),
+      child: selected
+          ? Icon(Icons.check, size: 20, color: MicroCard.foregroundOn(color))
+          : null,
+    ),
+  );
 }

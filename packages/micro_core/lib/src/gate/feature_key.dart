@@ -38,6 +38,13 @@ enum FeatureKey {
   /// Widget home screen nella versione ricca.
   advancedWidget,
 
+  /// I promemoria in se': l'app avvisa, oppure resta un registro da consultare.
+  ///
+  /// ⛑ Distinta da [multipleNotifications], che vende il *secondo* orario. Un'app puo'
+  /// regalare il promemoria e vendere il secondo, oppure vendere il promemoria e basta:
+  /// sono due decisioni commerciali diverse e vanno potute prendere separatamente.
+  notifications,
+
   /// Piu' di un promemoria per evento.
   multipleNotifications,
 

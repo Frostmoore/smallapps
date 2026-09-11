@@ -18,6 +18,15 @@ const FeatureLimits trashcanFeatureLimits = <FeatureKey, FeatureLimit>{
   // Calendari: uno gratis, illimitati con Pro.
   FeatureKey.unlimitedEntities: FeatureLimit.count(freeMax: 1),
 
+  // ☠ I promemoria **in generale**, non solo i doppi.
+  //
+  // Decisione del proprietario, 2026-09-11. Vale la pena scrivere qui il compromesso che
+  // comporta, perche' e' la scelta commerciale piu' pesante dell'app: TrashCan gratuito
+  // diventa un calendario che bisogna ricordarsi di aprire, cioe' non risolve piu' il
+  // problema per cui la si installa. Se le installazioni o le recensioni ne risentono,
+  // si torna indietro cambiando questa sola riga in `FeatureLimit.open()`.
+  FeatureKey.notifications: FeatureLimit.locked(),
+
   // Piu' di un promemoria per la stessa raccolta, es. 18:00 e 20:00.
   FeatureKey.multipleNotifications: FeatureLimit.locked(),
 

@@ -25,6 +25,8 @@ abstract final class Routes {
 
   static const String backup = '/settings/backup';
 
+  static const String restore = '/settings/restore';
+
   static const String settings = '/settings';
   static const String notifications = '/settings/notifications';
   static const String about = '/settings/about';

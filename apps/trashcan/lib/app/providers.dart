@@ -9,6 +9,7 @@ import '../data/repository.dart';
 import '../domain/occurrence_engine.dart';
 import '../services/trashcan_scheduler.dart';
 import '../services/trashcan_widget.dart';
+import 'app_themes.dart';
 import 'feature_limits.dart';
 
 /// I provider radice dell'app.
@@ -389,3 +390,20 @@ class NotificationsEnabled extends Notifier<bool> {
 final notificationsEnabledProvider = NotifierProvider<NotificationsEnabled, bool>(
   NotificationsEnabled.new,
 );
+
+/// Il colore generale dell'app, scelto dall'utente (funzione Pro).
+///
+/// ⛑ Il valore si legge sempre, anche senza Pro: chi compra, sceglie un colore e poi si
+/// fa rimborsare non deve ritrovarsi l'app di un colore che non ha piu' diritto di vedere
+/// ma nemmeno modo di cambiare. Il cancello sta dove si **sceglie**, non dove si legge.
+class SeedColor extends Notifier<Color> {
+  @override
+  Color build() => AppSeeds.resolve(ref.watch(settingsProvider).getString(AppSeeds.settingKey));
+
+  Future<void> set(Color color) async {
+    state = color;
+    await ref.read(settingsProvider).setString(AppSeeds.settingKey, AppSeeds.keyOf(color));
+  }
+}
+
+final seedColorProvider = NotifierProvider<SeedColor, Color>(SeedColor.new);

@@ -12,7 +12,7 @@
 > settimane.
 >
 > Stato: l'app gira su Android ed è stata percorsa a mano sull'emulatore in ogni schermata.
-> 116 test propri, oltre ai 107 di `micro_core`.
+> 117 test propri, oltre ai 107 di `micro_core`.
 
 ---
 
@@ -32,6 +32,8 @@
 | Colori, icone e preset dei tipi di rifiuto | `lib/app/waste_presets.dart` |
 | Italiano sì / italiano no | `lib/app/locale_resolution.dart` |
 | Il piano delle notifiche | `lib/services/trashcan_scheduler.dart` |
+| I colori generali dell'app (funzione Pro) | `lib/app/app_themes.dart` |
+| Come si riprende l'acquisto su un telefono nuovo | `lib/features/restore/restore_page.dart` |
 | Il contenuto del widget di sistema | `lib/services/trashcan_widget.dart` |
 | Export, import, backup | `lib/services/trashcan_backup_source.dart` |
 | Il disegno del widget | `android/app/src/main/kotlin/com/smp/trashcan/TrashcanWidgetProvider.kt` |
@@ -96,7 +98,7 @@ apps/trashcan/
 │       ├── mipmap-anydpi-v26/ic_launcher.xml    icona adattiva + monochrome
 │       ├── values/strings.xml, values-it/strings.xml
 │       └── xml/trashcan_widget_info.xml
-├── test/                             116 test (vedi §9)
+├── test/                             117 test (vedi §9)
 └── integration_test/first_run_test.dart
 ```
 
@@ -348,6 +350,7 @@ Da sovrascrivere in `main()`, altrimenti l'app non parte: `appConfigProvider`,
 | `schedulerProvider` | `Provider<TrashcanScheduler>` | |
 | `notificationSyncProvider` | `Provider<void>` | tiene notifiche **e** widget allineati ai dati |
 | `notificationsEnabledProvider` | `NotifierProvider<NotificationsEnabled, bool>` | `.set(value)` |
+| `seedColorProvider` | `NotifierProvider<SeedColor, Color>` | il colore generale dell'app, `.set(color)` |
 
 `EntitlementView` è un valore immutabile con `entitlement`, `busy`, `storeAvailable`,
 `product`, `error`, più `isPro` e `isPending`. Esiste perché `EntitlementService` è un
@@ -378,6 +381,7 @@ Dichiarate in `lib/app/routes.dart`, registrate in `lib/app/app.dart`.
 | `Routes.settings` | `/settings` | `SettingsPage` |
 | `Routes.notifications` | `/settings/notifications` | `NotificationsPage` |
 | `Routes.backup` | `/settings/backup` | `BackupPage` |
+| `Routes.restore` | `/settings/restore` | `RestorePage` |
 
 Helper: `Routes.dayOf(String iso)`, `Routes.calendarEditOf(int id)`,
 `Routes.wasteTypeEditOf(int id)`, `Routes.rulesOf(int wasteTypeId)`.
@@ -466,7 +470,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 
 ## 9. Catalogo dei test
 
-116 test in `apps/trashcan/`, oltre ai 107 di `micro_core`.
+117 test in `apps/trashcan/`, oltre ai 107 di `micro_core`.
 
 | File | N. | Cosa dimostra |
 |---|---|---|
@@ -475,7 +479,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 | `test/data/recurrence_roundtrip_test.dart` | 7 | andata e ritorno dominio↔tabella per tutte e 5 le forme; l'ancora e il `-1 = ultimo` sopravvivono; `setRule` sostituisce invece di affiancare |
 | `test/data/watch_bundle_test.dart` | 5 | lo stream del calendario riemette su **tutte** le tabelle: tipo aggiunto, regola cambiata, eccezione aggiunta, lista riordinata, calendario rinominato |
 | `test/data/orphan_exceptions_test.dart` | 3 | le eccezioni di un tipo **senza regola** arrivano fino al motore; la ricorrenza sintetica non genera date di suo; nessun duplicato per i tipi che una regola ce l'hanno |
-| `test/services/trashcan_scheduler_test.dart` | 15 | la sera prima, all'orario giusto; una notifica per giorno con tutti i tipi; tipo silenziato e calendario disattivato esclusi; raccolta saltata senza promemoria; niente nel passato; secondo orario solo col Pro; troncatura a 64 e ordine; titolo col nome del calendario solo se ce n'è più d'uno; id stabili; payload; `parseTime` che non lancia |
+| `test/services/trashcan_scheduler_test.dart` | 16 | **nel piano gratuito non si pianifica niente**; la sera prima, all'orario giusto; una notifica per giorno con tutti i tipi; tipo silenziato e calendario disattivato esclusi; raccolta saltata senza promemoria; niente nel passato; secondo orario solo col Pro; troncatura a 64 e ordine; titolo col nome del calendario solo se ce n'è più d'uno; id stabili; payload; `parseTime` che non lancia |
 | `test/services/trashcan_backup_source_test.dart` | 9 | giro completo su un database vuoto; `replaceAll` cancella; `mergeKeepExisting` non duplica; export di un solo calendario; conteggi veri; quattro casi di file storto |
 | `test/widget/home_page_test.dart` | 6 | la home nei tre stati (niente / uno / tre tipi), lo stato vuoto, la prossima raccolta con la sera giusta, il nome del calendario nel titolo |
 | `test/widget/paywall_config_test.dart` | 6 | **ogni funzione bloccata è venduta**; i calendari stanno per primi; nessun duplicato; nessun testo vuoto; il bottone regge un prezzo assente |
@@ -512,6 +516,7 @@ causa.
 | Dopo un riavvio del telefono i promemoria smettono | gli allarmi non sopravvivono al riavvio senza `RECEIVE_BOOT_COMPLETED` e il boot receiver | `AndroidManifest.xml` |
 | Configuro l'app e dopo due mesi non arriva più niente | niente ripianificava all'avvio: il piano si ricostruiva solo al cambio dei dati | `notificationSyncProvider` |
 | Tocco la notifica e il back esce dall'app | `go` sostituisce lo stack: la pagina del giorno restava senza nulla sotto | `app.dart`, `_openPayload` fa `go(home)` poi `push` |
+| Il widget e' squadrato sopra e tondo sotto | `setBackgroundColor` su una view sostituisce il drawable, e con lui gli angoli arrotondati. Il colore si applica tingendo con `setColorFilter` un `ImageView` di sfondo | `TrashcanWidgetProvider.kt` + `widget_header_background.xml` |
 | Il widget resta un rettangolo colorato e vuoto | il receiver crollava leggendo il colore: vedi la riga seguente | `TrashcanWidgetProvider.kt` |
 | "TrashCan continua a bloccarsi", dopo giorni di funzionamento perfetto | il canale fra Dart e Android codifica un intero come **Integer** se sta in 32 bit con segno e come **Long** altrimenti: *il tipo dipende dal valore*. Un ARGB con alpha `0xFF` supera 2³¹ e arriva Long; lo zero che si manda quando stasera non si raccoglie niente arriva Integer. `getInt` e `getLong` sbagliano **a turno**. E un receiver che lancia fa cadere l'intero processo dell'app, non solo il widget | `TrashcanWidgetProvider.kt`: si legge da `widgetData.all[...]` accettando entrambi i tipi, e tutto `onUpdate` sta dentro un `try` |
 | L'icona nella barra di stato è una macchia bianca | Android usa solo il canale alfa dell'icona: `@mipmap/ic_launcher` è opaca ovunque | `drawable/ic_notification.xml` |
@@ -536,6 +541,30 @@ causa.
 
 ---
 
+## 10bis. Cosa e' a pagamento
+
+Deciso dal proprietario l'11 settembre 2026. La mappa vive in
+`lib/app/feature_limits.dart` ed e' l'unico posto in cui cambiarlo.
+
+| Funzione | Chiave | Piano gratuito |
+|---|---|---|
+| Secondo calendario e oltre | `unlimitedEntities` | uno solo |
+| **I promemoria, tutti** | `notifications` | nessuno |
+| Secondo orario di promemoria | `multipleNotifications` | no |
+| Prossimi tre giorni nel widget | `advancedWidget` | uno solo |
+| Backup completo | `backupRestore` | no (la condivisione di un calendario resta gratuita) |
+| Colore dell'app | `themeCustomization` | verde fisso |
+
+⛑ **Il compromesso dei promemoria**, scritto qui perche' e' la scelta commerciale piu'
+pesante: TrashCan gratuito diventa un calendario che bisogna ricordarsi di aprire, cioe' non
+risolve piu' il problema per cui la si installa. Se le installazioni o le recensioni ne
+risentono, si torna indietro cambiando una riga in `FeatureLimit.open()`. Il controllo sta
+sia nella pagina sia **nel pianificatore**: una notifica gia' consegnata ad Android
+sopravvive alla perdita del diritto, e senza il secondo controllo un rimborso lascerebbe
+arrivare promemoria per sessanta giorni.
+
+---
+
 ## 11. Cosa NON esiste ancora
 
 Per non farlo cercare invano.
@@ -548,6 +577,11 @@ Per non farlo cercare invano.
 - **Nessuna vista mensile a calendario.** Le eccezioni si creano dalla home e dalla pagina
   del giorno.
 - **Nessun terzo orario di promemoria.** La tabella ne prevede due.
+- **Nessun selettore di colore libero.** Dieci semi misurati, non una ruota: un seme troppo
+  chiaro renderebbe illeggibile l'intera app e l'utente non avrebbe modo di accorgersene
+  prima. Vedi `AppSeeds`.
+- **Il codice di trasferimento non funziona finche' il server non e' in esercizio.** La
+  pagina lo dice invece di offrire un bottone che fallisce.
 - **Nessuna app su Play Console.** Vedi §12.
 - **Nessun test di migrazione dello schema** (F3.2.6): con `schemaVersion = 1` non c'è ancora
   niente da migrare, ma il test va scritto **prima** della versione 2.

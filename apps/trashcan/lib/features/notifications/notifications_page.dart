@@ -104,6 +104,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final calendar = ref.watch(activeCalendarProvider);
     final gate = ref.watch(featureGateProvider);
     final second = parseTime(calendar?.secondNotificationTime);
+    final allowed = gate.allows(FeatureKey.notifications);
 
     return Scaffold(
       appBar: AppBar(title: Text(l.notifications_title)),
@@ -111,6 +112,42 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         child: ListView(
           padding: MicroSpacing.page,
           children: [
+            // ⛑ Senza il Pro la pagina non mostra un interruttore spento: mostra cosa si
+            // compra e come. Un interruttore che non si muove insegna solo che l'app e'
+            // rotta, e non dice dove andare.
+            if (!allowed) ...[
+              MicroCard(
+                accent: Theme.of(context).colorScheme.primary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.paywall_benefitRemindersTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: MicroCard.foregroundOn(Theme.of(context).colorScheme.primary),
+                      ),
+                    ),
+                    MicroSpacing.gapS,
+                    Text(
+                      l.paywall_benefitRemindersBody,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: MicroCard.foregroundOn(Theme.of(context).colorScheme.primary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              MicroSpacing.gapL,
+              MicroPrimaryButton(
+                label: l.gate_seePro,
+                onPressed: () => unawaited(
+                  showTrashcanPaywall(context, ref, highlight: FeatureKey.notifications),
+                ),
+              ),
+            ],
+
+            if (allowed) ...
+            [
             MicroCard(
               padding: MicroSpacing.cardTight,
               child: SwitchListTile(
@@ -185,6 +222,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                   },
                 ),
               ),
+            ],
             ],
           ],
         ),

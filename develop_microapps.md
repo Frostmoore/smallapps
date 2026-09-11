@@ -819,6 +819,24 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[!]` bloccato · `[-
 - [x] **F3.15** `apps/trashcan/codebase_reference.md` riscritto a fine fase, con firme estratte dal codice
 - [x] **F3.16** Rituale di fine fase F3: piano e atlanti aggiornati, documenti iniettati nel Projects Tracker (progetto 17), branch `v4.0.0`
 
+**Revisione del proprietario, 11 settembre 2026** (branch `v4.1.0`). Quattro richieste,
+tutte fatte e provate sull'emulatore:
+
+- [x] **Recupero dell'acquisto su un telefono nuovo**: `lib/features/restore/restore_page.dart`,
+  raggiungibile dalle impostazioni. Due strade in ordine di probabilita': il ripristino da
+  Play, che copre il caso normale e funziona senza server, e il codice di trasferimento per
+  chi cambia account Google, che compare solo quando il License Server e' configurato.
+- [x] **Icona rifatta**: cestino davanti a un calendario. Il calendario e' un telaio e non un
+  rettangolo pieno, altrimenti a 48dp resta una macchia chiara.
+- [x] **Widget rifatto**: 2x2 invece di 4x2, stretto e verticale. Intestazione colorata col
+  tipo di stasera, corpo bianco coi giorni successivi. Col Pro ne elenca tre, senza uno solo:
+  una meta' bianca e vuota non si legge come "funzione a pagamento" ma come "non ha caricato".
+- [x] **Colore dell'app scelto dall'utente** fra dieci semi misurati, dietro al paywall
+  (`themeCustomization`). Vedi `lib/app/app_themes.dart`.
+- [x] **Tutte le notifiche dietro al paywall**, non solo le doppie. Nuova chiave
+  `FeatureKey.notifications` in `micro_core`. Il compromesso che comporta e' scritto in
+  `feature_limits.dart` e nell'atlante.
+
 ### F4 — Full Freezer → `v5.0.0`
 
 - [ ] **F4.1** Bootstrap progetto, tema, l10n, router

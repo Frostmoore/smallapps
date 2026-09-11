@@ -2,9 +2,14 @@
 <!--
   La descrizione del widget per il selettore di sistema.
 
-  minWidth 250dp x minHeight 70dp e' la misura 4x1 sulla griglia standard: la formula di
-  Android e' 70*n - 30, quindi 4 colonne fanno 250dp e 1 riga 40dp. Si chiede 70dp di
-  altezza per lasciare respiro alla riga "prossima raccolta".
+  2 colonne x 2 righe: stretto e verticale. La formula della griglia di Android e'
+  70*n - 30, quindi 2 colonne fanno 110dp e 2 righe 110dp. targetCellWidth/Height sono
+  quelli che Android 12+ usa davvero; minWidth/minHeight restano per le versioni prima.
+
+  ☠ La prima versione chiedeva 3 righe: con una sola riga nella fascia inferiore (il caso
+  del piano gratuito) restavano due terzi di bianco vuoto, che non si legge come "spazio"
+  ma come "non ha caricato". Due righe bastano per l'intestazione piu' un paio di giorni, e
+  chi ne vuole vedere tre allarga il widget: resizeMode lo consente.
 
   updatePeriodMillis resta 0: il sistema ignora comunque valori sotto i 30 minuti, e gli
   aggiornamenti veri li pilota l'app (a ogni modifica dei dati) piu' un allarme alle 00:05.
@@ -12,10 +17,12 @@
   che non e' cambiato.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="250dp"
-    android:minHeight="70dp"
-    android:targetCellWidth="4"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="2"
     android:targetCellHeight="2"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="110dp"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/trashcan_widget"
     android:previewLayout="@layout/trashcan_widget"

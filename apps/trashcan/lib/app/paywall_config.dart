@@ -32,6 +32,14 @@ PaywallConfig buildTrashcanPaywall(L l) => PaywallConfig(
       title: l.paywall_benefitCalendarsTitle,
       description: l.paywall_benefitCalendarsBody,
     ),
+    // Il promemoria sta per secondo, subito dopo i calendari: e' la funzione per cui l'app
+    // viene installata, e dal 2026-09-11 e' interamente a pagamento.
+    PaywallBenefit(
+      key: FeatureKey.notifications,
+      icon: Icons.notifications_outlined,
+      title: l.paywall_benefitRemindersTitle,
+      description: l.paywall_benefitRemindersBody,
+    ),
     PaywallBenefit(
       key: FeatureKey.multipleNotifications,
       icon: Icons.notifications_active_outlined,

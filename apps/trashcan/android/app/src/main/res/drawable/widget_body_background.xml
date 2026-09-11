@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Lo sfondo del corpo: bianco, angoli arrotondati solo in basso.
+
+  Il bianco e' fisso e non segue il tema scuro: il corpo elenca i giorni successivi in
+  piccolo, e un fondo chiaro sotto un'intestazione colorata e' l'unica combinazione che
+  resta leggibile sia su uno sfondo chiaro sia su uno scuro della schermata iniziale.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners
+        android:bottomLeftRadius="18dp"
+        android:bottomRightRadius="18dp" />
+    <solid android:color="#FFFFFFFF" />
+</shape>

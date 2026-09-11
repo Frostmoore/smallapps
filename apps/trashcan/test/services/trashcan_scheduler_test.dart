@@ -29,13 +29,31 @@ void main() {
   });
   tearDown(() => db.close());
 
-  TrashcanScheduler schedulerWith({bool pro = false}) => TrashcanScheduler(
+  /// Il pianificatore con un cancello dato.
+  ///
+  /// ⛑ Il default e' **Pro**, non gratuito: dal 2026-09-11 i promemoria sono tutti dietro
+  /// il paywall, quindi con un cancello gratuito ogni test sul contenuto del piano
+  /// verificherebbe soltanto che il piano e' vuoto. Il caso gratuito ha un test suo, qui
+  /// sotto, che e' il posto giusto per fissarlo.
+  TrashcanScheduler schedulerWith({FeatureGate? gate}) => TrashcanScheduler(
     db: db,
     settings: settings,
-    gate: pro
-        ? const FeatureGate.unlimited()
-        : const FeatureGate(limits: trashcanFeatureLimits, isPro: false),
+    gate: gate ?? const FeatureGate.unlimited(),
     appName: 'TrashCan',
+  );
+
+  /// Il cancello del piano gratuito vero.
+  const free = FeatureGate(limits: trashcanFeatureLimits, isPro: false);
+
+  /// Un cancello che concede i promemoria ma non il secondo orario: serve a dimostrare che
+  /// le due chiavi sono indipendenti, cosa che il piano gratuito da solo non mostrerebbe
+  /// perche' li nega entrambi.
+  const singleReminder = FeatureGate(
+    limits: <FeatureKey, FeatureLimit>{
+      FeatureKey.notifications: FeatureLimit.open(),
+      FeatureKey.multipleNotifications: FeatureLimit.locked(),
+    },
+    isPro: false,
   );
 
   /// Un calendario con un tipo di rifiuto raccolto nei giorni indicati.
@@ -63,6 +81,15 @@ void main() {
   // Martedi' 15 settembre 2026. Le raccolte del martedi' hanno il promemoria il lunedi'.
   final monday = CivilDate(2026, 9, 14);
   final morning = DateTime(2026, 9, 14, 8);
+
+  test('nel piano gratuito non si pianifica nessun promemoria', () async {
+    // ☠ Il controllo sta nel pianificatore e non solo nell'interfaccia: una notifica gia'
+    // consegnata ad Android sopravvive alla perdita del diritto, e senza questo un rimborso
+    // lascerebbe arrivare promemoria per i sessanta giorni successivi.
+    await seedCalendar();
+    final plan = await schedulerWith(gate: free).computeSchedule(today: monday, now: morning);
+    expect(plan, isEmpty);
+  });
 
   test('il promemoria arriva la sera prima della raccolta, all-orario del calendario', () async {
     await seedCalendar();
@@ -142,11 +169,14 @@ void main() {
     expect(plan.every((n) => n.localWhen.isAfter(DateTime(2026, 9, 14, 22))), isTrue);
   });
 
-  test('nel piano gratuito il secondo orario viene ignorato', () async {
+  test('senza il diritto ai promemoria multipli il secondo orario viene ignorato', () async {
     await seedCalendar(time: '18:00', secondTime: '21:00');
 
-    final free = await schedulerWith().computeSchedule(today: monday, now: morning);
-    final thatEvening = free.where((n) => n.localWhen.day == 14).toList();
+    final plan = await schedulerWith(gate: singleReminder).computeSchedule(
+      today: monday,
+      now: morning,
+    );
+    final thatEvening = plan.where((n) => n.localWhen.day == 14).toList();
     expect(thatEvening, hasLength(1));
     expect(thatEvening.single.localWhen, DateTime(2026, 9, 14, 18));
   });
@@ -154,7 +184,7 @@ void main() {
   test('col Pro il secondo orario viene pianificato, in ordine di ora', () async {
     await seedCalendar(time: '21:00', secondTime: '18:00');
 
-    final pro = await schedulerWith(pro: true).computeSchedule(today: monday, now: morning);
+    final pro = await schedulerWith().computeSchedule(today: monday, now: morning);
     final thatEvening = pro.where((n) => n.localWhen.day == 14).toList()
       ..sort((a, b) => a.localWhen.compareTo(b.localWhen));
     expect(thatEvening, hasLength(2));
