@@ -210,5 +210,6 @@
   "error_fileUnreadable": "Questo file non è leggibile.",
   "error_fileWrongApp": "Questo backup appartiene a un'altra app.",
   "error_fileTooNew": "Questo backup è stato fatto con una versione più recente di TrashCan. Aggiorna prima l'app.",
-  "error_noNetwork": "Nessuna connessione. Nessun problema: TrashCan funziona offline."
+  "error_noNetwork": "Nessuna connessione. Nessun problema: TrashCan funziona offline.",
+  "widget_openApp": "Apri TrashCan per aggiornare"
 }

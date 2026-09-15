@@ -13,6 +13,14 @@
          eventualmente in ritardo. L'app funziona comunque. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+
+    <!-- Gli acquisti in-app. La libreria di fatturazione di Google la dichiara gia' per
+         conto suo, e il manifest fuso la conterrebbe comunque: e' scritta qui lo stesso
+         perche' e' il manifest dell'app a dire cosa l'app fa, e perche' basta che un giorno
+         qualcuno tolga o sostituisca la dipendenza degli acquisti perche' il permesso
+         sparisca in silenzio. Senza, Play Console rifiuta di creare prodotti in-app: si
+         guarda il bundle caricato, non il codice. -->
+    <uses-permission android:name="com.android.vending.BILLING"/>
     <application
         android:label="TrashCan"
         android:name="${applicationName}"
@@ -53,6 +61,29 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/trashcan_widget_info" />
+        </receiver>
+
+        <!-- ☠ Senza questo receiver l'allarme delle 00:05 del widget non arriva a nessuno.
+             `HomeWidget.scheduleWidgetUpdates` arma l'allarme e non da' errore, il sistema
+             lo fa scattare, e la trasmissione cade nel vuoto: il plugin **non dichiara**
+             questo receiver nel proprio manifest, lo lascia fare all'app, cosi' chi non
+             pianifica niente non si ritrova il permesso di avvio ereditato.
+
+             Il sintomo era un widget fermo a "stasera: organico" riferito alla sera passata
+             finche' qualcuno non apriva l'app. Niente nei log, niente nell'interfaccia.
+
+             I filtri sull'avvio e sulla sostituzione del pacchetto servono perche' gli
+             allarmi di Android non sopravvivono ne' a un riavvio ne' a un aggiornamento
+             dell'app: senza, il widget smette di aggiornarsi al primo dei due eventi. -->
+        <receiver
+            android:name="es.antonborri.home_widget.HomeWidgetScheduledUpdateReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.SCHEDULED_UPDATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
         </receiver>
 
         <!-- Senza questi due receiver il plugin non ha nessuno a cui consegnare la

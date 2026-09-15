@@ -464,6 +464,78 @@ sono sparsi in venti file, cambiarli è un refactor; se sono in una mappa, è un
 il paywall può spiegare **cosa** si sblocca leggendo la stessa mappa, senza testi duplicati
 che divergono.
 
+### ADR-018 — Un widget contiene tutti i giorni che dovrà mostrare, non il giorno di oggi
+
+**Decisione**: il codice Dart che alimenta un widget scrive **uno stato per giorno** per un
+orizzonte lungo (in TrashCan 3650 giorni), in righe separate da `\n` con i campi separati da
+caratteri di controllo. Il provider Kotlin cerca la riga che porta la data di oggi. Le sveglie
+pianificate sono tante quante i giorni precalcolati.
+
+**Vale per ogni widget del monorepo**, TrashCan e Full Freezer (F5.10).
+
+☠ **Perché**: un widget Android non può far girare Flutter. Vive nel processo dell'app ma lo
+ridisegna il sistema, e Dart gira solo con l'app aperta. Un widget che contiene le stringhe
+di oggi è **corretto solo finché è oggi**: a mezzanotte mostra il giorno prima, e torna giusto
+appena si apre l'app, cioè smette di sbagliare esattamente quando lo si va a guardare. In
+TrashCan il difetto è arrivato fino al proprietario, che l'ha segnalato dal proprio telefono.
+
+Le due correzioni che vengono in mente per prime non bastano, e vanno sapute prima:
+
+1. **Far scattare un allarme non aggiorna niente** se il ridisegno rilegge le stesse stringhe.
+2. **Far girare Dart in background** costerebbe un isolate, una seconda connessione al
+   database e la benevolenza del sistema, e fallirebbe in silenzio sui telefoni che uccidono
+   i processi. Non è una strada.
+
+☠ Va dichiarato nel manifest dell'app il receiver `HomeWidgetScheduledUpdateReceiver`: il
+plugin lo lascia all'app di proposito, così chi non pianifica aggiornamenti non eredita il
+permesso di avvio al boot. Senza, l'allarme viene armato, scatta, e la trasmissione cade nel
+vuoto **senza nessun errore, da nessuna parte**.
+
+⚑ L'orizzonte lungo si paga solo se lo si costruisce male. In TrashCan costava formattare la
+data di ogni raccolta elencata, ripetuta per ogni giorno che la elenca: l'etichetta si
+prepara una volta per raccolta, e il ciclo dei giorni unisce stringhe già pronte. Le righe
+invece della serializzazione strutturata servono al lato Kotlin, che così cerca una
+sottostringa invece di analizzare l'intero orizzonte dentro un `BroadcastReceiver`.
+
+⚑ **L'elenco delle sveglie non può essere più corto dell'orizzonte.** In TrashCan erano sette
+contro i giorni già scritti: dall'ottavo giorno senza aprire l'app il risveglio smetteva di
+arrivare pur avendo i dati pronti sotto. È lo stesso difetto, solo spostato in avanti.
+
+### ADR-019 — Il widget non è una leva del Pro
+
+**Decisione**: il widget di TrashCan è identico per tutti, tre giorni compresi. Il Pro si
+vende con i promemoria, il secondo promemoria, i calendari multipli, il backup e il colore
+dell'app.
+
+☠ **Perché**: la versione gratuita mostrava **una** riga sola sotto la testata, con l'idea che
+"si vede cosa si guadagna ad averne tre". Era una supposizione, e il primo essere umano che
+ha guardato il widget vero l'ha letta come un guasto: «è sbagliato il widget». Una riga in
+mezzo a mezzo widget bianco non comunica "funzione a pagamento", comunica "non ha caricato",
+e chi lo pensa non compra: disinstalla. Una funzione mutilata non è una vetrina del Pro, è
+una recensione da due stelle.
+
+⚑ Regola generale per le altre app: si mette dietro il paywall una funzione **intera** che si
+capisce da fuori, mai la metà di una funzione che l'utente sta già guardando.
+
+### ADR-020 — I prezzi mostrati sono sempre quelli finali, tasse incluse
+
+**Decisione**: il prezzo si imposta in Play Console **ivato** (TrashCan: 1,99 € finali in
+Italia), e nell'app si mostra sempre e solo `formattedPrice` che arriva dallo store. Nei testi
+del sito e della scheda si scrive il prezzo finale, mai "+ IVA" né "+ VAT".
+
+☠ **Perché**: verso un consumatore il prezzo dev'essere comprensivo di imposte. È il Codice
+del consumo in Italia e la direttiva sull'indicazione dei prezzi in tutta l'Unione; "1,99 € +
+IVA" verso un privato è una pratica scorretta, non una scelta di presentazione. Play mostra
+comunque l'importo finale al momento dell'acquisto: scrivere un numero più basso altrove
+significa solo che l'utente ne vede uno diverso nel foglio di pagamento.
+
+⚑ Un prezzo ivato tondo dà anche un numero migliore da scrivere. Impostando 1,99 come
+imponibile, l'italiano paga 2,43: un prezzo che non si può stampare da nessuna parte.
+
+⚑ **Nell'app non si scrive mai un prezzo a mano.** `formattedPrice` arriva già localizzato e
+nella valuta del paese; una costante nel codice sarebbe sbagliata in tutti i paesi tranne uno
+e resterebbe sbagliata il giorno che il prezzo cambia.
+
 ---
 
 ## §3 — Ambiente di sviluppo (stato verificato il 2026-09-09)
@@ -3440,18 +3512,23 @@ personale. Regalare l'acquisizione e vendere la comodità è il verso giusto.
 
 ### F3.11 — Widget Android
 
-`android/app/src/main/kotlin/.../TrashcanWidgetProvider.kt` + `home_widget`.
+`android/app/src/main/kotlin/.../TrashcanWidgetProvider.kt` + `home_widget`, alimentato da
+`lib/services/trashcan_widget.dart`. Dettaglio completo del formato nell'atlante di TrashCan.
 
-- Widget 4×1: "STASERA" + tipo (o "Niente") + riga piccola "Prossimo: X domani".
-- Il colore di sfondo segue il tipo di rifiuto della sera.
+- Widget verticale: testata colorata con "STASERA", il tipo di rifiuto (o "Niente") e la sua
+  icona, e sotto le **tre** raccolte successive.
+- Il colore della testata segue il tipo di rifiuto della sera.
 - Aggiornato dall'app a ogni ripianificazione e da un `AlarmManager` alle 00:05.
-- Versione gratuita: testo semplice. Versione Pro (`FeatureKey.advancedWidget`): colori del
-  tipo, scelta del calendario, prossimi tre giorni, dimensione 4×2.
+- Uguale per tutti. Il widget **non** è una leva del Pro: vedi ADR-019.
 
 ☠ **Trappola**: i widget Android non possono usare Flutter per il rendering. Si passano i
 dati con `HomeWidget.saveWidgetData` e si disegna in `RemoteViews`. Il layout XML va tenuto
 semplice: `RemoteViews` supporta un sottoinsieme ristretto di view, e un `ConstraintLayout`
 non funziona.
+
+☠ **Trappola, quella vera**: i widget Android non possono nemmeno far *girare* Flutter per
+aggiornarsi da soli. Vedi ADR-018: chi scriverà il widget di Full Freezer deve leggerlo
+prima di cominciare, non dopo.
 
 ### F3.12 — Play Console e verifica end-to-end del billing
 
@@ -3461,7 +3538,8 @@ Questa sottofase è il vero motivo per cui TrashCan è l'app pilota.
 
 1. Creare l'app in Play Console con `com.smp.trashcan`.
 2. Compilare la scheda minima richiesta per un test interno.
-3. Creare il prodotto in-app `trashcan_pro_lifetime`, prezzo 2,99 €, stato attivo.
+3. Creare il prodotto in-app `trashcan_pro_lifetime`, prezzo **1,99 € tasse incluse**,
+   stato attivo. Vedi ADR-020 per il perché del prezzo ivato.
 4. Caricare un AAB firmato sul canale **interno**.
 5. Aggiungere l'account di test alle licenze di test (acquisti senza addebito reale).
 6. Con il server in esecuzione **in locale** ed esposto temporaneamente (tunnel SSH o

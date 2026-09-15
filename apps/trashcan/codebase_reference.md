@@ -3,7 +3,7 @@
 > Atlante dell'app **TrashCan**, il calendario personale della raccolta differenziata.
 > **Obiettivo**: capire il codice, trovare ciò che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-09-11 · **Fase**: F3 conclusa · **versionName+Code**: `1.0.0+2`
+> **Aggiornato al**: 2026-09-16 · **Fase**: F3 conclusa · **versionName+Code**: `1.0.0+3`
 > **Package Android**: `com.smp.trashcan` (immutabile dopo il primo upload su Play)
 > **SKU Pro**: `trashcan_pro_lifetime` — 2,99 € una tantum
 >
@@ -12,7 +12,7 @@
 > settimane.
 >
 > Stato: l'app gira su Android ed è stata percorsa a mano sull'emulatore in ogni schermata.
-> 122 test propri, oltre ai 107 di `micro_core`.
+> 127 test propri, oltre ai 109 di `micro_core`.
 
 ---
 
@@ -112,7 +112,7 @@ apps/trashcan/
 │       ├── drawable*/launch_background.xml      splash fino ad Android 11
 │       ├── drawable*/background.png             la tinta piatta della splash
 │       └── values-v31/styles.xml, values-night-v31/styles.xml   splash di Android 12+
-├── test/                             122 test (vedi §9)
+├── test/                             127 test (vedi §9)
 └── integration_test/first_run_test.dart
 ```
 
@@ -506,7 +506,9 @@ percorso interno di `go_router`.
 | Membro | Firma |
 |---|---|
 | `qualifiedName` | `static const String = 'com.smp.trashcan.TrashcanWidgetProvider'` |
-| chiavi | `keyTonightLabel`, `keyTonightText`, `keyTonightColor`, `keyTonightIcon`, `keyCalendarName`, `keyUpcoming`, `keyUpcomingEmpty` |
+| chiavi | `keyDays`, `keyTonightLabel`, `keyCalendarName`, `keyUpcomingEmpty`, `keyStale`, `iconKeyPrefix` |
+| separatori | `fieldSeparator` = `\u001F`, `lineSeparator` = `\u001E`, `newline` |
+| orizzonte | `giorniPrecalcolati` = `3650`, `giorniElencati` = `3` |
 | `newline` | `static const String = '\n'`, il separatore fra le righe dei prossimi giorni |
 | `iconSide` | `static const int = 96`, il lato in pixel del PNG dell'icona |
 | `giorniElencati` | `static const int = 3`, quanti giorni elenca la fascia inferiore. **Uguale per tutti** |
@@ -533,6 +535,94 @@ calendario — servirà di nuovo.
 `scheduleDailyRefresh` programma un aggiornamento alle 00:05 per i sette giorni successivi.
 Senza, alle 00:01 il widget continua a dire "stasera: organico" riferendosi alla sera
 precedente, cioè proprio la mattina, quando lo si guarda uscendo di casa.
+
+#### Perché il widget contiene dieci anni, e non il giorno di oggi
+
+☠ **Un widget Android non può far girare Flutter per aggiornarsi.** Vive nel processo
+dell'app ma viene ridisegnato dal sistema, e Dart gira solo quando l'app è aperta. Fino al
+16 settembre 2026 il widget conteneva le stringhe di **un giorno solo**: a mezzanotte
+continuava a dire "stasera: organico" riferendosi alla sera passata, finché qualcuno non
+apriva l'app. L'ha segnalato il proprietario, non un test: «adesso devo aprire l'app per far
+aggiornare il widget».
+
+Erano **due** difetti sovrapposti, ed è il motivo per cui la prima correzione plausibile
+(«manca l'allarme») non avrebbe risolto niente:
+
+1. `HomeWidgetScheduledUpdateReceiver` non era dichiarato nel manifest. L'allarme delle 00:05
+   veniva armato, scattava, e la trasmissione cadeva nel vuoto. Il plugin lascia la
+   dichiarazione all'app di proposito, così chi non pianifica aggiornamenti non eredita il
+   permesso di avvio al boot. Nessun errore, da nessuna parte.
+2. Anche fosse arrivata, il ridisegno rileggeva **le stesse stringhe**. Non c'era niente di
+   nuovo da mostrare.
+
+La soluzione **non** è far girare Dart in background: servirebbero un isolate, una seconda
+connessione al database e la benevolenza del sistema operativo, e fallirebbe in silenzio sui
+telefoni che uccidono i processi. La soluzione è precalcolare. Dart prepara **3650 stati, uno
+per giorno**, e Kotlin sceglie quello che porta la data di oggi. Kotlin non calcola niente e
+non conosce né calendari né lingue: confronta stringhe.
+
+#### Il formato delle righe
+
+Una riga per giorno, separate da `\n`; dentro la riga, cinque campi separati da
+`fieldSeparator`:
+
+| # | Campo | Esempio |
+|---|---|---|
+| 0 | data, in forma `AAAA-MM-GG` | `2026-09-15` |
+| 1 | cosa si porta fuori stasera, o il testo di "niente" | `Organico` |
+| 2 | colore ARGB come intero; `0` significa "usa il neutro" | `4284644662` |
+| 3 | **chiave** dell'icona, vuota se non ce n'è | `compost` |
+| 4 | i prossimi `giorniElencati`, separati da `lineSeparator` | `dom 20   Carta` |
+
+La riga di un giorno parla della raccolta del **giorno dopo**: il bidone si porta fuori la
+sera prima.
+
+⚑ **Righe e non JSON.** Il provider deve trovare **una riga su tremilaseicentocinquanta**:
+cercare `"\n2026-09-15\u001F"` costa quanto una ricerca di sottostringa, mentre analizzare
+tutto il JSON costerebbe quanto il decennio intero, dentro un `BroadcastReceiver` che ha un
+budget di tempo stretto. È questa scelta ad aver reso gratuito allungare l'orizzonte.
+
+☠ **I separatori sono caratteri di controllo** (US e RS), non `|` o `;`. Un tipo di rifiuto
+chiamato "Carta | Cartone" spaccherebbe la riga e il widget mostrerebbe i campi sfasati, il
+colore al posto del nome, senza nessun errore. Una tastiera non produce US e RS.
+
+☠ La riga porta la **chiave** dell'icona, non il percorso: il percorso è lungo una settantina
+di caratteri e si ripeterebbe in ognuna delle 3650 righe. Il provider lo ritrova leggendo
+`icon_<chiave>` dalle stesse preferenze, dove l'ha messo `HomeWidget.saveFile`.
+
+#### Quanto costa un decennio, e perché non costa
+
+Tre costi, guardati prima di scegliere il numero. Il proprietario aveva chiesto dieci anni
+(«parliamo di kbyte») contro un orizzonte di un anno che avevo motivato male.
+
+| Costo | Quanto | Perché non pesa |
+|---|---|---|
+| Spazio | ~90 caratteri per riga, ~330 KB in tutto | una preferenza, scritta una volta per pubblicazione |
+| Lettura | una ricerca di sottostringa | il formato a righe: non dipende dal numero di giorni |
+| Sveglie | 3650 istanti in un `JSONArray` di ~50 KB | il plugin arma **un allarme per volta** e riarma il successivo a ogni scatto; il sistema ne vede sempre uno |
+| Calcolo | 3650 giri di ciclo | vedi sotto: era il costo vero, ed è stato tolto |
+
+⚑ **Il calcolo era il costo vero, e stava in `DateFormat`.** `publish` gira a ogni avvio e a
+ogni modifica dei dati, e l'operazione cara del giro è formattare il nome del giorno nella
+lingua corrente. Ogni raccolta compare nell'elenco di tre giorni diversi, quindi formattandola
+dentro il ciclo la si formattava tre volte: con un decennio sarebbero state decine di migliaia
+di chiamate a ogni salvataggio di una regola. Adesso `publish` costruisce prima la mappa
+`etichette`, **una voce per raccolta**, e il ciclo dei giorni si limita a unire stringhe già
+pronte. Il decennio costa meno dell'anno di prima.
+
+⚑ La costruzione è **lineare** anche nell'altra direzione: le raccolte si raggruppano per data
+una volta sola e un puntatore (`primaDopo`) avanza insieme al giorno, senza mai tornare
+indietro. Filtrando la lista per ogni giorno il costo sarebbe il prodotto fra giorni e
+raccolte, cioè decine di milioni di confronti.
+
+⚑ La finestra di espansione è `giorniPrecalcolati + 120`. L'ultima riga del decennio deve
+comunque poter elencare le sue tre raccolte successive, e con una regola mensile la terza cade
+tre mesi dopo. Senza il margine, le ultime righe avrebbero la fascia inferiore vuota e nessuno
+capirebbe perché proprio quelle.
+
+⚑ Finite le righe, il provider scrive `keyStale` - "Apri TrashCan per aggiornare" - invece di
+mostrare un giorno sbagliato. Un decennio di righe non promette che il 2036 sarà così: è
+esattamente ciò che l'app stessa mostra scorrendo avanti, cioè le regole di oggi proiettate.
 
 #### L'icona di "stasera", nel widget
 
@@ -592,7 +682,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 
 ## 9. Catalogo dei test
 
-122 test in `apps/trashcan/`, oltre ai 107 di `micro_core`.
+127 test in `apps/trashcan/`, oltre ai 109 di `micro_core`.
 
 | File | N. | Cosa dimostra |
 |---|---|---|
@@ -606,6 +696,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 | `test/widget/home_page_test.dart` | 6 | la home nei tre stati (niente / uno / tre tipi), lo stato vuoto, la prossima raccolta con la sera giusta, il nome del calendario nel titolo |
 | `test/widget/paywall_config_test.dart` | 6 | **ogni funzione bloccata è venduta**; i calendari stanno per primi; nessun duplicato; nessun testo vuoto; il bottone regge un prezzo assente |
 | `test/services/trashcan_widget_icon_test.dart` | 5 | tutte e ventidue le icone si disegnano e non escono vuote; il glifo non riempie il riquadro (sarebbe il "tofu" del font mancante); esce bianco, perche' a tingerlo e' il provider; una chiave sconosciuta ripiega su un'icona vera; ogni preset del wizard punta a una chiave che esiste |
+| `test/services/trashcan_widget_giorni_test.dart` | 5 | il contratto del formato che Kotlin rilegge: i separatori sono caratteri di controllo, sono tre e diversi fra loro; l'orizzonte e' un decennio e copre i giorni elencati; il prefisso delle icone non collide con nessuna chiave fissa |
 | `test/widget/palette_contrast_test.dart` | 6 | ogni colore della tavolozza **e ogni preset** regge 4.5:1 col testo che ci va sopra; i preset usano colori della tavolozza; nessun duplicato |
 
 `test/widget/harness.dart` non contiene test: è l'impalcatura che monta una pagina
@@ -681,6 +772,9 @@ causa.
 | Configuro l'app e dopo due mesi non arriva più niente | niente ripianificava all'avvio: il piano si ricostruiva solo al cambio dei dati | `notificationSyncProvider` |
 | Tocco la notifica e il back esce dall'app | `go` sostituisce lo stack: la pagina del giorno restava senza nulla sotto | `app.dart`, `_openPayload` fa `go(home)` poi `push` |
 | "È sbagliato il widget": la metà inferiore mostra una riga sola e sembra non aver caricato | era il gate `advancedWidget`, `pro ? 3 : 1`. Il difetto non è tecnico ma di lettura: uno spazio bianco con una riga dentro non comunica "a pagamento". L'ha segnalato il proprietario, non un utente, il che vuol dire che un utente l'avrebbe scritto in una recensione | `advancedWidget` è passato a `open()` e `TrashcanWidget.giorniElencati` vale 3 per tutti |
+| Il widget resta fermo al giorno prima, e si aggiorna solo aprendo l'app | due difetti insieme. `HomeWidgetScheduledUpdateReceiver` non era dichiarato nel manifest, quindi l'allarme delle 00:05 scattava e non arrivava a nessuno; e anche arrivando, il ridisegno rileggeva le stesse stringhe, perche' a calcolarle e' Dart, che gira solo con l'app aperta | receiver dichiarato nel manifest, e Dart precalcola 3650 giorni fra cui il provider sceglie la riga di oggi (vedi la sezione qui sopra) |
+| L'elenco delle sveglie era piu' corto dell'orizzonte | sette sveglie contro i giorni che il widget sapeva gia' raccontare: dall'ottavo giorno senza aprire l'app il risveglio smetteva di arrivare pur avendo i dati pronti sotto. E' lo stesso difetto, spostato in avanti | `scheduleDailyRefresh` genera esattamente `giorniPrecalcolati` istanti |
+| Cinque test dello scheduler falliscono tutti insieme, senza che il codice sia cambiato | `setWeeklyRule` fa partire la regola da `CivilDate.today()`, cioe' dall'orologio vero: i test usavano una data fissa e passavano finche' la macchina stava prima di quella data. Dal giorno dopo, tutte le attese spostate avanti di una settimana esatta | il fixture passa `startDate: inizioRegole`, una data esplicita |
 | Il widget e' squadrato sopra e tondo sotto | `setBackgroundColor` su una view sostituisce il drawable, e con lui gli angoli arrotondati. Il colore si applica tingendo con `setColorFilter` un `ImageView` di sfondo | `TrashcanWidgetProvider.kt` + `widget_header_background.xml` |
 | Il widget resta un rettangolo colorato e vuoto | il receiver crollava leggendo il colore: vedi la riga seguente | `TrashcanWidgetProvider.kt` |
 | "TrashCan continua a bloccarsi", dopo giorni di funzionamento perfetto | il canale fra Dart e Android codifica un intero come **Integer** se sta in 32 bit con segno e come **Long** altrimenti: *il tipo dipende dal valore*. Un ARGB con alpha `0xFF` supera 2³¹ e arriva Long; lo zero che si manda quando stasera non si raccoglie niente arriva Integer. `getInt` e `getLong` sbagliano **a turno**. E un receiver che lancia fa cadere l'intero processo dell'app, non solo il widget | `TrashcanWidgetProvider.kt`: si legge da `widgetData.all[...]` accettando entrambi i tipi, e tutto `onUpdate` sta dentro un `try` |

@@ -56,6 +56,19 @@ void main() {
     isPro: false,
   );
 
+  /// La data da cui valgono le regole di questi test.
+  ///
+  /// ☠ **Esplicita, non il valore predefinito.** `setWeeklyRule` fa partire la regola da
+  /// `CivilDate.today()`, cioe' dall'orologio vero della macchina. Senza questa riga i test
+  /// passavano finche' la data di sistema restava prima del 15 settembre 2026 e da li' in
+  /// poi fallivano tutti insieme, con le date spostate avanti di una settimana esatta: la
+  /// regola iniziava dopo il giorno fissato dal test, e la prima raccolta utile finiva nella
+  /// settimana successiva.
+  ///
+  /// E' esattamente il difetto che fa perdere mezza giornata, perche' il codice sotto test
+  /// non e' cambiato e il calendario dice che "ieri funzionava".
+  final inizioRegole = CivilDate(2026, 9, 1);
+
   /// Un calendario con un tipo di rifiuto raccolto nei giorni indicati.
   Future<int> seedCalendar({
     String name = 'Casa',
@@ -74,7 +87,11 @@ void main() {
       iconKey: 'compost',
       colorValue: 0xFF6D8B3C,
     );
-    await repo.setWeeklyRule(wasteTypeId: typeId, weekdays: weekdays);
+    await repo.setWeeklyRule(
+      wasteTypeId: typeId,
+      weekdays: weekdays,
+      startDate: inizioRegole,
+    );
     return calendarId;
   }
 
@@ -110,7 +127,11 @@ void main() {
       iconKey: 'paper',
       colorValue: 0xFF2E6DA4,
     );
-    await repo.setWeeklyRule(wasteTypeId: second, weekdays: {DateTime.tuesday});
+    await repo.setWeeklyRule(
+      wasteTypeId: second,
+      weekdays: {DateTime.tuesday},
+      startDate: inizioRegole,
+    );
 
     final plan = await schedulerWith().computeSchedule(today: monday, now: morning);
     final forThatEvening = plan.where((n) => n.localWhen == DateTime(2026, 9, 14, 20)).toList();
@@ -130,7 +151,11 @@ void main() {
       iconKey: 'glass',
       colorValue: 0xFF3B7A6B,
     );
-    await repo.setWeeklyRule(wasteTypeId: quiet, weekdays: {DateTime.thursday});
+    await repo.setWeeklyRule(
+      wasteTypeId: quiet,
+      weekdays: {DateTime.thursday},
+      startDate: inizioRegole,
+    );
     await repo.updateWasteType(quiet, notificationsEnabled: false);
 
     final plan = await schedulerWith().computeSchedule(today: monday, now: morning);

@@ -61,7 +61,7 @@ return [
                           . 'di Google LLC.',
 
     // ── Le app del catalogo ─────────────────────────────────────────────────
-    'app.trashcan.prezzo'   => '2,99 €',
+    'app.trashcan.prezzo'   => '1,99 €',
     'app.trashcan.claim'    => 'Stasera cosa si butta?',
     'app.trashcan.sommario' => 'Il calendario della raccolta differenziata del tuo Comune, '
                              . 'con il promemoria la sera prima. Niente più bidone '
@@ -125,7 +125,7 @@ return [
     'trashcan.titolo'      => 'TrashCan, il calendario della raccolta differenziata',
     'trashcan.descrizione' => 'TrashCan ti ricorda la sera prima cosa portare fuori. '
                             . 'Calendario della raccolta differenziata con promemoria e '
-                            . 'widget. Gratis, Pro a 2,99 € una tantum.',
+                            . 'widget. Gratis, Pro a 1,99 € una tantum.',
 
     'trashcan.eyebrow'     => 'TrashCan · Android',
     'trashcan.hero.titolo' => 'Stasera cosa<br>si butta?',

@@ -234,7 +234,7 @@ condivisione di posizione, nessuna interazione fra utenti, nessun contenuto gene
 utenti. Esito atteso: **PEGI 3 / Tutti**.
 
 **Un'unica risposta affermativa**: alla domanda se l'app consente acquisti di beni digitali.
-Sì, un acquisto singolo di 2,99 €.
+Sì, un acquisto singolo di 1,99 €.
 
 ---
 
@@ -261,7 +261,7 @@ chi tocca "Sblocca Pro" riceve un messaggio invece di uno spinner infinito (vedi
 | Descrizione (it) | `Sblocca i promemoria della sera, il secondo promemoria, i calendari multipli, il backup completo e il colore dell'app. Un pagamento unico, nessun abbonamento.` |
 | Nome (en) | `TrashCan Pro` |
 | Descrizione (en) | `Unlocks evening reminders, the second reminder, multiple calendars, full backup and the app colour. One payment, no subscription.` |
-| Prezzo | **2,99 €** (Italia), prezzi locali automatici altrove |
+| Prezzo | **1,99 €** in Italia, **tasse comprese**. Prezzi locali automatici altrove |
 | Stato | Attivo |
 
 ☠ **L'ID del prodotto non si cambia e non si riusa.** È scritto in

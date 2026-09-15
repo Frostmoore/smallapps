@@ -35,7 +35,7 @@ class FakePurchaseGateway implements PurchaseGateway {
   /// Catalogo di comodo per i test, con un prodotto Pro già pronto.
   factory FakePurchaseGateway.withProduct(
     String productId, {
-    String formattedPrice = '2,99 €',
+    String formattedPrice = '1,99 €',
     FakeOutcome outcome = FakeOutcome.success,
     Duration latency = Duration.zero,
     bool startsOwned = false,
