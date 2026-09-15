@@ -121,9 +121,11 @@ abstract final class TrashcanWidget {
   /// avrebbe fatto scattare l'interfaccia. Il proprietario ha chiesto un decennio -
   /// «parliamo di kbyte» - e aveva ragione su tutti e tre i costi.
   ///
-  /// Lo **spazio**: una riga sta in una novantina di caratteri, quindi il decennio occupa
-  /// poco più di trecento kilobyte in una preferenza. È molto per una preferenza e niente
-  /// per un telefono, e si paga una volta sola.
+  /// Lo **spazio**: una riga sta in una novantina di caratteri, e il file delle preferenze
+  /// misura **420 KB** sul dispositivo - più dei ~330 KB delle righe, perché le preferenze
+  /// sono XML e ogni separatore di controllo ci finisce scritto come `&#31;`, cinque
+  /// caratteri invece di uno. È molto per una preferenza e niente per un telefono, e si
+  /// riscrive una volta per pubblicazione.
   ///
   /// La **lettura** non la paga nessuno: il provider cerca una riga invece di analizzare
   /// tutto, quindi il numero di giorni non incide sul ridisegno. È il formato a righe ad

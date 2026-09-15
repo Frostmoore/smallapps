@@ -597,7 +597,7 @@ Tre costi, guardati prima di scegliere il numero. Il proprietario aveva chiesto 
 
 | Costo | Quanto | Perché non pesa |
 |---|---|---|
-| Spazio | ~90 caratteri per riga, ~330 KB in tutto | una preferenza, scritta una volta per pubblicazione |
+| Spazio | **420 KB misurati** in `HomeWidgetPreferences.xml` | una preferenza, riscritta una volta per pubblicazione. Sono piu' dei ~330 KB delle righe: le preferenze sono XML, e ogni separatore di controllo ci finisce scritto come `&#31;`, cinque caratteri invece di uno |
 | Lettura | una ricerca di sottostringa | il formato a righe: non dipende dal numero di giorni |
 | Sveglie | 3650 istanti in un `JSONArray` di ~50 KB | il plugin arma **un allarme per volta** e riarma il successivo a ogni scatto; il sistema ne vede sempre uno |
 | Calcolo | 3650 giri di ciclo | vedi sotto: era il costo vero, ed è stato tolto |
