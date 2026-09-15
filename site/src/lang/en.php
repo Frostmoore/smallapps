@@ -57,7 +57,7 @@ return [
                           . 'Google LLC.',
 
     // ── The catalogue ───────────────────────────────────────────────────────
-    'app.trashcan.prezzo'   => '€1.99',
+    'app.trashcan.prezzo'   => '€2.39',
     'app.trashcan.claim'    => 'What goes out tonight?',
     'app.trashcan.sommario' => 'Your town\'s waste collection calendar, with a reminder the '
                              . 'evening before. No more bin left behind.',
@@ -119,7 +119,7 @@ return [
     'trashcan.titolo'      => 'TrashCan, the waste collection calendar',
     'trashcan.descrizione' => 'TrashCan reminds you the evening before what to put out. '
                             . 'Waste collection calendar with reminders and a home screen '
-                            . 'widget. Free, Pro for €1.99 one-off.',
+                            . 'widget. Free, Pro for €2.39 one-off.',
 
     'trashcan.eyebrow'     => 'TrashCan · Android',
     'trashcan.hero.titolo' => 'What goes out<br>tonight?',
@@ -179,7 +179,7 @@ return [
     'trashcan.prezzi.base'      => 'Base',
     'trashcan.prezzi.gratis'    => 'Free',
     'trashcan.prezzi.pro'       => 'Pro',
-    'trashcan.prezzi.unatantum' => 'one-off',
+    'trashcan.prezzi.unatantum' => 'one-off. Local price and tax apply',
     'trashcan.prezzi.base.lista' => '<li>One collection calendar</li>'
         . '<li>Unlimited waste types and rules</li>'
         . '<li>Exceptions, skips and extra collections</li>'

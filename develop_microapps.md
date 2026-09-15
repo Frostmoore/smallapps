@@ -517,24 +517,43 @@ una recensione da due stelle.
 ⚑ Regola generale per le altre app: si mette dietro il paywall una funzione **intera** che si
 capisce da fuori, mai la metà di una funzione che l'utente sta già guardando.
 
-### ADR-020 — I prezzi mostrati sono sempre quelli finali, tasse incluse
+### ADR-020 — Il prezzo scritto nei testi è quello finale del paese, non quello impostato
 
-**Decisione**: il prezzo si imposta in Play Console **ivato** (TrashCan: 1,99 € finali in
-Italia), e nell'app si mostra sempre e solo `formattedPrice` che arriva dallo store. Nei testi
-del sito e della scheda si scrive il prezzo finale, mai "+ IVA" né "+ VAT".
+**Decisione**: in Play Console si imposta il **prezzo base** (TrashCan: 1,99 €), e Play ne
+ricava il finale ivato paese per paese. Nei testi italiani si scrive **quel finale**
+(2,39 €), mai il base, mai "+ IVA". Nei testi inglesi, che parlano a decine di paesi, la
+cifra va accompagnata dalla nota che il prezzo locale varia. Nell'app non si scrive mai un
+prezzo: si mostra `formattedPrice` che arriva dallo store.
 
-☠ **Perché**: verso un consumatore il prezzo dev'essere comprensivo di imposte. È il Codice
-del consumo in Italia e la direttiva sull'indicazione dei prezzi in tutta l'Unione; "1,99 € +
-IVA" verso un privato è una pratica scorretta, non una scelta di presentazione. Play mostra
-comunque l'importo finale al momento dell'acquisto: scrivere un numero più basso altrove
-significa solo che l'utente ne vede uno diverso nel foglio di pagamento.
+☠ **Play tratta il numero che digiti come imponibile, e il compratore ne paga un altro.**
+Verificato nella tabella dei prezzi di `trashcan_pro_lifetime` il 16 settembre 2026: base
+1,99 €, e la colonna dei paesi riporta 2,39 € in Italia (22%), 2,49 € in Irlanda (23%),
+2,47 € in Islanda (24%), 2,29 € in Lussemburgo (17%), 2,29 USD dove non c'è IVA.
 
-⚑ Un prezzo ivato tondo dà anche un numero migliore da scrivere. Impostando 1,99 come
-imponibile, l'italiano paga 2,43: un prezzo che non si può stampare da nessuna parte.
+☠ **Non è una moltiplicazione, è una tabella.** Italia al 22% e Lettonia al 21% finiscono
+tutte e due a 2,39 €, e 1,99 × 1,22 farebbe 2,43: Play arrotonda ai propri livelli di
+prezzo per valuta. Quindi **il finale non si calcola, si legge** dalla tabella del prodotto.
+Chi prova a dedurlo sbaglia, e sbaglia in modo credibile, che è il modo peggiore.
 
-⚑ **Nell'app non si scrive mai un prezzo a mano.** `formattedPrice` arriva già localizzato e
-nella valuta del paese; una costante nel codice sarebbe sbagliata in tutti i paesi tranne uno
-e resterebbe sbagliata il giorno che il prezzo cambia.
+☠ **Perché si scrive il finale**: verso un consumatore il prezzo dev'essere comprensivo di
+imposte, lo dicono il Codice del consumo e la direttiva sull'indicazione dei prezzi. Scrivere
+il base significa che l'utente legge un numero sul sito e ne trova un altro, più alto, nel
+foglio di pagamento: è il momento peggiore in cui si possa perdere un acquisto.
+
+⚑ **Un prezzo unico scritto a mano non esiste per il mondo.** Solo nell'eurozona il finale
+va da 2,29 € a 2,49 €, e fuori cambia anche la valuta. Per questo la pagina inglese porta la
+cifra più la nota sul prezzo locale, e la pagina italiana può permettersi il numero secco: si
+rivolge a un paese solo.
+
+⚑ **Se si vuole un finale tondo, si edita il paese, non il base.** Per far pagare 1,99 €
+all'italiano non si imposta 1,99: si sovrascrive il prezzo dell'Italia nella tabella. 2,39 €
+sta sopra la soglia psicologica dei 2 € ed è un numero che non si ricorda; è una decisione
+commerciale aperta, non un vincolo tecnico.
+
+⚑ **Nell'app non si scrive mai un prezzo a mano.** `formattedPrice` arriva già localizzato,
+nella valuta del paese e col finale giusto; una costante nel codice sarebbe sbagliata in tutti
+i paesi tranne uno, e resterebbe sbagliata il giorno che il prezzo cambia. È anche l'unico
+punto del sistema che non ha avuto bisogno di questa correzione.
 
 ---
 
@@ -3538,8 +3557,9 @@ Questa sottofase è il vero motivo per cui TrashCan è l'app pilota.
 
 1. Creare l'app in Play Console con `com.smp.trashcan`.
 2. Compilare la scheda minima richiesta per un test interno.
-3. Creare il prodotto in-app `trashcan_pro_lifetime`, prezzo **1,99 € tasse incluse**,
-   stato attivo. Vedi ADR-020 per il perché del prezzo ivato.
+3. Creare il prodotto in-app `trashcan_pro_lifetime`, prezzo base **1,99 €**, che Play
+   porta a **2,39 € finali in Italia**. Stato attivo. Vedi ADR-020: il numero da
+   scrivere nei testi è il finale, e va letto dalla tabella dei paesi.
 4. Caricare un AAB firmato sul canale **interno**.
 5. Aggiungere l'account di test alle licenze di test (acquisti senza addebito reale).
 6. Con il server in esecuzione **in locale** ed esposto temporaneamente (tunnel SSH o
