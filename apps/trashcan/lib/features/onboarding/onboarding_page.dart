@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../../app/paywall_config.dart';
 import '../../app/providers.dart';
 import '../../app/routes.dart';
 import '../../app/waste_presets.dart';
@@ -131,6 +134,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       selection: _selection,
                       time: _time,
                       saving: _saving,
+                      // ☠ Il promemoria e' una funzione Pro (`FeatureKey.notifications`).
+                      // Qui il wizard chiedeva l'orario a chiunque e prometteva, testualmente,
+                      // che «il promemoria arriva la sera prima»: chi non comprava sceglieva
+                      // un orario, finiva il setup e non riceveva mai niente, senza che
+                      // nessuna schermata spiegasse perche'. Una promessa esplicita non
+                      // mantenuta e' peggio di una funzione assente.
+                      pro: ref.watch(featureGateProvider).allows(FeatureKey.notifications),
+                      onSeePro: () => unawaited(
+                        showTrashcanPaywall(
+                          context,
+                          ref,
+                          highlight: FeatureKey.notifications,
+                        ),
+                      ),
                       onToggleDay: (index, weekday) => setState(() {
                         final days = _selection[index] ?? <int>{};
                         if (!days.remove(weekday)) days.add(weekday);
@@ -327,8 +344,10 @@ class _ScheduleStep extends StatelessWidget {
     required this.selection,
     required this.time,
     required this.saving,
+    required this.pro,
     required this.onToggleDay,
     required this.onPickTime,
+    required this.onSeePro,
     required this.onFinish,
   });
 
@@ -336,8 +355,13 @@ class _ScheduleStep extends StatelessWidget {
   final Map<int, Set<int>> selection;
   final TimeOfDay time;
   final bool saving;
+
+  /// Se l'utente ha il Pro, e quindi se il promemoria arrivera' davvero.
+  final bool pro;
+
   final void Function(int index, int weekday) onToggleDay;
   final VoidCallback onPickTime;
+  final VoidCallback onSeePro;
   final Future<void> Function() onFinish;
 
   @override
@@ -360,20 +384,34 @@ class _ScheduleStep extends StatelessWidget {
       subtitle: l.onboarding_scheduleHelp,
       footer: Column(
         children: [
+          // ⚑ Due schede diverse, non una scheda con un lucchetto appiccicato. Chi ha
+          // il Pro sceglie l'orario; chi non ce l'ha legge che cosa gli manca e dove si
+          // prende, e **non** gli viene chiesto di scegliere un orario che verrebbe
+          // ignorato. Il wizard si chiude lo stesso: i giorni di raccolta servono comunque,
+          // e sono il motivo per cui l'app si installa.
           MicroCard(
-            onTap: onPickTime,
+            onTap: pro ? onPickTime : onSeePro,
             padding: MicroSpacing.cardTight,
             child: Row(
               children: [
-                const Icon(Icons.notifications_active_outlined),
+                Icon(
+                  pro ? Icons.notifications_active_outlined : Icons.lock_outline,
+                ),
                 MicroSpacing.hGapM,
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l.onboarding_notificationTitle, style: theme.textTheme.cardTitle),
                       Text(
-                        l.onboarding_notificationHelp,
+                        pro
+                            ? l.onboarding_notificationTitle
+                            : l.onboarding_notificationProTitle,
+                        style: theme.textTheme.cardTitle,
+                      ),
+                      Text(
+                        pro
+                            ? l.onboarding_notificationHelp
+                            : l.onboarding_notificationProBody,
                         style: theme.textTheme.cardMeta.copyWith(
                           color: theme.colorScheme.mutedText,
                         ),
@@ -382,7 +420,10 @@ class _ScheduleStep extends StatelessWidget {
                   ),
                 ),
                 MicroSpacing.hGapS,
-                Text(formatTime(time), style: theme.textTheme.titleMedium),
+                if (pro)
+                  Text(formatTime(time), style: theme.textTheme.titleMedium)
+                else
+                  Icon(Icons.chevron_right, color: theme.colorScheme.mutedText),
               ],
             ),
           ),

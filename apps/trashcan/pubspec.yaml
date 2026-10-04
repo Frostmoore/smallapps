@@ -5,7 +5,7 @@ publish_to: none
 # versionName+versionCode. Il versionCode e' monotono crescente e non si riusa mai:
 # Play rifiuta un AAB con un numero gia' visto e quel numero non si libera.
 # Lo incrementa tool/build_release.ps1 prima del build. Vedi develop_microapps.md §5.4.
-version: 1.0.0+5
+version: 1.0.0+6
 environment:
   sdk: ^3.13.0
   flutter: ">=3.35.0"

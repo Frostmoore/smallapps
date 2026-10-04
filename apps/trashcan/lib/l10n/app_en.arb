@@ -67,6 +67,8 @@
   "onboarding_scheduleHelp": "Tap the days each type is collected. Copy it straight off your town's leaflet.",
   "onboarding_notificationTitle": "When should we remind you?",
   "onboarding_notificationHelp": "The reminder arrives the evening before, so you still have time to take the bin out.",
+  "onboarding_notificationProTitle": "Reminders are a Pro feature",
+  "onboarding_notificationProBody": "With Pro you get the alert the evening before, at a time you choose. Tap to see what it includes.",
   "onboarding_finish": "Finish",
   "waste_organic": "Organic",
   "waste_paper": "Paper",

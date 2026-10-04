@@ -40,6 +40,8 @@
   "onboarding_scheduleHelp": "Tocca i giorni in cui passano per ogni tipo. Copiali dal volantino del Comune.",
   "onboarding_notificationTitle": "Quando vuoi il promemoria?",
   "onboarding_notificationHelp": "Il promemoria arriva la sera prima, così hai ancora tempo per portare fuori il bidone.",
+  "onboarding_notificationProTitle": "Il promemoria è una funzione Pro",
+  "onboarding_notificationProBody": "Con il Pro ricevi l’avviso la sera prima, in orario scelto da te. Tocca per vedere cosa include.",
   "onboarding_finish": "Fine",
   "waste_organic": "Organico",
   "waste_paper": "Carta",

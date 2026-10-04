@@ -24,23 +24,38 @@ import '../l10n/generated/app_localizations.dart';
 /// Quindi qui si calcolano solo **stringhe e colori**, si salvano dove il provider Kotlin
 /// sa leggerli, e il disegno lo fa un layout XML.
 abstract final class TrashcanWidget {
-  /// `true` dove il widget esiste davvero, cioè per ora solo su Android.
+  /// `true` dove il widget esiste davvero: Android e iOS.
   ///
-  /// ☠ **Non è una comodità: senza, l'app muore all'avvio su iOS.** `publish` gira da
-  /// `notificationSyncProvider` a ogni avvio, e su iOS `HomeWidget.saveWidgetData` scrive
-  /// in un App Group che non esiste finché non c'è un'estensione WidgetKit configurata.
-  /// Il canale di piattaforma solleva, l'eccezione risale dentro un `unawaited`, e la
-  /// prima schermata non si vede nemmeno.
+  /// ☠ **Serve ancora, e non è un residuo.** `publish` gira da `notificationSyncProvider`
+  /// a ogni avvio. Su una piattaforma senza widget (il desktop dei test, o iOS prima che
+  /// esistesse l'estensione) il canale solleva, l'eccezione risale dentro un `unawaited` e
+  /// la prima schermata non si vede nemmeno.
   ///
-  /// ⚑ Il widget iOS **non è stato abbandonato, è rimandato**: richiede un bersaglio
-  /// Xcode separato con un'estensione WidgetKit scritta in Swift, che è un lavoro suo e
-  /// non un adattamento di questo file. Quando ci sarà, qui si toglie la condizione sulla
-  /// piattaforma e si cambia il modo di consegnare i dati, non il calcolo: le righe che
-  /// `publish` costruisce vanno bene per tutti e due i sistemi.
+  /// ⚑ Le due piattaforme condividono **tutto** il calcolo: le stesse 3650 righe, gli
+  /// stessi separatori, le stesse icone disegnate da Dart. Cambia solo chi le consuma, un
+  /// `AppWidgetProvider` in Kotlin di qua e un'estensione WidgetKit in Swift di là.
+  static bool get disponibile =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+
+  /// Il gruppo condiviso fra app ed estensione su iOS.
   ///
-  /// ⚑ Si guarda [defaultTargetPlatform] e non `Platform.isAndroid`: il secondo legge
-  /// `dart:io`, che un test non può far mentire.
-  static bool get disponibile => defaultTargetPlatform == TargetPlatform.android;
+  /// ☠ **Senza, su iOS non si scrive niente e non lo dice nessuno.** Le preferenze del
+  /// widget non sono quelle dell'app: vivono in un contenitore separato a cui accedono
+  /// entrambe, e che va dichiarato nei diritti dei due bersagli **e** registrato nel
+  /// portale Apple. Se il gruppo non esiste, `saveWidgetData` scrive in un `UserDefaults`
+  /// nullo e l'estensione legge un contenitore vuoto: nessun errore, widget vuoto.
+  ///
+  /// ☠ La stringa è ripetuta in tre posti che devono restare uguali: qui,
+  /// `ios/Runner/Runner.entitlements` e `ios/TrashcanWidget/TrashcanWidget.entitlements`.
+  static const String gruppoIos = 'group.com.smp.trashcan';
+
+  /// Il nome con cui WidgetKit conosce l'estensione.
+  ///
+  /// ☠ È il `kind` dichiarato in `TrashcanWidget.swift`. Se le due divergono, l'app
+  /// chiede a WidgetKit di ricaricare un widget che non esiste: nessun errore, nessun
+  /// aggiornamento, e nessun indizio su dove guardare.
+  static const String nomeIos = 'TrashcanWidget';
 
   /// Il nome della classe Kotlin, con il package: è così che il plugin la ritrova.
   ///
@@ -191,6 +206,7 @@ abstract final class TrashcanWidget {
     required bool pro,
   }) async {
     if (!disponibile) return;
+    await _preparaIos();
 
     final l = lookupL(
       resolveAppLocale(WidgetsBinding.instance.platformDispatcher.locales, kSupportedLocales),
@@ -333,7 +349,10 @@ abstract final class TrashcanWidget {
     // aperta.
     await HomeWidget.saveWidgetData<String>(keyDays, newline + righe.join(newline));
 
-    await HomeWidget.updateWidget(qualifiedAndroidName: qualifiedName);
+    await HomeWidget.updateWidget(
+      qualifiedAndroidName: qualifiedName,
+      iOSName: nomeIos,
+    );
   }
 
   /// Disegna una volta sola ogni icona che servira' nell'anno precalcolato.
@@ -438,8 +457,23 @@ abstract final class TrashcanWidget {
   /// (`HomeWidgetScheduler.pruneAndArmNext`), quindi un decennio non è un decennio di
   /// allarmi di sistema: è un elenco di numeri in una preferenza, una cinquantina di
   /// kilobyte, riscritto una volta al giorno. Il sistema ne vede sempre e solo uno.
+  /// Dichiara al plugin il gruppo condiviso, una volta per avvio.
+  ///
+  /// ⚑ Su Android non serve e non fa niente di dannoso, ma chiamarlo comunque
+  /// costerebbe un passaggio di canale inutile a ogni pubblicazione.
+  static Future<void> _preparaIos() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    await HomeWidget.setAppGroupId(gruppoIos);
+  }
+
+  /// Programma i risvegli di mezzanotte. **Solo Android.**
+  ///
+  /// ⚑ Su iOS non servono sveglie, ed è la differenza piu' bella fra le due
+  /// piattaforme: WidgetKit chiede lui i prossimi giorni e cambia schermata all'ora
+  /// giusta, leggendo la timeline che l'estensione costruisce dalle righe già pronte.
+  /// Niente allarmi, niente permessi, niente da riarmare dopo un riavvio.
   static Future<void> scheduleDailyRefresh() async {
-    if (!disponibile) return;
+    if (defaultTargetPlatform != TargetPlatform.android) return;
 
     final now = DateTime.now();
     final times = <DateTime>[
