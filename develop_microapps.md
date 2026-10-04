@@ -1,13 +1,14 @@
 # develop_microapps.md — Specsheet operativa di sviluppo
 
-> **Progetto**: MicroApps — quattro app Flutter monetizzate una tantum su Google Play
-> più un server di licenze/entitlement self-hosted.
+> **Progetto**: MicroApps — quattro app Flutter monetizzate una tantum, su **Google Play
+> e App Store**, più un server di licenze/entitlement self-hosted.
 > **Repository app** (remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps.git`
 > **Mirror pubblico app** (remote `github`): `https://github.com/Frostmoore/smallapps.git`
 > **Repository server** (**solo Gitea**, remote `origin`): `https://git.home.varitest.ovh/smp-webmaster/microapps-server.git`
 > **Documento creato**: 2026-09-09
-> **Stato**: **F0, F1, F2 e F3 chiuse** (tranne F3.12, bloccata su Play Console). 224 test
-> verdi: 117 in TrashCan, 107 in micro_core. Vedi §7.
+> **Stato**: **F0, F1, F2 e F3 chiuse** (tranne F3.12, bloccata su Play Console). **F9
+> (porting iOS) aperta il 2026-10-04**: TrashCan compila, parte e passa il test di
+> integrazione sul simulatore. 236 test verdi: 127 in TrashCan, 109 in micro_core. Vedi §7.
 
 ---
 
@@ -432,10 +433,15 @@ l'endpoint pubblico venga sommerso da traffico casuale e a rendere non banale il
 Il commento in testa a `server/src/plugins/auth.ts` deve dire esattamente cosa protegge e
 cosa no.
 
-### ADR-015 — Widget Android nativi solo dove sono una feature di prodotto
+### ADR-015 — Widget nativi solo dove sono una feature di prodotto
 
-**Decisione**: widget home-screen in **TrashCan** (feature premium centrale, F4.10) e in
-**Full Freezer** (F5.10). Nessun widget in Scorte Calore e Film Tracker.
+**Decisione**: widget home-screen in **TrashCan** (F4.10) e in **Full Freezer** (F5.10).
+Nessun widget in Scorte Calore e Film Tracker.
+
+⚑ Dal 2026-10-04 la decisione vale **per due sistemi** (ADR-021), e il conto cambia: dove
+si diceva "un widget", adesso si legga "un `AppWidgetProvider` in Kotlin **e** un'estensione
+WidgetKit in Swift". Le due app che il widget non ce l'hanno risparmiano il doppio di
+quanto risparmiavano prima.
 
 ⚑ **Perché**: un widget Android in Flutter richiede codice Kotlin nativo, il plugin
 `home_widget`, e `RemoteViews`/Glance scritti a mano. È il pezzo più costoso in rapporto
@@ -554,6 +560,42 @@ commerciale aperta, non un vincolo tecnico.
 nella valuta del paese e col finale giusto; una costante nel codice sarebbe sbagliata in tutti
 i paesi tranne uno, e resterebbe sbagliata il giorno che il prezzo cambia. È anche l'unico
 punto del sistema che non ha avuto bisogno di questa correzione.
+
+### ADR-021 — Ogni app esce su Android **e** su iOS
+
+**Decisione**: le quattro app hanno due piattaforme di destinazione, non una. Ogni app ha
+`apps/<nome>/android` e `apps/<nome>/ios`, e una funzione non è finita finché non si comporta
+bene su entrambe.
+
+☠ **Questo documento ha detto il contrario per quasi un mese.** L'intestazione diceva
+«quattro app Flutter monetizzate una tantum su Google Play», e nessuna fase prevedeva iOS.
+Il proprietario l'aveva detto dall'inizio; la decisione è scritta, con le sue parole, in
+`memory/decisioni.md` alla data del 2026-10-04. Un documento che afferma una piattaforma
+sola fa scrivere codice che dà per scontata quella piattaforma, ed è esattamente quello che
+è successo: al momento della correzione, in tutto il monorepo esisteva **un solo** controllo
+di piattaforma.
+
+⚑ **Cosa cambia in pratica.** Flutter rende gratuita la parte grande - schermate, motore
+delle ricorrenze, database, traduzioni - e lascia intero il costo delle **giunture col
+sistema**, che sono poi le cose per cui si scarica l'app:
+
+| Giuntura | Android | iOS |
+|---|---|---|
+| Widget di casa | `AppWidgetProvider` in Kotlin + `RemoteViews` | estensione **WidgetKit** in Swift, bersaglio Xcode separato |
+| Acquisti | Google Play Billing | StoreKit, con prodotti da creare in App Store Connect |
+| Notifiche | canali, importanza, `SCHEDULE_EXACT_ALARM` | permesso Darwin, niente canali, `threadIdentifier` |
+| Icona | adattiva: primo piano, sfondo, monocromatica | una immagine sola, **senza canale alfa** |
+| Avvio | tema, più l'API di sistema di Android 12 | storyboard |
+
+☠ **La parte condivisa non è gratis: è gratis solo se nessuno ci mette dentro un
+presupposto.** Il difetto tipico non è il codice nativo, che si vede; è la riga Dart che
+chiama un'API esistente su una piattaforma sola, compila senza un avviso, e fallisce a
+runtime sull'altra. `micro_core` è il posto dove questo costa di più, perché il difetto si
+moltiplica per quattro app.
+
+⚑ Dove serve sapere su cosa si sta girando, si guarda `defaultTargetPlatform` e non
+`Platform.isAndroid`: il secondo legge `dart:io`, che un test non può far mentire, e la
+differenza fra le piattaforme resterebbe la sola parte non coperta dai test.
 
 ---
 
@@ -1013,6 +1055,44 @@ tutte fatte e provate sull'emulatore:
 - [ ] **F7.7** Informative privacy pubblicate e raggiungibili da URL
 - [ ] **F7.8** Verifica finale dei sei `codebase_reference.md` con `verify_atlas`
 - [ ] **F7.9** Rituale di fine fase F7
+
+### F9 — Porting iOS → `v5.0.0`
+
+Nata il 2026-10-04 dalla decisione in `memory/decisioni.md` e da ADR-021. Non è una fase
+"dopo le altre": ogni app la attraversa quando è pronta, e TrashCan è la prima.
+
+**F9.1 — Preparare `micro_core` alle due piattaforme**
+
+- [x] **F9.1.1** `NotificationService` inizializza anche il lato Darwin e chiede il permesso su iOS
+- [x] **F9.1.2** `PlayPurchaseGateway` → `StorePurchaseGateway`, con `GooglePlayPurchaseParam` solo su Android
+- [x] **F9.1.3** `BillingMode.play` → `BillingMode.store`; il define `BILLING=play` resta accettato
+- [ ] **F9.1.4** Test che coprano entrambi i rami di `defaultTargetPlatform`
+
+**F9.2 — TrashCan su iOS**
+
+- [x] **F9.2.1** Toolchain sul Mac mini: Flutter 3.47.3, Xcode 27, simulatori iOS 27
+- [x] **F9.2.2** `apps/trashcan/ios` generata, bundle `com.smp.trashcan`, nome "TrashCan", lingue dichiarate
+- [x] **F9.2.3** Icona e schermata di avvio generate dal logo, senza canale alfa
+- [x] **F9.2.4** Il percorso del widget si spegne fuori da Android (`TrashcanWidget.disponibile`)
+- [x] **F9.2.5** Compila e parte sul simulatore; `first_run_test.dart` passa su iOS
+- [ ] **F9.2.6** Prova su un iPhone vero: notifiche consegnate, permesso chiesto una volta sola
+- [ ] **F9.2.7** Estensione **WidgetKit** in Swift, con le stesse righe che Dart già calcola
+- [ ] **F9.2.8** Prodotto `trashcan_pro_lifetime` in App Store Connect e acquisto verificato
+- [ ] **F9.2.9** Scheda App Store: testi, schermate, informativa privacy, nutrition label
+- [ ] **F9.2.10** TestFlight interno
+
+**F9.3 — Le altre tre app**
+
+- [ ] **F9.3.1** Full Freezer su iOS, widget WidgetKit compreso (F5.10)
+- [ ] **F9.3.2** Scorte Calore su iOS
+- [ ] **F9.3.3** Film Tracker su iOS
+- [ ] **F9.3.4** Rituale di fine fase F9
+
+☠ **Debito aperto, F9.1.4 e il test di integrazione.** `first_run_test.dart` cerca i
+controlli per testo inglese e si **pianta** su un dispositivo in italiano invece di fallire:
+il 4 ottobre è costato un quarto d'ora prima che qualcuno guardasse lo schermo del
+simulatore. Finché resta così, il dispositivo di prova va messo in inglese a mano (vedi
+l'atlante di TrashCan, §9).
 
 ### F8 — Deploy e pubblicazione → `v9.0.0`
 

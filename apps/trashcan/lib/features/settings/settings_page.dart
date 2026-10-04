@@ -137,16 +137,22 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => context.push(Routes.notifications),
               ),
             ),
-            MicroSpacing.gapS,
-            MicroCard(
-              padding: EdgeInsets.zero,
-              child: MicroListTile(
-                title: l.widget_addTitle,
-                subtitle: l.widget_addBody,
-                leading: const Icon(Icons.widgets_outlined),
-                onTap: () => _pinWidget(context, l),
+            // ⚑ La voce compare solo dove il widget esiste. Mostrarla su iOS e poi dire
+            // "non supportato" al tocco è peggio che non mostrarla: l'utente ha già deciso
+            // che la vuole, e si porta via l'idea che l'app sia difettosa invece che
+            // l'idea, corretta, che su iPhone quella funzione non c'è ancora.
+            if (TrashcanWidget.disponibile) ...<Widget>[
+              MicroSpacing.gapS,
+              MicroCard(
+                padding: EdgeInsets.zero,
+                child: MicroListTile(
+                  title: l.widget_addTitle,
+                  subtitle: l.widget_addBody,
+                  leading: const Icon(Icons.widgets_outlined),
+                  onTap: () => _pinWidget(context, l),
+                ),
               ),
-            ),
+            ],
             MicroSpacing.gapS,
             MicroCard(
               padding: EdgeInsets.zero,

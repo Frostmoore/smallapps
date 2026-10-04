@@ -25,7 +25,8 @@
 | Configurazione dell'app | `src/config/micro_app_config.dart` → `MicroAppConfig`, `BillingMode` |
 | Tema e token grafici | `src/theme/` → `MicroTheme`, `MicroSpacing`, `MicroRadius`, `MicroDuration` |
 | Componenti UI | `src/ui/micro_widgets.dart` → undici widget `Micro*` |
-| Acquisti | `src/billing/` → `PurchaseGateway`, `PlayPurchaseGateway`, `FakePurchaseGateway` |
+| Acquisti | `src/billing/` → `PurchaseGateway`, `StorePurchaseGateway`, `FakePurchaseGateway` |
+| Dove le piattaforme divergono | § «Due sistemi, un package» qui sotto |
 | Diritto al Pro | `src/entitlement/` → `Entitlement`, `EntitlementService`, `LicenseApi` |
 | Cosa è a pagamento | `src/gate/` → `FeatureKey`, `FeatureLimit`, `FeatureGate` |
 | Paywall e lucchetti | `src/gate/paywall.dart` → `PaywallPage`, `ProLock`, `ProBadge` |
@@ -35,6 +36,32 @@
 | Cosa **non** esiste ancora | §10 |
 
 ---
+
+## Due sistemi, un package
+
+Dal 2026-10-04 le app escono su Android **e** su iOS (ADR-021, e `memory/decisioni.md`).
+`micro_core` è il posto dove questo costa di più: un presupposto sbagliato qui si moltiplica
+per quattro app.
+
+☠ **Il difetto tipico non è il codice nativo, è la riga Dart.** Il codice nativo si vede e
+si sa di doverlo scrivere due volte. Quello che non si vede è la chiamata a un'API che
+esiste su una piattaforma sola: compila senza un avviso, passa i test a tavolino, e fallisce
+a runtime sull'altro sistema. I due casi già pagati stanno qui sotto.
+
+| Punto | Com'era | Perché era un difetto |
+|---|---|---|
+| `NotificationService.create` | passava i soli `AndroidInitializationSettings` | su iOS non arrivava **nessuna** notifica, e niente lo diceva: l'oggetto accetta i soli parametri Android senza lamentarsi |
+| `NotificationService.ensurePermission` | risolveva la sola implementazione Android, e con `null` rispondeva `notRequired` | su iOS il permesso serve eccome. L'interfaccia mostrava i promemoria come attivi e funzionanti |
+| `StorePurchaseGateway.buy` | `GooglePlayPurchaseParam` sempre | `in_app_purchase` lo rifiuta a runtime su iOS: il difetto si vedeva solo toccando il pulsante d'acquisto |
+
+⚑ **Dove serve distinguere, si guarda `defaultTargetPlatform`**, non `Platform.isAndroid`:
+il secondo legge `dart:io`, che un test non può far mentire, e la differenza fra le
+piattaforme resterebbe la sola parte scoperta dai test.
+
+⚑ Quello che **non** diverge, e che conviene lasciare dov'è: il motore delle ricorrenze, il
+database, le traduzioni, il tema, i limiti del Pro e il paywall. Il paywall mostra
+`formattedPrice` che arriva dal negozio, quindi è già corretto su tutti e due senza una
+riga di condizione.
 
 ## 2. Albero dei file
 
@@ -52,7 +79,7 @@ packages/micro_core/
 │     │  ├─ purchase_gateway.dart      MicroProduct, PurchaseEvent + 4 sottotipi,
 │     │  │                             PurchaseGateway, BillingErrorCodes
 │     │  ├─ fake_purchase_gateway.dart FakeOutcome, FakePurchaseGateway
-│     │  └─ play_purchase_gateway.dart PlayPurchaseGateway
+│     │  └─ store_purchase_gateway.dart StorePurchaseGateway
 │     ├─ config/micro_app_config.dart  BillingMode, MicroAppConfig
 │     ├─ entitlement/
 │     │  ├─ entitlement.dart           ProStatus, EntitlementSource, Entitlement
@@ -113,7 +140,7 @@ packages/micro_core/
 | `shared_preferences` | `SettingsStore` |
 | `flutter_secure_storage`, `uuid`, `crypto` | `InstallId`, firma HMAC |
 | `http` | `LicenseApiClient` |
-| `in_app_purchase`, `in_app_purchase_android` | `PlayPurchaseGateway` |
+| `in_app_purchase`, `in_app_purchase_android` | `StorePurchaseGateway` (il pacchetto Android serve al solo `GooglePlayPurchaseParam`) |
 | `flutter_local_notifications`, `timezone`, `flutter_timezone` | `NotificationService` |
 | `archive`, `file_picker`, `share_plus` | `BackupService` |
 | `image` | `ImageStore` |
@@ -268,7 +295,7 @@ e obbligare a dichiararlo evita i `?? false` sparsi che confondono "spento" con 
 `loadProducts(Set<String>)` · `buy(MicroProduct, {required String obfuscatedAccountId})` ·
 `restorePurchases()` · `completePurchase(PurchaseSucceeded)` · `dispose()`
 
-Implementazioni: `PlayPurchaseGateway({InAppPurchase? iap})` e
+Implementazioni: `StorePurchaseGateway({InAppPurchase? iap})` e
 `FakePurchaseGateway({List<MicroProduct> catalog, Duration latency, FakeOutcome outcome, bool startsOwned})`,
 con `FakePurchaseGateway.withProduct(...)`, `owns()`, `wasAcknowledged()`, `grant()`, `reset()`.
 
@@ -559,9 +586,9 @@ niente; il contrario toglierebbe agli utenti gratuiti una funzione che doveva es
 | Golden test dei componenti | F7 |
 | Provider Riverpod condivisi | Deliberatamente assenti: `micro_core` resta libero da Riverpod, e ogni app cabla i propri provider |
 | Test di `NotificationService` che tocchino il plugin | F3.8, insieme allo scheduler di TrashCan |
-| Test di `PlayPurchaseGateway` | F3.12: servono Play Services e un prodotto pubblicato |
-| Supporto iOS testato | Non previsto, DT-01 |
-| Widget Android nativi | Vivono nelle app, non qui (ADR-015) |
+| Test di `StorePurchaseGateway` | F3.12: servono Play Services e un prodotto pubblicato |
+| Estensione WidgetKit per il widget iOS | Vive nelle app, non qui. Non esiste ancora in nessuna |
+| Widget nativi | Vivono nelle app, non qui (ADR-015) |
 
 ---
 

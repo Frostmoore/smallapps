@@ -1,6 +1,6 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +24,24 @@ import '../l10n/generated/app_localizations.dart';
 /// Quindi qui si calcolano solo **stringhe e colori**, si salvano dove il provider Kotlin
 /// sa leggerli, e il disegno lo fa un layout XML.
 abstract final class TrashcanWidget {
+  /// `true` dove il widget esiste davvero, cioè per ora solo su Android.
+  ///
+  /// ☠ **Non è una comodità: senza, l'app muore all'avvio su iOS.** `publish` gira da
+  /// `notificationSyncProvider` a ogni avvio, e su iOS `HomeWidget.saveWidgetData` scrive
+  /// in un App Group che non esiste finché non c'è un'estensione WidgetKit configurata.
+  /// Il canale di piattaforma solleva, l'eccezione risale dentro un `unawaited`, e la
+  /// prima schermata non si vede nemmeno.
+  ///
+  /// ⚑ Il widget iOS **non è stato abbandonato, è rimandato**: richiede un bersaglio
+  /// Xcode separato con un'estensione WidgetKit scritta in Swift, che è un lavoro suo e
+  /// non un adattamento di questo file. Quando ci sarà, qui si toglie la condizione sulla
+  /// piattaforma e si cambia il modo di consegnare i dati, non il calcolo: le righe che
+  /// `publish` costruisce vanno bene per tutti e due i sistemi.
+  ///
+  /// ⚑ Si guarda [defaultTargetPlatform] e non `Platform.isAndroid`: il secondo legge
+  /// `dart:io`, che un test non può far mentire.
+  static bool get disponibile => defaultTargetPlatform == TargetPlatform.android;
+
   /// Il nome della classe Kotlin, con il package: è così che il plugin la ritrova.
   ///
   /// ☠ Scritto per esteso e non come nome semplice: con il solo nome della classe il
@@ -172,6 +190,8 @@ abstract final class TrashcanWidget {
     required int? calendarId,
     required bool pro,
   }) async {
+    if (!disponibile) return;
+
     final l = lookupL(
       resolveAppLocale(WidgetsBinding.instance.platformDispatcher.locales, kSupportedLocales),
     );
@@ -419,6 +439,8 @@ abstract final class TrashcanWidget {
   /// allarmi di sistema: è un elenco di numeri in una preferenza, una cinquantina di
   /// kilobyte, riscritto una volta al giorno. Il sistema ne vede sempre e solo uno.
   static Future<void> scheduleDailyRefresh() async {
+    if (!disponibile) return;
+
     final now = DateTime.now();
     final times = <DateTime>[
       for (var day = 1; day <= giorniPrecalcolati; day++)

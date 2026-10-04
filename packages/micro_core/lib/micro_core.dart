@@ -11,8 +11,8 @@
 library;
 export 'src/backup/backup.dart';
 export 'src/billing/fake_purchase_gateway.dart';
-export 'src/billing/play_purchase_gateway.dart';
 export 'src/billing/purchase_gateway.dart';
+export 'src/billing/store_purchase_gateway.dart';
 export 'src/config/micro_app_config.dart';
 export 'src/entitlement/entitlement.dart';
 export 'src/entitlement/entitlement_service.dart';

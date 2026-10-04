@@ -10,7 +10,7 @@
 # usa solo il canale alfa. Dandogli questo PNG a colori si otterrebbe una macchia bianca.
 flutter_launcher_icons:
   android: true
-  ios: false
+  ios: true
   image_path: "assets/icons/trashcan_logo.png"
 
   # Icona adattiva. Il primo piano e' il logo, lo sfondo e' il verde del tema.
@@ -29,4 +29,15 @@ flutter_launcher_icons:
   # l'unica icona a colori fra tutte quelle tematizzate dal sistema.
   adaptive_icon_monochrome: "assets/icons/trashcan_logo.png"
 
-  remove_alpha_ios: false
+  # ☠ **L'icona iOS non può avere trasparenza.** App Store Connect rifiuta il caricamento
+  # di un'app la cui icona abbia un canale alfa, e lo fa a caricamento finito, non prima.
+  # Il logo è su fondo trasparente, quindi l'alfa va tolta riempiendo con un colore.
+  remove_alpha_ios: true
+
+  # Lo stesso verde dello sfondo dell'icona adattiva Android: le due piattaforme devono
+  # avere la stessa icona, non due parenti.
+  #
+  # ⚑ iOS non ritaglia e non tematizza: niente primo piano, niente sfondo, niente livello
+  # monocromatico. Quello che si dà è quello che si vede, dentro una maschera arrotondata
+  # che ci pensa il sistema ad applicare.
+  background_color_ios: "#2E7D5B"

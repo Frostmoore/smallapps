@@ -49,7 +49,7 @@ final installIdProvider = FutureProvider<InstallId>(
 final purchaseGatewayProvider = Provider<PurchaseGateway>((ref) {
   final config = ref.watch(appConfigProvider);
   final gateway = switch (config.billingMode) {
-    BillingMode.play => PlayPurchaseGateway(),
+    BillingMode.store => StorePurchaseGateway(),
     // Il gateway finto parte già posseduto solo se qualcuno lo chiede esplicitamente:
     // di default si vede il paywall, che è ciò che si vuole provare durante lo sviluppo.
     BillingMode.fake => FakePurchaseGateway.withProduct(config.proSku),

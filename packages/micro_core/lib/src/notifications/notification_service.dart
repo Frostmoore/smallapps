@@ -120,6 +120,22 @@ class NotificationService {
     await instance.initialize(
       settings: InitializationSettings(
         android: AndroidInitializationSettings(androidIconResource),
+        // ☠ Senza questa riga su iOS non arriva **nessuna** notifica, e non lo dice
+        // nessuno: `InitializationSettings` accetta i soli parametri Android senza
+        // lamentarsi, l'app parte, e il difetto si manifesta solo la sera in cui il
+        // promemoria doveva suonare.
+        //
+        // ⚑ I tre permessi sono chiesti a `false` di proposito. Lasciandoli a `true`
+        // iOS mostrerebbe il foglio di sistema **al primo avvio in assoluto**, prima che
+        // l'utente abbia visto cosa fa l'app e quindi prima che abbia un motivo per dire
+        // di sì. Un no a quel foglio è definitivo: si cambia idea solo dalle impostazioni
+        // di sistema, che nessuno apre. Il permesso si chiede da [ensurePermission],
+        // quando l'utente accende i promemoria, esattamente come su Android.
+        iOS: const DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
       ),
       onDidReceiveNotificationResponse: service._onTap,
     );
@@ -147,12 +163,29 @@ class NotificationService {
     return payload;
   }
 
+  /// Chiede il permesso di notificare, sulla piattaforma su cui gira.
+  ///
+  /// ☠ Qui c'era solo il ramo Android, e su iOS la risoluzione dell'implementazione
+  /// Android dà `null`: il metodo rispondeva [PermissionOutcome.notRequired], cioè
+  /// «non serve nessun permesso». Su iOS il permesso serve eccome, e senza non arriva
+  /// niente. L'interfaccia avrebbe mostrato i promemoria come attivi e funzionanti.
   Future<PermissionOutcome> ensurePermission() async {
     final android = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    if (android == null) return PermissionOutcome.notRequired;
-    final granted = await android.requestNotificationsPermission();
-    return (granted ?? false) ? PermissionOutcome.granted : PermissionOutcome.denied;
+    if (android != null) {
+      final granted = await android.requestNotificationsPermission();
+      return (granted ?? false) ? PermissionOutcome.granted : PermissionOutcome.denied;
+    }
+
+    final darwin = _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    if (darwin != null) {
+      // Gli stessi tre permessi che [create] non ha chiesto all'avvio.
+      final granted = await darwin.requestPermissions(alert: true, badge: true, sound: true);
+      return (granted ?? false) ? PermissionOutcome.granted : PermissionOutcome.denied;
+    }
+
+    return PermissionOutcome.notRequired;
   }
 
   /// `true` se il sistema consente gli alarm all'orario esatto.
@@ -160,6 +193,12 @@ class NotificationService {
   /// ☠ Su Android 14+ `SCHEDULE_EXACT_ALARM` non è concesso di default, e Google Play
   /// contesta la richiesta se non c'è una ragione da sveglia o promemoria dell'utente.
   /// Chi non ce l'ha deve comunque ricevere le notifiche, solo con tolleranza maggiore.
+  ///
+  /// ⚑ Su iOS risponde `false`, ed è corretto così anche se suona al contrario: iOS non
+  /// ha il concetto di permesso per l'orario esatto, consegna sempre all'ora chiesta, e
+  /// l'unico effetto di questo `false` è scegliere un `androidScheduleMode` che su iOS
+  /// viene ignorato. Non va usato per decidere cosa mostrare all'utente: su iOS non
+  /// esiste nessuna schermata di sistema da aprire.
   Future<bool> canScheduleExactAlarms() async {
     final android = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -203,6 +242,16 @@ class NotificationService {
           // Il testo lungo va reso con BigTextStyle, altrimenti Android lo tronca al
           // primo rigo e il promemoria perde proprio la parte che dice cosa fare.
           styleInformation: BigTextStyleInformation(notification.body),
+        ),
+        // ⚑ iOS non ha canali: l'importanza, la vibrazione e la descrizione del canale
+        // non hanno dove andare, e il raggruppamento si fa con `threadIdentifier`. Gli si
+        // passa l'id del canale, così i promemoria della stessa famiglia si impilano nel
+        // centro notifiche invece di presentarsi come avvisi slegati.
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: false,
+          presentSound: channel.playSound,
+          threadIdentifier: channel.id,
         ),
       ),
       androidScheduleMode: useExact

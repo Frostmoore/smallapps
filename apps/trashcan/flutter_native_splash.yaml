@@ -17,8 +17,17 @@ flutter_native_splash:
   image_dark: assets/icons/trashcan_logo.png
 
   android: true
-  ios: false
+  ios: true
   web: false
+
+  # ⚑ Su iOS la schermata di avvio non è un'immagine ma uno **storyboard**, che il sistema
+  # mostra prima ancora di aver caricato l'eseguibile. Non c'è nessun equivalente della
+  # trappola di Android 12: niente ritaglio circolare, quindi qui va bene il logo intero e
+  # non serve la variante rimpicciolita.
+  #
+  # ☠ Lo storyboard **non segue il tema scuro del sistema** come fa Android: iOS sceglie
+  # fra due insiemi di risorse solo se glieli si dà entrambi, e lo strumento lo fa leggendo
+  # `color_dark` e `image_dark`, che sono già dichiarati qui sopra.
 
   # ☠ Android 12 ha cambiato il meccanismo: la splash non e' piu' un tema con un drawable
   # di sfondo ma un'API di sistema, che ritaglia l'immagine in un cerchio e ne mangia il

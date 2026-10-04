@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
@@ -8,8 +10,8 @@ import '../util/result.dart';
 import 'purchase_gateway.dart';
 
 /// Il gateway vero, su Google Play Billing.
-class PlayPurchaseGateway implements PurchaseGateway {
-  PlayPurchaseGateway({InAppPurchase? iap}) : _iap = iap ?? InAppPurchase.instance;
+class StorePurchaseGateway implements PurchaseGateway {
+  StorePurchaseGateway({InAppPurchase? iap}) : _iap = iap ?? InAppPurchase.instance;
 
   final InAppPurchase _iap;
   final StreamController<PurchaseEvent> _events = StreamController<PurchaseEvent>.broadcast();
@@ -80,18 +82,31 @@ class PlayPurchaseGateway implements PurchaseGateway {
 
       // `buyNonConsumable` e non `buyConsumable`: il Pro è per sempre e non va consumato.
       // Consumarlo lo renderebbe riacquistabile, cioè addebitabile due volte.
-      await _iap.buyNonConsumable(
-        purchaseParam: GooglePlayPurchaseParam(
-          productDetails: details,
-          applicationUserName: obfuscatedAccountId,
-        ),
-      );
+      await _iap.buyNonConsumable(purchaseParam: _parametro(details, obfuscatedAccountId));
       return const Ok(null);
     } on Exception catch (error, stack) {
       MicroLog.e('acquisto fallito', error: error, stackTrace: stack);
       return Err(MicroError.unexpected(error, stack));
     }
   }
+
+  /// Il parametro d'acquisto giusto per il negozio su cui giriamo.
+  ///
+  /// ☠ `GooglePlayPurchaseParam` è l'**unico** punto di tutto il gateway legato a Play:
+  /// interrogare il catalogo, comprare, ripristinare e ascoltare lo stream sono identici
+  /// sui due negozi. Passandolo su iOS, `in_app_purchase` lo rifiuta a runtime, quindi il
+  /// difetto non si vede compilando: si vede quando qualcuno tocca il pulsante d'acquisto.
+  ///
+  /// ⚑ Si guarda [defaultTargetPlatform] e non `Platform.isAndroid` perché il secondo
+  /// legge `dart:io`, che nei test non c'è modo di far mentire: con `defaultTargetPlatform`
+  /// un test può verificare entrambi i rami su qualunque macchina.
+  PurchaseParam _parametro(ProductDetails details, String? obfuscatedAccountId) =>
+      defaultTargetPlatform == TargetPlatform.android
+      ? GooglePlayPurchaseParam(
+          productDetails: details,
+          applicationUserName: obfuscatedAccountId,
+        )
+      : PurchaseParam(productDetails: details, applicationUserName: obfuscatedAccountId);
 
   @override
   Future<Result<void>> restorePurchases() async {

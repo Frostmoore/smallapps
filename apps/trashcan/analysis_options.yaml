@@ -5,3 +5,4 @@ analyzer:
     - "lib/l10n/generated/**"
     - build/**
     - android/**
+    - ios/**

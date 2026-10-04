@@ -112,17 +112,71 @@ apps/trashcan/
 │       ├── drawable*/launch_background.xml      splash fino ad Android 11
 │       ├── drawable*/background.png             la tinta piatta della splash
 │       └── values-v31/styles.xml, values-night-v31/styles.xml   splash di Android 12+
+├── ios/                              generata il 2026-10-04 (vedi §2ter)
+│   ├── Runner.xcworkspace                **questo** si apre in Xcode, non .xcodeproj
+│   ├── Runner/Info.plist                 nome visualizzato, lingue, orientamenti
+│   ├── Runner/Assets.xcassets/            icona generata dal logo
+│   └── Runner/Base.lproj/LaunchScreen.storyboard   la schermata di avvio
 ├── test/                             127 test (vedi §9)
 └── integration_test/first_run_test.dart
 ```
 
 ---
 
+## 2ter. iOS
+
+TrashCan gira su iOS dal **4 ottobre 2026**. Il progetto Xcode è stato generato con
+`flutter create --platforms=ios --org com.smp --project-name trashcan .` dentro
+`apps/trashcan/`, quindi l'identificativo del bundle è già `com.smp.trashcan`, lo stesso
+`applicationId` di Android.
+
+### Come si compila e si prova
+
+Serve un Mac: Xcode non esiste altrove. La macchina di sviluppo iOS è il Mac mini
+(`ssh mac`), con Flutter 3.47.3 in `~/microapps-toolchain/flutter`.
+
+⚑ **Niente CocoaPods, e non è una dimenticanza.** Flutter 3.47 risolve i plugin iOS con
+**Swift Package Manager**: non esiste un `Podfile`, non esiste una cartella `Pods`, e il
+primo `flutter build ios` non scarica nessuno specfile. CocoaPods è installato sul Mac
+perché `flutter doctor` lo cerca e perché serve ai progetti più vecchi, non a questo. Chi
+cerca il `Podfile` per aggiungerci qualcosa sta per creare un file che nessuno leggerà.
+
+```
+export PATH="$HOME/microapps-toolchain/flutter/bin:/opt/homebrew/bin:$PATH"
+cd ~/microapps/apps/trashcan
+flutter build ios --simulator --debug
+xcrun simctl install <UDID> build/ios/iphonesimulator/Runner.app
+xcrun simctl launch  <UDID> com.smp.trashcan
+```
+
+⚑ La toolchain **non** sta in `.flutter/` come su Windows: quella cartella è esclusa dal
+trasferimento perché pesa due giga ed è specifica del sistema operativo. Il Mac ha la sua
+copia della stessa versione, 3.47.3. Due copie della stessa versione, non due versioni.
+
+### Cosa su iOS non c'è, e perché
+
+| Pezzo | Stato | Perché |
+|---|---|---|
+| Widget di casa | **assente** | è un `AppWidgetProvider` in Kotlin. Su iOS serve un'estensione WidgetKit in Swift, che è un bersaglio Xcode suo. `TrashcanWidget.disponibile` è `false` e tutto il percorso si spegne |
+| Acquisti | da verificare sul dispositivo | il gateway è neutro (`StorePurchaseGateway`), ma i prodotti vanno creati in App Store Connect e il simulatore non compra |
+| Notifiche | codice pronto, da provare | `micro_core` inizializza ora anche il lato Darwin e chiede il permesso. Il simulatore le consegna, un dispositivo vero è un'altra cosa |
+
+☠ **La voce "aggiungi il widget" nelle impostazioni compare solo dove il widget esiste.**
+Mostrarla su iOS e poi rispondere "non supportato" al tocco è peggio che non mostrarla:
+l'utente ha già deciso che la vuole, e si porta via l'idea che l'app sia difettosa invece
+dell'idea, corretta, che su iPhone quella funzione non c'è ancora.
+
 ## 2bis. Icona e schermata di avvio
 
 Il logo è **fornito dall'utente**: `assets/icons/trashcan_logo.png`, 1254x1254 ARGB, un
 cestino verde con un calendario dietro e il simbolo del riciclo in basso a destra. Da quel
-file si generano, con due pacchetti, tutte le risorse Android.
+file si generano, con due pacchetti, tutte le risorse Android **e iOS**.
+
+☠ **L'icona iOS non può avere un canale alfa.** App Store Connect rifiuta il caricamento di
+un'app la cui icona sia trasparente, e lo fa a caricamento finito, non prima. Il logo è su
+fondo trasparente, quindi `remove_alpha_ios: true` e `background_color_ios: "#2E7D5B"`
+riempiono con lo stesso verde che Android usa come sfondo dell'icona adattiva: la stessa
+icona sulle due piattaforme, non due parenti.
 
 ⚠️ **`assets/icons/` non è dichiarato in `pubspec.yaml` sotto `flutter: assets:`, ed è
 giusto così**: quelle immagini sono ingressi dei generatori, non asset letti a runtime.
@@ -705,6 +759,23 @@ sostituendo i provider che legge.
 `integration_test/first_run_test.dart` percorre wizard → home → dati scritti, sul
 dispositivo: `flutter test integration_test/first_run_test.dart -d <device>`.
 
+☠ **Il dispositivo deve essere in inglese.** Il test tocca i controlli cercandoli per
+testo visibile (`find.text('Set up my calendar')`), e l'app segue la lingua di sistema:
+su un dispositivo italiano quel testo non esiste e il test **non fallisce, si pianta**,
+restando in `pumpAndSettle` finché non scade il timeout. Costa un quarto d'ora prima che
+qualcuno sospetti qualcosa, perché l'output non dice niente e lo schermo mostra un'app
+perfettamente funzionante. Sul simulatore iOS:
+
+```
+xcrun simctl spawn <UDID> defaults write .GlobalPreferences AppleLanguages -array en-US
+xcrun simctl spawn <UDID> defaults write .GlobalPreferences AppleLocale -string en_US
+xcrun simctl shutdown <UDID> && xcrun simctl boot <UDID>
+```
+
+⚑ È **debito**, non una regola: un test che dipende dalla lingua della macchina su cui
+gira è un test fragile. La forma giusta è cercare per chiave di traduzione o per
+`Semantics`. Finché resta così, la riga qui sopra è obbligatoria.
+
 ### Come si eseguono
 
 ```
@@ -835,6 +906,12 @@ Per non farlo cercare invano.
 - **Nessuna esportazione in CSV.** `FeatureKey.csvExport` è dichiarata `open()` proprio per
   dire che non è una funzione di quest'app.
 - **Nessun golden test.** Scelta deliberata: vedi §12.
+- **Nessun widget su iOS.** Serve un'estensione WidgetKit in Swift, che è un bersaglio Xcode
+  separato. Il calcolo delle righe in `TrashcanWidget.publish` va bene per entrambe le
+  piattaforme: quando ci sarà, cambia il modo di consegnare i dati, non il calcolo.
+- **Nessun prodotto in App Store Connect.** Il Pro su iOS non è comprabile finché non c'è.
+- **Nessuna prova su un iPhone vero.** Finora solo simulatore: notifiche e acquisti sono
+  proprio le due cose che un simulatore non dimostra.
 - **Nessuna vista mensile a calendario.** Le eccezioni si creano dalla home e dalla pagina
   del giorno.
 - **Nessun terzo orario di promemoria.** La tabella ne prevede due.

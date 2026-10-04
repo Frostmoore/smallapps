@@ -7,8 +7,12 @@ enum BillingMode {
   /// flusso del paywall senza aver caricato l'app su un canale di Play Console.
   fake,
 
-  /// Google Play Billing vero.
-  play,
+  /// Il negozio vero della piattaforma: Google Play su Android, App Store su iOS.
+  ///
+  /// ⚑ Si chiamava `play` finché le app erano solo Android. Dal 2026-10-04 escono anche
+  /// su iOS (vedi `memory/decisioni.md`), e un nome che promette Play su un iPhone manda
+  /// a cercare il difetto dalla parte sbagliata.
+  store,
 }
 
 /// La configurazione di un'app delle MicroApps.
@@ -38,7 +42,7 @@ class MicroAppConfig {
   ///
   /// | define | valori | significato |
   /// |---|---|---|
-  /// | `BILLING` | `fake` \| `play` | quale gateway usare; senza define, `fake` in debug e `play` in release |
+  /// | `BILLING` | `fake` \| `store` | quale gateway usare; senza define, `fake` in debug e `store` in release. `play` e' accettato come grafia storica |
   /// | `MA_LICENSE_URL` | URL | base del License Server; assente = nessuna verifica lato server |
   /// | `MA_APP_SECRET` | stringa | segreto HMAC per firmare le chiamate (ADR-014) |
   ///
@@ -60,8 +64,11 @@ class MicroAppConfig {
 
     final mode = switch (billingRaw) {
       'fake' => BillingMode.fake,
-      'play' => BillingMode.play,
-      _ => kReleaseMode ? BillingMode.play : BillingMode.fake,
+      // ⚑ `play` è la grafia storica, accettata perché vive negli script di build e nei
+      // file di define già scritti. Toglierla farebbe compilare una release col gateway
+      // finto senza dire niente, che è il solo errore che questa classe esiste per impedire.
+      'store' || 'play' => BillingMode.store,
+      _ => kReleaseMode ? BillingMode.store : BillingMode.fake,
     };
 
     return MicroAppConfig(
@@ -111,7 +118,7 @@ class MicroAppConfig {
   bool get serverEnabled => licenseBaseUrl != null && appSecret.isNotEmpty;
 
   /// `true` se gli acquisti passano da Google Play.
-  bool get usesRealBilling => billingMode == BillingMode.play;
+  bool get usesRealBilling => billingMode == BillingMode.store;
 
   /// Fa fallire il programma se una build di release usa il gateway finto.
   ///
@@ -121,7 +128,7 @@ class MicroAppConfig {
     if (kReleaseMode && billingMode == BillingMode.fake) {
       throw StateError(
         'Build di release con BILLING=fake: il paywall sbloccherebbe il Pro a chiunque. '
-        'Ricompilare con --dart-define=BILLING=play.',
+        'Ricompilare con --dart-define=BILLING=store.',
       );
     }
   }
