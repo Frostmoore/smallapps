@@ -33,11 +33,51 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _refreshPermissions());
   }
 
+  /// Rilegge dal sistema lo stato dei due permessi.
+  ///
+  /// ☠ **Qui mancava la metà del lavoro, ed è costato le notifiche su tutte le
+  /// piattaforme.** Questo metodo aggiornava solo [_exactAllowed]; [_permissionGranted]
+  /// restava a `null` perché lo scriveva soltanto [_askPermission]. Ma l'avviso che porta
+  /// a [_askPermission] compare `if (_permissionGranted == false)`: con `null` non
+  /// compariva mai, quindi il permesso non veniva mai chiesto, quindi nessuna notifica
+  /// arrivava. Un giro perfettamente chiuso, senza un errore da nessuna parte.
+  ///
+  /// L'ha trovato il proprietario su un iPad vero, il 2026-10-04: «non mi chiede il
+  /// permesso per le notifiche anche quando mi chiede a che ora voglio il reminder». Su
+  /// Android era altrettanto rotto e nessuno se n'era accorto, perché chi provava l'app
+  /// aveva già concesso il permesso in qualche altro giro.
   Future<void> _refreshPermissions() async {
     final service = await ref.read(notificationServiceProvider.future);
+    final granted = await service.hasPermission();
     final exact = await service.canScheduleExactAlarms();
     if (!mounted) return;
-    setState(() => _exactAllowed = exact);
+    setState(() {
+      _permissionGranted = granted;
+      _exactAllowed = exact;
+    });
+  }
+
+  /// Accende o spegne i promemoria, chiedendo il permesso quando serve.
+  ///
+  /// ⚑ Il permesso si chiede **qui**, nel momento in cui l'utente dice di volere i
+  /// promemoria, e non all'avvio dell'app. È l'unico istante in cui la richiesta ha un
+  /// senso visibile: l'utente ha appena espresso il desiderio, e il foglio di sistema
+  /// arriva come conseguenza di quello che ha fatto invece che come un ostacolo messo
+  /// davanti a un'app che non ha ancora mostrato cosa fa.
+  ///
+  /// ☠ Su iOS il foglio si mostra **una volta sola** nella vita dell'installazione: un no
+  /// dato per fretta al primo avvio non si recupera se non dalle impostazioni di sistema,
+  /// che nessuno apre. Per questo non lo si spreca prima.
+  Future<void> _toggleEnabled(bool value) async {
+    await ref.read(notificationsEnabledProvider.notifier).set(value);
+    if (!value) return;
+
+    final service = await ref.read(notificationServiceProvider.future);
+    if (await service.hasPermission()) {
+      await _refreshPermissions();
+      return;
+    }
+    await _askPermission();
   }
 
   Future<void> _askPermission() async {
@@ -48,6 +88,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       () => _permissionGranted =
           outcome == PermissionOutcome.granted || outcome == PermissionOutcome.notRequired,
     );
+    // ⚑ Il permesso appena concesso cambia cosa il sistema accetta di pianificare: il
+    // piano va rifatto, altrimenti i promemoria partirebbero dal giorno dopo.
     await ref.read(schedulerProvider).rescheduleAll();
   }
 
@@ -159,7 +201,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 // come una minaccia.
                 subtitle: Text(l.onboarding_notificationHelp),
                 contentPadding: EdgeInsets.zero,
-                onChanged: (value) => ref.read(notificationsEnabledProvider.notifier).set(value),
+                onChanged: (value) => unawaited(_toggleEnabled(value)),
               ),
             ),
 

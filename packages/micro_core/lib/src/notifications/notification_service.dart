@@ -163,6 +163,43 @@ class NotificationService {
     return payload;
   }
 
+  /// `true` se il sistema consente già di notificare, **senza chiedere niente**.
+  ///
+  /// ☠ Esiste perché [ensurePermission] non si può usare per sapere come stiamo: quella
+  /// **chiede**, e su iOS il foglio di sistema si può mostrare una volta sola nella vita
+  /// dell'installazione. Chiamarla per leggere lo stato brucerebbe l'unica occasione, e il
+  /// secondo rifiuto non si recupera piu' se non dalle impostazioni di sistema.
+  ///
+  /// ☠ Era proprio l'assenza di questo metodo a tenere in piedi il difetto trovato il
+  /// 2026-10-04 su un iPad vero: l'interfaccia non aveva modo di sapere se il permesso
+  /// mancava, quindi non lo chiedeva mai, e i promemoria non arrivavano **su nessuna delle
+  /// due piattaforme**. Vedi `NotificationsPage`.
+  ///
+  /// ⚑ Su Android risponde `areNotificationsEnabled`, che tiene conto anche del caso in cui
+  /// l'utente abbia spento le notifiche dalle impostazioni di sistema dopo averle concesse:
+  /// non è la stessa cosa del permesso runtime, ed è la domanda giusta, perché quello che
+  /// conta e' se la notifica si vedra'.
+  ///
+  /// ⚑ Dove non c'è nessuna delle due implementazioni (i test a tavolino) risponde `true`:
+  /// l'alternativa sarebbe mostrare per sempre un avviso di permesso mancante su una
+  /// piattaforma che non ha permessi.
+  Future<bool> hasPermission() async {
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) return await android.areNotificationsEnabled() ?? false;
+
+    final darwin = _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    if (darwin != null) {
+      final stato = await darwin.checkPermissions();
+      // `isEnabled` copre sia il permesso pieno sia quello provvisorio: in entrambi i casi
+      // una notifica arriva, che e' la cosa che interessa a chi chiama.
+      return stato?.isEnabled ?? false;
+    }
+
+    return true;
+  }
+
   /// Chiede il permesso di notificare, sulla piattaforma su cui gira.
   ///
   /// ☠ Qui c'era solo il ramo Android, e su iOS la risoluzione dell'implementazione

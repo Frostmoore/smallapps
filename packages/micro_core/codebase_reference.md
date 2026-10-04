@@ -52,6 +52,7 @@ a runtime sull'altro sistema. I due casi già pagati stanno qui sotto.
 |---|---|---|
 | `NotificationService.create` | passava i soli `AndroidInitializationSettings` | su iOS non arrivava **nessuna** notifica, e niente lo diceva: l'oggetto accetta i soli parametri Android senza lamentarsi |
 | `NotificationService.ensurePermission` | risolveva la sola implementazione Android, e con `null` rispondeva `notRequired` | su iOS il permesso serve eccome. L'interfaccia mostrava i promemoria come attivi e funzionanti |
+| `NotificationService` | non esisteva un modo di **leggere** il permesso senza chiederlo | chi chiama non poteva sapere come stava, e non chiedeva mai. Vedi la trappola nell'atlante di TrashCan: niente notifiche su **nessuna** delle due piattaforme |
 | `StorePurchaseGateway.buy` | `GooglePlayPurchaseParam` sempre | `in_app_purchase` lo rifiuta a runtime su iOS: il difetto si vedeva solo toccando il pulsante d'acquisto |
 
 ⚑ **Dove serve distinguere, si guarda `defaultTargetPlatform`**, non `Platform.isAndroid`:
@@ -425,7 +426,8 @@ Extension `MicroTextTheme` su `TextTheme`: `numeric` · `cardTitle` · `cardMeta
 
 `NotificationService.create({required String androidIconResource, required List<MicroNotificationChannel> channels, FlutterLocalNotificationsPlugin? plugin})`
 
-`ensurePermission()` · `canScheduleExactAlarms()` · `requestExactAlarmPermission()` ·
+`hasPermission()` · `ensurePermission()` · `canScheduleExactAlarms()` ·
+`requestExactAlarmPermission()` ·
 `scheduleOne(ScheduledNotification)` · **`replaceSchedule(Iterable<ScheduledNotification>)`** ·
 `cancel(int)` · `cancelAll()` · `pending()` · `Stream<String> taps` ·
 `consumeLaunchPayload()` · `static const int maxPending = 64`
