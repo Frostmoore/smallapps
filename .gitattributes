@@ -1,5 +1,11 @@
 * text=auto eol=lf
 
+# ☠ Uno script di shell con i fine riga di Windows non si limita a stare scomodo:
+# un backslash seguito da CR non e' una continuazione di riga, e bash interrompe il
+# comando a meta' con un errore di sintassi che indica la riga sbagliata. Costato una
+# mezz'ora il 2026-10-04 su tool/build_ios.sh, copiato da Windows al Mac.
+*.sh    text eol=lf
+
 *.ps1   text eol=crlf
 *.bat   text eol=crlf
 *.cmd   text eol=crlf

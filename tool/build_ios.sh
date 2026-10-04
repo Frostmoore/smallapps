@@ -69,7 +69,22 @@ echo "==> $APP $VERSIONE"
 echo "==> compilo"
 flutter build ios --release --no-codesign --dart-define=BILLING=store
 
-echo "==> archivio e firmo"
+# ☠ **L'archivio si fa SENZA firma, e non e' una scorciatoia.**
+#
+# `xcodebuild archive` con la firma automatica pretende un profilo di **sviluppo**, anche
+# quando la configurazione e' Release e la destinazione e' un dispositivo generico: firma
+# con l'identita' di sviluppo e conta di rifirmare in esportazione. Apple pero' non rilascia
+# un profilo di sviluppo a un team che non ha **nessun dispositivo registrato**, e questo non
+# ne ha: l'errore parla di profili mancanti e manda a cercare il guasto nel progetto, mentre
+# la causa e' un elenco vuoto dall'altra parte dell'oceano.
+#
+# Archiviando senza firma quel requisito sparisce. A firmare e' il passo di esportazione qui
+# sotto, che chiede un profilo di **distribuzione**: quello Apple lo rilascia senza pretendere
+# dispositivi, perche' una build per lo store non deve girare su un telefono scelto prima.
+#
+# ⚑ Conseguenza utile: per arrivare su TestFlight non serve registrare nessun dispositivo
+#   ne' collegare niente via cavo. Servono solo per installare direttamente dal Mac.
+echo "==> archivio, senza firmare"
 rm -rf build/ios/archive
 xcodebuild archive \
   -workspace ios/Runner.xcworkspace \
@@ -77,15 +92,27 @@ xcodebuild archive \
   -configuration Release \
   -archivePath build/ios/archive/Runner.xcarchive \
   -destination 'generic/platform=iOS' \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY="" \
   DEVELOPMENT_TEAM="$ASC_TEAM_ID" \
-  "${FIRMA[@]}" \
   | tail -5
 
-echo "==> esporto l'ipa"
+# ☠ Il Team ID va messo nelle opzioni di esportazione, e si aggiunge **qui**, non nel file
+#   versionato: archiviando senza firma il team non finisce nei metadati dell'archivio, e
+#   `exportArchive` si ferma con "No Team Found in Archive". Sembra un difetto del progetto
+#   ed e' solo un dato che nessuno gli ha passato. Nel repo il Team ID non ci va, quindi si
+#   lavora su una copia temporanea che sparisce a fine script.
+echo "==> esporto e firmo per lo store"
 rm -rf build/ios/ipa
+OPZIONI=$(mktemp -t ExportOptions)
+trap 'rm -f "$OPZIONI"' EXIT
+cp ios/ExportOptions.plist "$OPZIONI"
+/usr/libexec/PlistBuddy -c "Add :teamID string $ASC_TEAM_ID" "$OPZIONI"
+
 xcodebuild -exportArchive \
   -archivePath build/ios/archive/Runner.xcarchive \
-  -exportOptionsPlist ios/ExportOptions.plist \
+  -exportOptionsPlist "$OPZIONI" \
   -exportPath build/ios/ipa \
   "${FIRMA[@]}" \
   | tail -5
