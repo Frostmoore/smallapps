@@ -18,6 +18,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		9C3010729A28BEE12AD7843B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD572BB9A4AB56BAC91699AB /* Foundation.framework */; };
+		C05C331507DA446F3D45DE10 /* VistaTrashcan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 768E5482B084070AEB8D7032 /* VistaTrashcan.swift */; };
 		D3C7F4080EE6B933603359B7 /* TrashcanWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D807722C0B99FF17A5DEC023 /* TrashcanWidget.swift */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		768E5482B084070AEB8D7032 /* VistaTrashcan.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VistaTrashcan.swift; sourceTree = "<group>"; };
 		7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				D807722C0B99FF17A5DEC023 /* TrashcanWidget.swift */,
 				F5D3345670A17C4747A7EE37 /* Info.plist */,
 				D07CBC5E312D2E3A1F33DA0F /* TrashcanWidget.entitlements */,
+				768E5482B084070AEB8D7032 /* VistaTrashcan.swift */,
 			);
 			name = TrashcanWidget;
 			path = TrashcanWidget;
@@ -373,6 +376,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3C7F4080EE6B933603359B7 /* TrashcanWidget.swift in Sources */,
+				C05C331507DA446F3D45DE10 /* VistaTrashcan.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

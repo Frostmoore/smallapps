@@ -67,6 +67,23 @@ if estensione.nil?
   puts "#{nome} creato: bundle #{id_app}.#{nome}, gruppo #{gruppo}"
 end
 
+# ── Tutti i sorgenti Swift della cartella stanno nel target ────────────────────────
+#
+# ☠ Un file `.swift` aggiunto alla cartella ma non al target non da' errore di per se':
+#   se nessuno lo usa viene semplicemente ignorato, e se qualcuno lo usa l'errore parla di
+#   un simbolo sconosciuto invece che di un file dimenticato. Si allinea a ogni giro.
+gruppo_file = progetto.main_group.find_subpath(nome, true)
+cartella_target = File.join(cartella_app, 'ios', nome)
+Dir.glob(File.join(cartella_target, '*.swift')).sort.each do |file|
+  base = File.basename(file)
+  presente = estensione.source_build_phase.files_references.any? { |r| r && r.path == base }
+  next if presente
+
+  riferimento = gruppo_file.files.find { |r| r.path == base } || gruppo_file.new_reference(base)
+  estensione.add_file_references([riferimento])
+  puts "#{base} aggiunto ai sorgenti di #{nome}"
+end
+
 # ── Le versioni vengono dal pubspec, anche per l'estensione ─────────────────
 #
 # ☠ **Senza questo l'app non si installa affatto**, e l'errore non nomina le versioni:
