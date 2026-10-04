@@ -153,6 +153,50 @@ xcrun simctl launch  <UDID> com.smp.trashcan
 trasferimento perché pesa due giga ed è specifica del sistema operativo. Il Mac ha la sua
 copia della stessa versione, 3.47.3. Due copie della stessa versione, non due versioni.
 
+### Solo iPhone, anche sugli iPad
+
+`TARGETED_DEVICE_FAMILY = 1`. Su iPad l'app si installa lo stesso e gira nella finestra di
+compatibilità da telefono, centrata sullo sfondo del tablet.
+
+☠ **Dichiararla universale non è gratis: è peggio.** Con `"1,2"` su un iPad il layout da
+telefono si allarga invece di adattarsi: il testo attraversa tutta la pagina, il pulsante
+diventa largo quanto lo schermo e in mezzo resta un vuoto enorme. Funziona, e sembra
+trascurata. Verificato sul simulatore iPad mini il 2026-10-04, prima e dopo la modifica.
+
+⚑ Conseguenza utile: la scheda App Store non ha bisogno di schermate per iPad.
+
+### Come si carica su TestFlight
+
+`tool/build_ios.sh`, da eseguire **sul Mac**: `ssh mac 'bash ~/microapps/tool/build_ios.sh'`.
+
+☠ **Non apre Xcode e non chiede nessuna password**, ed è il motivo per cui esiste. Firma e
+caricamento passano da una **chiave API di App Store Connect**, l'unico modo di fare tutto
+questo da una sessione ssh. Con l'Apple ID dentro Xcode servirebbe qualcuno davanti allo
+schermo a ogni rinnovo del certificato.
+
+☠ **I tre identificativi non stanno nel repo.** Vivono in `~/.microapps-ios.env` sul Mac,
+fuori da git, e la chiave privata sta in
+`~/.appstoreconnect/private_keys/AuthKey_<KEYID>.p8`. Chi ha quel file può caricare build a
+nome del titolare dell'account: non si committa e non si copia altrove.
+
+⚑ Lo script fa `flutter build ios --no-codesign` e poi `xcodebuild archive` a mano invece
+del più corto `flutter build ipa`: quest'ultimo non sa passare la chiave API a xcodebuild,
+quindi la firma automatica fallirebbe chiedendo un Apple ID che in ssh non c'è.
+
+⚑ `altool --validate-app` prima del caricamento vero: trasferire impiega minuti, e un
+difetto d'icona o un permesso mancante si scoprirebbe altrimenti solo alla fine.
+
+☠ **Il numero di build non si riusa**, esattamente come il `versionCode` di Play: Apple
+rifiuta una build già vista per quella versione e quel numero non si libera. Viene dal
+`pubspec.yaml`, unica fonte per tutte e due le piattaforme.
+
+⚑ `ITSAppUsesNonExemptEncryption` sta a `false` in `Info.plist`. È la dichiarazione di
+conformità all'esportazione, che Apple chiede a **ogni** build: senza la chiave, la domanda
+ricompare a mano in App Store Connect ogni volta. Dichiara che l'app non usa cifratura
+soggetta a restrizioni, il che vale finché si usano solo HTTPS, il portachiavi di sistema e
+l'HMAC per autenticare le chiamate al License Server. **Se un giorno si aggiunge cifratura
+vera dei dati, questa riga va rivista**: è una dichiarazione legale, non un'impostazione.
+
 ### Cosa su iOS non c'è, e perché
 
 | Pezzo | Stato | Perché |
