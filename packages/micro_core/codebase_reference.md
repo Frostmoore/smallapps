@@ -52,6 +52,8 @@ a runtime sull'altro sistema. I due casi già pagati stanno qui sotto.
 |---|---|---|
 | `NotificationService.create` | passava i soli `AndroidInitializationSettings` | su iOS non arrivava **nessuna** notifica, e niente lo diceva: l'oggetto accetta i soli parametri Android senza lamentarsi |
 | `NotificationService.ensurePermission` | risolveva la sola implementazione Android, e con `null` rispondeva `notRequired` | su iOS il permesso serve eccome. L'interfaccia mostrava i promemoria come attivi e funzionanti |
+| `NotificationService.scheduleOne` | lasciava risalire ogni `PlatformException` | su iOS, senza permesso, pianificare **lancia** (`UNErrorDomain`, "Source is not authorized"), mentre Android accetta in silenzio. Chi comprava il Pro su iPhone prima di concedere le notifiche vedeva la pianificazione fermarsi al primo promemoria. Ora il rifiuto di permesso si salta con un avviso nel registro (`rifiutoDiPermesso`), ogni altro errore risale. Trovato dal test degli screenshot il 2026-10-05 |
+| `MicroCard` | un `DecoratedBox` colorato senza superficie Material | le voci d'elenco dentro la card disegnavano l'effetto del tocco sotto il fondo: toccare "Chiaro" o "Scuro" non dava segno di risposta. Ora c'e' un `Material` trasparente fra fondo e contenuto |
 | `NotificationService` | non esisteva un modo di **leggere** il permesso senza chiederlo | chi chiama non poteva sapere come stava, e non chiedeva mai. Vedi la trappola nell'atlante di TrashCan: niente notifiche su **nessuna** delle due piattaforme |
 | `StorePurchaseGateway.buy` | `GooglePlayPurchaseParam` sempre | `in_app_purchase` lo rifiuta a runtime su iOS: il difetto si vedeva solo toccando il pulsante d'acquisto |
 

@@ -102,7 +102,16 @@ class MicroCard extends StatelessWidget {
         borderRadius: MicroRadius.card,
         border: filled ? null : Border.all(color: scheme.subtleBorder),
       ),
-      child: Padding(padding: padding, child: child),
+      // ☠ Una superficie Material trasparente fra il fondo e il contenuto. Senza, le voci
+      //   d'elenco dentro la card (RadioListTile, ListTile) disegnano l'effetto del tocco
+      //   sul Material piu' vicino, che sta **sotto** questo fondo colorato: l'effetto c'e'
+      //   ma non si vede, e toccare "Chiaro" o "Scuro" non da' nessun segno di risposta.
+      //   Flutter lo segnala con un avviso in debug, ed e' cosi' che e' emerso: il test che
+      //   produce gli screenshot degli store falliva per quell'avviso.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Padding(padding: padding, child: child),
+      ),
     );
 
     return DefaultTextStyle.merge(

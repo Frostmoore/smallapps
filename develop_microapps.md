@@ -1078,8 +1078,10 @@ Nata il 2026-10-04 dalla decisione in `memory/decisioni.md` e da ADR-021. Non è
 - [ ] **F9.2.6** Prova su un iPhone vero: notifiche consegnate, permesso chiesto una volta sola
 - [ ] **F9.2.7** Estensione **WidgetKit** in Swift, con le stesse righe che Dart già calcola
 - [ ] **F9.2.8** Prodotto `trashcan_pro_lifetime` in App Store Connect e acquisto verificato
-- [ ] **F9.2.9** Scheda App Store: testi, schermate, informativa privacy, nutrition label
-- [ ] **F9.2.10** TestFlight interno
+- [x] **F9.2.9** Scheda App Store: testi, schermate, informativa privacy, nutrition label (`store/scheda-app-store.md`, 2026-10-05)
+- [x] **F9.2.10** TestFlight interno: build fino alla `1.0.0 (10)`, widget verificato sull'iPad del proprietario
+- [x] **F9.2.11** Screenshot generati da un test (`integration_test/screenshots_test.dart`), per i due store e le due lingue
+- [ ] **F9.2.12** Invio in revisione su App Store e pubblicazione su Play
 
 **F9.3 — Le altre tre app**
 

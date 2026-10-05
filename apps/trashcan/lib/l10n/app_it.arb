@@ -102,6 +102,7 @@
   "widget_addTitle": "Metti il widget sulla schermata iniziale",
   "widget_addBody": "La raccolta di stasera, senza aprire l'app.",
   "widget_addUnsupported": "Questo launcher non sa aggiungere widget da solo. Tieni premuto sulla schermata iniziale e cerca TrashCan.",
+  "widget_addIos": "Tieni premuto sulla schermata Home, tocca + in alto e cerca TrashCan.",
   "backup_title": "Backup e condivisione",
   "backup_shareCalendarTitle": "Condividi questo calendario",
   "backup_shareCalendarBody": "Mandalo a un vicino: avra' gli stessi giorni di raccolta senza riscriverli.",

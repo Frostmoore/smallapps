@@ -84,6 +84,26 @@ Dir.glob(File.join(cartella_target, '*.swift')).sort.each do |file|
   puts "#{base} aggiunto ai sorgenti di #{nome}"
 end
 
+# ── I manifesti di privacy, se ci sono, stanno nelle risorse del loro target ─
+#
+# ☠ Un `PrivacyInfo.xcprivacy` che sta nella cartella ma non nelle risorse del target non
+#   finisce nel pacchetto, e per Apple e' come se non ci fosse: la revisione chiede le
+#   motivazioni delle API che il widget usa, e le trova vuote.
+{ 'Runner' => runner, nome => estensione }.each do |cartella, target|
+  file = File.join(cartella_app, 'ios', cartella, 'PrivacyInfo.xcprivacy')
+  next unless File.exist?(file)
+  presente = target.resources_build_phase.files_references.any? do |r|
+    r && r.path == 'PrivacyInfo.xcprivacy'
+  end
+  next if presente
+
+  gruppo = progetto.main_group.find_subpath(cartella, true)
+  ref = gruppo.files.find { |r| r.path == 'PrivacyInfo.xcprivacy' } ||
+        gruppo.new_reference('PrivacyInfo.xcprivacy')
+  target.add_resources([ref])
+  puts "PrivacyInfo.xcprivacy aggiunto alle risorse di #{target.name}"
+end
+
 # ── Le versioni vengono dal pubspec, anche per l'estensione ─────────────────
 #
 # ☠ **Senza questo l'app non si installa affatto**, e l'errore non nomina le versioni:

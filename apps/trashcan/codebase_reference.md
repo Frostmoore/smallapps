@@ -800,6 +800,18 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 `test/widget/harness.dart` non contiene test: è l'impalcatura che monta una pagina
 sostituendo i provider che legge.
 
+`integration_test/screenshots_test.dart` **non verifica niente**: percorre l'app con dati
+realistici e scrive `SCATTO:<nome>` a ogni schermata da fotografare per gli store. Lo scatto
+lo fa il computer che guida il dispositivo (`tool/screenshots_ios.sh` sul Mac,
+`tool/screenshots_android.ps1` sul PC), perche' `takeScreenshot` fotografa solo Flutter e
+lascerebbe fuori la barra di stato. La lingua la sceglie il test con `localesTestValue` e ogni
+testo cercato viene da `lookupL`, quindi gira in italiano e in inglese senza toccare il
+dispositivo. Azzera database, preferenze **e** `entitlement.json`: senza l'ultimo, il secondo
+giro trova il Pro gia' comprato e aspetta per sempre un pulsante che non c'e'. Su Android chiede
+anche al launcher di aggiungere il widget (`FISSA:widget`), e lo script conferma la finestra di
+sistema. E' anche un test di fatto: ha trovato il rifiuto di iOS sulle notifiche senza permesso
+e l'avviso di `MicroCard`, che nessun test a tavolino poteva vedere.
+
 `integration_test/first_run_test.dart` percorre wizard → home → dati scritti, sul
 dispositivo: `flutter test integration_test/first_run_test.dart -d <device>`.
 
@@ -828,6 +840,30 @@ pwsh tool/test_all.ps1                # tutto il monorepo
 ```
 
 ---
+
+## 9ter. Le schede degli store
+
+Tutto in `apps/trashcan/store/`: `scheda-play.md` e `scheda-app-store.md` con i testi pronti da
+incollare, ognuno col conteggio dei caratteri contro il limite del suo campo, e
+`screenshots/{android,ios}/{it,en}/01..06-*.png`.
+
+| Piattaforma | Misura | Perche' |
+|---|---|---|
+| Android | 1080×1920 | Play rifiuta immagini con il lato lungo oltre il doppio del corto: quelle di settembre erano 1080×2400 |
+| iOS | 1320×2868 | la misura da 6,9" e' l'unica obbligatoria; niente iPad, l'app e' solo iPhone |
+
+☠ **Le schede dicono solo cose vere.** Quella di settembre prometteva il promemoria come se fosse
+gratis e metteva il backup fra le funzioni gratuite: per gli store e' rappresentazione
+ingannevole. Prima di toccare i testi si rilegge `lib/app/feature_limits.dart`.
+
+⚑ Il widget negli screenshot e' **composto**: su iOS con `tool/anteprima_widget_ios.swift
+--vetrina`, su Android ritagliando il widget vero dalla schermata Home fotografata dallo script.
+In tutti e due i casi il widget e' quello vero; e' finta solo la cornice con la didascalia.
+
+⚑ Su iOS l'app **non raccoglie dati**: non parla con nessun server, quindi l'etichetta privacy
+e' "Dati non raccolti" e i manifesti `PrivacyInfo.xcprivacy` (app ed estensione) dichiarano
+solo l'uso delle preferenze. Su Android si', per la verifica dell'acquisto: le due schede
+privacy sono diverse di proposito.
 
 ## 9bis. Come si costruisce il pacchetto da caricare
 

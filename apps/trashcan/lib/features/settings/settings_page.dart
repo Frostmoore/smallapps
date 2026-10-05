@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +32,14 @@ class SettingsPage extends ConsumerWidget {
   /// errore: semplicemente non succede niente. Si controlla prima e si spiega come fare a
   /// mano, altrimenti l'utente tocca, non vede niente e conclude che l'app e' rotta.
   static Future<void> _pinWidget(BuildContext context, L l) async {
+    // ☠ Su iOS nessuna app può mettere un widget sulla schermata Home: lo fa sempre
+    //   l'utente. Prima qui si arrivava al ramo "non supportato" e l'iPhone rispondeva
+    //   "Questo launcher non sa aggiungere widget da solo": una parola che su iOS non
+    //   esiste, detta come un errore. Su iOS la voce spiega i tre gesti e basta.
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      MicroSnack.show(context, l.widget_addIos);
+      return;
+    }
     final supported = await HomeWidget.isRequestPinWidgetSupported() ?? false;
     if (!context.mounted) return;
     if (!supported) {

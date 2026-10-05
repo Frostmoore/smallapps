@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:meta/meta.dart';
@@ -264,39 +265,60 @@ class NotificationService {
 
     final useExact = notification.exact && await canScheduleExactAlarms();
 
-    await _plugin.zonedSchedule(
-      id: notification.id,
-      title: notification.title,
-      body: notification.body,
-      scheduledDate: when,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          channelDescription: channel.description,
-          importance: channel._androidImportance,
-          priority: Priority.defaultPriority,
-          // Il testo lungo va reso con BigTextStyle, altrimenti Android lo tronca al
-          // primo rigo e il promemoria perde proprio la parte che dice cosa fare.
-          styleInformation: BigTextStyleInformation(notification.body),
+    // ☠ **Su iOS, senza permesso, pianificare lancia.** Android accetta la notifica e
+    //   semplicemente non la mostra; iOS la rifiuta con `PlatformException` nel dominio
+    //   `UNErrorDomain` ("Source is not authorized"). Prima l'eccezione risaliva: la
+    //   pianificazione si fermava al primo promemoria e ogni ripianificazione produceva un
+    //   errore. Succede a chiunque compri il Pro su iPhone prima di concedere le notifiche.
+    //   L'ha trovato il test degli screenshot il 2026-10-05, il primo a comprare il Pro su un
+    //   simulatore senza permesso. Quando il permesso arriva, `NotificationsPage` ripianifica
+    //   tutto, quindi saltare qui non perde niente.
+    try {
+      await _plugin.zonedSchedule(
+        id: notification.id,
+        title: notification.title,
+        body: notification.body,
+        scheduledDate: when,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            channelDescription: channel.description,
+            importance: channel._androidImportance,
+            priority: Priority.defaultPriority,
+            // Il testo lungo va reso con BigTextStyle, altrimenti Android lo tronca al
+            // primo rigo e il promemoria perde proprio la parte che dice cosa fare.
+            styleInformation: BigTextStyleInformation(notification.body),
+          ),
+          // ⚑ iOS non ha canali: l'importanza, la vibrazione e la descrizione del canale
+          // non hanno dove andare, e il raggruppamento si fa con `threadIdentifier`. Gli si
+          // passa l'id del canale, così i promemoria della stessa famiglia si impilano nel
+          // centro notifiche invece di presentarsi come avvisi slegati.
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: false,
+            presentSound: channel.playSound,
+            threadIdentifier: channel.id,
+          ),
         ),
-        // ⚑ iOS non ha canali: l'importanza, la vibrazione e la descrizione del canale
-        // non hanno dove andare, e il raggruppamento si fa con `threadIdentifier`. Gli si
-        // passa l'id del canale, così i promemoria della stessa famiglia si impilano nel
-        // centro notifiche invece di presentarsi come avvisi slegati.
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: false,
-          presentSound: channel.playSound,
-          threadIdentifier: channel.id,
-        ),
-      ),
-      androidScheduleMode: useExact
-          ? AndroidScheduleMode.exactAllowWhileIdle
-          : AndroidScheduleMode.inexactAllowWhileIdle,
-      payload: notification.payload,
-    );
+        androidScheduleMode: useExact
+            ? AndroidScheduleMode.exactAllowWhileIdle
+            : AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: notification.payload,
+      );
+    } on PlatformException catch (error) {
+      if (!rifiutoDiPermesso(error)) rethrow;
+      MicroLog.w('notifica ${notification.id} non pianificata: permesso assente', error: error);
+    }
   }
+
+  /// `true` se [error] e' il rifiuto del sistema per mancanza di permesso.
+  ///
+  /// ⚑ Si riconosce dal dominio `UNErrorDomain`, cioe' il centro notifiche di iOS, e non dal
+  ///   testo del messaggio, che cambia con la lingua del sistema. Ogni altro errore risale:
+  ///   nasconderli tutti renderebbe invisibile un difetto vero di pianificazione.
+  @visibleForTesting
+  static bool rifiutoDiPermesso(PlatformException error) => error.details == 'UNErrorDomain';
 
   Future<void> cancel(int id) => _plugin.cancel(id: id);
 

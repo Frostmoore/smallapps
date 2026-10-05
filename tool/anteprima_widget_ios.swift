@@ -25,6 +25,13 @@ struct Anteprima {
     @MainActor
     static func main() {
         let argomenti = CommandLine.arguments
+
+        // `--vetrina it|en <file>`: l'immagine del widget per la scheda dell'App Store.
+        if argomenti.count > 3, argomenti[1] == "--vetrina" {
+            scrivi(Vetrina(italiano: argomenti[2] == "it"), in: argomenti[3], scala: 3)
+            return
+        }
+
         let uscita = argomenti.count > 1 ? argomenti[1] : "/tmp/anteprima.png"
 
         var casi: [(String, StatoGiorno)] = esempi()
@@ -45,6 +52,24 @@ struct Anteprima {
         }
         try? png.write(to: URL(fileURLWithPath: uscita))
         print("scritta \(uscita): \(casi.count) casi")
+    }
+
+    /// Scrive una vista come PNG, alla misura esatta in pixel.
+    @MainActor
+    static func scrivi<V: View>(_ vista: V, in percorso: String, scala: CGFloat) {
+        let render = ImageRenderer(content: vista)
+        render.scale = scala
+        guard let cg = render.cgImage else {
+            FileHandle.standardError.write("rendering fallito\n".data(using: .utf8)!)
+            exit(1)
+        }
+        // ⚑ Da `CGImage` e non da `NSImage`: la seconda passa per una rappresentazione TIFF
+        //   che sugli schermi Retina può raddoppiare i pixel, e App Store Connect rifiuta
+        //   qualunque misura che non sia esattamente una di quelle ammesse.
+        let bitmap = NSBitmapImageRep(cgImage: cg)
+        guard let png = bitmap.representation(using: .png, properties: [:]) else { exit(1) }
+        try? png.write(to: URL(fileURLWithPath: percorso))
+        print("scritta \(percorso): \(cg.width)x\(cg.height)")
     }
 
     /// Lo stato di oggi letto da un `.plist` del contenitore condiviso.
@@ -94,6 +119,95 @@ struct Anteprima {
         else { return nil }
         try? png.write(to: URL(fileURLWithPath: percorso))
         return percorso
+    }
+}
+
+/// L'immagine del widget per la scheda dell'App Store: 440x956 punti, cioè 1320x2868 a
+/// scala 3, la misura da 6,9 pollici che App Store Connect pretende.
+///
+/// ⚑ È **composta**, non fotografata, e va detto: un widget non si mette sulla schermata da
+/// riga di comando. Ma i widget dentro sono la vista vera, `VistaTrashcan`, con dati
+/// realistici: quello che si vede è esattamente quello che il telefono disegna.
+struct Vetrina: View {
+    let italiano: Bool
+
+    private func stato(_ testo: String, _ argb: Int, _ simbolo: String, _ prossimi: [String]) -> StatoGiorno {
+        StatoGiorno(
+            date: Date(), etichetta: italiano ? "Stasera" : "Tonight", cosaStasera: testo,
+            argb: argb, percorsoIcona: Anteprima.icona(simbolo), prossimi: prossimi,
+            elencoVuoto: "", senzaDati: false
+        )
+    }
+
+    var body: some View {
+        let organico = stato(
+            italiano ? "Organico" : "Organic", 0xFF627D36, "leaf.fill",
+            italiano
+                ? ["mar 7   Carta", "mer 8   Plastica", "gio 9   Indifferenziato"]
+                : ["Tue 7   Paper", "Wed 8   Plastic", "Thu 9   Unsorted"]
+        )
+        let plastica = stato(
+            italiano ? "Plastica" : "Plastic", 0xFFC9A227, "drop.fill",
+            italiano ? ["gio 9   Indifferenziato", "ven 10   Organico", "sab 11   Vetro"]
+                : ["Thu 9   Unsorted", "Fri 10   Organic", "Sat 11   Glass"]
+        )
+        let carta = stato(
+            italiano ? "Carta" : "Paper", 0xFF2E6F9E, "doc.fill",
+            italiano ? ["mer 8   Plastica", "gio 9   Indifferenziato", "ven 10   Organico"]
+                : ["Wed 8   Plastic", "Thu 9   Unsorted", "Fri 10   Organic"]
+        )
+
+        VStack(spacing: 0) {
+            VStack(spacing: 14) {
+                Text(italiano ? "Cosa si butta stasera,\nsenza aprire l'app." :
+                        "What goes out tonight,\nwithout opening the app.")
+                    .font(.system(size: 34, weight: .bold))
+                    .multilineTextAlignment(.center)
+                Text(italiano ? "Il widget si aggiorna da solo ogni sera." :
+                        "The widget updates itself every evening.")
+                    .font(.system(size: 18, weight: .medium))
+                    .opacity(0.8)
+            }
+            .foregroundColor(.white)
+            .padding(.top, 120)
+            .padding(.horizontal, 24)
+
+            Spacer(minLength: 0)
+
+            // ⚑ Ingranditi del 15%: a misura reale, su una vetrina vista come miniatura nella
+            //   pagina dello store, il testo dell'elenco non si legge. Il disegno resta quello.
+            VStack(spacing: 26) {
+                tessera(organico, .systemMedium, 364, 170)
+                HStack(spacing: 24) {
+                    tessera(plastica, .systemSmall, 170, 170)
+                    tessera(carta, .systemSmall, 170, 170)
+                }
+            }
+            .scaleEffect(1.15)
+
+            Spacer(minLength: 0)
+            Spacer(minLength: 0)
+        }
+        .frame(width: 440, height: 956)
+        .background(
+            LinearGradient(
+                colors: [Color(argb: 0xFF1F5A41), Color(argb: 0xFF16241E)],
+                startPoint: .top, endPoint: .bottom
+            )
+        )
+        .environment(\.colorScheme, .light)
+    }
+
+    private func tessera(_ s: StatoGiorno, _ f: WidgetFamily, _ w: CGFloat, _ h: CGFloat) -> some View {
+        VistaTrashcan(entry: s, famiglia: f)
+            .frame(width: w, height: h)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            // ☠ `compositingGroup` prima dell'ombra: senza, SwiftUI proietta l'ombra di ogni
+            //   elemento interno, e la testata ne getta una sulla colonna colorata e i testi
+            //   prendono un alone. Il widget vero non ce l'ha: era solo la vetrina a mentire.
+            .compositingGroup()
+            .shadow(color: .black.opacity(0.35), radius: 18, y: 8)
     }
 }
 

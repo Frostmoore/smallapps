@@ -184,6 +184,7 @@
   "widget_addTitle": "Add the widget to your home screen",
   "widget_addBody": "Tonight's collection, without opening the app.",
   "widget_addUnsupported": "Your launcher cannot add widgets on its own. Press and hold the home screen and look for TrashCan.",
+  "widget_addIos": "Touch and hold the Home Screen, tap + at the top and search for TrashCan.",
   "backup_title": "Backup and sharing",
   "backup_shareCalendarTitle": "Share this calendar",
   "backup_shareCalendarBody": "Send it to a neighbour: they get the same collection days without typing them in again.",
