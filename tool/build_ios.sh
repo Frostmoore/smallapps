@@ -98,6 +98,33 @@ xcodebuild archive \
   DEVELOPMENT_TEAM="$ASC_TEAM_ID" \
   | tail -5
 
+# ☠ **I diritti vanno incisi a mano nell'archivio, prima dell'esportazione.**
+#
+#   L'archivio senza firma non porta nessun diritto. In esportazione Xcode decide quale
+#   profilo chiedere ad Apple guardando i diritti dei binari, e non trovandone nessuno
+#   chiede un profilo base: niente gruppo condiviso. La build passa, si carica, e sul
+#   telefono app e widget non vedono lo stesso contenitore, quindi il widget resta senza
+#   dati. Abilitare App Groups sull'App ID non basta, perche' Xcode non sa di doverlo
+#   chiedere. Verificato il 2026-10-05: il gruppo mancava sia nei binari sia nei profili.
+#
+#   La firma provvisoria (`-s -`) non ha bisogno di profili e non vale per installare
+#   niente: serve solo a scrivere i diritti dove l'esportazione li va a leggere. Poi
+#   l'esportazione rifirma tutto per lo store, stavolta col profilo giusto.
+#
+# ⚑ Prima i framework, poi le estensioni, poi l'app: codesign rifiuta di firmare un
+#   pacchetto che contiene codice non firmato.
+echo "==> incido i diritti nell'archivio"
+APP_ARCHIVIATA=build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app
+for f in "$APP_ARCHIVIATA"/Frameworks/*; do
+  codesign -f -s - "$f" 2>/dev/null
+done
+for est in "$APP_ARCHIVIATA"/PlugIns/*.appex; do
+  [ -e "$est" ] || continue
+  nome_est=$(basename "$est" .appex)
+  codesign -f -s - --entitlements "ios/$nome_est/$nome_est.entitlements" "$est"
+done
+codesign -f -s - --entitlements ios/Runner/Runner.entitlements "$APP_ARCHIVIATA"
+
 # ☠ Il Team ID va messo nelle opzioni di esportazione, e si aggiunge **qui**, non nel file
 #   versionato: archiviando senza firma il team non finisce nei metadati dell'archivio, e
 #   `exportArchive` si ferma con "No Team Found in Archive". Sembra un difetto del progetto
@@ -119,6 +146,37 @@ xcodebuild -exportArchive \
 
 IPA=$(ls build/ios/ipa/*.ipa | head -1)
 echo "==> $IPA"
+
+# ── Il controllo che il gruppo ci sia davvero ───────────────────────────────
+#
+# ☠ Senza questo controllo la build 1.0.0+6 e' arrivata su TestFlight con un widget che
+#   non poteva leggere niente, e nessun passo dello script se n'era accorto: firma,
+#   validazione e caricamento erano tutti verdi. Il gruppo mancante non e' un errore per
+#   Apple, e' una configurazione legittima. Quindi lo si controlla qui, e se manca ci si
+#   ferma prima di caricare.
+if [ -f ios/Runner/Runner.entitlements ]; then
+  GRUPPO=$(/usr/libexec/PlistBuddy -c "Print :com.apple.security.application-groups:0" \
+    ios/Runner/Runner.entitlements 2>/dev/null || true)
+  if [ -n "$GRUPPO" ]; then
+    CONTROLLO=$(mktemp -d)
+    unzip -q "$IPA" -d "$CONTROLLO"
+    for bin in "$CONTROLLO"/Payload/*.app "$CONTROLLO"/Payload/*.app/PlugIns/*.appex; do
+      [ -e "$bin" ] || continue
+      if ! codesign -d --entitlements :- "$bin" 2>/dev/null | grep -q "$GRUPPO"; then
+        echo "!! $GRUPPO manca nella firma di $(basename "$bin"): non carico." >&2
+        rm -rf "$CONTROLLO"
+        exit 1
+      fi
+    done
+    rm -rf "$CONTROLLO"
+    echo "==> $GRUPPO firmato in app ed estensioni"
+  fi
+fi
+
+if [ -n "${SOLO_ESPORTA:-}" ]; then
+  echo "SOLO_ESPORTA: mi fermo prima del caricamento."
+  exit 0
+fi
 
 # ── Il caricamento ──────────────────────────────────────────────────────────
 #
