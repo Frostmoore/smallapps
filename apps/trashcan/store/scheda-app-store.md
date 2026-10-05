@@ -58,15 +58,18 @@ d'azzardo, nessun controllo parentale da dichiarare.
 
 ## 3. Pagina della versione 1.0.0
 
-### Testo promozionale (italiano)
+I campi sono nell'ordine in cui li trovi nella pagina. Le parole chiave non ripetono il nome e il
+sottotitolo, che Apple indicizza gia', e sono separate da virgole senza spazi.
+
+### Italiano
+
+**Testo promozionale** (126 su 170)
 
 ```
 Imposti una volta i giorni del tuo Comune e il widget ti dice ogni sera cosa portare fuori. Niente account, niente pubblicità.
 ```
 
-*126 caratteri su 170.*
-
-### Descrizione (italiano)
+**Descrizione** (2808 su 4000)
 
 ```
 Stasera cosa si butta?
@@ -130,28 +133,47 @@ I giorni di raccolta li decide il tuo Comune, non l'app. TrashCan ti ricorda que
 TrashCan fa parte di SMP MicroApps: app piccole, che fanno una cosa sola e la fanno bene.
 ```
 
-*2808 caratteri su 4000.*
-
-### Parole chiave (italiano)
+**Parole chiave** (98 su 100)
 
 ```
 calendario,rifiuti,spazzatura,bidone,comune,promemoria,riciclo,umido,organico,carta,plastica,vetro
 ```
 
-*98 caratteri su 100.*
+**URL di assistenza**
 
-⚑ Nessuna ripete il nome o il sottotitolo: Apple li indicizza gia', e ripeterli sprecherebbe
-caratteri. Virgole senza spazi, perche' anche gli spazi contano.
+```
+https://smpmicroapps.it/contatti
+```
 
-### Testo promozionale (inglese)
+**URL di marketing**
+
+```
+https://smpmicroapps.it/trashcan
+```
+
+**Versione**
+
+```
+1.0.0
+```
+
+**Copyright** (34 su 200)
+
+```
+2026 SeeMyPage di Ronconi Riccardo
+```
+
+**File di copertura geografica**: lascia vuoto. Serve solo alle app di navigazione stradale.
+
+### Inglese (Regno Unito)
+
+**Testo promozionale** (115 su 170)
 
 ```
 Set your council's collection days once and the widget tells you every evening what to put out. No account, no ads.
 ```
 
-*115 caratteri su 170.*
-
-### Descrizione (inglese)
+**Descrizione** (2675 su 4000)
 
 ```
 What goes out tonight?
@@ -215,33 +237,48 @@ Collection days are decided by your council, not by the app. TrashCan reminds yo
 TrashCan is part of SMP MicroApps: small apps that do one thing and do it well.
 ```
 
-*2675 caratteri su 4000.*
-
-### Parole chiave (inglese)
+**Parole chiave** (93 su 100)
 
 ```
 trash,garbage,recycling,waste,rubbish,refuse,council,reminder,schedule,widget,dustbin,recycle
 ```
 
-*93 caratteri su 100.*
+**URL di assistenza**
 
-### Gli altri campi della versione
+```
+https://smpmicroapps.it/en/contatti
+```
+
+**URL di marketing**
+
+```
+https://smpmicroapps.it/en/trashcan
+```
+
+**Versione**
+
+```
+1.0.0
+```
+
+**Copyright** (34 su 200)
+
+```
+2026 SeeMyPage di Ronconi Riccardo
+```
+
+**File di copertura geografica**: lascia vuoto. Serve solo alle app di navigazione stradale.
+
+### Piu' in basso nella stessa pagina
 
 | Campo | Valore |
 |---|---|
-| URL di supporto (it) | `https://smpmicroapps.it/contatti` |
-| URL di supporto (en) | `https://smpmicroapps.it/en/contatti` |
-| URL di marketing (it) | `https://smpmicroapps.it/trashcan` |
-| URL di marketing (en) | `https://smpmicroapps.it/en/trashcan` |
-| Versione | `1.0.0` |
-| Copyright | `2026 SeeMyPage di Ronconi Riccardo` |
 | Build | `1.0.0 (10)`, quella con widget e manifesti di privacy |
-| Acquisti in-app | Seleziona **TrashCan Pro** nella sezione della versione |
+| Acquisti in-app | Seleziona **TrashCan Pro** |
 | Rilascio | Manuale, cosi' scegli tu il momento dopo l'approvazione |
 
-☠ **Il primo acquisto in-app si invia insieme alla prima versione.** Va selezionato nella sezione
-"Acquisti in-app e abbonamenti" della pagina della versione; se resta fuori, Apple approva l'app e
-non l'acquisto, e il Pro non si puo' comprare.
+☠ **Il primo acquisto in-app si invia insieme alla prima versione.** Se resta fuori, Apple approva
+l'app e non l'acquisto, e il Pro non si puo' comprare.
 
 ---
 
