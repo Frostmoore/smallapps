@@ -13,12 +13,14 @@
 
 | File | Dove va in App Store Connect |
 |---|---|
-| `screenshots/ios/it/*.png` | Pagina della versione, Italiano → Anteprime e screenshot → **iPhone 6,9"**, in quest'ordine |
-| `screenshots/ios/en/*.png` | Pagina della versione, Inglese (Regno Unito) → iPhone 6,9", in quest'ordine |
+| `screenshots/ios-6.5/it/*.png` | Pagina della versione, Italiano → Anteprime e screenshot → **iPhone, display da 6,5"**, in quest'ordine |
+| `screenshots/ios-6.5/en/*.png` | Pagina della versione, Inglese (Regno Unito) → iPhone 6,5", in quest'ordine |
 | `screenshots/ios/revisione/paywall-it.png` | Acquisti in-app → TrashCan Pro → **Screenshot per la revisione** |
 
-⚑ Sono 1320×2868, la misura da 6,9 pollici: e' l'unica obbligatoria, e da quella Apple ricava
-da sola le misure piu' piccole. **Niente screenshot per iPad**: l'app e' dichiarata solo iPhone
+☠ **App Store Connect chiede la misura da 6,5 pollici, 1284×2778**, e rifiuta le 1320×2868 da
+6,9 trascinate in quello spazio. Le `ios-6.5/` sono ricavate dalle `ios/` (ridotte e rifilate di
+6 pixel sopra e sotto: le proporzioni differiscono di 12 pixel su 2800). Le 6,9 restano in `ios/`
+per lo spazio facoltativo in "Visualizza tutte le dimensioni". **Niente screenshot per iPad**: l'app e' dichiarata solo iPhone
 (`TARGETED_DEVICE_FAMILY = 1`), e sugli iPad gira nella finestra di compatibilita'.
 
 ⚑ Il secondo screenshot, quello del widget, e' **composto** e non fotografato: un widget non si
