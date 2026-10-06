@@ -146,6 +146,9 @@ Future<SizeChoice?> pickSize(
                 ),
                 MicroSpacing.hGapM,
                 FilledButton(
+                  // Larghezza minima finita: quella del tema e' infinita e in una Row non
+                  // si disegna (vedi MicroPrimaryButton in micro_core).
+                  style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
                   onPressed: () {
                     final v = parseUserNumber(custom.text);
                     if (v != null && v > 0) Navigator.of(sheet).pop(SizeLiters(v));

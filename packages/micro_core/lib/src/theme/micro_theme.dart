@@ -15,22 +15,26 @@ abstract final class MicroTheme {
     required Color seed,
     required String fontFamily,
     String? displayFontFamily,
+    DynamicSchemeVariant variant = DynamicSchemeVariant.tonalSpot,
   }) => build(
     seed: seed,
     brightness: Brightness.light,
     fontFamily: fontFamily,
     displayFontFamily: displayFontFamily,
+    variant: variant,
   );
 
   static ThemeData dark({
     required Color seed,
     required String fontFamily,
     String? displayFontFamily,
+    DynamicSchemeVariant variant = DynamicSchemeVariant.tonalSpot,
   }) => build(
     seed: seed,
     brightness: Brightness.dark,
     fontFamily: fontFamily,
     displayFontFamily: displayFontFamily,
+    variant: variant,
   );
 
   static ThemeData build({
@@ -38,8 +42,13 @@ abstract final class MicroTheme {
     required Brightness brightness,
     required String fontFamily,
     String? displayFontFamily,
+    DynamicSchemeVariant variant = DynamicSchemeVariant.tonalSpot,
   }) {
-    final scheme = ColorScheme.fromSeed(seedColor: seed, brightness: brightness);
+    // ⚑ [variant]: con il default `tonalSpot` Material desatura il seme, e un blu acceso
+    // come quello dell'icona di Full Freezer (#0461E5) diventa un blu ardesia spento: i
+    // pulsanti non sembrano piu' la stessa app dell'icona. `fidelity` tiene la saturazione
+    // del seme. Il default resta `tonalSpot` perche' TrashCan e' tarato su quello.
+    final scheme = ColorScheme.fromSeed(seedColor: seed, brightness: brightness, dynamicSchemeVariant: variant);
     final text = _textTheme(scheme, fontFamily, displayFontFamily);
     final isDark = brightness == Brightness.dark;
 

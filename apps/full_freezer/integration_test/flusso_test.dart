@@ -40,6 +40,23 @@ void main() {
       if (file.existsSync()) file.deleteSync();
     }
 
+    // ☠ pumpAndSettle NON aspetta il database. Dopo "Inizia" o "Salva" la scrittura su
+    // SQLite e' I/O vero, fuori dai frame: pumpAndSettle torna subito, prima che la
+    // navigazione avvenga, e il controllo successivo fallisce. Peggio: fallito un expect,
+    // l'app resta congelata a schermo (main() sostituisce FlutterError.onError e il binding
+    // dei test non riesce piu' a chiudere). Il primo giro, il 2026-10-06, si e' fermato
+    // proprio cosi'. Quindi si aspetta la schermata attesa, fotogramma per fotogramma.
+    Future<void> aspetta(Finder f, {Duration limite = const Duration(seconds: 15)}) async {
+      final fine = DateTime.now().add(limite);
+      while (f.evaluate().isEmpty) {
+        if (DateTime.now().isAfter(fine)) {
+          fail('schermata attesa non comparsa: $f');
+        }
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pumpAndSettle();
+    }
+
     Future<void> scatto(String nome) async {
       await tester.pumpAndSettle();
       await Future<void>.delayed(const Duration(milliseconds: 600));
@@ -56,10 +73,14 @@ void main() {
     await scatto('01-primo-freezer');
     await tester.tap(find.text(l.freezerModel_combi_compact));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text(l.onboarding_start), 300, scrollable: find.byType(Scrollable).first);
+    // ☠ Non scrollUntilVisible: il pulsante e' gia' COSTRUITO appena sotto il bordo (la
+    // lista prepara un margine fuori schermo), il finder lo trova, scrollUntilVisible non
+    // scorre e il tocco cade fuori dallo schermo ("Maybe the widget is actually
+    // off-screen"). ensureVisible scorre finche' il pulsante e' davvero dentro.
+    await tester.ensureVisible(find.text(l.onboarding_start));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(l.onboarding_start));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.text(l.home_emptyTitle), findsOneWidget);
+    await aspetta(find.text(l.home_emptyTitle));
     await scatto('02-home-vuota');
 
     // 2. Inserimento rapido, contando i tocchi.
@@ -71,35 +92,36 @@ void main() {
     }
 
     await tocca(find.text(l.home_add));
+    await aspetta(find.byType(TextField)); // il titolo del foglio e' uguale al pulsante
     await tester.enterText(find.byType(TextField).first, 'Spezzatino di manzo');
     await tester.pumpAndSettle();
     await scatto('03-inserimento-rapido');
     await tocca(find.widgetWithText(FilledButton, l.common_save).last);
+    await aspetta(find.text('Spezzatino di manzo'));
     expect(tocchi, lessThan(4), reason: 'F4.5: meno di 4 tocchi per salvare un alimento');
     // ignore: avoid_print
     print('TOCCHI:$tocchi');
 
     // Un secondo, con un'altra unita', per vedere le righe.
     await tester.tap(find.text(l.home_add));
-    await tester.pumpAndSettle();
+    await aspetta(find.byType(TextField)); // il titolo del foglio e' uguale al pulsante
     await tester.enterText(find.byType(TextField).first, 'Piselli');
     await tester.pumpAndSettle();
     await tester.tap(find.text(l.unit_packs(2)));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, l.common_save).last);
-    await tester.pumpAndSettle(const Duration(seconds: 1));
 
     // 3. La home con gli alimenti.
+    await aspetta(find.text('Piselli'));
     expect(find.text('Spezzatino di manzo'), findsOneWidget);
-    expect(find.text('Piselli'), findsOneWidget);
     await Future<void>.delayed(const Duration(seconds: 5)); // lo snackbar sparisce
     await scatto('04-home');
 
     // 4. La pagina del freezer.
-    await tester.scrollUntilVisible(find.byIcon(Icons.chevron_right).last, 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.byIcon(Icons.chevron_right).last);
+    await tester.ensureVisible(find.byIcon(Icons.chevron_right).last);
     await tester.pumpAndSettle();
-    expect(find.text(l.calibrate_button), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.chevron_right).last);
+    await aspetta(find.text(l.calibrate_button));
     await scatto('05-freezer');
   });
 }

@@ -245,6 +245,8 @@ Future<String?> _askName(BuildContext context, {required String title, String? h
       actions: [
         TextButton(onPressed: () => Navigator.of(dialog).pop(), child: Text(l.common_cancel)),
         FilledButton(
+          // Larghezza minima finita: quella del tema e' infinita (vedi MicroPrimaryButton).
+          style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
           onPressed: () {
             final v = controller.text.trim();
             Navigator.of(dialog).pop(v.isEmpty ? null : v);

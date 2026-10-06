@@ -94,8 +94,18 @@ class _FullFreezerAppState extends ConsumerState<FullFreezerApp> {
       title: config.appName,
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      theme: MicroTheme.light(seed: config.seedColor, fontFamily: config.fontFamily),
-      darkTheme: MicroTheme.dark(seed: config.seedColor, fontFamily: config.fontFamily),
+      // `fidelity`: il blu resta quello acceso dell'icona invece del blu ardesia che
+      // Material ricaverebbe dal seme (scoperto sul primo giro sull'emulatore, 2026-10-06).
+      theme: MicroTheme.light(
+        seed: config.seedColor,
+        fontFamily: config.fontFamily,
+        variant: DynamicSchemeVariant.fidelity,
+      ),
+      darkTheme: MicroTheme.dark(
+        seed: config.seedColor,
+        fontFamily: config.fontFamily,
+        variant: DynamicSchemeVariant.fidelity,
+      ),
       themeMode: ref.watch(themeModeProvider),
       supportedLocales: kSupportedLocales,
       localizationsDelegates: const [

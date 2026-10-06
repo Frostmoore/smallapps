@@ -333,6 +333,13 @@ class MicroPrimaryButton extends StatelessWidget {
       // Durante il caricamento il bottone è disabilitato: un doppio tocco su "acquista"
       // è un modo eccellente per generare due acquisti e un rimborso.
       onPressed: loading ? null : onPressed,
+      // ☠ Il tema dà ai FilledButton `minimumSize: Size.fromHeight(52)`, cioè una larghezza
+      // minima INFINITA (serve ai pulsanti a tutta larghezza). Un pulsante non espanso dentro
+      // una Row riceve una larghezza illimitata, e infinito su illimitato non si disegna:
+      // "BoxConstraints forces an infinite width", e in Full Freezer il foglio
+      // d'inserimento restava invisibile sotto lo sfondo scuro (2026-10-06). Qui la
+      // larghezza minima torna finita.
+      style: expanded ? null : FilledButton.styleFrom(minimumSize: const Size(64, 52)),
       child: child,
     );
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
