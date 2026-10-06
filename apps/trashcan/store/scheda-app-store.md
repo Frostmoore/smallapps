@@ -311,7 +311,7 @@ usate per motivi propri dell'app e del gruppo condiviso col widget.
 | Descrizione (it) | `Promemoria, più calendari, backup e colori` (42 su 45) |
 | Nome visualizzato (en) | `TrashCan Pro` |
 | Descrizione (en) | `Reminders, more calendars, backup, colours` (42 su 45) |
-| Prezzo | Paese di riferimento **Italia**, **2,39 €**, lo stesso che il compratore italiano paga su Play |
+| Prezzo | Paese di riferimento **Italia**, **2,99 €** IVA inclusa (verificato via API il 2026-10-06: ricavo 2,07 €). Su Play è 2,39 €: il sito mostra il più alto dei due |
 | Screenshot per la revisione | `screenshots/ios/revisione/paywall-it.png` |
 | Note per la revisione | "Unlocked from Settings > Reminders > See what Pro includes." |
 
@@ -319,7 +319,7 @@ usate per motivi propri dell'app e del gruppo condiviso col widget.
 quel nome su tutti e due i negozi.
 
 ⚑ Apple i prezzi li mostra gia' **IVA inclusa**, e dal paese di riferimento ricava gli altri.
-Controlla nella tabella dei paesi che l'Italia dica 2,39 €.
+Controlla nella tabella dei paesi che l'Italia dica 2,99 €.
 
 ---
 

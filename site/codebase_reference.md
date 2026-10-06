@@ -619,3 +619,6 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
   server licenze**: è vero perché `tool/build_ios.sh` compila senza `MA_LICENSE_URL`, quindi
   `MicroAppConfig.serverEnabled` è `false`. Se un giorno la build iOS lo passasse, l'informativa
   va cambiata **prima** di pubblicare quella build. `comune.data_legale` → 6 ottobre 2026.
+- `app.trashcan.prezzo` → **2,99 € / €2.99**: è il prezzo App Store in Italia (verificato via API il
+  2026-10-06), più alto dei 2,39 € di Play. ⚑ Il sito mostra **il più alto dei due**, così nessuno
+  trova in negozio un prezzo superiore a quello promesso qui.

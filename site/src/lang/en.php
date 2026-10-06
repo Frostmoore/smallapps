@@ -59,7 +59,7 @@ return [
                           . 'Google LLC. iPhone and App Store are trademarks of Apple Inc.',
 
     // ── The catalogue ───────────────────────────────────────────────────────
-    'app.trashcan.prezzo'   => '€2.39',
+    'app.trashcan.prezzo'   => '€2.99',
     'app.trashcan.claim'    => 'What goes out tonight?',
     'app.trashcan.sommario' => 'Your town\'s waste collection calendar, with a reminder the '
                              . 'evening before. No more bin left behind.',
@@ -121,7 +121,7 @@ return [
     'trashcan.titolo'      => 'TrashCan, the waste collection calendar',
     'trashcan.descrizione' => 'TrashCan reminds you the evening before what to put out. '
                             . 'Waste collection calendar with reminders and a home screen '
-                            . 'widget, for Android and iPhone. Free, Pro for €2.39 one-off.',
+                            . 'widget, for Android and iPhone. Free, Pro for €2.99 one-off.',
 
     'trashcan.eyebrow'     => 'TrashCan · Android and iPhone',
     'trashcan.hero.titolo' => 'What goes out<br>tonight?',
