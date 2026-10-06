@@ -1,0 +1,27 @@
+# Generazione delle icone di Full Freezer.
+#
+# Si rigenerano con:  pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons
+#
+# ☠ Le immagini qui sotto NON si modificano a mano: le produce tool/genera_icone.py
+# dall'originale del proprietario (assets/icons/source/fullfreezer_originale.png). Per
+# cambiare l'icona si sostituisce l'originale e si rilancia lo script, poi questo strumento.
+flutter_launcher_icons:
+  android: true
+  ios: true
+
+  # Quadrato pieno, senza gli angoli neri dell'originale: icona legacy Android e iOS.
+  image_path: "assets/icons/fullfreezer_fullbleed.png"
+  min_sdk_android: 24
+
+  # ⚑ Lo sfondo adattivo e' un'IMMAGINE, non un colore: e' l'icona stessa alla stessa scala
+  # del primo piano, cosi' dove il ritaglio del disegno sbaglia sotto c'e' l'originale.
+  # Il primo piano e' gia' dimensionato nella zona sicura dallo script: inset 0.
+  adaptive_icon_background: "assets/icons/adaptive_background.png"
+  adaptive_icon_foreground: "assets/icons/adaptive_foreground.png"
+  adaptive_icon_foreground_inset: 0
+  adaptive_icon_monochrome: "assets/icons/adaptive_monochrome.png"
+
+  # ☠ iOS: niente canale alfa, o App Store Connect rifiuta la build a caricamento finito.
+  # L'immagine e' gia' opaca; la riga resta come cintura di sicurezza.
+  remove_alpha_ios: true
+  background_color_ios: "#0461E5"

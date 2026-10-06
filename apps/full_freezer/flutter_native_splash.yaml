@@ -1,0 +1,24 @@
+# La schermata di avvio di Full Freezer.
+#
+# Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
+#
+# Il colore e' il blu mediano dello sfondo dell'icona (#0461E5, misurato da
+# tool/genera_icone.py): l'avvio non deve cambiare colore fra icona e app.
+flutter_native_splash:
+  color: "#0461E5"
+  image: assets/icons/fullfreezer_logo.png
+  color_dark: "#0B1A33"
+  image_dark: assets/icons/fullfreezer_logo.png
+
+  android: true
+  ios: true
+  web: false
+
+  # ☠ Android 12+ ritaglia l'immagine a cerchio e tiene solo i due terzi centrali: il logo
+  # intero perderebbe l'anello delle frecce. splash_android12.png e' il solo disegno, gia'
+  # confinato nel cerchio sopravvissuto.
+  android_12:
+    color: "#0461E5"
+    color_dark: "#0B1A33"
+    image: assets/icons/splash_android12.png
+    image_dark: assets/icons/splash_android12.png
