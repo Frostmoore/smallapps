@@ -24,6 +24,8 @@ PaywallConfig buildTrashcanPaywall(L l) => PaywallConfig(
   thanksLabel: l.paywall_thanks,
   nothingToRestoreLabel: l.paywall_restoredNothing,
   unavailableLabel: l.paywall_unavailable,
+  productUnavailableLabel: l.paywall_productUnavailable,
+  retryLabel: l.common_retry,
   oneTimeNotice: l.paywall_subhead,
   benefits: [
     PaywallBenefit(

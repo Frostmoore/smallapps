@@ -127,4 +127,5 @@ abstract final class BillingErrorCodes {
   static const String alreadyOwned = 'already_owned';
   static const String userCanceled = 'user_canceled';
   static const String storeError = 'store_error';
+  static const String timeout = 'store_timeout';
 }

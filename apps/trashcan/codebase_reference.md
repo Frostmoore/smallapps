@@ -800,6 +800,13 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 `test/widget/harness.dart` non contiene test: è l'impalcatura che monta una pagina
 sostituendo i provider che legge.
 
+`integration_test/acquisto_store_test.dart` apre il paywall **con lo store vero**
+(`--dart-define=BILLING=store`) dal riquadro Pro delle impostazioni, e verifica che entro il
+tempo massimo la rotellina sparisca: prezzo, messaggio con "Riprova", o "store assente".
+☠ E' l'unico test che vede il difetto del 2026-10-06 (rotellina eterna su iPhone): il
+gateway finto risponde sempre col prodotto. Esiti verificati: iOS "messaggio con Riprova",
+emulatore Android "store assente".
+
 `integration_test/screenshots_test.dart` **non verifica niente**: percorre l'app con dati
 realistici e scrive `SCATTO:<nome>` a ogni schermata da fotografare per gli store. Lo scatto
 lo fa il computer che guida il dispositivo (`tool/screenshots_ios.sh` sul Mac,

@@ -1,7 +1,7 @@
 # Scheda Play Store — TrashCan
 
 > Tutto quello che serve per compilare Play Console, pronto da incollare.
-> **Aggiornato al**: 2026-10-05 · **Versione**: `1.0.0+10` · **Pacchetto**: `com.smp.trashcan`
+> **Aggiornato al**: 2026-10-05 · **Versione**: `1.0.0+11` · **Pacchetto**: `com.smp.trashcan`
 >
 > ⚑ Ogni testo qui sotto e' stato controllato contro il limite del campo in cui va: il numero
 > di caratteri e' scritto sotto ciascuno. Nessun segreto in questo file.
@@ -12,7 +12,7 @@
 
 | File | Dove va in Play Console |
 |---|---|
-| `trashcan-1.0.0-10.aab` | Versioni → Produzione (o Test chiuso) → Crea nuova versione → Carica |
+| `trashcan-1.0.0-11.aab` | Versioni → Produzione (o Test chiuso) → Crea nuova versione → Carica |
 | `icona-512.png` | Scheda principale dello Store → Icona dell'app |
 | `testata-1024x500-it.png` | Scheda principale (italiano) → Grafica in primo piano |
 | `testata-1024x500-en.png` | Scheda principale (inglese) → Grafica in primo piano |

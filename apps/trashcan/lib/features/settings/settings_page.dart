@@ -178,13 +178,21 @@ class SettingsPage extends ConsumerWidget {
               padding: EdgeInsets.zero,
               child: MicroListTile(
                 title: l.restore_title,
-                subtitle: l.restore_playBody,
+                subtitle: defaultTargetPlatform == TargetPlatform.iOS
+                    ? l.restore_appleBody
+                    : l.restore_playBody,
                 leading: const Icon(Icons.phonelink_setup_outlined),
                 onTap: () => context.push(Routes.restore),
               ),
             ),
             MicroSpacing.gapS,
+            // ☠ Questo riquadro sembrava un pulsante per comprare il Pro, col lucchetto e il
+            //   bollino PRO, ma non aveva nessuna azione: toccandolo non succedeva niente. Il
+            //   proprietario l'ha trovato cosi' il 2026-10-06. Ora apre il paywall.
             MicroCard(
+              onTap: entitlement.isPro
+                  ? null
+                  : () => unawaited(showTrashcanPaywall(context, ref)),
               child: Row(
                 children: [
                   Icon(

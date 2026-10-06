@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -112,18 +113,26 @@ class _RestorePageState extends ConsumerState<RestorePage> {
     final serverAvailable = ref.watch(appConfigProvider).serverEnabled;
     final created = _created;
 
+    // ☠ Su iPhone questa pagina parlava di "account Google" e offriva un codice di
+    //   trasferimento che passa da un server che la build iOS non contatta. Su iOS si
+    //   ripristina con l'ID Apple, e basta: la sezione del codice non si mostra.
+    final ios = defaultTargetPlatform == TargetPlatform.iOS;
+
     return Scaffold(
       appBar: AppBar(title: Text(l.restore_title)),
       body: SafeArea(
         child: ListView(
           padding: MicroSpacing.page,
           children: [
-            MicroSectionHeader(title: l.restore_playTitle),
+            MicroSectionHeader(title: ios ? l.restore_appleTitle : l.restore_playTitle),
             MicroCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l.restore_playBody, style: theme.textTheme.bodyMedium),
+                  Text(
+                    ios ? l.restore_appleBody : l.restore_playBody,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                   MicroSpacing.gapL,
                   MicroPrimaryButton(
                     label: l.restore_playAction,
@@ -134,6 +143,7 @@ class _RestorePageState extends ConsumerState<RestorePage> {
               ),
             ),
 
+            if (!ios) ...[
             MicroSpacing.gapXXL,
             MicroSectionHeader(title: l.restore_codeTitle),
             MicroCard(
@@ -182,6 +192,7 @@ class _RestorePageState extends ConsumerState<RestorePage> {
                 ],
               ),
             ),
+            ],
           ],
         ),
       ),

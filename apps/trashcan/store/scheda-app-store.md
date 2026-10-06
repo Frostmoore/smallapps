@@ -1,7 +1,7 @@
 # Scheda App Store — TrashCan
 
 > Tutto quello che serve per compilare App Store Connect, pronto da incollare.
-> **Aggiornato al**: 2026-10-05 · **Versione**: `1.0.0 (10)` · **Bundle ID**: `com.smp.trashcan`
+> **Aggiornato al**: 2026-10-05 · **Versione**: `1.0.0 (11)` · **Bundle ID**: `com.smp.trashcan`
 > · **ID Apple**: `6818986320`
 >
 > ⚑ Ogni testo qui sotto e' stato controllato contro il limite del campo in cui va: il numero
@@ -273,7 +273,7 @@ https://smpmicroapps.it/en/trashcan
 
 | Campo | Valore |
 |---|---|
-| Build | `1.0.0 (10)`, quella con widget e manifesti di privacy |
+| Build | `1.0.0 (11)`, quella con widget e manifesti di privacy |
 | Acquisti in-app | Seleziona **TrashCan Pro** |
 | Rilascio | Manuale, cosi' scegli tu il momento dopo l'approvazione |
 
@@ -369,7 +369,7 @@ Cosa provare:
    l'invio" finche' non lo alleghi alla versione.
 2. **Informazioni sull'app** (§2), comprese classificazione per eta' e privacy (§4).
 3. **Pagina della versione** in italiano, poi aggiungi l'inglese (§3) con i suoi screenshot.
-4. Scegli la build `1.0.0 (10)` e seleziona TrashCan Pro fra gli acquisti in-app.
+4. Scegli la build `1.0.0 (11)` e seleziona TrashCan Pro fra gli acquisti in-app.
 5. **Informazioni per la revisione** (§6), poi **Aggiungi per la revisione** e invia.
 
 La prima revisione di solito richiede da uno a tre giorni.

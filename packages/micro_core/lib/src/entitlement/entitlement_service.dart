@@ -68,6 +68,7 @@ class EntitlementService extends ChangeNotifier {
   bool _busy = false;
   bool _storeAvailable = false;
   List<MicroProduct> _products = const <MicroProduct>[];
+  CatalogState _catalog = CatalogState.idle;
   MicroError? _lastError;
   DateTime? _lastServerSync;
 
@@ -79,6 +80,16 @@ class EntitlementService extends ChangeNotifier {
   List<MicroProduct> get products => _products;
   MicroProduct? get proProduct =>
       _products.where((p) => p.id == proSku).firstOrNull;
+
+  /// A che punto e' il prezzo del Pro: da chiedere, in arrivo, arrivato, mancante, fallito.
+  ///
+  /// ☠ **Esiste perche' "nessun prodotto" e "prodotto in arrivo" sembravano la stessa cosa.**
+  /// Il paywall mostrava la rotellina finche' [proProduct] era `null`, e `null` restava per
+  /// sempre quando lo store rispondeva "non lo trovo". Su iPhone e' successo al proprietario
+  /// il 2026-10-06: tasto d'acquisto che gira all'infinito, cioe' nessun modo di comprare il
+  /// Pro, che e' l'unica entrata dell'app. Adesso il paywall distingue l'attesa dall'assenza,
+  /// e nell'assenza offre di riprovare.
+  CatalogState get catalogState => _catalog;
   MicroError? get lastError => _lastError;
 
   /// Prepara il servizio. **L'ordine dei passi è vincolante.**
@@ -102,8 +113,8 @@ class EntitlementService extends ChangeNotifier {
     await gateway.init();
     _sub ??= gateway.events.listen(_onPurchaseEvent);
 
-    final loaded = await gateway.loadProducts({proSku});
-    loaded.fold(ok: (list) => _products = list, err: (e) => _lastError = e);
+    await reloadProducts();
+    if (_disposed) return;
 
     await gateway.restorePurchases();
     if (_disposed) return;
@@ -111,6 +122,83 @@ class EntitlementService extends ChangeNotifier {
 
     unawaited(_syncFromServerIfDue());
   }
+
+  /// Chiede di nuovo il prezzo del Pro allo store.
+  ///
+  /// ☠ **Prima si chiedeva una volta sola, all'avvio.** Se in quel momento lo store era
+  /// lento, il telefono offline o il prodotto non ancora propagato, il prezzo non arrivava
+  /// piu' fino al riavvio dell'app. Ora lo richiede il paywall ogni volta che si apre senza
+  /// prezzo, e il pulsante "Riprova" quando l'utente lo chiede.
+  ///
+  /// ☠ **Un tempo massimo, e non e' prudenza.** Una richiesta allo store che non torna
+  /// lascerebbe la rotellina accesa per sempre: dopo [catalogTimeout] lo stato diventa
+  /// [CatalogState.failed] e l'utente vede un messaggio con cui fare qualcosa.
+  ///
+  /// ⚑ Un elenco vuoto **non** e' un successo. Lo store risponde senza errori anche quando
+  /// non trova il prodotto: e' il caso piu' insidioso, e diventa [CatalogState.missing].
+  Future<void> reloadProducts() async {
+    if (_disposed || !_storeAvailable || _catalog == CatalogState.loading) return;
+    _catalog = CatalogState.loading;
+    notifyListeners();
+
+    final loaded = await gateway.loadProducts({proSku}).timeout(
+      catalogTimeout,
+      onTimeout: () => const Err(
+        MicroError(code: BillingErrorCodes.timeout, message: 'Lo store non ha risposto'),
+      ),
+    );
+    if (_disposed) return;
+
+    loaded.fold(
+      ok: (list) {
+        _products = list;
+        _catalog = proProduct == null ? CatalogState.missing : CatalogState.ready;
+        if (proProduct == null) {
+          MicroLog.w('lo store non conosce $proSku: il Pro non e\' comprabile');
+        }
+      },
+      err: (e) {
+        _lastError = e;
+        _catalog = CatalogState.failed;
+      },
+    );
+    notifyListeners();
+  }
+
+  /// Riprova ad aprire lo store, se all'avvio non rispondeva.
+  ///
+  /// ☠ Stesso difetto di [reloadProducts], un gradino prima. Se lo store non rispondeva
+  /// **all'avvio** (Play Store che si aggiorna, telefono appena acceso, rete assente) il
+  /// servizio decideva "store assente" e non ci tornava piu': il paywall diceva che su
+  /// quel dispositivo non si puo' comprare, cosa falsa, e non offriva di riprovare. Ora lo
+  /// richiama il paywall a ogni apertura e il suo pulsante "Riprova".
+  ///
+  /// ⚑ Ripete i passi di [bootstrap] dopo l'apertura, compreso il ripristino silenzioso:
+  /// chi aveva gia' comprato e ha avviato l'app senza store deve ritrovare il Pro appena lo
+  /// store torna, non al riavvio successivo.
+  Future<void> reconnectStore() async {
+    if (_disposed || _storeAvailable) return;
+    _storeAvailable = await gateway.isAvailable().timeout(
+      catalogTimeout,
+      onTimeout: () => false,
+    );
+    if (_disposed) return;
+    if (!_storeAvailable) {
+      notifyListeners();
+      return;
+    }
+
+    await gateway.init();
+    _sub ??= gateway.events.listen(_onPurchaseEvent);
+    notifyListeners();
+
+    await reloadProducts();
+    if (_disposed) return;
+    await gateway.restorePurchases();
+  }
+
+  /// Quanto si aspetta lo store prima di dichiarare il prezzo non disponibile.
+  static const Duration catalogTimeout = Duration(seconds: 20);
 
   Future<Result<void>> buyPro() async {
     final product = proProduct;
@@ -354,4 +442,22 @@ class EntitlementService extends ChangeNotifier {
     _lastError = error;
     if (!_disposed) notifyListeners();
   }
+}
+
+/// A che punto e' il prezzo del Pro. Vedi [EntitlementService.catalogState].
+enum CatalogState {
+  /// Non ancora chiesto: lo store non e' stato aperto, o non esiste.
+  idle,
+
+  /// Chiesto, in attesa di risposta. L'unico stato in cui ha senso la rotellina.
+  loading,
+
+  /// Arrivato: [EntitlementService.proProduct] non e' `null`.
+  ready,
+
+  /// Lo store ha risposto, ma il prodotto non c'e'. Configurazione dello store, non rete.
+  missing,
+
+  /// Errore o tempo scaduto. Di solito rete o store momentaneamente giu'.
+  failed,
 }

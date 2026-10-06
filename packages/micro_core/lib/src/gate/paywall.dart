@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../billing/purchase_gateway.dart';
@@ -37,6 +39,8 @@ class PaywallConfig {
     required this.thanksLabel,
     required this.nothingToRestoreLabel,
     required this.unavailableLabel,
+    required this.productUnavailableLabel,
+    required this.retryLabel,
     required this.oneTimeNotice,
     this.heroBuilder,
     this.footnote,
@@ -55,6 +59,13 @@ class PaywallConfig {
   final String thanksLabel;
   final String nothingToRestoreLabel;
   final String unavailableLabel;
+
+  /// Lo store risponde ma il prezzo del Pro non arriva. Diverso da [unavailableLabel], che
+  /// vuol dire "su questo dispositivo non c'e' nessuno store".
+  final String productUnavailableLabel;
+
+  /// Il pulsante che richiede il prezzo allo store.
+  final String retryLabel;
 
   /// La frase che dice "pagamento unico, nessun abbonamento".
   ///
@@ -110,6 +121,16 @@ class _PaywallPageState extends State<PaywallPage> {
     super.initState();
     _wasPro = widget.service.isPro;
     widget.service.addListener(_onServiceChanged);
+
+    // ☠ Il prezzo si richiede a ogni apertura in cui manca. Il servizio lo chiedeva solo
+    //   all'avvio dell'app, e se in quel momento non arrivava, il paywall restava ad
+    //   aspettarlo per sempre: il difetto che su iPhone impediva di comprare il Pro.
+    final service = widget.service;
+    if (!service.storeAvailable) {
+      unawaited(service.reconnectStore());
+    } else if (service.proProduct == null) {
+      unawaited(service.reloadProducts());
+    }
   }
 
   @override
@@ -176,14 +197,12 @@ class _PaywallPageState extends State<PaywallPage> {
                 ),
               )
             else if (!service.storeAvailable)
-              MicroCard(
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: scheme.mutedText),
-                    MicroSpacing.hGapM,
-                    Expanded(child: Text(config.unavailableLabel)),
-                  ],
-                ),
+              // ⚑ Anche qui si puo' riprovare: "nessuno store" all'avvio puo' voler dire
+              //   soltanto che il Play Store si stava aggiornando.
+              _PriceMissing(
+                message: config.unavailableLabel,
+                retryLabel: config.retryLabel,
+                onRetry: service.reconnectStore,
               )
             else
               _BuyButton(config: config, service: service, product: product),
@@ -238,12 +257,51 @@ class _BuyButton extends StatelessWidget {
     // numero scritto nel codice sarebbe sbagliato per la maggioranza degli utenti.
     final available = product;
     if (available == null) {
-      return const _PriceSkeleton();
+      // ⚑ Rotellina solo mentre lo store sta rispondendo. Quando ha risposto senza il
+      //   prodotto, o non ha risposto in tempo, si dice cosa succede e si offre di
+      //   riprovare: una rotellina eterna non dice niente e non lascia fare niente.
+      return switch (service.catalogState) {
+        CatalogState.idle || CatalogState.loading => const _PriceSkeleton(),
+        CatalogState.ready || CatalogState.missing || CatalogState.failed => _PriceMissing(
+          message: config.productUnavailableLabel,
+          retryLabel: config.retryLabel,
+          onRetry: service.reloadProducts,
+        ),
+      };
     }
     return MicroPrimaryButton(
       label: config.buyLabel(available.formattedPrice),
       loading: service.isBusy,
       onPressed: service.buyPro,
+    );
+  }
+}
+
+class _PriceMissing extends StatelessWidget {
+  const _PriceMissing({required this.message, required this.retryLabel, required this.onRetry});
+
+  final String message;
+  final String retryLabel;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return MicroCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.cloud_off_outlined, color: scheme.mutedText),
+              MicroSpacing.hGapM,
+              Expanded(child: Text(message)),
+            ],
+          ),
+          MicroSpacing.gapM,
+          MicroPrimaryButton(label: retryLabel, onPressed: () => unawaited(onRetry())),
+        ],
+      ),
     );
   }
 }

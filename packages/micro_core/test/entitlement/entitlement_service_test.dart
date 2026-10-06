@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:micro_core/micro_core.dart';
 
@@ -527,4 +528,120 @@ void main() {
       expect(riletto.purchasedAt, originale.purchasedAt);
     });
   });
+
+  group('il prezzo del Pro: nessuna rotellina eterna', () {
+    // ☠ Questo gruppo esiste per il difetto del 2026-10-06. Su iPhone lo store rispondeva
+    //   "prodotto non trovato" senza errori; il servizio teneva l'elenco vuoto, non lo
+    //   richiedeva piu', e il paywall girava per sempre. Nessuno poteva comprare il Pro.
+
+    test('se lo store non conosce il prodotto, lo stato dice "mancante", non "in arrivo"', () async {
+      final service = build(gateway: _CatalogoVariabile());
+      addTearDown(service.dispose);
+      await service.bootstrap();
+
+      expect(service.proProduct, isNull);
+      expect(service.catalogState, CatalogState.missing);
+    });
+
+    test('quando il prodotto compare, ricaricare lo trova senza riavviare l app', () async {
+      final gateway = _CatalogoVariabile();
+      final service = build(gateway: gateway);
+      addTearDown(service.dispose);
+      await service.bootstrap();
+      expect(service.catalogState, CatalogState.missing);
+
+      gateway.prodotti = [_pro];
+      await service.reloadProducts();
+
+      expect(service.catalogState, CatalogState.ready);
+      expect(service.proProduct?.formattedPrice, '2,39 €');
+    });
+
+    test('uno store che non risponde diventa "fallito" dopo il tempo massimo', () async {
+      fakeAsync((tempo) {
+        final service = build(gateway: _CatalogoVariabile(blocca: true));
+        addTearDown(service.dispose);
+        unawaited(service.bootstrap());
+        tempo.flushMicrotasks();
+        expect(service.catalogState, CatalogState.loading);
+
+        tempo.elapse(EntitlementService.catalogTimeout + const Duration(seconds: 1));
+        expect(service.catalogState, CatalogState.failed);
+        expect(service.lastError?.code, BillingErrorCodes.timeout);
+      });
+    });
+
+    test('un errore dello store diventa "fallito", e si puo riprovare', () async {
+      final gateway = _CatalogoVariabile(fallisce: true);
+      final service = build(gateway: gateway);
+      addTearDown(service.dispose);
+      await service.bootstrap();
+      expect(service.catalogState, CatalogState.failed);
+
+      gateway
+        ..fallisce = false
+        ..prodotti = [_pro];
+      await service.reloadProducts();
+      expect(service.catalogState, CatalogState.ready);
+    });
+
+    test('se lo store torna, riconnettersi trova il prezzo senza riavviare', () async {
+      final gateway = _CatalogoVariabile()
+        ..disponibile = false
+        ..prodotti = [_pro];
+      final service = build(gateway: gateway);
+      addTearDown(service.dispose);
+      await service.bootstrap();
+      expect(service.storeAvailable, isFalse);
+
+      gateway.disponibile = true;
+      await service.reconnectStore();
+
+      expect(service.storeAvailable, isTrue);
+      expect(service.catalogState, CatalogState.ready);
+    });
+
+    test('senza store il catalogo non si chiede nemmeno', () async {
+      final service = build(
+        gateway: FakePurchaseGateway.withProduct(sku, outcome: FakeOutcome.unavailable),
+      );
+      addTearDown(service.dispose);
+      await service.bootstrap();
+      await service.reloadProducts();
+      expect(service.catalogState, CatalogState.idle);
+    });
+  });
+}
+
+const MicroProduct _pro = MicroProduct(
+  id: sku,
+  title: 'Pro',
+  description: 'Sblocca tutto',
+  formattedPrice: '2,39 €',
+  rawPriceMicros: 2390000,
+  currencyCode: 'EUR',
+);
+
+/// Un gateway il cui catalogo si puo' cambiare durante il test, o bloccare.
+class _CatalogoVariabile extends FakePurchaseGateway {
+  _CatalogoVariabile({this.blocca = false, this.fallisce = false}) : super(latency: Duration.zero);
+
+  List<MicroProduct> prodotti = const <MicroProduct>[];
+  final bool blocca;
+  bool fallisce;
+  bool disponibile = true;
+
+  @override
+  Future<bool> isAvailable() async => disponibile;
+
+  @override
+  Future<Result<List<MicroProduct>>> loadProducts(Set<String> productIds) {
+    if (blocca) return Completer<Result<List<MicroProduct>>>().future;
+    if (fallisce) {
+      return Future.value(
+        const Err(MicroError(code: BillingErrorCodes.storeError, message: 'store giu')),
+      );
+    }
+    return Future.value(Ok(prodotti.where((p) => productIds.contains(p.id)).toList()));
+  }
 }

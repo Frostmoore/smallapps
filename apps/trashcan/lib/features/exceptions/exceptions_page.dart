@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +9,7 @@ import '../../app/providers.dart';
 import '../../app/waste_presets.dart';
 import '../../domain/occurrence_engine.dart';
 import '../../l10n/generated/app_localizations.dart';
+import 'add_exception.dart';
 
 /// L'elenco delle deroghe attive: raccolte saltate, spostate e straordinarie.
 ///
@@ -39,6 +42,14 @@ class ExceptionsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l.exceptions_title)),
+      // ☠ Questa pagina elencava le eccezioni senza permettere di crearne: si creavano solo
+      //   toccando una raccolta della home, cioe' dei prossimi sette giorni. Vedi
+      //   `showAddException`.
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => unawaited(showAddException(context, ref)),
+        icon: const Icon(Icons.add),
+        label: Text(l.common_add),
+      ),
       body: SafeArea(
         child: entries.isEmpty
             ? MicroEmptyState(
@@ -47,7 +58,7 @@ class ExceptionsPage extends ConsumerWidget {
                 message: l.exceptions_emptyHint,
               )
             : ListView(
-                padding: MicroSpacing.page,
+                padding: MicroSpacing.page.copyWith(bottom: 96),
                 children: [
                   for (final entry in entries)
                     Padding(

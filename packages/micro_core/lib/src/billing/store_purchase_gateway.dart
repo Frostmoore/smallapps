@@ -54,10 +54,12 @@ class StorePurchaseGateway implements PurchaseGateway {
         );
       }
       if (response.notFoundIDs.isNotEmpty) {
-        // ☠ Non è per forza un bug del codice: un prodotto in-app non è interrogabile
-        // finché l'AAB non è stato pubblicato su un canale, anche solo interno, e la
-        // propagazione richiede ore. Si logga e si prosegue con quelli trovati.
-        MicroLog.w('prodotti non trovati su Play: ${response.notFoundIDs.join(", ")}');
+        // ☠ Non è per forza un bug del codice. Su Play un prodotto non è interrogabile
+        // finché l'AAB non è pubblicato su un canale, e la propagazione richiede ore. Su
+        // iOS lo store non restituisce **nessun** prodotto finché l'accordo per le app a
+        // pagamento non è attivo in App Store Connect, anche se il prodotto è pronto.
+        // Il servizio lo tratta come `CatalogState.missing`, non come un successo.
+        MicroLog.w('prodotti non trovati nello store: ${response.notFoundIDs.join(", ")}');
       }
       return Ok(response.productDetails.map(_toMicroProduct).toList());
     } on Exception catch (error, stack) {
@@ -75,7 +77,7 @@ class StorePurchaseGateway implements PurchaseGateway {
         return const Err(
           MicroError(
             code: BillingErrorCodes.productNotFound,
-            message: 'Prodotto non disponibile su Play',
+            message: 'Prodotto non disponibile nello store',
           ),
         );
       }

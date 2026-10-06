@@ -260,6 +260,16 @@
     }
   },
   "exceptions_pickType": "Which waste type?",
+  "exceptions_pickCollection": "Which {name} collection?",
+  "@exceptions_pickCollection": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exceptions_noUpcoming": "No collections in the coming months. You can still add an extra one.",
+  "exceptions_noTypes": "Add at least one waste type first.",
   "exceptions_addedSkip": "Collection skipped",
   "exceptions_addedMove": "Collection moved",
   "exceptions_addedExtra": "Extra collection added",
@@ -326,6 +336,8 @@
   "restore_playTitle": "Restore with your Google account",
   "restore_playBody": "If the new phone uses the same Google account you bought with, Pro comes back from here. No code, nothing to write down.",
   "restore_playAction": "Restore purchase",
+  "restore_appleTitle": "Restore with your Apple ID",
+  "restore_appleBody": "If your new iPhone uses the same Apple ID you bought with, Pro comes back from here. No code, nothing to write down.",
   "restore_codeTitle": "Move it to another account",
   "restore_codeBody": "Only if the new phone uses a different Google account. Generate a code here, then type it in over there.",
   "restore_codeCreate": "Generate a code",
@@ -366,7 +378,8 @@
   "paywall_pending": "Your payment is being processed. We will unlock Pro as soon as it goes through.",
   "paywall_thanks": "Thank you. Pro is unlocked.",
   "paywall_restoredNothing": "No previous purchase found on this account.",
-  "paywall_unavailable": "In-app purchases are not available on this device.",
+  "paywall_unavailable": "The purchase store isn't responding on this device. Check your connection and try again.",
+  "paywall_productUnavailable": "The Pro price hasn't arrived from the store. Check your connection and try again.",
   "paywall_benefitRemindersTitle": "The evening reminder",
   "paywall_benefitRemindersBody": "TrashCan tells you what to take out, the evening before, so the truck never catches you out.",
   "paywall_benefitCalendarsTitle": "As many calendars as you need",
