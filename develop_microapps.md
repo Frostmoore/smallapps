@@ -993,8 +993,8 @@ tutte fatte e provate sull'emulatore:
 - [x] **F4.0** Decisioni di partenza (vedi §8 F4.0): due piattaforme, solo iPhone, prezzo 3,99 €, foto gratis e notifiche Pro, capienza (2026-10-06)
 - [x] **F4.1** Bootstrap progetto, tema, l10n, router — **`android/` e `ios/` insieme** (2026-10-06: `com.smp.fullfreezer`, seme `#0461E5`, Plus Jakarta Sans, icone da `tool/genera_icone.py`; 4 test; provata su emulatore Android 15 e simulatore iPhone 18 Pro)
 - [x] **F4.2** Data layer Drift: freezer, scomparti, alimenti, movimenti (2026-10-06: `lib/data/{tables,database,freezer_repository}.dart`, `lib/domain/{categories,units,text_norm}.dart`; 19 test del repository + 6 di dominio)
-- [ ] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test
-- [ ] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test
+- [x] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test (2026-10-06: `lib/domain/aging.dart`, `compareOldestFirst`; 9 test)
+- [x] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test (2026-10-06: `lib/domain/capacity.dart`, con anche `CapacityAlertPolicy` dell'isteresi di F4.9, che e' logica pura; 18 test)
 - [ ] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima"
 - [ ] **F4.5** Inserimento rapido (obiettivo: sotto i 5 secondi) e inserimento completo
 - [ ] **F4.6** Posizioni: freezer (scelto da una serie di modelli, dal più piccolo al più grande) e scomparti, con conteggi e barra di riempimento
