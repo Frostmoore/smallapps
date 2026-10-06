@@ -994,13 +994,14 @@ tutte fatte e provate sull'emulatore:
 - [ ] **F4.1** Bootstrap progetto, tema, l10n, router — **`android/` e `ios/` insieme**
 - [ ] **F4.2** Data layer Drift: freezer, scomparti, alimenti, movimenti
 - [ ] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test
+- [ ] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test
 - [ ] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima"
 - [ ] **F4.5** Inserimento rapido (obiettivo: sotto i 5 secondi) e inserimento completo
-- [ ] **F4.6** Posizioni: freezer e scomparti, con conteggi
+- [ ] **F4.6** Posizioni: freezer (scelto da una serie di modelli, dal più piccolo al più grande) e scomparti, con conteggi e barra di riempimento
 - [ ] **F4.7** Uscita alimento: consumato / buttato, con storico
 - [ ] **F4.8** Ricerca istantanea
-- [ ] **F4.9** Notifiche: digest aggregato settimanale/quindicinale/mensile
-- [ ] **F4.10** Feature Pro: freezer multipli, foto, storico, statistiche, CSV, categorie personalizzate
+- [ ] **F4.9** Notifiche (**Pro**): digest aggregato settimanale/quindicinale/mensile + avvisi «quasi pieno» / «quasi vuoto»
+- [ ] **F4.10** Feature Pro: freezer multipli, notifiche, storico, statistiche, CSV, backup, categorie personalizzate (le foto sono **gratis**)
 - [ ] **F4.11** Widget "da consumare presto": Android (Kotlin) **e** iOS (WidgetKit), stesso payload
 - [ ] **F4.12** Voice input per l'inserimento rapido, Android e iOS (permessi microfono e riconoscimento vocale)
 - [ ] **F4.13** Test (unit, DB, widget, golden, integrazione)
@@ -3726,6 +3727,15 @@ correzioni, tutte già pagate con TrashCan:
    resta `open()`, a correzione della mappa in F4.10.
 9. **Test d'integrazione** con `lookupL` e `localesTestValue`, mai testi letterali in una
    lingua: un test che cerca l'inglese su un dispositivo italiano si pianta invece di fallire.
+10. **Foto gratis, notifiche Pro** (proprietario, 2026-10-06). Ribalta F4.10 originale: la foto
+    è parte del gesto di inserimento e toglierla al gratuito peggiora l'app che deve farsi
+    installare; la notifica è il richiamo che fa tornare nell'app, ed è quella che si vende,
+    come in TrashCan. `FeatureKey.photos` → `open()`, `FeatureKey.notifications` → `locked()`.
+11. **Capienza del freezer** (proprietario, 2026-10-06). Il freezer si sceglie da una serie di
+    modelli, dal più piccolo al più grande; ogni alimento ha un ingombro stimato, correggibile;
+    la home mostra quanto è pieno ogni freezer; con il Pro arrivano gli avvisi «quasi pieno» e
+    «quasi vuoto». Specifica in **F4.3b**. La barra di riempimento è **gratis**: è la cosa che
+    distingue l'app dalle altre e va vista da tutti; il Pro vende l'avviso.
 
 ### F4.1 — Bootstrap
 
@@ -3742,6 +3752,10 @@ Dipendenze aggiuntive: `speech_to_text` (F4.12), `home_widget` (F4.11), `image_p
 |---|---|---|
 | `id` | int | |
 | `name` | text | "Freezer cucina" |
+| `modelKey` | text | chiave in `FreezerModels` (F4.3b), es. `combi_drawers`; `custom` se i litri li ha scritti l'utente |
+| `capacityLiters` | real | litri **nominali**: dal modello, o scritti a mano con `custom` |
+| `calibration` | real | default `1.0`; fattore di taratura scritto da «quanto è pieno davvero?» (F4.3b) |
+| `lastAlertLevel` | text nullable | `full` \| `empty` \| null: l'ultimo avviso mandato, per non ripeterlo (F4.9) |
 | `sortOrder` | int | |
 | `createdAt` | int | ms UTC |
 
@@ -3767,6 +3781,8 @@ Dipendenze aggiuntive: `speech_to_text` (F4.12), `home_widget` (F4.11), `image_p
 | `unit` | text | chiave in `Units` (`porzioni`, `pezzi`, `g`, `kg`, `confezioni`, `L`) | |
 | `frozenAt` | text | `YYYY-MM-DD` | ADR-008 |
 | `reminderAfterDays` | int nullable | | override del preset di categoria |
+| `volumeLiters` | real | > 0 | ingombro **dell'intera riga** (quantità compresa), in litri |
+| `volumeManual` | bool | default false | true se l'utente l'ha corretto: da lì in poi la stima non lo tocca più |
 | `photoPath` | text nullable | relativo (F1.11) | |
 | `note` | text nullable | | |
 | `status` | text | `stored` \| `consumed` \| `discarded` | |
@@ -3835,6 +3851,107 @@ comunque per anzianità.
 Ordinare per livello e poi per data farebbe scendere sotto un prodotto vecchissimo senza
 promemoria configurato, che è esattamente quello che l'utente ha dimenticato.
 
+### F4.3b — `CapacityEstimator`: quanto è pieno il freezer
+
+**`lib/domain/capacity.dart`** — Dart puro, zero Flutter, come `aging.dart`.
+
+```dart
+/// Un modello di freezer fra cui l'utente sceglie quando ne aggiunge uno.
+@immutable
+class FreezerModel {
+  const FreezerModel({required this.key, required this.liters, required this.iconKey});
+  final String key;      // chiave stabile, salvata in freezers.modelKey; il nome sta nell'ARB
+  final double liters;   // litri nominali
+  final String iconKey;
+}
+
+abstract final class FreezerModels {
+  static const List<FreezerModel> all = [ /* tabella qui sotto, dal più piccolo */ ];
+  static FreezerModel? byKey(String key);
+  static const String customKey = 'custom';
+}
+
+enum FillLevel { empty, normal, full }
+
+@immutable
+class FillInfo {
+  const FillInfo({required this.usedLiters, required this.usableLiters, required this.fraction, required this.level});
+  final double usedLiters;    // somma degli ingombri × taratura
+  final double usableLiters;  // capacità nominale × usableFraction
+  final double fraction;      // 0..1+ : può superare 1, e la UI lo mostra come "pieno"
+  final FillLevel level;
+}
+
+class CapacityEstimator {
+  const CapacityEstimator({this.usableFraction = 0.8, this.fullAt = 0.85, this.emptyAt = 0.20});
+  final double usableFraction;
+  final double fullAt;
+  final double emptyAt;
+
+  /// Ingombro stimato di una riga: quantità × litri per unità (tabella sotto).
+  double estimateLiters({required double quantity, required String unit, String? categoryKey});
+
+  FillInfo fill({required double capacityLiters, required double calibration, required Iterable<double> itemLiters});
+
+  /// Taratura da «quanto è pieno davvero?»: l'utente dice 60%, la stima diceva 40% → 1.5.
+  /// Limitata a 0.25–4: oltre, è più probabile un errore di tocco che un freezer così strano.
+  double calibrate({required double estimatedFraction, required double declaredFraction});
+}
+```
+
+**Modelli** (litri nominali netti, valori tipici di mercato, non di un produttore):
+
+| `key` | Nome (it) | Litri |
+|---|---|---|
+| `ice_box` | Celletta del frigorifero | 15 |
+| `fridge_top` | Freezer sopra il frigo (doppia porta) | 50 |
+| `combi_drawers` | Cassetti del frigo combinato | 90 |
+| `undercounter` | Congelatore sottopiano | 85 |
+| `chest_small` | Congelatore a pozzo piccolo | 100 |
+| `side_by_side` | Frigo americano (lato freezer) | 180 |
+| `upright_tall` | Congelatore verticale alto | 250 |
+| `chest_large` | Congelatore a pozzo grande | 300 |
+| `custom` | Altro: scrivo io i litri | — |
+
+L'elenco si mostra **ordinato per litri**, con un disegno stilizzato per ciascuno, e i litri
+scritti sotto: chi conosce i litri del proprio congelatore (sono sull'etichetta) sceglie
+`custom` e li scrive.
+
+**Litri per unità** (`estimateLiters`): `porzioni` 0,4 · `confezioni` 0,8 · `L` 1,1 ·
+`kg` 1,3 · `g` 0,0013 · `pezzi` per categoria: carne 0,5, pesce 0,4, verdura 0,3, frutta 0,2,
+pane 0,5, gelati 1,0, preparati 0,4, altro 0,4.
+
+⚑ **Perché `kg` vale 1,3 litri e non 1**: il cibo congelato pesa poco meno dell'acqua, ma
+sacchetti, vaschette e aria fra un pezzo e l'altro occupano spazio. Per lo stesso motivo la
+capienza utile è l'80% di quella nominale (`usableFraction`): nessun freezer si riempie fino
+all'ultimo litro.
+
+⚑ **Perché due correzioni e non una.** La stima sbaglia in due modi diversi, e ognuno ha la sua
+correzione:
+1. **Il singolo alimento** è stimato male (la lasagna in teglia non è «una porzione»). Si
+   corregge sull'alimento: nel `QuickAddSheet` l'ingombro compare come «≈ 1,2 L», toccandolo si
+   aggiusta con quattro misure rapide (piccolo 0,25 · medio 0,5 · grande 1 · molto grande 2 litri
+   per unità) o un valore libero. `volumeManual = true`.
+2. **Il freezer intero** sembra più pieno o più vuoto di quello che è, perché l'utente riempie
+   in modo diverso dalla media. Si corregge sul freezer: nella pagina del freezer, «Quanto è
+   pieno davvero?» con uno slider; `calibrate()` scrive `freezers.calibration`. Da lì la barra
+   coincide con quello che l'utente vede aprendo lo sportello, e gli inserimenti successivi la
+   fanno salire in proporzione.
+
+Correggere solo gli alimenti costringerebbe a ricorreggerli uno per uno; correggere solo il
+freezer non aggiusta il caso della lasagna. Servono entrambe.
+
+☠ **Trappola**: la taratura si calcola sulla stima **senza** taratura precedente, altrimenti
+due tarature di seguito si moltiplicano e la barra impazzisce. `calibrate()` riceve la frazione
+stimata grezza.
+
+**Soglie**: `full` da 85% in su, `empty` sotto il 20%. In UI: barra verde fino al 70%, ambra
+70–85%, rossa oltre l'85%.
+
+**Test (F4.13)**: stima per ogni unità; somma e frazione; taratura (60 dichiarato su 40 stimato
+→ 1,5; limiti 0,25 e 4); una seconda taratura non si moltiplica con la prima; livelli alle
+soglie esatte; freezer vuoto → frazione 0 senza divisioni per zero; `custom` con litri a mano.
+
 ### F4.4 — Home
 
 1. Testata: nome del freezer selezionato (o "Tutti"), numero di prodotti, e il contatore
@@ -3842,7 +3959,9 @@ promemoria configurato, che è esattamente quello che l'utente ha dimenticato.
 2. Sezione **"Da usare prima"**: i prodotti con `level != fresh`, ordinati per giorni
    decrescenti, massimo 5, con "vedi tutti".
 3. Sezione **"Tutto il resto"**: ordinata per `frozenAt` crescente (più vecchio in cima).
-4. Sezione **"Dove sono"**: elenco dei freezer con il conteggio per ciascuno.
+4. Sezione **"Dove sono"**: elenco dei freezer con il conteggio e la **barra di riempimento**
+   per ciascuno («Freezer cucina · 23 prodotti · pieno al 64%»). Il freezer selezionato mostra
+   la barra anche in testata.
 5. FAB grande: **"+ Metti nel freezer"**.
 
 Ogni riga è un `MicroListTile` con swipe a destra "Consumato" (verde) e a sinistra "Buttato"
@@ -3853,7 +3972,12 @@ Ogni riga è un `MicroListTile` con swipe a destra "Consumato" (verde) e a sinis
 **Rapido** (`QuickAddSheet`): bottom sheet che si apre con la tastiera **già attiva** sul
 campo nome. Campi visibili: nome (autocompletamento dai nomi già usati), quantità con
 stepper, unità (chip preselezionato con l'ultimo usato). Data = oggi, posizione = ultima
-usata, categoria dedotta dal nome se corrisponde a un termine noto. Bottone "Salva".
+usata, categoria dedotta dal nome se corrisponde a un termine noto. Sotto la quantità, la
+riga «≈ 1,2 L · il freezer sarà pieno al 67%», toccabile per correggere l'ingombro (F4.3b).
+Bottone "Salva".
+
+⚑ La riga dell'ingombro **non aggiunge tocchi**: è precompilata e si tocca solo per
+correggerla, così il vincolo dei 4 tocchi resta.
 Un link "Altri dettagli" apre la form completa mantenendo quanto già scritto.
 
 ⚑ **Perché l'autocompletamento sui nomi già usati**: il freezer di una famiglia contiene
@@ -3861,7 +3985,12 @@ sempre le stesse venti cose. Dopo due settimane, "spe" completa "Spezzatino" e l
 scende a due tocchi. È la singola ottimizzazione che fa la differenza tra un'app usata e una
 abbandonata.
 
-**Completo** (`ItemEditPage`): tutti i campi, foto (Pro), nota, promemoria personalizzato.
+**Completo** (`ItemEditPage`): tutti i campi, foto (**gratis**), nota, promemoria
+personalizzato, ingombro.
+
+**Foto**: `image_picker` da fotocamera o galleria, ridotta a 1280 px sul lato lungo, JPEG
+qualità 80, salvata nella cartella dell'app con percorso relativo (F1.11). Su iOS servono
+`NSCameraUsageDescription` e `NSPhotoLibraryUsageDescription` (it/en).
 
 Funzione **"Ne ho congelato un altro uguale"**: duplica l'item con `frozenAt = oggi`,
 disponibile dal menu di una riga. Nel piano gratuito è disponibile: costa nulla e crea
@@ -3871,6 +4000,15 @@ abitudine.
 
 `lib/features/locations/` — CRUD di freezer e scomparti, con drag per riordinare e conteggio
 per ciascuno. Nel piano gratuito **un solo freezer**, scomparti illimitati.
+
+**Aggiungere un freezer** (anche nell'onboarding, che crea il primo): nome, poi la **scelta
+del modello** da `FreezerModels.all`, una griglia di carte ordinate dal più piccolo al più
+grande, ciascuna con disegno, nome e litri; l'ultima è «Altro: scrivo io i litri». Il modello
+si può cambiare dopo: cambia la capacità, non gli alimenti.
+
+**Pagina del freezer**: barra di riempimento grande, litri occupati su litri utili, e
+«Quanto è pieno davvero?» (taratura, F4.3b), con «Ripristina la stima» che riporta
+`calibration` a 1.
 
 ⚑ **Perché gli scomparti sono gratuiti e i freezer no**: chi ha un freezer solo è il caso
 comune; chi ha il freezer in garage **oltre** a quello in cucina ha già dimostrato di avere
@@ -3897,6 +4035,10 @@ su quella. Cercare "pure" deve trovare "Purè".
 
 ### F4.9 — Notifiche
 
+**Tutte le notifiche sono Pro** (`FeatureKey.notifications`, F4.0 punto 10). Senza Pro la
+home mostra comunque «Da usare prima» e la barra di riempimento: l'informazione c'è, manca
+solo il richiamo.
+
 `lib/services/freezer_scheduler.dart` — **una sola** notifica ricorrente, il digest:
 
 > "Hai 4 prodotti nel freezer da più di 90 giorni. Il più vecchio è Spezzatino, congelato 137 giorni fa."
@@ -3915,12 +4057,31 @@ consegna, si ripianifica il testo a ogni resume dell'app e a ogni modifica dei d
 l'utente non apre l'app per un mese, il testo può essere leggermente datato: è accettabile e
 va tenuto conservativo ("almeno 4 prodotti").
 
+**Avvisi di capienza** (Pro), in `lib/services/capacity_alerts.dart`:
+
+- Si valutano **dopo ogni modifica** degli alimenti di un freezer (inserimento, uscita,
+  correzione) e dopo una taratura.
+- **Quasi pieno**: il freezer passa sopra `fullAt` → notifica immediata «Il Freezer cucina è
+  pieno all'88%: prima di comprare altro da congelare, consuma qualcosa di quello che c'è»,
+  con il più vecchio citato.
+- **Quasi vuoto**: il freezer scende sotto `emptyAt` → notifica pianificata per **il sabato
+  successivo alle 10:00** («è un buon momento per cucinare e congelare»), perché arrivare mentre
+  si sta togliendo l'ultima cosa non serve a niente; arrivare quando si pianifica la spesa sì.
+- Anche il digest periodico aggiunge una riga per ogni freezer pieno o quasi vuoto.
+
+☠ **Trappola, l'avviso ripetuto**: un freezer all'86% che riceve e perde un alimento al giorno
+attraverserebbe la soglia ogni giorno. Si usa `freezers.lastAlertLevel` con **isteresi**:
+dopo un «pieno» non si riavvisa finché non è sceso sotto il 70%; dopo un «vuoto» non si
+riavvisa finché non è risalito sopra il 40%. Un freezer appena creato e vuoto non manda mai
+«quasi vuoto»: `lastAlertLevel` parte da `empty`.
+
 ### F4.10 — Pro
 
 ```dart
 const FeatureLimits freezerLimits = {
   FeatureKey.unlimitedEntities:  FeatureLimit.count(freeMax: 1),   // freezer
-  FeatureKey.photos:             FeatureLimit.locked(),
+  FeatureKey.photos:             FeatureLimit.open(),       // F4.0 punto 10: gratis
+  FeatureKey.notifications:      FeatureLimit.locked(),     // F4.0 punto 10: digest e avvisi di capienza
   FeatureKey.fullHistory:        FeatureLimit.locked(),
   FeatureKey.statistics:         FeatureLimit.locked(),
   FeatureKey.csvExport:          FeatureLimit.locked(),
