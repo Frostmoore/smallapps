@@ -3,14 +3,13 @@
 # Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
 #
 # L'immagine e' il disegno senza sfondo fatto dal proprietario (splash_logo.png, generata da
-# tool/genera_icone.py). Lo sfondo e' quello dell'app, non il blu dell'icona: l'anello
-# azzurro del disegno su #0461E5 si perderebbe, e cosi' il passaggio splash -> app non
-# cambia colore. #FAF8FF e #121318 sono gli sfondi chiaro e scuro che MicroTheme ricava dal
-# seme #0461E5, misurati il 2026-10-06 (scaffoldBackgroundColor).
+# tool/genera_icone.py). Lo sfondo e' il blu mediano dell'icona (#0461E5): il proprietario
+# l'ha voluto cosi' (2026-10-06), dopo aver provato e scartato lo sfondo chiaro dell'app.
+# Nel tema scuro, blu notte #0B1A33.
 flutter_native_splash:
-  color: "#FAF8FF"
+  color: "#0461E5"
   image: assets/icons/splash_logo.png
-  color_dark: "#121318"
+  color_dark: "#0B1A33"
   image_dark: assets/icons/splash_logo.png
 
   android: true
@@ -21,7 +20,7 @@ flutter_native_splash:
   # intero perderebbe l'anello delle frecce. splash_android12.png e' il solo disegno, gia'
   # confinato nel cerchio sopravvissuto.
   android_12:
-    color: "#FAF8FF"
-    color_dark: "#121318"
+    color: "#0461E5"
+    color_dark: "#0B1A33"
     image: assets/icons/splash_android12.png
     image_dark: assets/icons/splash_android12.png

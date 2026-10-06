@@ -13,7 +13,7 @@ Produce in assets/icons/:
 | fullfreezer_logo.png        | il quadrato arrotondato originale con gli angoli trasparenti: sito, splash iOS |
 | adaptive_background.png     | Android 8+: livello di sfondo, 1080x1080 (108 dp) |
 | adaptive_foreground.png     | Android 8+: solo il disegno, su trasparente, nella zona sicura |
-| adaptive_monochrome.png     | Android 13+: il disegno in bianco, per le icone a tema |
+| adaptive_monochrome.png     | Android 13+: sagoma piatta dal ritaglio del proprietario, per le icone a tema |
 | splash_logo.png             | splash (Android fino a 11 e iOS): il disegno senza sfondo del proprietario, su tela quadrata |
 | splash_android12.png        | splash di Android 12+: lo stesso disegno, nei due terzi centrali |
 
@@ -139,13 +139,6 @@ def main():
     primo = np.dstack([rgb, alfa * 255]).astype(np.uint8)
     su_tela(Image.fromarray(primo, 'RGBA'), scala, TELA, 'trasparente').save(ICONE / 'adaptive_foreground.png')
 
-    # ☠ La monocromatica non puo' usare l'alfa sfumato del primo piano: il sistema la
-    # tinge in base all'alfa, e le sfumature del disegno 3D diventano macchie grigie
-    # metalliche. Serve una sagoma piena: soglia piu' alta e rampa corta.
-    alfa_mono = np.clip((rgb[..., 0] - 110) / 30, 0, 1) * (alfa > 0)
-    mono = np.dstack([np.full_like(alfa, 255)] * 3 + [alfa_mono * 255]).astype(np.uint8)
-    su_tela(Image.fromarray(mono, 'RGBA'), scala, TELA, 'trasparente').save(ICONE / 'adaptive_monochrome.png')
-
     # Splash dal ritaglio del proprietario. Il disegno non e' quadrato (1323x1189): lo si
     # centra su una tela quadrata, col lato piu' lungo che occupa la frazione voluta.
     disegno = Image.open(SENZA_SFONDO).convert('RGBA')
@@ -159,6 +152,31 @@ def main():
         return out
 
     centrato(1024, 1024).save(ICONE / 'splash_logo.png')
+
+    # ☠ Monocromatica (Android 13+): il sistema la tinge leggendo SOLO l'alfa. Il primo
+    # tentativo usava l'alfa sfumato del ritaglio automatico e veniva "svuotata"; il
+    # proprietario ha chiesto il suo ritaglio "vettorizzato". Quindi: sagoma piatta a due
+    # toni dal ritaglio del proprietario, piena dove il disegno e' chiaro (luminanza > 120),
+    # vuota nelle linee scure che separano fiocco, freezer e anello; poi sfocatura e nuova
+    # soglia, che arrotondano i bordi come un tracciato vettoriale, e via i frammenti sotto
+    # i 400 px che a 48 dp sarebbero rumore.
+    rgba = np.array(disegno).astype(np.float32)
+    lum = 0.299 * rgba[..., 0] + 0.587 * rgba[..., 1] + 0.114 * rgba[..., 2]
+    pieno = (lum > 120) & (rgba[..., 3] > 127)
+    morbido = ndimage.gaussian_filter(pieno.astype(np.float32), 3.0) > 0.5
+    etichette, quante = ndimage.label(morbido)
+    grandezze = ndimage.sum(morbido, etichette, range(1, quante + 1))
+    morbido = np.isin(etichette, 1 + np.nonzero(grandezze >= 400)[0])
+    alfa_mono = np.clip(ndimage.gaussian_filter(morbido.astype(np.float32), 1.0), 0, 1)
+    sagoma = np.dstack([np.full_like(alfa_mono, 255)] * 3 + [alfa_mono * 255]).astype(np.uint8)
+    sagoma = Image.fromarray(sagoma, 'RGBA')
+    # Il disegno e' quasi un cerchio: il lato lungo sta nel diametro della zona sicura.
+    lato_mono = round(2 * RAGGIO_SICURO * MARGINE)
+    k = lato_mono / max(sagoma.size)
+    sagoma = sagoma.resize((round(sagoma.width * k), round(sagoma.height * k)), Image.LANCZOS)
+    mono = Image.new('RGBA', (TELA, TELA), (0, 0, 0, 0))
+    mono.paste(sagoma, ((TELA - sagoma.width) // 2, (TELA - sagoma.height) // 2), sagoma)
+    mono.save(ICONE / 'adaptive_monochrome.png')
     # Android 12+: tela 1152, sopravvive il cerchio dei 768 px centrali. Il disegno e' quasi
     # un cerchio (l'anello), quindi il lato lungo puo' stare a filo del 94% del diametro.
     centrato(1152, round(768 * MARGINE)).save(ICONE / 'splash_android12.png')
