@@ -1,0 +1,9 @@
+{
+  "@@locale": "en",
+  "appTitle": "Full Freezer",
+  "home_emptyTitle": "Your freezer is empty",
+  "@home_emptyTitle": {
+    "description": "Home, empty state title: nothing has been added yet."
+  },
+  "home_emptyBody": "Add what you put in the freezer: the oldest will always be at the top."
+}

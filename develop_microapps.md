@@ -331,7 +331,7 @@ pagine.
 | App | Seed color | Brightness di default | Font | Motivo |
 |---|---|---|---|---|
 | TrashCan | `#2E7D5B` | light | Outfit | Verde raccolta, leggibile a colpo d'occhio la sera |
-| Full Freezer | `#3A7CA5` | light | Plus Jakarta Sans | Blu ghiaccio, freddo e pulito |
+| Full Freezer | `#0461E5` | light | Plus Jakarta Sans | Il blu dell'icona del proprietario (era `#3A7CA5`, cambiato il 2026-10-06) |
 | Scorte Calore | `#C4622D` | light | Sora | Ambra/fiamma, richiama il calore |
 | Film Tracker | `#E0A458` | **dark** | Fraunces (titoli) + Inter (corpo) | La camera oscura è scura; le foto risaltano su fondo scuro |
 
@@ -3740,7 +3740,7 @@ correzioni, tutte già pagate con TrashCan:
 ### F4.1 — Bootstrap
 
 Applicare **§8.T**. `appId: 'full_freezer'`, `proSku: 'fullfreezer_pro_lifetime'`,
-`seedColor: Color(0xFF3A7CA5)`, `fontFamily: 'PlusJakartaSans'`, brightness light.
+`seedColor: Color(0xFF0461E5)` (il blu dell'icona, proprietario 2026-10-06: sostituisce `#3A7CA5`), `fontFamily: 'PlusJakartaSans'`, brightness light.
 Dipendenze aggiuntive: `speech_to_text` (F4.12), `home_widget` (F4.11), `image_picker`,
 `fl_chart` (statistiche Pro).
 

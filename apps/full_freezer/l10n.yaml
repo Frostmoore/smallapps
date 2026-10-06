@@ -1,0 +1,13 @@
+# Configurazione di gen_l10n. Vedi develop_microapps.md ADR-011.
+#
+# Il template e' l'INGLESE, non l'italiano: gen_l10n garantisce la completezza del
+# solo template e ripiega su di esso per le chiavi mancanti altrove. Poiche' l'inglese
+# e' la lingua di ripiego per tutti i dispositivi non italiani, una chiave dimenticata
+# deve produrre una parola inglese in un'app italiana, non il contrario.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: L
+untranslated-messages-file: lib/l10n/untranslated.json
+nullable-getter: false
+output-dir: lib/l10n/generated
