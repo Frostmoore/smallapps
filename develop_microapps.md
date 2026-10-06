@@ -3899,19 +3899,30 @@ class CapacityEstimator {
 }
 ```
 
-**Modelli** (litri nominali netti, valori tipici di mercato, non di un produttore):
+**Modelli** (litri **netti** del solo vano congelatore; valore tipico e intervallo trovato
+nelle schede tecniche di mercato il 2026-10-06, vedi le fonti sotto):
 
-| `key` | Nome (it) | Litri |
-|---|---|---|
-| `ice_box` | Celletta del frigorifero | 15 |
-| `fridge_top` | Freezer sopra il frigo (doppia porta) | 50 |
-| `combi_drawers` | Cassetti del frigo combinato | 90 |
-| `undercounter` | Congelatore sottopiano | 85 |
-| `chest_small` | Congelatore a pozzo piccolo | 100 |
-| `side_by_side` | Frigo americano (lato freezer) | 180 |
-| `upright_tall` | Congelatore verticale alto | 250 |
-| `chest_large` | Congelatore a pozzo grande | 300 |
-| `custom` | Altro: scrivo io i litri | — |
+| `key` | Nome (it) | Litri | Intervallo nelle schede |
+|---|---|---|---|
+| `ice_box` | Celletta del frigo monoporta | 15 | 4–17 |
+| `fridge_top` | Freezer sopra il frigo (doppia porta) | 50 | 37–100, quasi tutti 44–52 |
+| `combi_compact` | Frigo combinato da 180 cm (cassetti in basso) | 70 | 67–76 |
+| `undercounter` | Congelatore sottopiano a cassetti (85 cm) | 85 | 70–100 |
+| `combi_large` | Frigo combinato da 200 cm | 100 | 87–119 |
+| `chest_small` | Congelatore a pozzetto piccolo | 100 | 60–150 |
+| `side_by_side` | Frigo americano o multiporta (lato freezer) | 200 | ~200 |
+| `chest_medium` | Congelatore a pozzetto medio | 200 | 150–250 |
+| `upright_tall` | Congelatore verticale alto (185 cm) | 270 | 242–324 |
+| `chest_large` | Congelatore a pozzetto grande | 350 | 250–400 e oltre |
+| `custom` | Altro: scrivo io i litri | — | — |
+
+Fonti: schede Bosch KIV86VS30 / KIN86VF30 e Neff KI7862S30S, KG7393B40 (combinati); schede
+Mediaworld e Yeppon di doppia porta (Domo, Severin, Indesit, Candy, San Giorgio, Sharp) e
+monoporta (Electrolux, Candy, Bosch KIL42NSE0); guide all'acquisto di Mediaworld, Yeppon e
+Qualescegliere per pozzetti e sottopiano; Samsung RF56N9740SR (side by side, freezer 199 L);
+verticali No Frost da 185 cm (Liebherr SGNEF3036 253 L, Bosch 3GFF563WE 242 L, LG GFT41PZGSZ
+324 L). ⚑ Il valore tipico serve solo come punto di partenza: chi conosce i litri del proprio
+apparecchio (sono sull'etichetta energetica, alla voce del vano congelatore) sceglie `custom`.
 
 L'elenco si mostra **ordinato per litri**, con un disegno stilizzato per ciascuno, e i litri
 scritti sotto: chi conosce i litri del proprio congelatore (sono sull'etichetta) sceglie
