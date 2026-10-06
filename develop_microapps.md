@@ -992,7 +992,7 @@ tutte fatte e provate sull'emulatore:
 
 - [x] **F4.0** Decisioni di partenza (vedi §8 F4.0): due piattaforme, solo iPhone, prezzo 3,99 €, foto gratis e notifiche Pro, capienza (2026-10-06)
 - [x] **F4.1** Bootstrap progetto, tema, l10n, router — **`android/` e `ios/` insieme** (2026-10-06: `com.smp.fullfreezer`, seme `#0461E5`, Plus Jakarta Sans, icone da `tool/genera_icone.py`; 4 test; provata su emulatore Android 15 e simulatore iPhone 18 Pro)
-- [ ] **F4.2** Data layer Drift: freezer, scomparti, alimenti, movimenti
+- [x] **F4.2** Data layer Drift: freezer, scomparti, alimenti, movimenti (2026-10-06: `lib/data/{tables,database,freezer_repository}.dart`, `lib/domain/{categories,units,text_norm}.dart`; 19 test del repository + 6 di dominio)
 - [ ] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test
 - [ ] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test
 - [ ] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima"
@@ -3778,7 +3778,7 @@ Dipendenze aggiuntive: `speech_to_text` (F4.12), `home_widget` (F4.11), `image_p
 | `name` | text | 1–60 | |
 | `category` | text nullable | chiave in `ItemCategories` | |
 | `quantity` | real | > 0 | |
-| `unit` | text | chiave in `Units` (`porzioni`, `pezzi`, `g`, `kg`, `confezioni`, `L`) | |
+| `unit` | text | chiave in `Units`: `portions`, `pieces`, `packs`, `g`, `kg`, `l` (chiavi inglesi stabili; i nomi visibili stanno negli ARB) | |
 | `frozenAt` | text | `YYYY-MM-DD` | ADR-008 |
 | `reminderAfterDays` | int nullable | | override del preset di categoria |
 | `volumeLiters` | real | > 0 | ingombro **dell'intera riga** (quantità compresa), in litri |
@@ -3928,8 +3928,8 @@ L'elenco si mostra **ordinato per litri**, con un disegno stilizzato per ciascun
 scritti sotto: chi conosce i litri del proprio congelatore (sono sull'etichetta) sceglie
 `custom` e li scrive.
 
-**Litri per unità** (`estimateLiters`): `porzioni` 0,4 · `confezioni` 0,8 · `L` 1,1 ·
-`kg` 1,3 · `g` 0,0013 · `pezzi` per categoria: carne 0,5, pesce 0,4, verdura 0,3, frutta 0,2,
+**Litri per unità** (`estimateLiters`; chiavi di `Units` in `lib/domain/units.dart`):
+`portions` 0,4 · `packs` 0,8 · `l` 1,1 · `kg` 1,3 · `g` 0,0013 · `pieces` per categoria: carne 0,5, pesce 0,4, verdura 0,3, frutta 0,2,
 pane 0,5, gelati 1,0, preparati 0,4, altro 0,4.
 
 ⚑ **Perché `kg` vale 1,3 litri e non 1**: il cibo congelato pesa poco meno dell'acqua, ma

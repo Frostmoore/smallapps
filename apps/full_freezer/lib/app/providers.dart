@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../data/database.dart';
+import '../data/freezer_repository.dart';
+
 /// I provider radice dell'app.
 ///
 /// ⚑ Perche' tutto passa da qui e niente e' globale: un singleton in una variabile di
@@ -20,6 +23,17 @@ final appPathsProvider = Provider<AppPaths>(
 
 final settingsProvider = Provider<SettingsStore>(
   (ref) => throw UnimplementedError('settingsProvider va sovrascritto in main()'),
+);
+
+/// Il database, aperto alla prima lettura e chiuso con il `ProviderScope`.
+final databaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase.open();
+  ref.onDispose(db.close);
+  return db;
+});
+
+final repositoryProvider = Provider<FreezerRepository>(
+  (ref) => FreezerRepository(ref.watch(databaseProvider)),
 );
 
 /// Il tema scelto dall'utente, persistito.

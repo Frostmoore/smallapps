@@ -22,6 +22,7 @@ dependencies:
   # Senza, qualche widget di Material mostra quadrati vuoti nei menu di selezione del
   # testo. Vedi apps/trashcan/pubspec.yaml.
   cupertino_icons: ^1.0.8
+  drift: ^2.35.0
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -32,6 +33,10 @@ dependencies:
   meta: ^1.19.0
   micro_core:
     path: ../../packages/micro_core
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  sqlite3: ^3.5.2
+  sqlite3_flutter_libs: ^0.6.0+eol
 
 dev_dependencies:
   flutter_test:
@@ -42,6 +47,13 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.8
   shared_preferences: ^2.5.6
+  drift_dev: ^2.35.0
+  build_runner: ^2.16.1
+  # ☠ Tetto all'analyzer usato da build_runner. Con analyzer 14.5.0 la generazione di Drift
+  # muore con "The setter 'contextFeatures' isn't defined for AnalysisOptionsImpl": la 14.5
+  # ha cambiato un'API interna che la catena di generazione usa ancora. TrashCan gira con la
+  # 14.3.0. Si toglie quando la catena supporta la 14.5 (scoperto il 2026-10-06).
+  analyzer: ">=14.0.0 <14.4.0"
 
 flutter:
   uses-material-design: true
