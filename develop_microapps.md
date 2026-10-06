@@ -990,7 +990,8 @@ tutte fatte e provate sull'emulatore:
 
 ### F4 — Full Freezer → `v5.0.0`
 
-- [ ] **F4.1** Bootstrap progetto, tema, l10n, router
+- [ ] **F4.0** Decisioni di partenza (vedi §8 F4.0): due piattaforme, solo iPhone, prezzo 3,99 €
+- [ ] **F4.1** Bootstrap progetto, tema, l10n, router — **`android/` e `ios/` insieme**
 - [ ] **F4.2** Data layer Drift: freezer, scomparti, alimenti, movimenti
 - [ ] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test
 - [ ] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima"
@@ -1000,12 +1001,13 @@ tutte fatte e provate sull'emulatore:
 - [ ] **F4.8** Ricerca istantanea
 - [ ] **F4.9** Notifiche: digest aggregato settimanale/quindicinale/mensile
 - [ ] **F4.10** Feature Pro: freezer multipli, foto, storico, statistiche, CSV, categorie personalizzate
-- [ ] **F4.11** Widget Android "da consumare presto"
-- [ ] **F4.12** Voice input Android per l'inserimento rapido
+- [ ] **F4.11** Widget "da consumare presto": Android (Kotlin) **e** iOS (WidgetKit), stesso payload
+- [ ] **F4.12** Voice input per l'inserimento rapido, Android e iOS (permessi microfono e riconoscimento vocale)
 - [ ] **F4.13** Test (unit, DB, widget, golden, integrazione)
 - [ ] **F4.14** Rifinitura visiva, onboarding, empty state, accessibilità
 - [ ] **F4.15** `apps/full_freezer/codebase_reference.md`
 - [ ] **F4.16** Rituale di fine fase F4
+- [ ] **F4.17** Store: prodotto Pro su Play Console e App Store Connect, schede, screenshot da test, TestFlight, invii (aggiornare `StatusMicroApps.md`)
 
 ### F5 — Scorte Calore → `v6.0.0`
 
@@ -1076,16 +1078,16 @@ Nata il 2026-10-04 dalla decisione in `memory/decisioni.md` e da ADR-021. Non è
 - [x] **F9.2.4** Il percorso del widget si spegne fuori da Android (`TrashcanWidget.disponibile`)
 - [x] **F9.2.5** Compila e parte sul simulatore; `first_run_test.dart` passa su iOS
 - [ ] **F9.2.6** Prova su un iPhone vero: notifiche consegnate, permesso chiesto una volta sola
-- [ ] **F9.2.7** Estensione **WidgetKit** in Swift, con le stesse righe che Dart già calcola
-- [ ] **F9.2.8** Prodotto `trashcan_pro_lifetime` in App Store Connect e acquisto verificato
+- [x] **F9.2.7** Estensione **WidgetKit** in Swift, con le stesse righe che Dart già calcola (`ios/TrashcanWidget/`, approvata dal proprietario sull'iPad)
+- [x] **F9.2.8** Prodotto `trashcan_pro_lifetime` in App Store Connect e acquisto verificato (prezzo in sandbox dal 2026-10-06 12:13, approvato insieme alla 1.0.0)
 - [x] **F9.2.9** Scheda App Store: testi, schermate, informativa privacy, nutrition label (`store/scheda-app-store.md`, 2026-10-05)
 - [x] **F9.2.10** TestFlight interno: build fino alla `1.0.0 (10)`, widget verificato sull'iPad del proprietario
 - [x] **F9.2.11** Screenshot generati da un test (`integration_test/screenshots_test.dart`), per i due store e le due lingue
-- [ ] **F9.2.12** Invio in revisione su App Store e pubblicazione su Play
+- [ ] **F9.2.12** Invio in revisione su App Store e pubblicazione su Play — App Store **approvata e in vendita** il 2026-10-06 in 148 paesi, **UE bloccata** dalla verifica DSA; Play in revisione. Stato vivo in `StatusMicroApps.md`
 
 **F9.3 — Le altre tre app**
 
-- [ ] **F9.3.1** Full Freezer su iOS, widget WidgetKit compreso (F5.10)
+- [ ] **F9.3.1** Full Freezer su iOS, widget WidgetKit compreso — **assorbita da F4** (F4.0, F4.11, F4.17): Full Freezer nasce su due piattaforme
 - [ ] **F9.3.2** Scorte Calore su iOS
 - [ ] **F9.3.3** Film Tracker su iOS
 - [ ] **F9.3.4** Rituale di fine fase F9
@@ -3695,6 +3697,36 @@ dentro da troppo tempo?") e a un gesto ("metti nel freezer" in meno di cinque se
 quantità devono passare **meno di 5 secondi** e **meno di 4 tocchi**. Questo numero è un
 criterio di accettazione, non un auspicio: si misura con il test di integrazione F4.13.
 
+### F4.0 — Decisioni di partenza (2026-10-06)
+
+Questa fase è stata scritta quando le app erano solo Android. Prima di F4.1 valgono queste
+correzioni, tutte già pagate con TrashCan:
+
+1. **Due piattaforme dal primo commit** (ADR-021). `flutter create --platforms=android,ios`.
+   Ogni giuntura col sistema (widget, notifiche, acquisti, microfono) si chiude su entrambe
+   prima di spuntare la sottofase. Mai `Platform.isX`: `defaultTargetPlatform`.
+2. **iOS solo iPhone** (`memory/decisioni.md`, 2026-10-04): `TARGETED_DEVICE_FAMILY = 1`;
+   sull'iPad gira in modalità iPhone. `DEVELOPMENT_TEAM = A29HGT2MQ4`, nessun
+   `CODE_SIGN_IDENTITY` fissato; bundle `com.smp.fullfreezer`, widget
+   `com.smp.fullfreezer.FullFreezerWidget`, App Group `group.com.smp.fullfreezer`.
+   ☠ App ID, App Group ed estensione vanno **registrati a mano** nel portale Apple prima della
+   prima build firmata: con TrashCan è costato un giro di build.
+3. **Build iOS**: `tool/build_ios.sh full_freezer` (lo script prende l'app come argomento; va solo verificato che nomi del widget e del gruppo non siano cablati su TrashCan. Archivio senza firma,
+   entitlement timbrati, verifica del gruppo, export con `-allowProvisioningUpdates`).
+   ☠ Script `.sh` con fini riga LF (`.gitattributes`).
+4. **Prezzo Pro 3,99 €** (§1.3). È un gradino che esiste sia su Play sia su App Store: niente
+   doppio prezzo come TrashCan (2,39 / 2,99). Se Play lo trasforma, vale ADR-020 e il sito
+   mostra il più alto.
+5. **Paywall**: `PaywallConfig` richiede `productUnavailableLabel` e `retryLabel` (mai la
+   rotellina eterna). Pulsante Pro delle impostazioni con `onTap` vero.
+6. **Notifiche iOS**: permesso chiesto quando serve, non all'avvio (`NotificationService`).
+7. **Ripristino su iOS**: testi «ID Apple», niente codice di trasferimento (il server licenze non
+   è contattato dalla build iOS, e l'informativa del sito lo dice).
+8. **ADR-019 vale anche qui**: il widget non è una leva del Pro. `FeatureKey.advancedWidget`
+   resta `open()`, a correzione della mappa in F4.10.
+9. **Test d'integrazione** con `lookupL` e `localesTestValue`, mai testi letterali in una
+   lingua: un test che cerca l'inglese su un dispositivo italiano si pianta invece di fallire.
+
 ### F4.1 — Bootstrap
 
 Applicare **§8.T**. `appId: 'full_freezer'`, `proSku: 'fullfreezer_pro_lifetime'`,
@@ -3893,7 +3925,7 @@ const FeatureLimits freezerLimits = {
   FeatureKey.statistics:         FeatureLimit.locked(),
   FeatureKey.csvExport:          FeatureLimit.locked(),
   FeatureKey.backupRestore:      FeatureLimit.locked(),
-  FeatureKey.advancedWidget:     FeatureLimit.locked(),
+  FeatureKey.advancedWidget:     FeatureLimit.open(),     // ADR-019, vedi F4.0 punto 8
   FeatureKey.customCategories:   FeatureLimit.locked(),
 };
 ```
@@ -3902,14 +3934,27 @@ const FeatureLimits freezerLimits = {
 categoria più sprecata, andamento mensile con `fl_chart`, valore indicativo dello spreco se
 l'utente ha inserito i costi (opzionale).
 
-### F4.11 — Widget Android
+### F4.11 — Widget (Android e iOS)
 
 4×2: titolo "Da usare presto", fino a tre righe "nome — N giorni", e il conteggio totale.
 Tocco: apre l'app sulla sezione. Aggiornamento a ogni modifica e una volta al giorno.
 
+⚑ **ADR-018 applicato all'anzianità**: i giorni cambiano a mezzanotte anche se nessuno apre
+l'app. Il payload non contiene "N giorni" ma `frozenAt` di ogni riga; il widget calcola i
+giorni da sé, su Android nel provider e su iOS nella `TimelineProvider` (una voce per i
+prossimi giorni). Così il numero non invecchia.
+
+**iOS**: estensione WidgetKit `ios/FullFreezerWidget/`, creata con lo script Ruby di TrashCan
+(`tool/aggiungi_widget_ios.rb`, adattato) e anteprima con `tool/anteprima_widget_ios.swift`. Trappole già
+pagate: la fase *Embed App Extensions* va **prima** di *Thin Binary* (ciclo di build);
+l'estensione eredita l'xcconfig di Flutter; testi di riserva nell'estensione, mai widget vuoto;
+`contentMarginsDisabled`.
+
 ### F4.12 — Voice input
 
-`speech_to_text` sul campo nome del `QuickAddSheet`, con parsing locale della frase:
+`speech_to_text` sul campo nome del `QuickAddSheet`, con parsing locale della frase.
+Su iOS servono `NSMicrophoneUsageDescription` e `NSSpeechRecognitionUsageDescription` in
+`Info.plist` (it/en), altrimenti l'app viene chiusa dal sistema al primo tocco sul microfono:
 
 ```dart
 class VoiceItemParser {
