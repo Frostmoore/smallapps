@@ -995,9 +995,9 @@ tutte fatte e provate sull'emulatore:
 - [x] **F4.2** Data layer Drift: freezer, scomparti, alimenti, movimenti (2026-10-06: `lib/data/{tables,database,freezer_repository}.dart`, `lib/domain/{categories,units,text_norm}.dart`; 19 test del repository + 6 di dominio)
 - [x] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test (2026-10-06: `lib/domain/aging.dart`, `compareOldestFirst`; 9 test)
 - [x] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test (2026-10-06: `lib/domain/capacity.dart`, con anche `CapacityAlertPolicy` dell'isteresi di F4.9, che e' logica pura; 18 test)
-- [ ] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima"
-- [ ] **F4.5** Inserimento rapido (obiettivo: sotto i 5 secondi) e inserimento completo
-- [ ] **F4.6** Posizioni: freezer (scelto da una serie di modelli, dal più piccolo al più grande) e scomparti, con conteggi e barra di riempimento
+- [x] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima" (2026-10-07: interfaccia "A · Ghiaccio" scelta dal proprietario, vedi `memory/decisioni.md`; `lib/features/home/`, `lib/app/freezer_palette.dart`, icone disegnate in `lib/app/category_glyphs.dart`)
+- [ ] **F4.5** Inserimento rapido (obiettivo: sotto i 5 secondi) e inserimento completo — FATTO: foglio rapido (2 tocchi), pagina completa, ingombro. MANCA: la foto (F4.5b, `image_picker` + permessi iOS)
+- [x] **F4.6** Posizioni: freezer (scelto da una serie di modelli, dal più piccolo al più grande) e scomparti, con conteggi e barra di riempimento (2026-10-06; manca solo il limite di un freezer nel piano gratuito, che arriva con il Pro in F4.10)
 - [ ] **F4.7** Uscita alimento: consumato / buttato, con storico
 - [ ] **F4.8** Ricerca istantanea
 - [ ] **F4.9** Notifiche (**Pro**): digest aggregato settimanale/quindicinale/mensile + avvisi «quasi pieno» / «quasi vuoto»
@@ -1008,6 +1008,16 @@ tutte fatte e provate sull'emulatore:
 - [ ] **F4.14** Rifinitura visiva, onboarding, empty state, accessibilità
 - [ ] **F4.15** `apps/full_freezer/codebase_reference.md`
 - [ ] **F4.16** Rituale di fine fase F4
+
+**Ripresa (stato al 2026-10-07, 2:00).** Da fare, in quest'ordine: allineare allo stile
+"Ghiaccio" la pagina del freezer sotto il pannello e la scelta del modello; F4.5b foto;
+F4.7 storico usciti (Pro); F4.8 ricerca; F4.9 notifiche Pro e avvisi di capienza
+(`CapacityAlertPolicy` e' gia' scritta e provata); F4.10 Pro e paywall; F4.11 widget
+Android e iOS; F4.12 voce. Aperti: il test d'integrazione `integration_test/flusso_test.dart`
+non si collega all'app sull'emulatore (resta sulla splash: problema del collegamento
+PC-emulatore, non dell'app; il giro manuale via adb funziona); un test di
+`micro_core/test/entitlement` fallisce ogni tanto e al giro dopo passa. Per provare l'app
+piena: `flutter run --dart-define=FF_DEMO=true` (dati di esempio, mai in release).
 - [ ] **F4.17** Store: prodotto Pro su Play Console e App Store Connect, schede, screenshot da test, TestFlight, invii (aggiornare `StatusMicroApps.md`)
 
 ### F5 — Scorte Calore → `v6.0.0`
