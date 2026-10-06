@@ -990,8 +990,8 @@ tutte fatte e provate sull'emulatore:
 
 ### F4 — Full Freezer → `v5.0.0`
 
-- [ ] **F4.0** Decisioni di partenza (vedi §8 F4.0): due piattaforme, solo iPhone, prezzo 3,99 €
-- [ ] **F4.1** Bootstrap progetto, tema, l10n, router — **`android/` e `ios/` insieme**
+- [x] **F4.0** Decisioni di partenza (vedi §8 F4.0): due piattaforme, solo iPhone, prezzo 3,99 €, foto gratis e notifiche Pro, capienza (2026-10-06)
+- [x] **F4.1** Bootstrap progetto, tema, l10n, router — **`android/` e `ios/` insieme** (2026-10-06: `com.smp.fullfreezer`, seme `#0461E5`, Plus Jakarta Sans, icone da `tool/genera_icone.py`; 4 test; provata su emulatore Android 15 e simulatore iPhone 18 Pro)
 - [ ] **F4.2** Data layer Drift: freezer, scomparti, alimenti, movimenti
 - [ ] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test
 - [ ] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test
