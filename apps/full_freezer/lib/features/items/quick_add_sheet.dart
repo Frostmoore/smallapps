@@ -168,7 +168,10 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                   labelText: l.quickAdd_nameLabel,
                   hintText: l.quickAdd_nameHint,
                   counterText: '',
-                  prefixIcon: Icon(categoryIcon(d.category)),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: categoryGlyph(d.category),
+                  ),
                 ),
                 onChanged: (v) => unawaited(_onName(v)),
                 onSubmitted: (_) => unawaited(_save()),
@@ -280,18 +283,15 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                 },
               ),
               MicroSpacing.gapL,
-              Row(
-                children: [
-                  TextButton(onPressed: _moreDetails, child: Text(l.quickAdd_moreDetails)),
-                  const Spacer(),
-                  MicroPrimaryButton(
-                    label: l.common_save,
-                    icon: Icons.ac_unit,
-                    expanded: false,
-                    loading: _saving,
-                    onPressed: d.isValid ? () => unawaited(_save()) : null,
-                  ),
-                ],
+              // Interfaccia "Ghiaccio": il salvataggio e' il pulsante largo, come "Metti nel
+              // freezer" in home; "Altri dettagli" e' la via secondaria, sopra, in piccolo.
+              Center(child: TextButton(onPressed: _moreDetails, child: Text(l.quickAdd_moreDetails))),
+              MicroSpacing.gapS,
+              MicroPrimaryButton(
+                label: l.common_save,
+                icon: Icons.ac_unit,
+                loading: _saving,
+                onPressed: d.isValid ? () => unawaited(_save()) : null,
               ),
             ],
           ),

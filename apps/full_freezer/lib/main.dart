@@ -5,6 +5,9 @@ import 'package:micro_core/micro_core.dart';
 import 'app/app.dart';
 import 'app/app_config.dart';
 import 'app/providers.dart';
+import 'data/database.dart';
+import 'data/freezer_repository.dart';
+import 'dev/demo_data.dart';
 
 /// L'avvio di Full Freezer.
 ///
@@ -35,6 +38,15 @@ Future<void> main() async {
 
   final settings = await SettingsStore.create(namespace: config.appId);
   await _recordLaunch(settings);
+
+  // Solo in sviluppo, con --dart-define=FF_DEMO=true: riempie un database vuoto con dati di
+  // esempio. Va fatto PRIMA di runApp, perche' il router decide subito se mostrare il primo
+  // avvio; usa una connessione sua, chiusa prima che l'app apra la propria.
+  if (demoEnabled) {
+    final db = AppDatabase.open();
+    await seedDemoData(FreezerRepository(db), settings, freezerName: 'Freezer cucina');
+    await db.close();
+  }
 
   runApp(
     ProviderScope(

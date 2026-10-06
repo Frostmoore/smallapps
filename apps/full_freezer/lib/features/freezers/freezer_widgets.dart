@@ -184,6 +184,49 @@ class FillBar extends StatelessWidget {
   }
 }
 
+/// L'asticella verticale della testata (interfaccia "Ghiaccio"): si riempie dal basso.
+class FillGauge extends StatelessWidget {
+  const FillGauge({
+    required this.fill,
+    required this.track,
+    required this.color,
+    this.height = 92,
+    this.width = 14,
+    super.key,
+  });
+
+  final FillInfo fill;
+  final Color track;
+  final Color color;
+  final double height;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final value = fill.fraction.clamp(0.0, 1.0);
+    // Oltre l'85% l'asticella diventa del colore d'allarme: e' lo stesso confine degli
+    // avvisi "quasi pieno" (F4.9).
+    final scheme = Theme.of(context).colorScheme;
+    final c = fill.fraction >= 0.85 ? scheme.danger : color;
+    return Semantics(
+      label: l.fill_semantics(fill.percent),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(color: track, borderRadius: BorderRadius.circular(width / 2)),
+        alignment: Alignment.bottomCenter,
+        child: FractionallySizedBox(
+          heightFactor: value == 0 ? 0 : value.clamp(width / height, 1.0),
+          child: Container(
+            decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(width / 2)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Il nome visibile di un modello di freezer.
 String freezerModelName(L l, String key) => switch (key) {
   'ice_box' => l.freezerModel_ice_box,

@@ -178,7 +178,7 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(categoryIcon(d.category)),
+            leading: categoryGlyph(d.category),
             title: Text(l.item_category),
             subtitle: Text(categoryName(l, d.category)),
             trailing: const Icon(Icons.chevron_right),

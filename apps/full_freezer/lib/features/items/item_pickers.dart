@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../../app/category_glyphs.dart';
 import '../../app/formats.dart';
-import '../../app/freezer_icons.dart';
 import '../../data/database.dart';
 import '../../domain/capacity.dart';
 import '../../domain/categories.dart';
@@ -37,7 +37,9 @@ String categoryName(L l, String? key) => switch (key) {
   _ => l.category_none,
 };
 
-IconData categoryIcon(String? key) => CategoryIcons.resolve(ItemCategories.byKey(key)?.iconKey);
+/// L'icona disegnata della categoria di un alimento (`category_glyphs.dart`).
+Widget categoryGlyph(String? key, {double size = 22, Color? color}) =>
+    CategoryGlyph(iconKey: ItemCategories.byKey(key)?.iconKey, size: size, color: color);
 
 /// Sceglie la categoria. Restituisce la chiave, `''` per "nessuna", null se chiuso.
 Future<String?> pickCategory(BuildContext context, String? current) {
@@ -52,7 +54,7 @@ Future<String?> pickCategory(BuildContext context, String? current) {
         children: [
           for (final c in ItemCategories.all)
             ListTile(
-              leading: Icon(CategoryIcons.resolve(c.iconKey)),
+              leading: CategoryGlyph(iconKey: c.iconKey),
               title: Text(categoryName(l, c.key)),
               subtitle: Text(l.category_reminderDays(c.defaultReminderDays)),
               trailing: current == c.key ? const Icon(Icons.check) : null,

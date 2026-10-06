@@ -96,14 +96,15 @@ void main() {
         item(2, 'Piselli', '2026-09-30', category: 'vegetables'),
       ],
     );
-    // MicroSectionHeader scrive i titoli in maiuscolo.
+    // Le etichette di sezione sono in maiuscolo (interfaccia "Ghiaccio").
     expect(find.text('DA USARE PRIMA'), findsOneWidget);
     expect(find.text('Merluzzo'), findsOneWidget);
-    expect(find.text('TUTTO IL RESTO'), findsOneWidget);
+    expect(find.text('TUTTO IL RESTO · 1'), findsOneWidget);
     expect(find.text('Piselli'), findsOneWidget);
-    expect(find.text('1 da usare presto'), findsOneWidget);
-    // 1,6 litri su 56 utili (70 x 80%) -> 3%.
-    expect(find.text('Pieno al 3%'), findsWidgets);
+    // Il bollino in testata.
+    expect(find.text('da usare'), findsOneWidget);
+    // 1,6 litri su 56 utili (70 x 80%) -> 3%: in testata il numero grande e la riga dei litri.
+    expect(find.textContaining('pieno · 1,6 L su 56 L utili'), findsOneWidget);
     // L'ordine: Merluzzo sopra Piselli.
     expect(
       tester.getTopLeft(find.text('Merluzzo')).dy,

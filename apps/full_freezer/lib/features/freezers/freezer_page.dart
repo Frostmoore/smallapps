@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../../app/formats.dart';
+import '../../app/freezer_palette.dart';
 import '../../app/providers.dart';
 import '../../app/routes.dart';
 import '../../data/database.dart';
@@ -42,6 +43,7 @@ class FreezerPage extends ConsumerWidget {
     final summary = view.freezers.single;
     final locale = Localizations.localeOf(context).toLanguageTag();
     final text = Theme.of(context).textTheme;
+    final p = FreezerPalette.of(context);
     final compartments = ref.watch(compartmentsProvider(freezer.id)).value ?? const <Compartment>[];
 
     return Scaffold(
@@ -64,33 +66,53 @@ class FreezerPage extends ConsumerWidget {
       body: ListView(
         padding: MicroSpacing.page,
         children: [
-          MicroCard(
+          // Il pannello blu notte dell'interfaccia "Ghiaccio", come la testata della home.
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(color: p.night, borderRadius: BorderRadius.circular(24)),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                FreezerSilhouette(iconKey: silhouetteKeyFor(freezer.modelKey), size: 72),
-                MicroSpacing.hGapL,
+                FillGauge(fill: summary.fill, height: 110, track: p.nightRaised, color: p.gaugeFill),
+                const SizedBox(width: 18),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l.fill_percentBig(summary.fill.percent), style: text.headlineMedium),
-                      MicroSpacing.gapXS,
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: '${summary.fill.percent}'),
+                            TextSpan(text: '%', style: TextStyle(fontSize: 28, color: p.ice)),
+                          ],
+                        ),
+                        style: TextStyle(
+                          color: p.onNight,
+                          fontSize: 56,
+                          fontWeight: FontWeight.w800,
+                          height: 1,
+                          letterSpacing: -1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       Text(
-                        l.fill_liters(
+                        l.fill_headerLine(
                           formatLiters(summary.fill.usedLiters, locale),
                           formatLiters(summary.fill.usableLiters, locale),
                         ),
-                        style: text.bodyMedium,
+                        style: TextStyle(color: p.onNightMuted, fontSize: 14),
                       ),
-                      Text(l.home_itemCount(summary.count), style: text.bodySmall),
+                      Text(
+                        l.home_itemCount(summary.count),
+                        style: TextStyle(color: p.onNightMuted, fontSize: 14),
+                      ),
                     ],
                   ),
                 ),
+                FreezerSilhouette(iconKey: silhouetteKeyFor(freezer.modelKey), size: 64),
               ],
             ),
           ),
-          MicroSpacing.gapM,
-          FillBar(fill: summary.fill, height: 14, showLabel: false),
           MicroSpacing.gapM,
           Text(
             '${freezerModelName(l, freezer.modelKey)} · ${formatLiters(freezer.capacityLiters, locale)}',

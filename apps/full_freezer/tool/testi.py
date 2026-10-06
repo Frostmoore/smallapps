@@ -47,12 +47,16 @@ TESTI = {
     'home_seeAll': ('See all', 'Vedi tutti'),
     'home_rest': ('Everything else', 'Tutto il resto'),
     'home_where': ('Where they are', 'Dove sono'),
+    'home_badgeLabel': ('to use', 'da usare'),
+    'home_allFreezersHint': ('Pick a freezer to see how full it is.', 'Scegli un freezer per vedere quanto è pieno.'),
+    'home_daysUnit': ('{days, plural, =1{day} other{days}}', '{days, plural, =1{giorno} other{gg}}'),
 
     # ── Riempimento ──
     'fill_label': ('{percent}% full', 'Pieno al {percent}%'),
     'fill_semantics': ('Freezer {percent}% full', 'Freezer pieno al {percent}%'),
     'fill_percentBig': ('{percent}%', '{percent}%'),
     'fill_liters': ('{used} of {usable} usable', '{used} su {usable} utili'),
+    'fill_headerLine': ('full · {used} of {usable} usable', 'pieno · {used} su {usable} utili'),
 
     # ── Freezer ──
     'freezer_defaultName': ('Kitchen freezer', 'Freezer cucina'),

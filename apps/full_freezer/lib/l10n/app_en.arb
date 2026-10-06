@@ -35,6 +35,16 @@
   "home_seeAll": "See all",
   "home_rest": "Everything else",
   "home_where": "Where they are",
+  "home_badgeLabel": "to use",
+  "home_allFreezersHint": "Pick a freezer to see how full it is.",
+  "home_daysUnit": "{days, plural, =1{day} other{days}}",
+  "@home_daysUnit": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "fill_label": "{percent}% full",
   "@fill_label": {
     "placeholders": {
@@ -61,6 +71,17 @@
   },
   "fill_liters": "{used} of {usable} usable",
   "@fill_liters": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "usable": {
+        "type": "String"
+      }
+    }
+  },
+  "fill_headerLine": "full · {used} of {usable} usable",
+  "@fill_headerLine": {
     "placeholders": {
       "used": {
         "type": "String"

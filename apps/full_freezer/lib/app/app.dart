@@ -10,6 +10,7 @@ import '../features/home/home_page.dart';
 import '../features/items/item_draft.dart';
 import '../features/items/item_edit_page.dart';
 import '../l10n/generated/app_localizations.dart';
+import 'freezer_palette.dart';
 import 'locale_resolution.dart';
 import 'providers.dart';
 import 'routes.dart';
@@ -96,15 +97,22 @@ class _FullFreezerAppState extends ConsumerState<FullFreezerApp> {
       routerConfig: _router,
       // `fidelity`: il blu resta quello acceso dell'icona invece del blu ardesia che
       // Material ricaverebbe dal seme (scoperto sul primo giro sull'emulatore, 2026-10-06).
-      theme: MicroTheme.light(
-        seed: config.seedColor,
-        fontFamily: config.fontFamily,
-        variant: DynamicSchemeVariant.fidelity,
+      // Sopra, il fondo e i colori dell'interfaccia "Ghiaccio" (FreezerPalette).
+      theme: withFreezerLook(
+        MicroTheme.light(
+          seed: config.seedColor,
+          fontFamily: config.fontFamily,
+          variant: DynamicSchemeVariant.fidelity,
+        ),
+        FreezerPalette.light,
       ),
-      darkTheme: MicroTheme.dark(
-        seed: config.seedColor,
-        fontFamily: config.fontFamily,
-        variant: DynamicSchemeVariant.fidelity,
+      darkTheme: withFreezerLook(
+        MicroTheme.dark(
+          seed: config.seedColor,
+          fontFamily: config.fontFamily,
+          variant: DynamicSchemeVariant.fidelity,
+        ),
+        FreezerPalette.dark,
       ),
       themeMode: ref.watch(themeModeProvider),
       supportedLocales: kSupportedLocales,
