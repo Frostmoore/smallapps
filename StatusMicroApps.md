@@ -41,13 +41,8 @@ Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubbl
 | Data | Evento |
 |---|---|
 | 2026-09 | Test chiuso: 14 giorni con 12 tester completati |
-| entro 2026-10-06 | Inviata in **produzione** — ⚠️ con la **build 10** |
+| entro 2026-10-06 | Inviata in **produzione** con la **build 11** (confermato dal proprietario) |
 | 2026-10-06 | Stato: **in revisione** |
-
-⚠️ **Da verificare:** la build 10 ha il difetto della rotellina infinita sul paywall, corretto
-nella **11** (`apps/trashcan/store/trashcan-1.0.0-11.aab`). Se in produzione c'è ancora la 10,
-va sostituita con la 11 (nuova release di produzione con l'AAB 11) prima o subito dopo
-l'approvazione.
 
 **Per accendere il pulsante sul sito:** app visibile su Play dall'Italia → `suPlay => true`.
 
