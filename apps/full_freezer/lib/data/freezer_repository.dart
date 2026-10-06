@@ -138,6 +138,14 @@ class FreezerRepository {
             ]))
           .watch();
 
+  /// Tutti gli scomparti di tutti i freezer, per scegliere dove mettere un alimento.
+  Stream<List<Compartment>> watchAllCompartments() => (_db.select(_db.compartments)..orderBy([
+        (t) => OrderingTerm(expression: t.freezerId),
+        (t) => OrderingTerm(expression: t.sortOrder),
+        (t) => OrderingTerm(expression: t.id),
+      ]))
+      .watch();
+
   Future<int> addCompartment(int freezerId, String name) async {
     final count =
         await (_db.selectOnly(_db.compartments)

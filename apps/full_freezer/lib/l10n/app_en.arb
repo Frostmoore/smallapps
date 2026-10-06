@@ -1,9 +1,287 @@
 {
   "@@locale": "en",
   "appTitle": "Full Freezer",
+  "common_save": "Save",
+  "common_cancel": "Cancel",
+  "common_edit": "Edit",
+  "common_rename": "Rename",
+  "common_ok": "OK",
+  "common_undo": "Undo",
+  "onboarding_title": "Your freezer",
+  "onboarding_body": "Pick the freezer that looks most like yours: Full Freezer uses its size to tell you how full it is.",
+  "onboarding_start": "Start",
   "home_emptyTitle": "Your freezer is empty",
-  "@home_emptyTitle": {
-    "description": "Home, empty state title: nothing has been added yet."
+  "home_emptyBody": "Add what you put in the freezer: the oldest will always be at the top.",
+  "home_add": "Put in freezer",
+  "home_addFreezer": "Add a freezer",
+  "home_allFreezers": "All freezers",
+  "home_itemCount": "{count, plural, =0{Nothing inside} =1{1 item} other{{count} items}}",
+  "@home_itemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "home_emptyBody": "Add what you put in the freezer: the oldest will always be at the top."
+  "home_useSoonCount": "{count, plural, =1{1 to use soon} other{{count} to use soon}}",
+  "@home_useSoonCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_useSoon": "Use first",
+  "home_seeAll": "See all",
+  "home_rest": "Everything else",
+  "home_where": "Where they are",
+  "fill_label": "{percent}% full",
+  "@fill_label": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fill_semantics": "Freezer {percent}% full",
+  "@fill_semantics": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fill_percentBig": "{percent}%",
+  "@fill_percentBig": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fill_liters": "{used} of {usable} usable",
+  "@fill_liters": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "usable": {
+        "type": "String"
+      }
+    }
+  },
+  "freezer_defaultName": "Kitchen freezer",
+  "freezer_newTitle": "New freezer",
+  "freezer_editTitle": "Edit freezer",
+  "freezer_nameLabel": "Name",
+  "freezer_modelLabel": "What kind of freezer?",
+  "freezer_modelHint": "Typical sizes from product data sheets. If you know your litres, choose \"Other\".",
+  "freezer_customLitersShort": "your litres",
+  "freezer_customLitersLabel": "Freezer litres",
+  "freezer_customLitersHelp": "Printed on the energy label, next to the snowflake.",
+  "freezer_delete": "Delete freezer",
+  "freezer_deleteTitle": "Delete \"{name}\"?",
+  "@freezer_deleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "freezer_deleteEmpty": "It is empty: nothing else will be lost.",
+  "freezer_deleteBody": "{count, plural, =1{The item inside will be deleted too.} other{The {count} items inside will be deleted too.}}",
+  "@freezer_deleteBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "freezerModel_ice_box": "Fridge ice box",
+  "freezerModel_fridge_top": "Top freezer (two doors)",
+  "freezerModel_combi_compact": "Fridge-freezer, 180 cm",
+  "freezerModel_undercounter": "Under-counter drawers",
+  "freezerModel_combi_large": "Fridge-freezer, 200 cm",
+  "freezerModel_chest_small": "Small chest freezer",
+  "freezerModel_side_by_side": "American side by side",
+  "freezerModel_chest_medium": "Medium chest freezer",
+  "freezerModel_upright_tall": "Tall upright freezer",
+  "freezerModel_chest_large": "Large chest freezer",
+  "freezerModel_custom": "Other",
+  "calibrate_button": "How full is it really?",
+  "calibrate_reset": "Go back to the estimate",
+  "calibrate_title": "How full is it really?",
+  "calibrate_body": "Open the door and tell the app what you see: from now on the bar will match it.",
+  "compartments_title": "Compartments",
+  "compartments_add": "Add compartment",
+  "compartments_hint": "Drawer 2",
+  "compartments_empty": "No compartments: items just go in the freezer.",
+  "compartments_delete": "Delete compartment",
+  "compartments_deleteHint": "Its items stay in the freezer.",
+  "location_noCompartment": "No compartment",
+  "unit_portions": "{n, plural, =1{portion} other{portions}}",
+  "@unit_portions": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "unit_pieces": "{n, plural, =1{piece} other{pieces}}",
+  "@unit_pieces": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "unit_packs": "{n, plural, =1{pack} other{packs}}",
+  "@unit_packs": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "category_meat_red": "Red meat",
+  "category_meat_white": "White meat",
+  "category_fish": "Fish",
+  "category_vegetables": "Vegetables",
+  "category_fruit": "Fruit",
+  "category_bread": "Bread and dough",
+  "category_prepared": "Meals and leftovers",
+  "category_ice_cream": "Ice cream",
+  "category_other": "Other",
+  "category_none": "No category",
+  "category_reminderDays": "Reminder after {days} days",
+  "@category_reminderDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "size_title": "How much space does it take?",
+  "size_body": "Used to work out how full the freezer is. It does not need to be exact.",
+  "size_auto": "Automatic estimate",
+  "size_small": "Small",
+  "size_medium": "Medium",
+  "size_large": "Large",
+  "size_xlarge": "Very large",
+  "size_perUnit": "{perUnit} each · {total} in all",
+  "@size_perUnit": {
+    "placeholders": {
+      "perUnit": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "size_customLabel": "Litres in all",
+  "quickAdd_title": "Put in freezer",
+  "quickAdd_nameLabel": "What is it?",
+  "quickAdd_nameHint": "Beef stew, peas, lasagne…",
+  "quickAdd_less": "Less",
+  "quickAdd_more": "More",
+  "quickAdd_volumeLine": "≈ {liters} · freezer will be {percent}% full",
+  "@quickAdd_volumeLine": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "quickAdd_moreDetails": "More details",
+  "quickAdd_saved": "{name} is in the freezer",
+  "@quickAdd_saved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "item_newTitle": "New item",
+  "item_editTitle": "Item",
+  "item_category": "Category",
+  "item_quantity": "Quantity",
+  "item_frozenAt": "Frozen on",
+  "item_daysAgo": "{days, plural, =0{today} =1{1 day ago} other{{days} days ago}}",
+  "@item_daysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "item_daysShort": "{days, plural, =0{today} other{{days} d}}",
+  "@item_daysShort": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "item_location": "Where",
+  "item_volume": "Space it takes",
+  "item_volumeAuto": "{liters} (estimated)",
+  "@item_volumeAuto": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      }
+    }
+  },
+  "item_volumeManual": "{liters} (set by you)",
+  "@item_volumeManual": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      }
+    }
+  },
+  "item_reminder": "Reminder after",
+  "item_reminderSuffix": "days",
+  "item_reminderHelp": "Leave empty to use the category one: {days} days.",
+  "@item_reminderHelp": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "item_reminderHelpNone": "Leave empty for no reminder.",
+  "item_reminderDisclaimer": "A reminder to help you get organised, not an expiry date or a food safety guarantee.",
+  "item_note": "Note",
+  "item_duplicate": "I froze another one",
+  "item_duplicated": "Another {name} added, frozen today",
+  "@item_duplicated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "item_consume": "Eaten",
+  "item_discard": "Thrown away",
+  "item_consumed": "{name}: eaten",
+  "@item_consumed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "item_discarded": "{name}: thrown away",
+  "@item_discarded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
