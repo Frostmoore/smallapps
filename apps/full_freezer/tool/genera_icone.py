@@ -14,7 +14,14 @@ Produce in assets/icons/:
 | adaptive_background.png     | Android 8+: livello di sfondo, 1080x1080 (108 dp) |
 | adaptive_foreground.png     | Android 8+: solo il disegno, su trasparente, nella zona sicura |
 | adaptive_monochrome.png     | Android 13+: il disegno in bianco, per le icone a tema |
-| splash_android12.png        | splash di Android 12+: il disegno nei due terzi centrali |
+| splash_logo.png             | splash (Android fino a 11 e iOS): il disegno senza sfondo del proprietario, su tela quadrata |
+| splash_android12.png        | splash di Android 12+: lo stesso disegno, nei due terzi centrali |
+
+☠ Le splash NON usano il ritaglio automatico del disegno (`alfa_disegno`): le sfaccettature
+blu scure del fiocco hanno lo stesso colore dello sfondo, il ritaglio le rende trasparenti e
+il disegno appare «svuotato» (osservazione del proprietario, 2026-10-06). Per le splash si usa
+il ritaglio fatto a mano dal proprietario, `source/fullfreezer_senza_sfondo.png`. Nell'icona
+adattiva il problema non si vede perche' sotto c'e' lo sfondo originale.
 
 Perche' cosi':
 
@@ -42,6 +49,7 @@ from scipy import ndimage
 QUI = Path(__file__).resolve().parent.parent
 ICONE = QUI / 'assets' / 'icons'
 ORIGINALE = ICONE / 'source' / 'fullfreezer_originale.png'
+SENZA_SFONDO = ICONE / 'source' / 'fullfreezer_senza_sfondo.png'
 
 # Android: tela di 108 dp a 10 px/dp; la zona sicura e' un cerchio di 66 dp di diametro.
 TELA = 1080
@@ -138,9 +146,22 @@ def main():
     mono = np.dstack([np.full_like(alfa, 255)] * 3 + [alfa_mono * 255]).astype(np.uint8)
     su_tela(Image.fromarray(mono, 'RGBA'), scala, TELA, 'trasparente').save(ICONE / 'adaptive_monochrome.png')
 
-    # Splash Android 12: tela 1152, sopravvive il cerchio dei 768 px centrali (2/3).
-    scala_splash = (384 * MARGINE) / raggio
-    su_tela(Image.fromarray(primo, 'RGBA'), scala_splash, 1152, 'trasparente').save(ICONE / 'splash_android12.png')
+    # Splash dal ritaglio del proprietario. Il disegno non e' quadrato (1323x1189): lo si
+    # centra su una tela quadrata, col lato piu' lungo che occupa la frazione voluta.
+    disegno = Image.open(SENZA_SFONDO).convert('RGBA')
+    disegno = disegno.crop(disegno.getbbox())
+
+    def centrato(tela, occupato):
+        scala = occupato / max(disegno.size)
+        piccolo = disegno.resize((round(disegno.width * scala), round(disegno.height * scala)), Image.LANCZOS)
+        out = Image.new('RGBA', (tela, tela), (0, 0, 0, 0))
+        out.paste(piccolo, ((tela - piccolo.width) // 2, (tela - piccolo.height) // 2), piccolo)
+        return out
+
+    centrato(1024, 1024).save(ICONE / 'splash_logo.png')
+    # Android 12+: tela 1152, sopravvive il cerchio dei 768 px centrali. Il disegno e' quasi
+    # un cerchio (l'anello), quindi il lato lungo puo' stare a filo del 94% del diametro.
+    centrato(1152, round(768 * MARGINE)).save(ICONE / 'splash_android12.png')
 
     # Anteprime per controllare a occhio: cerchio e squircle come li mostrano i launcher.
     anteprime = ICONE / 'source' / 'anteprime'

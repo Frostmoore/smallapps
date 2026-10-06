@@ -2,13 +2,16 @@
 #
 # Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
 #
-# Il colore e' il blu mediano dello sfondo dell'icona (#0461E5, misurato da
-# tool/genera_icone.py): l'avvio non deve cambiare colore fra icona e app.
+# L'immagine e' il disegno senza sfondo fatto dal proprietario (splash_logo.png, generata da
+# tool/genera_icone.py). Lo sfondo e' quello dell'app, non il blu dell'icona: l'anello
+# azzurro del disegno su #0461E5 si perderebbe, e cosi' il passaggio splash -> app non
+# cambia colore. #FAF8FF e #121318 sono gli sfondi chiaro e scuro che MicroTheme ricava dal
+# seme #0461E5, misurati il 2026-10-06 (scaffoldBackgroundColor).
 flutter_native_splash:
-  color: "#0461E5"
-  image: assets/icons/fullfreezer_logo.png
-  color_dark: "#0B1A33"
-  image_dark: assets/icons/fullfreezer_logo.png
+  color: "#FAF8FF"
+  image: assets/icons/splash_logo.png
+  color_dark: "#121318"
+  image_dark: assets/icons/splash_logo.png
 
   android: true
   ios: true
@@ -18,7 +21,7 @@ flutter_native_splash:
   # intero perderebbe l'anello delle frecce. splash_android12.png e' il solo disegno, gia'
   # confinato nel cerchio sopravvissuto.
   android_12:
-    color: "#0461E5"
-    color_dark: "#0B1A33"
+    color: "#FAF8FF"
+    color_dark: "#121318"
     image: assets/icons/splash_android12.png
     image_dark: assets/icons/splash_android12.png
