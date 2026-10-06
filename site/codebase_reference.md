@@ -49,7 +49,7 @@ site/
 │   │   ├── it.legale.php       i corpi delle cinque pagine legali, italiano
 │   │   ├── en.php              interfaccia e testi commerciali, inglese
 │   │   └── en.legale.php       i corpi delle cinque pagine legali, inglese
-│   ├── apps.php                il catalogo: catalogo(), app_per_slug(), link_play()
+│   ├── apps.php                il catalogo: catalogo(), app_per_slug(), link_play(), link_app_store()
 │   ├── layout.php              pagina_inizio(), pagina_fine(), intestazione_legale()
 │   ├── contact.php             validazione, CSRF, trappola, limite, archivio, notifica
 │   └── mailer.php              client SMTP minimo (classi Mailer, SmtpError)
@@ -370,6 +370,7 @@ Costanti: `AZIENDA` (array), `SITO_URL` (`https://smpmicroapps.it`), `SITO_NOME`
 | `catalogo` | `catalogo(): array` | Le app indicizzate per slug, nell'ordine di presentazione. |
 | `app_per_slug` | `app_per_slug(string $slug): ?array` | Una app, o `null`. |
 | `link_play` | `link_play(array $app): ?string` | L'indirizzo su Play, o `null` finché `suPlay` è `false`. |
+| `link_app_store` | `link_app_store(array $app): ?string` | `https://apps.apple.com/app/id{appStoreId}`, o `null` finché `suAppStore` è `false` o manca `appStoreId`. |
 
 Campi di una voce del catalogo:
 
@@ -381,6 +382,8 @@ Campi di una voce del catalogo:
 | `pubblicata` | bool | Decide se la card è un link o un riquadro grigio |
 | `packageId` | string | Il nome del pacchetto Android, da cui si costruisce l'indirizzo Play |
 | `suPlay` | bool | `false` finché l'app non è davvero pubblicata: il bottone resta spento |
+| `appStoreId` | string, facoltativa | L'id numerico di App Store Connect (TrashCan: `6818986320`), da cui si costruisce l'indirizzo App Store |
+| `suAppStore` | bool, facoltativa | Come `suPlay`, per App Store. Finché **tutti e due** sono `false` la pagina mostra un solo bottone spento, `comune.presto_store` |
 
 ☠ Nel catalogo non c'è **nessun testo visibile** oltre al nome: claim, sommario e prezzo
 stanno nei dizionari sotto `app.<slug>.*`, perché vanno tradotti. Rimetterli qui darebbe un
@@ -599,4 +602,20 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 | **Numero REA assente** | non fornito. Se c'è iscrizione al Registro delle Imprese va indicato (art. 2250 c.c.) | va riempita `AZIENDA['rea']` in `src/config.php` |
 | **Nessuna schermata delle app** | la pagina di TrashCan descrive a parole; qualche immagine venderebbe meglio | quando ci saranno gli screenshot per Play, che servono comunque |
 | **Il bottone Play è spento** | l'app non è ancora pubblicata | si mette `suPlay => true` in `src/apps.php`, e basta |
+| **Il bottone App Store è spento** | Apple non ha ancora approvato | si mette `suAppStore => true` in `src/apps.php`, e basta: l'id è già scritto |
 | **Nessun backup dell'archivio messaggi** | `var/contatti.jsonl` vive solo sul server | quando arriveranno messaggi che valga la pena non perdere |
+
+---
+
+## Aggiornamento 2026-10-06 — TrashCan anche su iPhone
+
+- Testi di home, piè di pagina, contatti e pagina TrashCan: «Android e iPhone». Piano gratuito e
+  Pro allineati a `apps/trashcan/lib/app/feature_limits.dart`: la condivisione del calendario è
+  gratuita, il **backup completo è Pro**, il promemoria è Pro.
+- Nuove chiavi: `comune.scarica_app_store`, `comune.presto_store` (`comune.presto_play` resta nel
+  dizionario ma `trashcan.php` non la usa più).
+- Pagine legali (privacy, termini, note legali, cookie, responsabilità): aggiunti App Store e Apple
+  Distribution International. ⚑ L'informativa dice che **su iPhone l'app non contatta il nostro
+  server licenze**: è vero perché `tool/build_ios.sh` compila senza `MA_LICENSE_URL`, quindi
+  `MicroAppConfig.serverEnabled` è `false`. Se un giorno la build iOS lo passasse, l'informativa
+  va cambiata **prima** di pubblicare quella build. `comune.data_legale` → 6 ottobre 2026.

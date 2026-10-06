@@ -37,7 +37,7 @@ return [
 <h2>Oggetto del sito</h2>
 
 <p>
-  Questo sito presenta le applicazioni per dispositivi Android sviluppate e distribuite dal
+  Questo sito presenta le applicazioni per Android e iPhone sviluppate e distribuite dal
   titolare sopra indicato, e mette a disposizione un modulo per richiedere assistenza,
   segnalare malfunzionamenti e chiedere informazioni su servizi di sviluppo software su
   misura.
@@ -47,8 +47,9 @@ return [
   Il sito <strong>non è un negozio</strong>: non vi si conclude alcun contratto di acquisto e
   non vi si effettuano pagamenti. La distribuzione delle applicazioni e la vendita delle
   relative funzioni aggiuntive avvengono esclusivamente attraverso Google Play, gestito da
-  Google Ireland Limited. Le condizioni economiche, il diritto di recesso e la procedura di
-  rimborso relativi a tali acquisti sono regolati dai termini di Google Play, come indicato
+  Google Ireland Limited, e App Store, gestito da Apple Distribution International Ltd. Le
+  condizioni economiche, il diritto di recesso e la procedura di rimborso relativi a tali
+  acquisti sono regolati dai termini dello store da cui hai acquistato, come indicato
   nelle <a href="{url_termini}">condizioni di servizio</a>.
 </p>
 
@@ -65,6 +66,12 @@ return [
   Android, Google Play e il logo Google Play sono marchi di Google LLC. La loro citazione ha
   finalità esclusivamente descrittiva e non implica alcun rapporto di affiliazione,
   sponsorizzazione o approvazione da parte di Google.
+</p>
+
+<p>
+  Apple, iPhone e App Store sono marchi di Apple Inc., registrati negli Stati Uniti e in altri
+  Paesi. Vale quanto detto sopra: la citazione è descrittiva e non implica alcun rapporto con
+  Apple.
 </p>
 
 <h2>Segnalazione di contenuti</h2>
@@ -192,7 +199,7 @@ HTML,
   Tutto quello che inserisci — nel caso di TrashCan: calendari, tipi di rifiuto, regole di
   raccolta, eccezioni, orari dei promemoria e preferenze — è salvato in un database locale
   nella memoria del dispositivo, protetto dall'isolamento fra applicazioni previsto da
-  Android. Questi dati non ci vengono trasmessi, non li vediamo e non possiamo recuperarli
+  Android e da iOS. Questi dati non ci vengono trasmessi, non li vediamo e non possiamo recuperarli
   per te: se disinstalli l'app senza aver fatto un'esportazione, si perdono.
 </p>
 
@@ -211,17 +218,25 @@ HTML,
 <h3>Acquisto e verifica della versione Pro</h3>
 
 <p>
-  L'acquisto della versione Pro avviene interamente su Google Play. Non riceviamo e non
-  trattiamo i tuoi dati di pagamento: la carta, i dati di fatturazione e l'identità
-  dell'acquirente restano a Google, che opera come titolare autonomo del trattamento. Vedi la
+  L'acquisto della versione Pro avviene interamente su Google Play, se usi Android, o su App
+  Store, se usi iPhone. Non riceviamo e non trattiamo i tuoi dati di pagamento: la carta, i dati
+  di fatturazione e l'identità dell'acquirente restano a Google o ad Apple, che operano come
+  titolari autonomi del trattamento. Vedi la
   <a href="https://policies.google.com/privacy" rel="noopener">informativa privacy di
-  Google</a>.
+  Google</a> e quella <a href="https://www.apple.com/it/legal/privacy/" rel="noopener">di
+  Apple</a>.
 </p>
 
 <p>
-  Per riconoscere un acquisto valido e per impedire che una licenza venga riutilizzata su un
-  numero indefinito di dispositivi, l'app comunica con un nostro server. I dati trattati in
-  questa fase sono:
+  <strong>Su iPhone</strong> l'app non comunica con nessun nostro server: l'acquisto lo
+  verifica il telefono stesso con Apple, e noi non riceviamo nulla. Le righe che seguono, fino
+  al codice di trasferimento compreso, valgono soltanto per Android.
+</p>
+
+<p>
+  <strong>Su Android</strong>, per riconoscere un acquisto valido e per impedire che una licenza
+  venga riutilizzata su un numero indefinito di dispositivi, l'app comunica con un nostro
+  server. I dati trattati in questa fase sono:
 </p>
 
 <div class="scroll-x">
@@ -250,7 +265,8 @@ HTML,
 
 <div class="box">
   <p>
-    <strong>Non trattiamo il tuo indirizzo email, il tuo nome o il tuo account Google.</strong>
+    <strong>Non trattiamo il tuo indirizzo email, il tuo nome, il tuo account Google o il tuo
+    ID Apple.</strong>
     Il nostro archivio degli acquisti non contiene dati che permettano di identificarti:
     contiene un codice casuale e la prova che a quel codice corrisponde un acquisto valido.
   </p>
@@ -294,6 +310,8 @@ HTML,
     situati nell'Unione Europea.</li>
   <li><strong>Google Ireland Limited</strong>, in qualità di titolare autonomo, per tutto ciò
     che riguarda la distribuzione dell'app e l'acquisto sul Play Store.</li>
+  <li><strong>Apple Distribution International Ltd</strong>, in qualità di titolare autonomo,
+    per tutto ciò che riguarda la distribuzione dell'app e l'acquisto su App Store.</li>
   <li><strong>Il fornitore del servizio di posta elettronica</strong> attraverso cui
     transitano i messaggi inviati dal modulo di contatto.</li>
   <li>Autorità pubbliche, quando la comunicazione sia imposta da una norma di legge o da un
@@ -304,8 +322,8 @@ HTML,
 
 <p>
   Il trattamento avviene di regola all'interno dell'Unione Europea. La verifica degli acquisti
-  comporta un'interrogazione ai sistemi di Google, che può trattare dati anche negli Stati
-  Uniti: tale trasferimento avviene sulla base della decisione di adeguatezza della Commissione
+  comporta un'interrogazione ai sistemi di Google o di Apple, che possono trattare dati anche
+  negli Stati Uniti: tale trasferimento avviene sulla base della decisione di adeguatezza della Commissione
   europea relativa al quadro UE-USA per la protezione dei dati, e in via residuale sulla base
   delle clausole contrattuali tipo adottate dalla Commissione.
 </p>
@@ -455,8 +473,8 @@ HTML,
 
 <div class="box">
   <p>
-    I link che portano fuori da questo sito, per esempio quello alla scheda dell'app su Google
-    Play, conducono a pagine gestite da altri soggetti, che applicano le proprie politiche sui
+    I link che portano fuori da questo sito, per esempio quelli alle schede dell'app su Google
+    Play e su App Store, conducono a pagine gestite da altri soggetti, che applicano le proprie politiche sui
     cookie. Una volta uscito da qui, valgono le loro regole.
   </p>
 </div>
@@ -493,8 +511,8 @@ HTML,
 <h2>1. Chi siamo e a cosa si applicano queste condizioni</h2>
 
 <p>
-  Le presenti condizioni regolano l'uso del sito {sito} e delle applicazioni per Android
-  distribuite con il marchio SMP MicroApps da <strong>{denominazione}</strong>, {indirizzo},
+  Le presenti condizioni regolano l'uso del sito {sito} e delle applicazioni per Android e
+  iPhone distribuite con il marchio SMP MicroApps da <strong>{denominazione}</strong>, {indirizzo},
   {cap} {citta} ({provincia}), P. IVA e C.F. {piva} (di seguito «il fornitore»).
 </p>
 
@@ -507,17 +525,19 @@ HTML,
 
 <p>
   Questo sito ha funzione esclusivamente informativa. Le applicazioni si scaricano e si
-  acquistano su <strong>Google Play</strong>, e il contratto di acquisto si conclude fra te e
-  <strong>Google Ireland Limited</strong>, che agisce come rivenditore. Il fornitore non incassa
+  acquistano su <strong>Google Play</strong> o su <strong>App Store</strong>, e il contratto di
+  acquisto si conclude fra te e <strong>Google Ireland Limited</strong> o <strong>Apple
+  Distribution International Ltd</strong>, che agiscono come rivenditori. Il fornitore non incassa
   direttamente il prezzo, non emette la ricevuta d'acquisto e non ha accesso ai tuoi dati di
   pagamento.
 </p>
 
 <div class="box">
   <p>
-    Di conseguenza <strong>rimborsi, storni e diritto di recesso sull'acquisto si richiedono a
-    Google Play</strong>, secondo le procedure e i termini indicati da Google. Se hai un
-    problema che Google non risolve, scrivici lo stesso: possiamo intervenire sul piano tecnico
+    Di conseguenza <strong>rimborsi, storni e diritto di recesso sull'acquisto si richiedono
+    allo store da cui hai acquistato</strong>: a Google Play secondo le procedure di Google, ad
+    App Store secondo quelle di Apple (reportaproblem.apple.com). Se hai un problema che lo
+    store non risolve, scrivici lo stesso: possiamo intervenire sul piano tecnico
     e, dove ci è consentito, sollecitare la pratica.
   </p>
 </div>
@@ -535,8 +555,9 @@ HTML,
 
 <ul>
   <li><strong>un acquisto singolo</strong>, non un abbonamento: non si rinnova e non scade;</li>
-  <li><strong>legato al tuo account Google Play</strong>, non al singolo telefono: cambiando
-    dispositivo puoi ripristinarlo dal medesimo account;</li>
+  <li><strong>legato al tuo account Google Play o al tuo ID Apple</strong>, non al singolo
+    telefono: cambiando dispositivo puoi ripristinarlo dal medesimo account. Un acquisto fatto
+    su Google Play non vale su iPhone, e viceversa: sono due store distinti;</li>
   <li><strong>riferito alla singola applicazione</strong>: l'acquisto di un'app non sblocca le
     altre del catalogo.</li>
 </ul>
@@ -557,7 +578,7 @@ HTML,
 
 <p>
   Per i casi in cui non sia possibile il ripristino tramite Google Play — tipicamente il cambio
-  di account Google — le applicazioni offrono un codice temporaneo per spostare la licenza su un
+  di account Google — le applicazioni per Android offrono un codice temporaneo per spostare la licenza su un
   altro dispositivo. È uno strumento di assistenza, soggetto a limiti di validità, di numero e di
   frequenza. L'uso del codice per condividere la licenza con terzi costituisce violazione del
   punto 3 e consente al fornitore di revocare la licenza.
@@ -567,7 +588,7 @@ HTML,
 
 <p>
   Il fornitore può aggiornare le applicazioni per correggere difetti, adeguarsi a nuove versioni
-  di Android o migliorarne il funzionamento. Può altresì modificare, sospendere o cessare la
+  di Android e di iOS o migliorarne il funzionamento. Può altresì modificare, sospendere o cessare la
   distribuzione di un'applicazione, dandone preavviso quando ragionevolmente possibile.
 </p>
 
@@ -585,7 +606,7 @@ HTML,
   digitale prevista dagli articoli 135-octies e seguenti del Codice del consumo (d.lgs.
   206/2005). Se l'applicazione non è conforme a quanto descritto, hai diritto al ripristino della
   conformità e, nei casi previsti, alla riduzione del prezzo o alla risoluzione del contratto,
-  secondo le procedure di Google Play. Nessuna clausola di queste condizioni limita tali diritti.
+  secondo le procedure dello store da cui hai acquistato. Nessuna clausola di queste condizioni limita tali diritti.
 </p>
 
 <h2>7. Responsabilità</h2>
@@ -662,7 +683,7 @@ HTML,
 <h2>2. Le notifiche dipendono dal sistema operativo</h2>
 
 <p>
-  I promemoria sono pianificati attraverso i servizi di allarme di Android. La loro consegna
+  I promemoria sono pianificati attraverso i servizi di notifica di Android e di iOS. La loro consegna
   puntuale non è garantita dall'applicazione e può essere impedita o ritardata da fattori che
   l'app non controlla: risparmio energetico, ottimizzazione della batteria, modalità «non
   disturbare», sospensione dell'app da parte del sistema, riavvii del dispositivo,

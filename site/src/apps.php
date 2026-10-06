@@ -42,6 +42,10 @@ function catalogo(): array
             // quando `suPlay` passa a true.
             'packageId' => 'com.smp.trashcan',
             'suPlay'    => false,
+            // L'id Apple e' quello di App Store Connect, assegnato alla creazione della
+            // scheda e mai piu' cambiato. Diventa un bottone quando `suAppStore` passa a true.
+            'appStoreId' => '6818986320',
+            'suAppStore' => false,
         ],
         'full-freezer' => [
             'nome'      => 'Full Freezer',
@@ -74,6 +78,14 @@ function catalogo(): array
 function app_per_slug(string $slug): ?array
 {
     return catalogo()[$slug] ?? null;
+}
+
+/** L'indirizzo della scheda su App Store, o null finche' Apple non l'ha pubblicata. */
+function link_app_store(array $app): ?string
+{
+    return ($app['suAppStore'] ?? false) && isset($app['appStoreId'])
+        ? 'https://apps.apple.com/app/id' . $app['appStoreId']
+        : null;
 }
 
 /** L'indirizzo della scheda su Google Play, o null finche' l'app non e' pubblicata. */

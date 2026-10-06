@@ -15,6 +15,7 @@ require_once __DIR__ . '/../src/layout.php';
 $lingua = lingua_corrente();
 $app = app_per_slug('trashcan');
 $play = link_play($app);
+$appStore = link_app_store($app);
 
 pagina_inizio('trashcan.titolo', 'trashcan.descrizione', '/trashcan');
 ?>
@@ -27,8 +28,12 @@ pagina_inizio('trashcan.titolo', 'trashcan.descrizione', '/trashcan');
     <div class="hero__actions">
       <?php if ($play !== null): ?>
         <a class="btn btn--primary" href="<?= e($play) ?>" rel="noopener"><?= t('comune.scarica_play') ?></a>
-      <?php else: ?>
-        <span class="btn" aria-disabled="true"><?= t('comune.presto_play') ?></span>
+      <?php endif; ?>
+      <?php if ($appStore !== null): ?>
+        <a class="btn btn--primary" href="<?= e($appStore) ?>" rel="noopener"><?= t('comune.scarica_app_store') ?></a>
+      <?php endif; ?>
+      <?php if ($play === null && $appStore === null): ?>
+        <span class="btn" aria-disabled="true"><?= t('comune.presto_store') ?></span>
       <?php endif; ?>
       <a class="btn btn--ghost" href="#funzioni"><?= t('trashcan.hero.cta') ?></a>
     </div>
@@ -95,8 +100,12 @@ pagina_inizio('trashcan.titolo', 'trashcan.descrizione', '/trashcan');
         <p style="margin-top:1.25rem">
           <?php if ($play !== null): ?>
             <a class="btn btn--dark" href="<?= e($play) ?>" rel="noopener"><?= t('comune.scarica_play') ?></a>
-          <?php else: ?>
-            <span class="btn btn--spento" aria-disabled="true"><?= t('comune.presto_play') ?></span>
+          <?php endif; ?>
+          <?php if ($appStore !== null): ?>
+            <a class="btn btn--dark" href="<?= e($appStore) ?>" rel="noopener"><?= t('comune.scarica_app_store') ?></a>
+          <?php endif; ?>
+          <?php if ($play === null && $appStore === null): ?>
+            <span class="btn btn--spento" aria-disabled="true"><?= t('comune.presto_store') ?></span>
           <?php endif; ?>
         </p>
       </div>

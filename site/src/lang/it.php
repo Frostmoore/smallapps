@@ -27,13 +27,15 @@ return [
     'comune.in_inglese'        => 'Read in English',
     'comune.salta'             => 'Salta al contenuto',
     'comune.aggiornato'        => 'Ultimo aggiornamento: {data}',
-    'comune.data_legale'       => '11 settembre 2026',
+    'comune.data_legale'       => '6 ottobre 2026',
     'comune.scopri'            => 'Scopri di più &rarr;',
     'comune.in_lavorazione'    => 'In lavorazione',
     'comune.in_arrivo'         => 'In arrivo',
     'comune.disponibile'       => 'Disponibile',
     'comune.presto_play'       => 'Presto su Google Play',
     'comune.scarica_play'      => 'Scarica su Google Play',
+    'comune.scarica_app_store' => 'Scarica su App Store',
+    'comune.presto_store'      => 'Presto su Google Play e App Store',
 
     // ── Navigazione ─────────────────────────────────────────────────────────
     'nav.app'         => 'Le app',
@@ -45,7 +47,7 @@ return [
     'nav.mostra_app'  => 'Mostra le app',
 
     // ── Pie' di pagina ──────────────────────────────────────────────────────
-    'footer.blurb'       => 'App piccole per Android, che fanno una cosa sola e la fanno '
+    'footer.blurb'       => 'App piccole per Android e iPhone, che fanno una cosa sola e la fanno '
                           . 'bene. Gratis nella versione base, sbloccabili con un acquisto '
                           . 'una tantum. Nessun abbonamento.',
     'footer.app'         => 'Le app',
@@ -58,7 +60,7 @@ return [
     'footer.responsabilita' => 'Limitazione di responsabilità',
     'footer.segnala'     => 'Segnala un problema',
     'footer.diritti'     => 'Tutti i diritti riservati. Android e Google Play sono marchi '
-                          . 'di Google LLC.',
+                          . 'di Google LLC. iPhone e App Store sono marchi di Apple Inc.',
 
     // ── Le app del catalogo ─────────────────────────────────────────────────
     'app.trashcan.prezzo'   => '2,39 €',
@@ -80,12 +82,12 @@ return [
                                  . 'in analogico e non vuole perdere le note dello sviluppo.',
 
     // ── Home ────────────────────────────────────────────────────────────────
-    'home.titolo'      => 'App piccole per Android, che fanno una cosa sola',
-    'home.descrizione' => 'SMP MicroApps: applicazioni Android leggere, senza account e '
+    'home.titolo'      => 'App piccole per Android e iPhone, che fanno una cosa sola',
+    'home.descrizione' => 'SMP MicroApps: applicazioni Android e iPhone leggere, senza account e '
                         . 'senza abbonamenti. Versione base gratuita, Pro con un acquisto '
                         . 'una tantum.',
 
-    'home.eyebrow'      => 'App per Android',
+    'home.eyebrow'      => 'App per Android e iPhone',
     'home.hero.titolo'  => 'Una cosa sola.<br>Fatta bene.',
     'home.hero.lede'    => 'Micro applicazioni che rispondono a una domanda precisa e si '
                          . 'tolgono di mezzo. Nessun account, nessuna pubblicità, nessun '
@@ -125,9 +127,9 @@ return [
     'trashcan.titolo'      => 'TrashCan, il calendario della raccolta differenziata',
     'trashcan.descrizione' => 'TrashCan ti ricorda la sera prima cosa portare fuori. '
                             . 'Calendario della raccolta differenziata con promemoria e '
-                            . 'widget. Gratis, Pro a 2,39 € una tantum.',
+                            . 'widget, per Android e iPhone. Gratis, Pro a 2,39 € una tantum.',
 
-    'trashcan.eyebrow'     => 'TrashCan · Android',
+    'trashcan.eyebrow'     => 'TrashCan · Android e iPhone',
     'trashcan.hero.titolo' => 'Stasera cosa<br>si butta?',
     'trashcan.hero.lede'   => 'Il calendario della raccolta differenziata del tuo Comune, '
                             . 'con il promemoria la sera prima e il widget sulla schermata '
@@ -149,8 +151,8 @@ return [
                                   . 'scelte a mano. Anche i giri strani del tuo Comune ci '
                                   . 'stanno.',
     'trashcan.problema.3.titolo' => 'Le eccezioni non ti fregano',
-    'trashcan.problema.3.testo'  => 'Festività, salti e raccolte straordinarie: segni la '
-                                  . 'variazione sul singolo giorno e il promemoria si '
+    'trashcan.problema.3.testo'  => 'Festività, salti e raccolte straordinarie: scegli la '
+                                  . 'raccolta da cambiare, anche fra mesi, e il calendario si '
                                   . 'aggiusta da solo, senza toccare la regola.',
 
     'trashcan.funzioni.titolo' => 'Cosa trovi dentro',
@@ -161,30 +163,30 @@ return [
                                   . 'fuori stasera, grande e a colori. Sotto, la prossima '
                                   . 'raccolta e i sette giorni successivi.',
     'trashcan.funzioni.2.titolo' => 'Il widget sulla home',
-    'trashcan.funzioni.2.testo'  => 'Stretto e verticale: l\'intestazione colorata dice '
-                                  . 'cosa si butta stasera, con la sua icona; sotto, i tre '
-                                  . 'giorni successivi. Gratis, senza aprire l\'app.',
+    'trashcan.funzioni.2.testo'  => 'Su Android e su iPhone: l\'intestazione colorata dice '
+                                  . 'cosa si butta stasera, con la sua icona; sotto, i giorni '
+                                  . 'successivi. Si aggiorna da solo ogni sera, ed è gratis.',
     'trashcan.funzioni.3.titolo' => 'Promemoria puntuale',
-    'trashcan.funzioni.3.testo'  => 'Una notifica all\'ora che scegli, la sera prima della '
-                                  . 'raccolta. Toccandola si apre direttamente il giorno '
-                                  . 'interessato.',
+    'trashcan.funzioni.3.testo'  => 'Con il Pro, una notifica all\'ora che scegli, la sera '
+                                  . 'prima della raccolta. Se al primo non sei in casa, ne '
+                                  . 'aggiungi un secondo.',
     'trashcan.funzioni.4.titolo' => 'Tipi di rifiuto tuoi',
     'trashcan.funzioni.4.testo'  => 'Ogni Comune ha le sue categorie e i suoi nomi. Parti '
                                   . 'dai tipi già pronti e rinominali, cambia icona e '
                                   . 'colore, o creane di nuovi.',
-    'trashcan.funzioni.5.titolo' => 'Backup ed esportazione',
-    'trashcan.funzioni.5.testo'  => 'Un file che contiene tutto il calendario: lo salvi '
-                                  . 'dove vuoi, lo rimetti su un altro telefono, o lo passi '
-                                  . 'a un familiare che abita nella stessa via.',
+    'trashcan.funzioni.5.titolo' => 'Condivisione e backup',
+    'trashcan.funzioni.5.testo'  => 'Mandi il calendario a un vicino e lui ha gli stessi '
+                                  . 'giorni senza riscriverli, gratis. Con il Pro salvi tutto '
+                                  . 'in un file e lo porti su un telefono nuovo.',
     'trashcan.funzioni.6.titolo' => 'Italiano e inglese',
     'trashcan.funzioni.6.testo'  => 'L\'app segue la lingua del telefono. Le date e i giorni '
                                   . 'della settimana anche.',
 
     'trashcan.prezzi.titolo' => 'Gratis, e poi Pro se ti serve',
     'trashcan.prezzi.lede'   => 'Un acquisto solo, nessun abbonamento, nessun rinnovo. Se '
-                              . 'cambi telefono lo ripristini dal tuo account Google, e se '
-                              . 'hai cambiato anche account c\'è un codice di trasferimento '
-                              . 'dentro l\'app.',
+                              . 'cambi telefono lo ripristini dal tuo account Google o dal '
+                              . 'tuo ID Apple. Su Android, se hai cambiato anche account, '
+                              . 'c\'è un codice di trasferimento dentro l\'app.',
     'trashcan.prezzi.base'      => 'Base',
     'trashcan.prezzi.gratis'    => 'Gratis',
     'trashcan.prezzi.pro'       => 'Pro',
@@ -192,13 +194,14 @@ return [
     'trashcan.prezzi.base.lista' => '<li>Un calendario della raccolta</li>'
         . '<li>Tipi di rifiuto e regole illimitati</li>'
         . '<li>Eccezioni, salti e raccolte straordinarie</li>'
-        . '<li>Widget con la raccolta di stasera e i tre giorni successivi</li>'
-        . '<li>Esportazione e backup del calendario</li>'
-        . '<li>Nessuna pubblicità</li>',
+        . '<li>Widget con la raccolta di stasera e i giorni successivi</li>'
+        . '<li>Condivisione del calendario con un vicino</li>'
+        . '<li>Nessuna pubblicità, nessun account</li>',
     'trashcan.prezzi.pro.lista' => '<li>Tutto quello che c\'è nella versione base</li>'
         . '<li><strong>I promemoria</strong>: la notifica la sera prima</li>'
         . '<li>Doppio promemoria, per chi al primo non si muove</li>'
         . '<li>Calendari multipli: casa, casa al mare, i genitori</li>'
+        . '<li>Backup completo in un file, per il telefono nuovo</li>'
         . '<li>Il colore dell\'app scelto da te, fra dieci</li>',
 
     'trashcan.privacy.titolo' => 'I tuoi dati restano tuoi',
@@ -207,7 +210,7 @@ return [
                                . 'rifiuto e i promemoria vivono nella memoria del telefono '
                                . 'e non vengono inviati da nessuna parte. L\'unica cosa che '
                                . 'esce dal dispositivo è la verifica dell\'acquisto, perché '
-                               . 'la fa Google.',
+                               . 'la fa Google o Apple.',
     'trashcan.privacy.link'   => 'Leggi l\'informativa privacy completa &rarr;',
 
     'trashcan.bug.titolo'  => 'Qualcosa non va, o manca qualcosa?',
@@ -227,12 +230,12 @@ return [
                             . 'persona sola.',
 
     'contatti.misura.titolo' => 'Sviluppo su misura',
-    'contatti.misura.testo'  => 'Applicazioni Android, gestionali, automazioni e strumenti '
+    'contatti.misura.testo'  => 'Applicazioni Android e iPhone, gestionali, automazioni e strumenti '
                               . 'interni. Descrivi il problema e il contesto in cui nasce: '
                               . 'la prima risposta dice se è fattibile, con che tempi e con '
                               . 'quale ordine di grandezza di costo.',
     'contatti.bug.titolo'    => 'Segnalare un problema',
-    'contatti.bug.testo'     => 'Indica il modello di telefono, la versione di Android e '
+    'contatti.bug.testo'     => 'Indica il modello di telefono, la versione di Android o iOS e '
                               . 'cosa stavi facendo quando è successo. Con queste tre '
                               . 'informazioni un problema si riproduce in pochi minuti; '
                               . 'senza, spesso non si riproduce affatto.',
@@ -249,7 +252,7 @@ return [
     'form.app'         => 'App interessata',
     'form.app.ph'      => 'TrashCan, oppure lascia vuoto',
     'form.app.aiuto'   => 'Per una segnalazione, aggiungi modello del telefono e versione '
-                        . 'di Android nel messaggio.',
+                        . 'di Android o iOS nel messaggio.',
     'form.messaggio'   => 'Messaggio',
     'form.consenso'    => 'Ho letto l\'<a href="{privacy}">informativa privacy</a> e '
                         . 'acconsento al trattamento dei miei dati per ricevere una '

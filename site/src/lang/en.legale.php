@@ -42,7 +42,7 @@ return [
 <h2>What this website is</h2>
 
 <p>
-  This website presents the Android applications developed and distributed by the owner named
+  This website presents the Android and iPhone applications developed and distributed by the owner named
   above, and provides a form for requesting support, reporting malfunctions and enquiring
   about custom software development services.
 </p>
@@ -50,9 +50,10 @@ return [
 <p>
   This website <strong>is not a shop</strong>: no purchase contract is concluded here and no
   payment is taken here. The applications, and the additional features within them, are
-  distributed and sold exclusively through Google Play, operated by Google Ireland Limited.
-  Pricing, the right of withdrawal and the refund procedure for those purchases are governed by
-  the Google Play terms, as set out in the <a href="{url_termini}">terms of service</a>.
+  distributed and sold exclusively through Google Play, operated by Google Ireland Limited, and
+  the App Store, operated by Apple Distribution International Ltd. Pricing, the right of
+  withdrawal and the refund procedure for those purchases are governed by the terms of the store
+  you bought from, as set out in the <a href="{url_termini}">terms of service</a>.
 </p>
 
 <h2>Intellectual property</h2>
@@ -67,6 +68,12 @@ return [
   Android, Google Play and the Google Play logo are trademarks of Google LLC. They are named
   here for descriptive purposes only and this implies no affiliation with, sponsorship by or
   endorsement from Google.
+</p>
+
+<p>
+  Apple, iPhone and App Store are trademarks of Apple Inc., registered in the U.S. and other
+  countries. The same applies: they are named for descriptive purposes only and this implies no
+  relationship with Apple.
 </p>
 
 <h2>Reporting content</h2>
@@ -198,7 +205,7 @@ HTML,
   SMP MicroApps applications <strong>require no registration and have no accounts</strong>.
   Everything you enter — in TrashCan's case: calendars, waste types, collection rules,
   exceptions, reminder times and preferences — is saved in a local database in your device's
-  storage, protected by the app isolation Android provides. This data is never transmitted to
+  storage, protected by the app isolation Android and iOS provide. This data is never transmitted to
   us, we cannot see it and we cannot recover it for you: uninstall the app without having
   exported, and it is gone.
 </p>
@@ -217,16 +224,24 @@ HTML,
 <h3>Buying and verifying the Pro version</h3>
 
 <p>
-  The Pro version is purchased entirely on Google Play. We neither receive nor process your
-  payment data: the card, the billing details and the purchaser's identity stay with Google,
-  which acts as an independent controller. See
-  <a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a>.
+  The Pro version is purchased entirely on Google Play, if you use Android, or on the App
+  Store, if you use iPhone. We neither receive nor process your payment data: the card, the
+  billing details and the purchaser's identity stay with Google or Apple, which act as
+  independent controllers. See
+  <a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a> and
+  <a href="https://www.apple.com/legal/privacy/" rel="noopener">Apple's</a>.
 </p>
 
 <p>
-  In order to recognise a valid purchase, and to stop one licence being reused on an unlimited
-  number of devices, the app communicates with a server of ours. The data processed at that
-  stage is:
+  <strong>On iPhone</strong> the app communicates with no server of ours: the phone itself
+  verifies the purchase with Apple, and we receive nothing. What follows, up to and including
+  the transfer code, applies to Android only.
+</p>
+
+<p>
+  <strong>On Android</strong>, in order to recognise a valid purchase, and to stop one licence
+  being reused on an unlimited number of devices, the app communicates with a server of ours.
+  The data processed at that stage is:
 </p>
 
 <div class="scroll-x">
@@ -255,7 +270,8 @@ HTML,
 
 <div class="box">
   <p>
-    <strong>We do not process your email address, your name or your Google account.</strong>
+    <strong>We do not process your email address, your name, your Google account or your
+    Apple ID.</strong>
     Our purchase records contain no data capable of identifying you: they contain a random code
     and the proof that a valid purchase corresponds to it.
   </p>
@@ -299,6 +315,8 @@ HTML,
     Union.</li>
   <li><strong>Google Ireland Limited</strong>, as an independent controller, for everything
     concerning distribution of the app and purchases on the Play Store.</li>
+  <li><strong>Apple Distribution International Ltd</strong>, as an independent controller, for
+    everything concerning distribution of the app and purchases on the App Store.</li>
   <li><strong>The email service provider</strong> through which messages sent from the contact
     form pass.</li>
   <li>Public authorities, where disclosure is required by law or by an order of the
@@ -309,7 +327,7 @@ HTML,
 
 <p>
   Processing normally takes place within the European Union. Verifying purchases involves a
-  query to Google's systems, which may process data in the United States as well: that transfer
+  query to Google's or Apple's systems, which may process data in the United States as well: that transfer
   relies on the European Commission's adequacy decision on the EU-US Data Privacy Framework and,
   in the alternative, on the standard contractual clauses adopted by the Commission.
 </p>
@@ -464,7 +482,7 @@ HTML,
 
 <div class="box">
   <p>
-    Links leading away from this site, for instance the one to the app's Google Play listing,
+    Links leading away from this site, for instance those to the app's Google Play and App Store listings,
     lead to pages run by other parties, which apply their own cookie policies. Once you leave
     here, their rules apply.
   </p>
@@ -508,7 +526,7 @@ HTML,
 <h2>1. Who we are, and what these terms cover</h2>
 
 <p>
-  These terms govern the use of the website {sito} and of the Android applications distributed
+  These terms govern the use of the website {sito} and of the Android and iPhone applications distributed
   under the SMP MicroApps name by <strong>{denominazione}</strong>, {indirizzo}, {cap} {citta}
   ({provincia}), VAT and tax number {piva} (hereinafter "the supplier").
 </p>
@@ -522,16 +540,18 @@ HTML,
 
 <p>
   This website is purely informational. The applications are downloaded and purchased on
-  <strong>Google Play</strong>, and the purchase contract is concluded between you and
-  <strong>Google Ireland Limited</strong>, acting as reseller. The supplier does not collect the
+  <strong>Google Play</strong> or the <strong>App Store</strong>, and the purchase contract is
+  concluded between you and <strong>Google Ireland Limited</strong> or <strong>Apple
+  Distribution International Ltd</strong>, acting as resellers. The supplier does not collect the
   price directly, does not issue the purchase receipt and has no access to your payment data.
 </p>
 
 <div class="box">
   <p>
     It follows that <strong>refunds, chargebacks and the right of withdrawal on a purchase are
-    requested from Google Play</strong>, under the procedures and terms Google sets out. If you
-    have a problem Google does not resolve, write to us anyway: we can act on the technical side
+    requested from the store you bought from</strong>: from Google Play under Google's procedures,
+    from the App Store under Apple's (reportaproblem.apple.com). If you have a problem the store
+    does not resolve, write to us anyway: we can act on the technical side
     and, where we are permitted to, chase the case.
   </p>
 </div>
@@ -549,8 +569,9 @@ HTML,
 <ul>
   <li><strong>a single purchase</strong>, not a subscription: it does not renew and does not
     expire;</li>
-  <li><strong>tied to your Google Play account</strong>, not to one handset: change device and
-    you can restore it from the same account;</li>
+  <li><strong>tied to your Google Play account or your Apple ID</strong>, not to one handset:
+    change device and you can restore it from the same account. A purchase made on Google Play
+    does not carry over to iPhone, nor the other way round: they are two separate stores;</li>
   <li><strong>specific to one application</strong>: buying one app does not unlock the others in
     the catalogue.</li>
 </ul>
@@ -571,7 +592,7 @@ HTML,
 
 <p>
   For cases where restoring through Google Play is not possible — typically a change of Google
-  account — the applications offer a temporary code to move the licence to another device. It is
+  account — the Android applications offer a temporary code to move the licence to another device. It is
   a support tool, subject to limits of validity, number and frequency. Using the code to share
   the licence with third parties breaches clause 3 and entitles the supplier to revoke the
   licence.
@@ -580,7 +601,7 @@ HTML,
 <h2>5. Updates and continuity of service</h2>
 
 <p>
-  The supplier may update the applications to fix defects, to keep up with new Android versions
+  The supplier may update the applications to fix defects, to keep up with new Android and iOS versions
   or to improve how they work. The supplier may also modify, suspend or discontinue distribution
   of an application, giving notice where reasonably possible.
 </p>
@@ -599,7 +620,7 @@ HTML,
   135-octies et seq. of the Italian Consumer Code (Legislative Decree 206/2005) remains
   unaffected. If the application does not conform to what is described, you are entitled to have
   conformity restored and, in the cases provided for, to a price reduction or termination of the
-  contract, through the Google Play procedures. No clause of these terms limits those rights.
+  contract, through the procedures of the store you bought from. No clause of these terms limits those rights.
 </p>
 
 <h2>7. Liability</h2>
@@ -679,7 +700,7 @@ HTML,
 <h2>2. Notifications depend on the operating system</h2>
 
 <p>
-  Reminders are scheduled through Android's alarm services. Their timely delivery is not
+  Reminders are scheduled through the notification services of Android and iOS. Their timely delivery is not
   guaranteed by the application and may be prevented or delayed by factors the app does not
   control: power saving, battery optimisation, "do not disturb" mode, the system suspending the
   app, device restarts, manufacturer customisations or permissions being revoked.
