@@ -14,10 +14,10 @@ environment:
 # Le versioni delle dipendenze si risolvono con "pwsh tool/fl.ps1 pub add <pacchetto>".
 # Non si scrivono a memoria: un vincolo inventato fa fallire la risoluzione.
 #
-# ⚑ Qui c'e' solo quello che serve a F4.1. Drift, image_picker, home_widget,
-# speech_to_text e fl_chart arrivano con le sottofasi che li usano (F4.2, F4.5, F4.11,
-# F4.12, F4.10): una dipendenza aggiunta prima del suo codice e' un plugin nativo in piu'
-# da compilare su due piattaforme senza che nessuno lo stia provando.
+# ⚑ Ogni dipendenza e' entrata con la sottofase che la usa (drift F4.2, image_picker F4.5,
+# home_widget F4.11, speech_to_text F4.12): una dipendenza aggiunta prima del suo codice e'
+# un plugin nativo in piu' da compilare su due piattaforme senza che nessuno lo stia
+# provando. Le statistiche (F4.7) sono disegnate a mano: fl_chart non e' servito.
 dependencies:
   # Senza, qualche widget di Material mostra quadrati vuoti nei menu di selezione del
   # testo. Vedi apps/trashcan/pubspec.yaml.
@@ -39,6 +39,7 @@ dependencies:
   path_provider: ^2.1.6
   sqlite3: ^3.5.2
   sqlite3_flutter_libs: ^0.6.0+eol
+  speech_to_text: ^7.5.0
 
 dev_dependencies:
   flutter_test:

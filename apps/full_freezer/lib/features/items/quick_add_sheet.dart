@@ -11,7 +11,9 @@ import '../../app/routes.dart';
 import '../../data/database.dart';
 import '../../domain/capacity.dart';
 import '../../domain/units.dart';
+import '../../domain/voice_parser.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../services/voice_input.dart';
 import 'item_draft.dart';
 import 'item_photo.dart';
 import 'item_pickers.dart';
@@ -75,6 +77,11 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
   bool _handedOff = false;
   late final AppPaths _paths = ref.read(appPathsProvider);
 
+  /// Il microfono (F4.12). Creato solo al primo tocco: chi non lo usa non paga
+  /// l'inizializzazione del riconoscitore, ne' vede la richiesta di permesso.
+  VoiceInput? _voice;
+  bool _listening = false;
+
   ItemDraft get d => widget.draft;
 
   @override
@@ -82,6 +89,7 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
     // Foglio chiuso senza salvare: la foto scattata non serve a nessuno.
     final photo = d.photoPath;
     if (!_handedOff && photo != null) unawaited(deleteItemPhoto(_paths, photo));
+    unawaited(_voice?.cancel());
     _name.dispose();
     super.dispose();
   }
@@ -103,6 +111,64 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
       d.setName(name);
       _suggestions = const <String>[];
     });
+  }
+
+  /// Tocco sul microfono: ascolta, mostra il testo man mano, poi lo interpreta.
+  Future<void> _toggleVoice() async {
+    final voice = _voice ??= VoiceInput();
+    if (_listening) {
+      await voice.stop();
+      return;
+    }
+    final l = L.of(context);
+    final ready = await voice.prepare(
+      onStatus: (status) {
+        // "done"/"notListening": il motore ha chiuso da se' (pausa o limite di tempo).
+        if (mounted && status != 'listening') setState(() => _listening = false);
+      },
+    );
+    if (!mounted) return;
+    if (!ready) {
+      MicroSnack.show(context, l.voice_unavailable);
+      return;
+    }
+    final language = Localizations.localeOf(context).languageCode;
+    setState(() => _listening = true);
+    await voice.listen(
+      languageTag: language,
+      onWords: (words, {required isFinal}) {
+        if (!mounted) return;
+        if (!isFinal) {
+          // Il testo provvisorio si vede nel campo: chi parla capisce che lo si sta
+          // ascoltando, e cosa si e' capito.
+          _name.text = words;
+          return;
+        }
+        _applyVoice(words, language);
+      },
+    );
+  }
+
+  /// Mette nel foglio quello che si e' capito.
+  ///
+  /// ⚑ Con confidenza zero la frase intera va nel nome, cosi' com'e': il ripiego non e' mai
+  /// un errore (F4.12). Quantita' e unita' cambiano solo se la frase le dice.
+  void _applyVoice(String words, String language) {
+    final parsed = VoiceItemParser(locale: language).parse(words);
+    final name = parsed.name.isEmpty ? words.trim() : parsed.name;
+    _name
+      ..text = name
+      ..selection = TextSelection.collapsed(offset: name.length);
+    setState(() {
+      _listening = false;
+      d.setName(name);
+      if (parsed.quantity != null && parsed.unit != null) {
+        d
+          ..unit = parsed.unit!
+          ..quantity = parsed.quantity!;
+      }
+    });
+    unawaited(_onName(name));
   }
 
   Future<void> _save() async {
@@ -177,11 +243,22 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                 textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
                   labelText: l.quickAdd_nameLabel,
-                  hintText: l.quickAdd_nameHint,
+                  hintText: _listening ? l.voice_listening : l.quickAdd_nameHint,
                   counterText: '',
                   // La foto e' facoltativa e non aggiunge tocchi al percorso minimo (F4.5).
-                  suffixIcon: d.photoPath == null
-                      ? IconButton(
+                  // Microfono e foto: tutti e due facoltativi, nessuno aggiunge tocchi al
+                  // percorso minimo (F4.5).
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: _listening ? l.voice_stop : l.voice_start,
+                        icon: Icon(_listening ? Icons.mic : Icons.mic_none_outlined),
+                        color: _listening ? scheme.error : null,
+                        onPressed: () => unawaited(_toggleVoice()),
+                      ),
+                      if (d.photoPath == null)
+                        IconButton(
                           tooltip: l.photo_add,
                           icon: const Icon(Icons.photo_camera_outlined),
                           onPressed: () async {
@@ -189,7 +266,8 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                             if (added != null) setState(() => d.photoPath = added);
                           },
                         )
-                      : Padding(
+                      else
+                        Padding(
                           padding: const EdgeInsets.all(8),
                           child: ItemPhotoThumb(
                             photoPath: d.photoPath!,
@@ -198,6 +276,8 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                             fallback: const Icon(Icons.photo_outlined),
                           ),
                         ),
+                    ],
+                  ),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(12),
                     child: categoryGlyph(d.category),

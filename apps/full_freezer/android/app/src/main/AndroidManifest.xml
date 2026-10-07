@@ -13,6 +13,18 @@
          smettono di arrivare e niente lo dice. Niente SCHEDULE_EXACT_ALARM: i riepiloghi
          sono inesatti per scelta (ADR-009), arrivare alle 18:07 invece che alle 18 va bene. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <!-- Voce (F4.12): il microfono per dettare il nome. Il riconoscimento lo fa il servizio
+         di sistema; senza la <queries> qui sotto, da Android 11 l'app non lo "vede" e
+         speech_to_text risponde che non c'e' nessun riconoscitore. Niente INTERNET e
+         niente Bluetooth: li chiede il README del plugin, ma la rete la usa il servizio di
+         Google (un'altra app), e le cuffie non servono a dettare "due porzioni". -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
     <application
         android:label="Full Freezer"
         android:name="${applicationName}"

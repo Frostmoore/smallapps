@@ -287,6 +287,13 @@ TESTI = {
     'item_discard': ('Thrown away', 'Buttato'),
     'item_consumed': ('{name}: eaten', '{name}: consumato'),
     'item_discarded': ('{name}: thrown away', '{name}: buttato'),
+    # ── Voce ──
+    'voice_start': ('Say it', 'Dillo a voce'),
+    'voice_stop': ('Stop listening', 'Smetti di ascoltare'),
+    'voice_listening': ('Listening… e.g. “two portions of lasagne”', 'Ti ascolto… es. «due porzioni di lasagne»'),
+    'voice_unavailable': ('Voice input isn’t available: check the microphone permission in the phone settings.',
+                          'La voce non è disponibile: controlla il permesso del microfono nelle impostazioni del telefono.'),
+
     # ── Widget ──
     'widget_addTitle': ('Put the widget on the home screen', 'Metti il widget sulla schermata iniziale'),
     'widget_addBody': ('The oldest things in the freezer, without opening the app.', 'Le cose più vecchie nel freezer, senza aprire l’app.'),
