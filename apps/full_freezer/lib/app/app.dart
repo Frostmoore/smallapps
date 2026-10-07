@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../features/categories/custom_categories_page.dart';
 import '../features/freezers/freezer_editor_page.dart';
 import '../features/freezers/freezer_page.dart';
 import '../features/history/history_page.dart';
@@ -39,6 +40,7 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
     GoRoute(path: Routes.stats, builder: (_, __) => const StatsPage()),
     GoRoute(path: Routes.history, builder: (_, __) => const HistoryPage()),
+    GoRoute(path: Routes.categories, builder: (_, __) => const CustomCategoriesPage()),
     // ⚑ `new` prima di `:freezerId`: go_router prova le rotte in ordine, e "new" e' anche
     // un valore valido per il parametro.
     GoRoute(path: Routes.freezerNew, builder: (_, __) => const FreezerEditorPage()),

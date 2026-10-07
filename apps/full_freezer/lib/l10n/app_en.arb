@@ -104,7 +104,7 @@
   "freezer_editTitle": "Edit freezer",
   "freezer_nameLabel": "Name",
   "freezer_modelLabel": "What kind of freezer?",
-  "freezer_modelHint": "Typical sizes from product data sheets. If you know your litres, choose \"Other\".",
+  "freezer_modelHint": "Typical sizes from product data sheets. If you know your litres, choose “Other”.",
   "freezer_customLitersShort": "your litres",
   "freezer_customLitersLabel": "Freezer litres",
   "freezer_customLitersHelp": "Printed on the energy label, next to the snowflake.",
@@ -502,6 +502,31 @@
       }
     }
   },
+  "categories_title": "Your categories",
+  "categories_settingsBody": "Add your own, like “Game” or “Baby food”.",
+  "categories_empty": "No categories of your own yet. They appear next to the standard ones when you choose the category of an item.",
+  "categories_new": "New category",
+  "categories_edit": "Edit category",
+  "categories_name": "Name",
+  "categories_icon": "Icon",
+  "categories_reminderHelp": "Optional. Items you put in this category get this reminder.",
+  "categories_delete": "Delete category",
+  "categories_deleteTitle": "Delete \"{name}\"?",
+  "@categories_deleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categories_deleteBody": "{count, plural, =0{No item uses it.} =1{1 item will be left without a category.} other{{count} items will be left without a category.}}",
+  "@categories_deleteBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "settings_data": "Your data",
   "csv_export": "Export to a spreadsheet",
   "csv_exportBody": "What's in the freezer, as a CSV file that opens in Excel.",
@@ -515,7 +540,7 @@
   "backup_createBody": "Freezers, items, photos and history in one file, to keep or move to a new phone.",
   "backup_subject": "Full Freezer backup",
   "backup_restore": "Restore from a backup",
-  "backup_restoreBody": "Bring back the data from a file made with \"Back up everything\".",
+  "backup_restoreBody": "Bring back the data from a file made with “Back up everything”.",
   "backup_restoreTitle": "What to do with this backup?",
   "backup_restoreSummary": "It contains {freezers} freezers, {items} items inside and {history} in the history.",
   "@backup_restoreSummary": {

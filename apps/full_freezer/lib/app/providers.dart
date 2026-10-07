@@ -77,6 +77,12 @@ final removedItemsProvider = StreamProvider<List<Item>>(
 );
 
 /// Gli scomparti di tutti i freezer, raggruppati per freezer.
+/// Le categorie personalizzate (Pro). Esistono anche senza Pro: chi lo perde (rimborso)
+/// continua a vederle sugli alimenti, solo non ne crea di nuove.
+final customCategoriesProvider = StreamProvider<List<CustomCategory>>(
+  (ref) => ref.watch(repositoryProvider).watchCustomCategories(),
+);
+
 final compartmentsByFreezerProvider = StreamProvider<Map<int, List<Compartment>>>(
   (ref) => ref.watch(repositoryProvider).watchAllCompartments().map((all) {
     final map = <int, List<Compartment>>{};

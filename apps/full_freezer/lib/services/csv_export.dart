@@ -23,8 +23,16 @@ Future<File> exportStoredCsv({
   required List<Freezer> freezers,
   required Map<int, List<Compartment>> compartments,
   required CivilDate today,
+  List<CustomCategory> customCategories = const [],
 }) {
-  final csv = buildStoredCsv(l: l, items: items, freezers: freezers, compartments: compartments, today: today);
+  final csv = buildStoredCsv(
+    l: l,
+    items: items,
+    freezers: freezers,
+    compartments: compartments,
+    today: today,
+    customCategories: customCategories,
+  );
   return csv.writeTo(paths.file(paths.exports, 'full-freezer-${today.toIso()}.csv'));
 }
 
@@ -36,6 +44,7 @@ CsvWriter buildStoredCsv({
   required List<Freezer> freezers,
   required Map<int, List<Compartment>> compartments,
   required CivilDate today,
+  List<CustomCategory> customCategories = const [],
 }) {
   final names = {for (final f in freezers) f.id: f.name};
   final csv = CsvWriter()
@@ -57,7 +66,7 @@ CsvWriter buildStoredCsv({
         .firstOrNull;
     csv.addRow([
       i.name,
-      categoryName(l, i.category),
+      categoryName(l, i.category, customCategories),
       formatQuantity(i.quantity, l.localeName),
       unitName(l, i.unit, i.quantity),
       i.frozenAt,

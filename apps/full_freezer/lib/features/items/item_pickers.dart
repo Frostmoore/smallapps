@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../../app/category_glyphs.dart';
+import '../../app/entitlement.dart';
 import '../../app/formats.dart';
+import '../../app/paywall_config.dart';
+import '../../app/providers.dart';
 import '../../data/database.dart';
 import '../../domain/capacity.dart';
 import '../../domain/categories.dart';
 import '../../domain/units.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../categories/custom_category_editor.dart';
 
 /// Il nome visibile di un'unita', con la quantita' (per il plurale).
 String unitName(L l, String key, double quantity) {
@@ -23,8 +28,22 @@ String unitName(L l, String key, double quantity) {
   };
 }
 
-/// Il nome visibile di una categoria predefinita.
-String categoryName(L l, String? key) => switch (key) {
+/// Il nome visibile di una categoria: predefinita (dagli ARB) o personalizzata ([custom]).
+///
+/// Una chiave `custom:<id>` che non e' in [custom] (lista non ancora caricata, categoria
+/// cancellata) si legge "Nessuna categoria", come una chiave sconosciuta.
+String categoryName(L l, String? key, [List<CustomCategory> custom = const []]) {
+  final id = customCategoryId(key);
+  if (id != null) {
+    for (final c in custom) {
+      if (c.id == id) return c.name;
+    }
+    return l.category_none;
+  }
+  return _builtInName(l, key);
+}
+
+String _builtInName(L l, String? key) => switch (key) {
   'meat_red' => l.category_meat_red,
   'meat_white' => l.category_meat_white,
   'fish' => l.category_fish,
@@ -38,11 +57,67 @@ String categoryName(L l, String? key) => switch (key) {
 };
 
 /// L'icona disegnata della categoria di un alimento (`category_glyphs.dart`).
+///
+/// ⚑ E' un widget che legge da solo le categorie personalizzate: chi disegna una riga non
+/// deve sapere se la categoria e' predefinita o no, e non serve passare liste ovunque.
 Widget categoryGlyph(String? key, {double size = 22, Color? color}) =>
-    CategoryGlyph(iconKey: ItemCategories.byKey(key)?.iconKey, size: size, color: color);
+    _CategoryGlyphFor(categoryKey: key, size: size, color: color);
 
-/// Sceglie la categoria. Restituisce la chiave, `''` per "nessuna", null se chiuso.
-Future<String?> pickCategory(BuildContext context, String? current) {
+class _CategoryGlyphFor extends ConsumerWidget {
+  const _CategoryGlyphFor({required this.categoryKey, required this.size, this.color});
+
+  final String? categoryKey;
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final id = customCategoryId(categoryKey);
+    final iconKey = id == null
+        ? ItemCategories.byKey(categoryKey)?.iconKey
+        : (ref.watch(customCategoriesProvider).value ?? const <CustomCategory>[])
+              .where((c) => c.id == id)
+              .firstOrNull
+              ?.iconKey;
+    return CategoryGlyph(iconKey: iconKey, size: size, color: color);
+  }
+}
+
+/// Valore speciale di [pickCategory]: "crea una categoria".
+const String newCategoryChoice = '+new';
+
+/// Sceglie la categoria e, se serve, ne crea una nuova (Pro).
+///
+/// Restituisce `(chiave, promemoria)`: la chiave e' `''` per "nessuna"; il promemoria e'
+/// quello della categoria personalizzata scelta, da copiare nell'alimento. null se chiuso.
+///
+/// ⚑ Il promemoria si **copia** nell'alimento invece di leggerlo dalla categoria ogni volta:
+/// cosi' cambiare la categoria domani non sposta i promemoria di cio' che e' gia' dentro,
+/// e cancellarla non li fa sparire.
+Future<(String, int?)?> chooseCategory(BuildContext context, WidgetRef ref, String? current) async {
+  final custom = ref.read(customCategoriesProvider).value ?? const <CustomCategory>[];
+  final picked = await pickCategory(context, current, custom: custom);
+  if (picked == null || !context.mounted) return null;
+  if (picked != newCategoryChoice) {
+    final id = customCategoryId(picked);
+    final reminder = id == null ? null : custom.where((c) => c.id == id).firstOrNull?.defaultReminderDays;
+    return (picked, reminder);
+  }
+  if (!ref.read(featureGateProvider).allows(FeatureKey.customCategories)) {
+    await showFreezerPaywall(context, ref, highlight: FeatureKey.customCategories);
+    return null;
+  }
+  final draft = await showCustomCategoryEditor(context);
+  if (draft == null) return null;
+  final id = await ref
+      .read(repositoryProvider)
+      .addCustomCategory(name: draft.name, iconKey: draft.iconKey, defaultReminderDays: draft.reminderDays);
+  return (customCategoryKey(id), draft.reminderDays);
+}
+
+/// Il foglio delle categorie. Restituisce la chiave, `''` per "nessuna",
+/// [newCategoryChoice] per crearne una, null se chiuso.
+Future<String?> pickCategory(BuildContext context, String? current, {List<CustomCategory> custom = const []}) {
   final l = L.of(context);
   return showModalBottomSheet<String>(
     context: context,
@@ -60,6 +135,19 @@ Future<String?> pickCategory(BuildContext context, String? current) {
               trailing: current == c.key ? const Icon(Icons.check) : null,
               onTap: () => Navigator.of(sheet).pop(c.key),
             ),
+          for (final c in custom)
+            ListTile(
+              leading: CategoryGlyph(iconKey: c.iconKey),
+              title: Text(c.name),
+              subtitle: c.defaultReminderDays == null ? null : Text(l.category_reminderDays(c.defaultReminderDays!)),
+              trailing: current == customCategoryKey(c.id) ? const Icon(Icons.check) : null,
+              onTap: () => Navigator.of(sheet).pop(customCategoryKey(c.id)),
+            ),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: Text(l.categories_new),
+            onTap: () => Navigator.of(sheet).pop(newCategoryChoice),
+          ),
           ListTile(
             leading: const Icon(Icons.block),
             title: Text(l.category_none),

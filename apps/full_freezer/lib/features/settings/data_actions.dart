@@ -28,6 +28,7 @@ Future<void> exportCsv(BuildContext context, WidgetRef ref) async {
     freezers: ref.read(freezersProvider).value ?? const <Freezer>[],
     compartments: ref.read(compartmentsByFreezerProvider).value ?? const <int, List<Compartment>>{},
     today: ref.read(todayProvider),
+    customCategories: ref.read(customCategoriesProvider).value ?? const <CustomCategory>[],
   );
   await ref.read(backupServiceProvider).shareBackup(file, subject: l.csv_subject);
 }

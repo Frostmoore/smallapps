@@ -136,6 +136,14 @@ class SettingsPage extends ConsumerWidget {
           ),
           GhiaccioSectionLabel(text: l.settings_data, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
           GhiaccioTile(
+            leading: const Icon(Icons.label_outline),
+            title: l.categories_title,
+            subtitle: l.categories_settingsBody,
+            trailing: pro ? Icon(Icons.chevron_right, color: p.inkMuted) : const ProBadge(),
+            onTap: () => unawaited(openProFeature(context, ref, FeatureKey.customCategories, Routes.categories)),
+          ),
+          const SizedBox(height: 6),
+          GhiaccioTile(
             leading: const Icon(Icons.table_view_outlined),
             title: l.csv_export,
             subtitle: l.csv_exportBody,

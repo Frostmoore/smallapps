@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:full_freezer/data/database.dart';
 import 'package:full_freezer/data/freezer_repository.dart';
+import 'package:full_freezer/domain/categories.dart';
 import 'package:full_freezer/domain/units.dart';
 import 'package:micro_core/micro_core.dart';
 // I vincoli CHECK violati arrivano come eccezione di sqlite3, non di drift.
@@ -242,5 +243,42 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 50));
     expect(segnali, isNotEmpty);
     await sub.cancel();
+  });
+
+  group('categorie personalizzate', () {
+    test('si creano, si rinominano e si elencano in ordine alfabetico', () async {
+      final b = await repo.addCustomCategory(name: ' Selvaggina ', iconKey: 'meat', defaultReminderDays: 200);
+      await repo.addCustomCategory(name: 'Pappe', iconKey: 'prepared');
+      expect((await repo.watchCustomCategories().first).map((c) => c.name), ['Pappe', 'Selvaggina']);
+      await repo.updateCustomCategory(b, name: 'Cacciagione', iconKey: 'poultry', defaultReminderDays: null);
+      final c = (await repo.watchCustomCategories().first).first;
+      expect((c.name, c.iconKey, c.defaultReminderDays), ('Cacciagione', 'poultry', null));
+    });
+
+    test('cancellarla lascia gli alimenti senza categoria, non con una chiave orfana', () async {
+      final f = await freezer();
+      final cat = await repo.addCustomCategory(name: 'Pappe', iconKey: 'prepared');
+      final id = await repo.addItem(
+        NewItem(
+          name: 'Pappa',
+          freezerId: f,
+          category: customCategoryKey(cat),
+          quantity: 1,
+          unit: Units.portions,
+          frozenAt: CivilDate.parse('2026-10-01'),
+          volumeLiters: 0.2,
+        ),
+      );
+      await repo.deleteCustomCategory(cat);
+      expect((await repo.itemById(id))!.category, isNull);
+      expect(await repo.watchCustomCategories().first, isEmpty);
+    });
+
+    test('la chiave custom:<id> va e torna', () {
+      expect(customCategoryKey(7), 'custom:7');
+      expect(customCategoryId('custom:7'), 7);
+      expect(customCategoryId('fish'), isNull);
+      expect(customCategoryId(null), isNull);
+    });
   });
 }

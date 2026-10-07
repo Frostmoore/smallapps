@@ -32,6 +32,16 @@ class ItemCategory {
   final String iconKey;
 }
 
+/// La chiave con cui un alimento cita una categoria personalizzata: `custom:<id>`.
+///
+/// ⚑ Il prefisso distingue a colpo d'occhio le due famiglie: le predefinite hanno chiavi
+/// fisse in codice, le personalizzate vivono nel database (`custom_categories`).
+String customCategoryKey(int id) => 'custom:$id';
+
+/// L'id della categoria personalizzata citata da [key], o null se non e' personalizzata.
+int? customCategoryId(String? key) =>
+    key != null && key.startsWith('custom:') ? int.tryParse(key.substring(7)) : null;
+
 /// Le categorie predefinite, nell'ordine in cui si mostrano.
 abstract final class ItemCategories {
   static const ItemCategory meatRed = ItemCategory(

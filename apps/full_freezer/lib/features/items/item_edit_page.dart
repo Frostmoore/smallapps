@@ -237,11 +237,19 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
             contentPadding: EdgeInsets.zero,
             leading: categoryGlyph(d.category),
             title: Text(l.item_category),
-            subtitle: Text(categoryName(l, d.category)),
+            subtitle: Text(categoryName(l, d.category, ref.watch(customCategoriesProvider).value ?? const [])),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
-              final key = await pickCategory(context, d.category);
-              if (key != null) setState(() => d.setCategory(key.isEmpty ? null : key));
+              final choice = await chooseCategory(context, ref, d.category);
+              if (choice == null) return;
+              final (key, reminder) = choice;
+              setState(() {
+                d.setCategory(key.isEmpty ? null : key);
+                if (reminder != null) {
+                  d.reminderAfterDays = reminder;
+                  _reminder.text = '$reminder';
+                }
+              });
             },
           ),
           Row(

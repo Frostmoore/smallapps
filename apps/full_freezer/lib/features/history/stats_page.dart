@@ -107,7 +107,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
                   Expanded(
                     child: _NumberTile(
                       value: stats.mostWastedCategory == null ? '–' : '${stats.mostWastedCount}',
-                      unit: stats.mostWastedCategory == null ? '' : categoryName(l, stats.mostWastedCategory),
+                      unit: stats.mostWastedCategory == null ? '' : categoryName(l, stats.mostWastedCategory, ref.watch(customCategoriesProvider).value ?? const []),
                       label: l.stats_mostWasted,
                       leading: stats.mostWastedCategory == null
                           ? null

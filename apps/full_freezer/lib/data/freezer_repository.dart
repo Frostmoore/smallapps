@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../domain/categories.dart';
 import '../domain/text_norm.dart';
 import 'database.dart';
 
@@ -181,6 +182,47 @@ class FreezerRepository {
     }
   });
 
+  // ── Categorie personalizzate (Pro) ───────────────────────────────────────
+
+  /// Le categorie dell'utente, in ordine alfabetico.
+  Stream<List<CustomCategory>> watchCustomCategories() =>
+      (_db.select(_db.customCategories)..orderBy([(t) => OrderingTerm(expression: t.name)])).watch();
+
+  /// ⚑ `colorValue` e' una colonna obbligatoria dello schema 1 ma l'interfaccia non la usa:
+  /// le icone dell'app hanno tutte il colore della palette (F4.14, "A · Ghiaccio"), e una
+  /// categoria arancione in mezzo stonerebbe. Si salva 0 e la colonna resta per il futuro.
+  Future<int> addCustomCategory({required String name, required String iconKey, int? defaultReminderDays}) =>
+      _db.into(_db.customCategories).insert(
+        CustomCategoriesCompanion.insert(
+          name: name.trim(),
+          iconKey: iconKey,
+          colorValue: 0,
+          defaultReminderDays: Value(defaultReminderDays),
+        ),
+      );
+
+  /// Cambiare il promemoria della categoria **non** tocca gli alimenti gia' salvati: il
+  /// promemoria si copia nell'alimento quando lo si assegna (vedi `chooseCategory`).
+  Future<void> updateCustomCategory(int id, {required String name, required String iconKey, int? defaultReminderDays}) =>
+      (_db.update(_db.customCategories)..where((t) => t.id.equals(id))).write(
+        CustomCategoriesCompanion(
+          name: Value(name.trim()),
+          iconKey: Value(iconKey),
+          defaultReminderDays: Value(defaultReminderDays),
+        ),
+      );
+
+  /// Cancella la categoria e la toglie dagli alimenti che la usavano (restano "senza
+  /// categoria"). ☠ `items.category` e' testo, non una chiave esterna: senza questo passo
+  /// gli alimenti puntano a un `custom:<id>` che non esiste, e se l'id torna libero (SQLite
+  /// puo' riusarlo) finiscono nella categoria di un altro.
+  Future<void> deleteCustomCategory(int id) => _db.transaction(() async {
+    await (_db.update(_db.items)..where((t) => t.category.equals(customCategoryKey(id)))).write(
+      const ItemsCompanion(category: Value(null)),
+    );
+    await (_db.delete(_db.customCategories)..where((t) => t.id.equals(id))).go();
+  });
+
   // ── Alimenti ──────────────────────────────────────────────────────────────
 
   /// Gli alimenti nel freezer, **il piu' vecchio per primo** (la promessa dell'app).
@@ -339,7 +381,7 @@ class FreezerRepository {
   /// Un segnale a ogni modifica di freezer o alimenti: lo usano lo scheduler delle
   /// notifiche (F4.9) e il widget (F4.11), cosi' nessuno deve ricordarsi di chiamarli.
   Stream<void> watchAnyChange() => _db.tableUpdates(
-    TableUpdateQuery.onAllTables([_db.freezers, _db.compartments, _db.items]),
+    TableUpdateQuery.onAllTables([_db.freezers, _db.compartments, _db.items, _db.customCategories]),
   );
 
   // ── Regole interne ────────────────────────────────────────────────────────
