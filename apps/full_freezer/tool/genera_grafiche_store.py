@@ -8,8 +8,9 @@ dall'anteprima Mac (store/grafiche/sorgenti/widget_<lingua>.png, da
 tool/anteprima_widget_ios.swift --vetrina), e scrive in store/grafiche/:
 
 - testata-1024x500-<lingua>.png      la "grafica in primo piano" di Google Play;
-- appstore/<lingua>/NN-nome.png      1320x2868, la misura da 6,9" che App Store Connect
-                                     pretende (le altre le ricava da sola);
+- appstore/<lingua>/NN-nome.png      1320x2868, iPhone 6,9";
+- appstore-6.5/<lingua>/NN-nome.png  1284x2778, iPhone 6,5": quella che App Store Connect
+                                     pretende davvero nello spazio obbligatorio;
 - play/<lingua>/NN-nome.png          1080x2160: Play non accetta proporzioni oltre 2:1.
 
 Ogni scheda: titolo grande e una riga sotto, sul blu dell'app, e la schermata vera dentro
@@ -179,7 +180,9 @@ def testata(lingua: str) -> Image.Image:
 def main():
     for lingua in ('it', 'en'):
         testata(lingua).save(USCITA / f'testata-1024x500-{lingua}.png')
-        for cartella, (w, h) in (('appstore', (1320, 2868)), ('play', (1080, 2160))):
+        # ☠ App Store Connect chiede la misura da 6,5" (1284x2778) e rifiuta le 6,9" trascinate in
+        #   quello spazio (lezione di TrashCan, 2026-10-05): si compongono tutte e due, native.
+        for cartella, (w, h) in (('appstore', (1320, 2868)), ('appstore-6.5', (1284, 2778)), ('play', (1080, 2160))):
             dest = USCITA / cartella / lingua
             dest.mkdir(parents=True, exist_ok=True)
             for i, (nome, titolo, sotto) in enumerate(SCHEDE[lingua], 1):

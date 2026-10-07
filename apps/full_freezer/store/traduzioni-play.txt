@@ -1,0 +1,120 @@
+GOOGLE PLAY STORE LISTING - Full Freezer (com.smp.fullfreezer)
+
+=====================================================
+LANGUAGE: Italian (Italy) - it-IT
+=====================================================
+
+App name:
+Full Freezer
+
+Short description:
+Cosa c'è nel freezer e da quanto tempo: il più vecchio sempre in cima.
+
+Full description:
+Cosa c'è nel freezer, e da quanto tempo?
+
+Full Freezer risponde in un colpo d'occhio. Gli alimenti stanno in ordine di anzianità, il più vecchio in cima, con i giorni passati dal congelamento. Niente più sacchetti dimenticati in fondo al cassetto.
+
+DENTRO IN TRE TOCCHI
+
+Metti nel freezer, scrivi il nome, salva. La categoria si capisce dal nome, la data è oggi, il resto è già come l'ultima volta. Puoi anche dirlo a voce («due porzioni di lasagne») o scattare una foto per riconoscerlo dopo.
+
+QUANTO È PIENO
+
+Scegli il tuo freezer da una serie di modelli veri, dal cassetto del frigo al pozzetto da 350 litri. L'app stima lo spazio che occupa ogni cosa e ti dice quanto è pieno, e lo puoi correggere quando apri lo sportello.
+
+IL WIDGET SULLA SCHERMATA INIZIALE
+
+Le tre cose più vecchie, con i giorni. Li conta da solo ogni notte, anche se l'app non la apri mai.
+
+TROVI TUTTO
+
+Cerca per nome o per nota, senza badare ad accenti e maiuscole. Dividi il freezer in cassetti e ripiani e sai sempre dove guardare.
+
+SENZA ACCOUNT, SENZA INTERNET
+
+Niente da registrare, niente da accettare. Quello che inserisci resta sul telefono: non lo vediamo e non lo raccogliamo.
+
+NIENTE PUBBLICITÀ
+
+Nemmeno nella versione gratuita.
+
+GRATIS, E POI PRO SE TI SERVE
+
+La versione gratuita include un freezer con i suoi cassetti, l'inserimento rapido, a voce e con le foto, il riempimento, la ricerca, il widget e il ripristino da un backup.
+
+Full Freezer Pro si sblocca con un acquisto singolo, senza abbonamento, e aggiunge:
+• tutti i freezer che hai: il pozzetto in garage, quello dai tuoi
+• gli avvisi: cosa sta lì da troppo, freezer quasi pieno o quasi vuoto
+• lo storico di cosa hai consumato e buttato, con le statistiche dello spreco
+• le tue categorie, ognuna con il suo promemoria
+• l'esportazione in un foglio di calcolo e il backup completo
+
+Se cambi telefono, il Pro lo ripristini dal tuo account Google.
+
+UNA COSA DA DIRE CHIARAMENTE
+
+I promemoria sono un aiuto per organizzarti, non una scadenza né una garanzia di sicurezza alimentare: in caso di dubbio valgono le indicazioni sulla confezione.
+
+Full Freezer fa parte di SMP MicroApps: app piccole, che fanno una cosa sola e la fanno bene.
+https://smpmicroapps.it
+
+
+=====================================================
+LANGUAGE: English (United Kingdom) - en-GB
+=====================================================
+
+App name:
+Full Freezer
+
+Short description:
+What's in your freezer and since when: the oldest always on top.
+
+Full description:
+What's in your freezer, and since when?
+
+Full Freezer answers at a glance. Items are sorted by age, the oldest on top, with the days since they were frozen. No more forgotten bags at the bottom of the drawer.
+
+IN THE FREEZER IN THREE TAPS
+
+Put in freezer, type the name, save. The category comes from the name, the date is today, everything else is as last time. You can also say it ("two portions of lasagne") or take a photo to recognise it later.
+
+HOW FULL IT IS
+
+Pick your freezer from a range of real models, from the fridge drawer to a 350-litre chest freezer. The app estimates the space each item takes and tells you how full it is, and you can correct it when you open the door.
+
+THE HOME SCREEN WIDGET
+
+The three oldest items, with their days. It counts them by itself every night, even if you never open the app.
+
+FIND ANYTHING
+
+Search by name or note, accents and capitals don't matter. Split the freezer into drawers and shelves and always know where to look.
+
+NO ACCOUNT, NO INTERNET
+
+Nothing to register, nothing to accept. What you enter stays on your phone: we never see it and never collect it.
+
+NO ADVERTISING
+
+Not even in the free version.
+
+FREE, THEN PRO IF YOU NEED IT
+
+The free version includes one freezer with its drawers, quick add by text, voice and photo, the fill level, search, the widget and restoring from a backup.
+
+Full Freezer Pro unlocks with a single purchase, no subscription, and adds:
+• every freezer you have: the chest in the garage, the one at your parents'
+• alerts: what has been in too long, freezer nearly full or nearly empty
+• the history of what you ate and threw away, with waste statistics
+• your own categories, each with its own reminder
+• export to a spreadsheet and full backup
+
+Change phone and you restore Pro from your Google account.
+
+ONE THING TO SAY PLAINLY
+
+Reminders help you get organised; they are not an expiry date or a food safety guarantee. When in doubt, follow the instructions on the packaging.
+
+Full Freezer is part of SMP MicroApps: small apps that do one thing and do it well.
+https://smpmicroapps.it
