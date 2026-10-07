@@ -261,8 +261,12 @@ Esito atteso: **PEGI 3 / Tutti**. **Unica risposta affermativa**: acquisti di be
 | Descrizione (it) | `Più freezer, avvisi di freezer pieno o vuoto e cose vecchie, storico e statistiche, categorie tue, CSV e backup. Un pagamento unico.` |
 | Nome (en) | `Full Freezer Pro` |
 | Descrizione (en) | `More freezers, nearly full/empty and old-item alerts, history and statistics, your own categories, CSV and backup. One payment.` |
-| Prezzo | **3,99 € in Italia, IVA inclusa** (lo stesso prezzo dell'App Store); Play calcola gli altri paesi |
-| Stato | Attivo |
+| Opzione d'acquisto | ID `lifetime`, tipo **Acquista** |
+| Prezzo | Base **3,27 EUR** senza IVA → **3,99 € in Italia** (con il 22%), come l'App Store; Play calcola gli altri paesi |
+| Stato | **Attivo** (creato il 2026-10-07) |
+
+☠ **Il prezzo che si scrive in Play e' senza IVA**: scrivendo 3,99 l'Italia diventava 4,89 €
+(3,99 + 22% e arrotondamento). Per ottenere 3,99 € al pubblico in Italia si scrive 3,27.
 
 ☠ **L'ID del prodotto non si cambia e non si riusa.** E' scritto in
 `apps/full_freezer/lib/app/app_config.dart`.
