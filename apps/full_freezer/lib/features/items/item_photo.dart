@@ -68,7 +68,19 @@ Future<String?> pickItemPhoto(BuildContext context, WidgetRef ref) async {
   if (picked == null) return null;
 
   final store = ImageStore(paths: ref.read(appPathsProvider));
-  final result = await store.importFile(File(picked.path), bucket: itemPhotoBucket, maxLongSide: itemPhotoMaxSide);
+  final source0 = File(picked.path);
+  final result = await store.importFile(source0, bucket: itemPhotoBucket, maxLongSide: itemPhotoMaxSide);
+  // image_picker lascia una copia nella cache dell'app (visto sull'emulatore, 2026-10-07):
+  // dopo l'importazione non serve piu', e una foto a scatto si accumulerebbe finche' il
+  // sistema non decide di pulire. Solo se sta davvero nella cache: dalla galleria, su
+  // alcune versioni, il percorso e' l'originale dell'utente, che non si tocca.
+  if (source0.path.contains('/cache/')) {
+    try {
+      await source0.delete();
+    } on FileSystemException {
+      // Gia' sparita: va bene cosi'.
+    }
+  }
   switch (result) {
     case Ok(:final value):
       return value.path;
