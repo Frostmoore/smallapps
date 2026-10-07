@@ -182,6 +182,13 @@ class _NightHeader extends ConsumerWidget {
                   ],
                 ),
               ),
+              // La ricerca, come nel disegno di riferimento "Ghiaccio" (F4.8).
+              _NightIconButton(
+                tooltip: l.search_hint,
+                icon: Icons.search,
+                onPressed: () => context.push(Routes.search),
+              ),
+              const SizedBox(width: 8),
               _NightIconButton(
                 tooltip: l.home_addFreezer,
                 icon: Icons.add_home_work_outlined,

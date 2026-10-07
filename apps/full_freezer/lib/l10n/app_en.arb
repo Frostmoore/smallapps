@@ -228,6 +228,17 @@
       }
     }
   },
+  "search_hint": "Search the freezer",
+  "search_clear": "Clear",
+  "search_empty": "Type a name or a word from the notes: accents and capitals don't matter.",
+  "search_noResults": "Nothing in the freezer matches \"{query}\".",
+  "@search_noResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "photo_add": "Add a photo",
   "photo_camera": "Take a photo",
   "photo_gallery": "Choose from gallery",

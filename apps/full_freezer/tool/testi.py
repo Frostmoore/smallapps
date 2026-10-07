@@ -148,6 +148,13 @@ TESTI = {
     'quickAdd_moreDetails': ('More details', 'Altri dettagli'),
     'quickAdd_saved': ('{name} is in the freezer', '{name} è nel freezer'),
 
+    # ── Ricerca ──
+    'search_hint': ('Search the freezer', 'Cerca nel freezer'),
+    'search_clear': ('Clear', 'Cancella'),
+    'search_empty': ("Type a name or a word from the notes: accents and capitals don't matter.",
+                     'Scrivi un nome o una parola delle note: accenti e maiuscole non contano.'),
+    'search_noResults': ('Nothing in the freezer matches "{query}".', 'Nel freezer non c’è niente che corrisponda a «{query}».'),
+
     # ── Foto ──
     'photo_add': ('Add a photo', 'Aggiungi una foto'),
     'photo_camera': ('Take a photo', 'Scatta una foto'),

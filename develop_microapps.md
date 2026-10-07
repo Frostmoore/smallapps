@@ -996,10 +996,10 @@ tutte fatte e provate sull'emulatore:
 - [x] **F4.3** `AgingCalculator` e ordinamento "oldest first" + test (2026-10-06: `lib/domain/aging.dart`, `compareOldestFirst`; 9 test)
 - [x] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test (2026-10-06: `lib/domain/capacity.dart`, con anche `CapacityAlertPolicy` dell'isteresi di F4.9, che e' logica pura; 18 test)
 - [x] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima" (2026-10-07: interfaccia "A · Ghiaccio" scelta dal proprietario, vedi `memory/decisioni.md`; `lib/features/home/`, `lib/app/freezer_palette.dart`, icone disegnate in `lib/app/category_glyphs.dart`)
-- [ ] **F4.5** Inserimento rapido (obiettivo: sotto i 5 secondi) e inserimento completo — FATTO: foglio rapido (2 tocchi), pagina completa, ingombro. MANCA: la foto (F4.5b, `image_picker` + permessi iOS)
+- [x] **F4.5** Inserimento rapido (obiettivo: sotto i 5 secondi) e inserimento completo (foglio rapido in 2 tocchi, pagina completa, ingombro; F4.5b foto con `image_picker` e `ImageStore`, provata sull'emulatore il 2026-10-07. Debito: i testi d'uso iOS di fotocamera e galleria sono solo in inglese, l'`InfoPlist.strings` italiano va aggiunto al progetto Xcode dal Mac)
 - [x] **F4.6** Posizioni: freezer (scelto da una serie di modelli, dal più piccolo al più grande) e scomparti, con conteggi e barra di riempimento (2026-10-06; manca solo il limite di un freezer nel piano gratuito, che arriva con il Pro in F4.10)
 - [ ] **F4.7** Uscita alimento: consumato / buttato, con storico
-- [ ] **F4.8** Ricerca istantanea
+- [x] **F4.8** Ricerca istantanea (2026-10-07: `lib/domain/search.dart` filtra in memoria nome e note normalizzati, tutte le parole in qualunque ordine; `lib/features/search/search_page.dart`; lente nella testata)
 - [ ] **F4.9** Notifiche (**Pro**): digest aggregato settimanale/quindicinale/mensile + avvisi «quasi pieno» / «quasi vuoto»
 - [ ] **F4.10** Feature Pro: freezer multipli, notifiche, storico, statistiche, CSV, backup, categorie personalizzate (le foto sono **gratis**)
 - [ ] **F4.11** Widget "da consumare presto": Android (Kotlin) **e** iOS (WidgetKit), stesso payload
