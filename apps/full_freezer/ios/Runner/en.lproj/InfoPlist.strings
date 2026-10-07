@@ -1,0 +1,7 @@
+/* Permission texts in English: the same as Info.plist, kept here so that both languages
+   live in the same place (develop_microapps.md F4.14). */
+"CFBundleDisplayName" = "Full Freezer";
+"NSCameraUsageDescription" = "Full Freezer uses the camera only when you take a photo of something you put in the freezer, so you can recognise it later.";
+"NSPhotoLibraryUsageDescription" = "Full Freezer opens your photos only when you choose one for something in the freezer.";
+"NSMicrophoneUsageDescription" = "Full Freezer uses the microphone only while you tap the mic to say what you are putting in the freezer.";
+"NSSpeechRecognitionUsageDescription" = "Full Freezer turns what you say into the name and quantity of the item, for example “two portions of lasagne”.";
