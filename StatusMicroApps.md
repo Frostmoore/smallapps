@@ -16,7 +16,7 @@ Ultimo aggiornamento: **2026-10-07**
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
 | **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
-| **Full Freezer** | 1.0.0 (1) | 🔵 in sviluppo: codice completo, mancano app su Console, prodotto e scheda | 🔵 **TestFlight** (build 1), Pro pronto per l'invio, scheda da compilare | card grigia «In arrivo» |
+| **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🔵 **TestFlight** (build 1), Pro pronto per l'invio, scheda da compilare | card grigia «In arrivo» |
 | **Scorte Calore** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 
@@ -94,6 +94,13 @@ Grafiche pronte in `apps/full_freezer/store/grafiche/` (testata 1024x500, 6 sche
 App Store e 1080x2160 per Play, it/en). ☠ Firma: Xcode 27 non crea piu' profili nuovi con la chiave
 API; per Full Freezer i profili «MicroApps AppStore …» sono stati creati via API (vedi
 `tool/build_ios.sh`).
+
+| Data | Google Play |
+|---|---|
+| 2026-10-07 | App creata su Play Console (account **personale** SMPStudio); AAB **1.0.0 (2)** in **test interno**; prodotto `fullfreezer_pro_lifetime` **attivo**, base 3,27 EUR → 3,99 € in Italia; scheda dello Store compilata it/en (testi importati da `store/traduzioni-play.txt`) |
+| 2026-10-07 | ☠ **Account personale → per ogni app nuova serve un test chiuso con 12 tester per 14 giorni** prima della produzione. Avviato il **cambio ad account da organizzazione**: sito `https://smp-digital.it` verificato (record TXT su Aruba + Search Console), **D-U-N-S richiesto** tramite il modulo Apple, in attesa dell'email di Dun & Bradstreet |
+
+**Prossimi passi Play**: compilare i moduli «Contenuti dell'app» (risposte in `apps/full_freezer/store/scheda-play.md` §6-8); appena arriva il D-U-N-S (aspettare 1-2 giorni lavorativi prima di inserirlo) → Account sviluppatore → Cambia tipo di account, con profilo pagamenti da organizzazione e recapiti pubblici di lavoro; dopo il cambio aspettare 72 ore prima di pubblicare.
 
 Cosa resta (prima versione era: prima del primo invio, il proprietario deve):
 
