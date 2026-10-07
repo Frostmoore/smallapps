@@ -25,13 +25,16 @@ class CategoryGlyph extends StatelessWidget {
     final c = color ?? IconTheme.of(context).color ?? Theme.of(context).colorScheme.onSurface;
     return SizedBox.square(
       dimension: size,
-      child: CustomPaint(painter: _GlyphPainter(iconKey ?? 'other', c)),
+      child: CustomPaint(painter: CategoryGlyphPainter(iconKey ?? 'other', c)),
     );
   }
 }
 
-class _GlyphPainter extends CustomPainter {
-  _GlyphPainter(this.key, this.color);
+/// Il disegno di una categoria su una tela 24x24 scalata a [Size]. Pubblico perche' il
+/// widget della schermata iniziale lo rende in PNG (`FreezerWidget`): stesso disegno
+/// nell'app e sul widget, per costruzione.
+class CategoryGlyphPainter extends CustomPainter {
+  CategoryGlyphPainter(this.key, this.color);
 
   final String key;
   final Color color;
@@ -153,5 +156,5 @@ class _GlyphPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_GlyphPainter old) => old.key != key || old.color != color;
+  bool shouldRepaint(CategoryGlyphPainter old) => old.key != key || old.color != color;
 }

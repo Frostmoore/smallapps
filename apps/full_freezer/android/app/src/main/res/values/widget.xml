@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Stili e testi del widget (F4.11). I testi stanno qui e non arrivano da Dart perche' il
+  selettore di widget e il primo disegno avvengono prima che l'app sia mai partita. La
+  traduzione italiana e' in values-it/widget.xml.
+-->
+<resources>
+    <string name="widget_label">Full Freezer</string>
+    <string name="widget_description">The oldest things in your freezer, on the home screen.</string>
+    <string name="widget_title">USE FIRST</string>
+    <!-- Solo per l'anteprima nel selettore: tre righe d'esempio invece di un rettangolo vuoto. -->
+    <string name="widget_sample1">Lasagne</string>
+    <string name="widget_sample2">Peas</string>
+    <string name="widget_sample3">Ice cream</string>
+    <string name="widget_open_app">Open Full Freezer to see what\'s inside.</string>
+
+    <style name="WidgetRow">
+        <item name="android:layout_width">match_parent</item>
+        <!-- Altezza 0 e peso 1: le righe si dividono tutta l'altezza del widget. Con
+             wrap_content stavano in alto e lasciavano mezzo widget vuoto, che si legge come
+             "non ha caricato" (visto sull'emulatore il 2026-10-07). -->
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="WidgetIcon">
+        <item name="android:layout_width">22dp</item>
+        <item name="android:layout_height">22dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+
+    <style name="WidgetName">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">#FFFFFFFF</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="WidgetDays">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:textColor">#FFB9CBE8</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">1</item>
+    </style>
+</resources>

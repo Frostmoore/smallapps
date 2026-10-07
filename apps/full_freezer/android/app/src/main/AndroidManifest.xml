@@ -4,9 +4,8 @@
          permesso sparirebbe in silenzio e Play Console rifiuterebbe di creare il prodotto Pro
          (guarda il bundle caricato, non il codice). Vedi apps/trashcan.
 
-         I permessi delle notifiche (F4.9), del microfono (F4.12) e il receiver del widget
-         (F4.11) si aggiungono con le loro sottofasi, non prima: un permesso dichiarato e
-         non usato e' una domanda in piu' nella revisione di Play. -->
+         I permessi si aggiungono con le sottofasi che li usano, non prima: un permesso
+         dichiarato e non usato e' una domanda in piu' nella revisione di Play. -->
     <uses-permission android:name="com.android.vending.BILLING"/>
 
     <!-- Notifiche (F4.9). Gli allarmi di Android non sopravvivono al riavvio: senza
@@ -35,6 +34,12 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- ☠ Il deep link di Flutter va spento: il tocco sul widget arriva con l'URI
+                 fullfreezer:///use-soon, e con questa voce accesa Flutter lo passava da solo a
+                 go_router come `go`, che sostituisce la pila. Risultato visto sull'emulatore
+                 il 2026-10-07: "Da usare prima" senza freccia indietro, e da app chiusa la
+                 home invece della pagina. Gli URI li gestisce solo app.dart (_openWidgetUri). -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -45,6 +50,35 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Il widget (F4.11). Vedi FullFreezerWidgetProvider.kt. exported="true" e'
+             obbligatorio: APPWIDGET_UPDATE lo manda il sistema, che e' un'altra app. -->
+        <receiver
+            android:name=".FullFreezerWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/full_freezer_widget_info" />
+        </receiver>
+
+        <!-- ☠ Senza questo receiver l'allarme delle 00:05 scatta e non arriva a nessuno: il
+             widget resterebbe ai giorni di ieri fino al prossimo avvio (lezione di TrashCan).
+             BOOT_COMPLETED e MY_PACKAGE_REPLACED riarmano l'allarme dopo un riavvio o un
+             aggiornamento. -->
+        <receiver
+            android:name="es.antonborri.home_widget.HomeWidgetScheduledUpdateReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.SCHEDULED_UPDATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Senza questi due receiver il plugin non ha nessuno a cui consegnare la notifica
              quando l'allarme scatta: si pianifica senza errori e la notifica non arriva mai.
              Stessa trappola gia' disinnescata in TrashCan. -->

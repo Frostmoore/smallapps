@@ -28,6 +28,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^3.4.3
+  home_widget: ^0.9.4
   go_router: ^18.0.1
   image_picker: ^1.2.4
   intl: ^0.20.3

@@ -502,6 +502,10 @@
       }
     }
   },
+  "widget_addTitle": "Put the widget on the home screen",
+  "widget_addBody": "The oldest things in the freezer, without opening the app.",
+  "widget_addUnsupported": "This launcher can’t add widgets by itself. Touch and hold the home screen and look for Full Freezer.",
+  "widget_addIos": "Touch and hold the Home Screen, tap + at the top and look for Full Freezer.",
   "categories_title": "Your categories",
   "categories_settingsBody": "Add your own, like “Game” or “Baby food”.",
   "categories_empty": "No categories of your own yet. They appear next to the standard ones when you choose the category of an item.",

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_label">Full Freezer</string>
+    <string name="widget_description">Le cose più vecchie del freezer sulla schermata iniziale.</string>
+    <string name="widget_title">DA USARE PRIMA</string>
+    <string name="widget_sample1">Lasagne</string>
+    <string name="widget_sample2">Piselli</string>
+    <string name="widget_sample3">Gelato</string>
+    <string name="widget_open_app">Apri Full Freezer per vedere cosa c\'è dentro.</string>
+</resources>

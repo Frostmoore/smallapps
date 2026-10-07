@@ -10,6 +10,7 @@ import '../data/freezer_repository.dart';
 import '../domain/home_view.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../services/freezer_scheduler.dart';
+import '../services/freezer_widget.dart';
 import 'entitlement.dart';
 import 'locale_resolution.dart';
 
@@ -195,12 +196,21 @@ final notificationSyncProvider = Provider<void>((ref) {
   final repo = ref.watch(repositoryProvider);
   if (scheduler.isReady) unawaited(scheduler.rescheduleAll());
 
+  // Il widget (F4.11) segue gli stessi eventi delle notifiche: all'avvio e a ogni modifica.
+  Future<void> publishWidget() async => FreezerWidget.publish(
+    stored: await repo.storedItems(),
+    custom: await repo.watchCustomCategories().first,
+  );
+  unawaited(publishWidget());
+  unawaited(FreezerWidget.scheduleDailyRefresh());
+
   Timer? debounce;
   final sub = repo.watchAnyChange().listen((_) {
     debounce?.cancel();
     debounce = Timer(const Duration(milliseconds: 500), () async {
       await scheduler.evaluateCapacity();
       await scheduler.rescheduleAll();
+      await publishWidget();
     });
   });
   ref.onDispose(() {

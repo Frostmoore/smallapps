@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Anteprima del widget nel selettore di sistema (previewLayout): righe d'esempio. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_title"
+            android:textColor="#FF8FB8FF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/widget_count"
+            android:text="3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFB9CBE8"
+            android:textSize="11sp"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_stale"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/widget_open_app"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:maxLines="3"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:maxLines="2"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/widget_row1"
+        style="@style/WidgetRow"
+        android:visibility="visible">
+        <ImageView android:id="@+id/widget_icon1" style="@style/WidgetIcon" android:visibility="invisible" />
+        <TextView android:id="@+id/widget_name1" style="@style/WidgetName" android:text="@string/widget_sample1" />
+        <TextView android:id="@+id/widget_days1" style="@style/WidgetDays" android:text="92 d" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_row2"
+        style="@style/WidgetRow"
+        android:visibility="visible">
+        <ImageView android:id="@+id/widget_icon2" style="@style/WidgetIcon" android:visibility="invisible" />
+        <TextView android:id="@+id/widget_name2" style="@style/WidgetName" android:text="@string/widget_sample2" />
+        <TextView android:id="@+id/widget_days2" style="@style/WidgetDays" android:text="41 d" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_row3"
+        style="@style/WidgetRow"
+        android:visibility="visible">
+        <ImageView android:id="@+id/widget_icon3" style="@style/WidgetIcon" android:visibility="invisible" />
+        <TextView android:id="@+id/widget_name3" style="@style/WidgetName" android:text="@string/widget_sample3" />
+        <TextView android:id="@+id/widget_days3" style="@style/WidgetDays" android:text="12 d" />
+    </LinearLayout>
+</LinearLayout>

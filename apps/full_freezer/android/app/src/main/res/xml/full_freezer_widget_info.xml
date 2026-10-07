@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Il widget nel selettore di sistema: 4x2 (develop_microapps.md F4.11). La formula della
+  griglia e' 70*n - 30: 4 colonne 250dp, 2 righe 110dp. targetCell* vale da Android 12,
+  minWidth/minHeight per le versioni prima.
+
+  updatePeriodMillis 0: gli aggiornamenti li pilota l'app (a ogni modifica) piu' l'allarme
+  delle 00:05 (FreezerWidget.scheduleDailyRefresh). Con un periodo il sistema sveglierebbe
+  il telefono per ridisegnare qualcosa che non e' cambiato.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="110dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/full_freezer_widget"
+    android:previewLayout="@layout/full_freezer_widget_preview"
+    android:description="@string/widget_description"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />

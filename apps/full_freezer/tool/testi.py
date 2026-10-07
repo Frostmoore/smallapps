@@ -287,6 +287,14 @@ TESTI = {
     'item_discard': ('Thrown away', 'Buttato'),
     'item_consumed': ('{name}: eaten', '{name}: consumato'),
     'item_discarded': ('{name}: thrown away', '{name}: buttato'),
+    # ── Widget ──
+    'widget_addTitle': ('Put the widget on the home screen', 'Metti il widget sulla schermata iniziale'),
+    'widget_addBody': ('The oldest things in the freezer, without opening the app.', 'Le cose più vecchie nel freezer, senza aprire l’app.'),
+    'widget_addUnsupported': ('This launcher can’t add widgets by itself. Touch and hold the home screen and look for Full Freezer.',
+                              'Questo launcher non sa aggiungere widget da solo. Tieni premuto sulla schermata iniziale e cerca Full Freezer.'),
+    'widget_addIos': ('Touch and hold the Home Screen, tap + at the top and look for Full Freezer.',
+                      'Tieni premuto sulla schermata Home, tocca + in alto e cerca Full Freezer.'),
+
     # ── Categorie personalizzate ──
     'categories_title': ('Your categories', 'Le tue categorie'),
     'categories_settingsBody': ('Add your own, like “Game” or “Baby food”.', 'Aggiungi le tue, come «Selvaggina» o «Pappe».'),

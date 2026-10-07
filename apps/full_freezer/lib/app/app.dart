@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../features/categories/custom_categories_page.dart';
@@ -17,6 +18,7 @@ import '../features/items/item_edit_page.dart';
 import '../features/search/search_page.dart';
 import '../features/settings/settings_page.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../services/freezer_widget.dart';
 import 'freezer_palette.dart';
 import 'locale_resolution.dart';
 import 'providers.dart';
@@ -85,6 +87,7 @@ class _FullFreezerAppState extends ConsumerState<FullFreezerApp> {
   late final GoRouter _router = buildRouter(ref);
   AppLifecycleListener? _lifecycle;
   StreamSubscription<String>? _taps;
+  StreamSubscription<Uri?>? _widgetTaps;
 
   @override
   void initState() {
@@ -108,6 +111,21 @@ class _FullFreezerAppState extends ConsumerState<FullFreezerApp> {
       final launch = service.consumeLaunchPayload();
       if (launch != null) _openPayload(launch);
     }, fireImmediately: true);
+
+    // Il tocco sul widget (F4.11): `fullfreezer:///use-soon` porta a "Da usare prima".
+    if (FreezerWidget.available) {
+      // Dopo il primo frame: prima il router non ha ancora la sua posizione iniziale, e un
+      // `go` fatto in initState verrebbe sovrascritto (app aperta dal widget da chiusa).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(HomeWidget.initiallyLaunchedFromHomeWidget().then(_openWidgetUri));
+      });
+      _widgetTaps = HomeWidget.widgetClicked.listen(_openWidgetUri);
+    }
+  }
+
+  void _openWidgetUri(Uri? uri) {
+    // Solo percorsi noti: un link costruito altrove non deve aprire pagine a caso.
+    if (uri?.scheme == Routes.scheme && uri?.path == Routes.useSoon) _openPayload(Routes.useSoon);
   }
 
   /// Apre la pagina della notifica lasciandosi dietro la home: con il solo `go`, il tasto
@@ -122,6 +140,7 @@ class _FullFreezerAppState extends ConsumerState<FullFreezerApp> {
   void dispose() {
     _lifecycle?.dispose();
     unawaited(_taps?.cancel());
+    unawaited(_widgetTaps?.cancel());
     super.dispose();
   }
 

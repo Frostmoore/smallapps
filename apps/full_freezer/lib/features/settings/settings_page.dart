@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../../app/entitlement.dart';
@@ -13,6 +14,7 @@ import '../../app/providers.dart';
 import '../../app/routes.dart';
 import '../../data/database.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../services/freezer_widget.dart';
 import '../common/ghiaccio.dart';
 import '../freezers/freezer_actions.dart';
 import '../freezers/freezer_widgets.dart';
@@ -181,6 +183,17 @@ class SettingsPage extends ConsumerWidget {
               );
             },
           ),
+          // ⚑ Solo dove il widget esiste (lezione di TrashCan: mostrarla e poi dire "non
+          // supportato" al tocco fa sembrare l'app difettosa).
+          if (FreezerWidget.available) ...[
+            const SizedBox(height: 6),
+            GhiaccioTile(
+              leading: const Icon(Icons.widgets_outlined),
+              title: l.widget_addTitle,
+              subtitle: l.widget_addBody,
+              onTap: () => unawaited(_pinWidget(context, l)),
+            ),
+          ],
           GhiaccioSectionLabel(text: l.settings_appearance, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
           GhiaccioTile(
             leading: const Icon(Icons.dark_mode_outlined),
@@ -248,6 +261,21 @@ Future<void> _setAlerts(BuildContext context, WidgetRef ref, bool on) async {
     await ref.read(schedulerProvider).evaluateCapacity();
     await ref.read(schedulerProvider).rescheduleAll();
   }
+}
+
+/// Chiede al launcher di aggiungere il widget; su iPhone spiega i gesti (non c'e' un'API).
+Future<void> _pinWidget(BuildContext context, L l) async {
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    MicroSnack.show(context, l.widget_addIos);
+    return;
+  }
+  final supported = await HomeWidget.isRequestPinWidgetSupported() ?? false;
+  if (!context.mounted) return;
+  if (!supported) {
+    MicroSnack.show(context, l.widget_addUnsupported);
+    return;
+  }
+  await HomeWidget.requestPinWidget(qualifiedAndroidName: FreezerWidget.androidName);
 }
 
 /// La scheda del Pro, blu notte come la testata.
