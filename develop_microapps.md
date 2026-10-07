@@ -1018,6 +1018,7 @@ tutte fatte e provate sull'emulatore:
 
 ### F5 — Scorte Calore → `v7.0.0`
 
+- [x] **F5.0** Decisioni di partenza (vedi §8 F5.0): Android e iPhone, notifiche **Pro**, widget su entrambe le piattaforme, prezzo 2,99 €, colori dall'icona, interfaccia essenziale prima e proposte grafiche dopo (2026-10-07)
 - [ ] **F5.1** Bootstrap progetto, tema, l10n, router
 - [ ] **F5.2** Data layer Drift: fonti, misurazioni, acquisti, promemoria calendario
 - [ ] **F5.3** `ConsumptionCalculator`: media mobile, rilevamento rifornimenti, qualità della stima + test
@@ -1095,7 +1096,7 @@ Nata il 2026-10-04 dalla decisione in `memory/decisioni.md` e da ADR-021. Non è
 **F9.3 — Le altre tre app**
 
 - [ ] **F9.3.1** Full Freezer su iOS, widget WidgetKit compreso — **assorbita da F4** (F4.0, F4.11, F4.17): Full Freezer nasce su due piattaforme
-- [ ] **F9.3.2** Scorte Calore su iOS
+- [ ] **F9.3.2** Scorte Calore su iOS — **assorbita da F5** (F5.0): Scorte Calore nasce su due piattaforme
 - [ ] **F9.3.3** Film Tracker su iOS
 - [ ] **F9.3.4** Rituale di fine fase F9
 
@@ -4173,6 +4174,51 @@ ricerca accent-insensitive; test del digest con 0, 1 e N prodotti vecchi.
 
 **Obiettivo della fase**: rispondere in mezzo secondo a "quando devo ricomprare?", con una
 stima che sia onesta sulla propria incertezza.
+
+### F5.0 — Decisioni di partenza (2026-10-07)
+
+Prese con il proprietario prima di F5.1. Dove contraddicono il resto della fase, vincono queste.
+
+1. **Android e iPhone dal primo commit**, come Full Freezer (ADR-021, F4.0 punti 1-3):
+   `flutter create --platforms=android,ios`, `TARGETED_DEVICE_FAMILY = 1`, bundle
+   `com.smp.scortecalore`, widget `com.smp.scortecalore.ScorteCaloreWidget`, App Group
+   `group.com.smp.scortecalore`. ☠ App ID e App Group li registra il proprietario nel portale;
+   **il gruppo va agganciato a ciascun App ID** (Identifiers → App Groups → Configure),
+   altrimenti i profili escono con l'elenco dei gruppi vuoto (pagato con Full Freezer).
+2. **Notifiche Pro** (proprietario: «le notifiche sono pro»). Ribalta la mappa di F5.11, dove
+   non erano citate: `FeatureKey.notifications` → `locked()`. Il gratuito resta utile perche'
+   stima e autonomia si vedono aprendo l'app **e nel widget**.
+3. **Widget su Android e iOS** (proprietario, 2026-10-07): "Pellet: 22 giorni" con la data di
+   riordino. ⚑ **ADR-018**: il payload porta la **data di esaurimento stimata**, non "N giorni";
+   i giorni li conta il widget (provider Kotlin con `LocalDate.now()`, timeline WidgetKit), come
+   in Full Freezer (`lib/services/freezer_widget.dart`). Il widget non e' una leva del Pro
+   (ADR-019): `FeatureKey.advancedWidget` → `open()`.
+4. **Prezzo Pro 2,99 €** (proprietario). App Store: 2,99 € con base Italia. Play: il prezzo si
+   scrive **senza IVA** → base **2,45 EUR** per avere 2,99 € in Italia (☠ pagato con Full
+   Freezer: scrivendo il prezzo finale Play aggiunge il 22%). SKU `scortecalore_pro_lifetime`.
+5. **Colori dall'icona** (proprietario): arancio della fiamma come seme del tema, blu notte
+   dello sfondo dell'icona per le testate (come "A · Ghiaccio" di Full Freezer). Sostituisce
+   `#C4622D`; i valori esatti li misura `tool/genera_icone.py`.
+6. **Prima un'interfaccia essenziale, poi le proposte grafiche** (proprietario): appena
+   l'app funziona si disegnano 2-3 direzioni (artifact, come per Full Freezer) e il
+   proprietario sceglie.
+7. **Trappole gia' pagate da non ripetere** (Full Freezer, 2026-10-07):
+   - ☠ **Id per il License Server senza trattino basso**: `appId` locale `scorte_calore`, ma
+     il server conosce `scortecalore` → costante `licenseAppId` in `app_config.dart` usata dal
+     client licenze e dall'`EntitlementService`.
+   - ☠ **Deep link di Flutter spento** su Android (`flutter_deeplinking_enabled`) e iOS
+     (`FlutterDeepLinkingEnabled`), e `onNewIntent` → `setIntent` in `MainActivity`, se il
+     widget apre una pagina.
+   - ☠ **Xcode 27 non crea profili nuovi con la chiave API**: i profili App Store si creano via
+     API ("MicroApps AppStore <bundle>") e `tool/build_ios.sh` li usa da solo.
+   - ☠ **Pagine Pro protette sulla pagina** (`ProGate`), non solo all'ingresso.
+   - ☠ **Testi inglesi con virgolette tipografiche** (gli script adb cercano `content-desc="…"`).
+   - ☠ **Account Google Play**: se e' ancora personale, ogni app nuova chiede un test chiuso di
+     12 tester per 14 giorni. Il passaggio ad account da organizzazione e' in corso (D-U-N-S
+     richiesto il 2026-10-07, `StatusMicroApps.md`).
+8. **Calendario (Pro) su entrambe le piattaforme**: `device_calendar` chiede `READ_CALENDAR`/
+   `WRITE_CALENDAR` su Android (da giustificare nella scheda Play) e
+   `NSCalendarsFullAccessUsageDescription` su iOS 17+, con testi it/en in `InfoPlist.strings`.
 
 ### F5.1 — Bootstrap
 
