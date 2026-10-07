@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../features/common/pro_gate.dart';
+import '../features/home/home_page.dart';
+import '../features/settings/settings_page.dart';
+import '../features/sources/source_editor_page.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'locale_resolution.dart';
 import 'providers.dart';
@@ -16,8 +20,22 @@ import 'routes.dart';
 GoRouter buildRouter(WidgetRef ref) => GoRouter(
   initialLocation: Routes.home,
   routes: [
-    GoRoute(path: Routes.home, builder: (_, __) => const _Provvisoria()),
-    GoRoute(path: Routes.welcome, builder: (_, __) => const _Provvisoria()),
+    GoRoute(path: Routes.home, builder: (_, __) => const HomePage()),
+    GoRoute(path: Routes.welcome, builder: (_, __) => const SourceEditorPage(firstRun: true)),
+    GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
+    // ⚑ `new` prima di `:sourceId`: go_router prova le rotte in ordine.
+    GoRoute(
+      path: Routes.sourceNew,
+      builder: (_, __) => ProGate(
+        feature: FeatureKey.unlimitedEntities,
+        allowed: (gate) => gate.withinLimit(FeatureKey.unlimitedEntities, ref.read(sourcesProvider).value?.length ?? 0),
+        child: const SourceEditorPage(),
+      ),
+    ),
+    GoRoute(
+      path: Routes.sourceEdit,
+      builder: (_, s) => SourceEditorPage(sourceId: int.tryParse(s.pathParameters['sourceId'] ?? '')),
+    ),
   ],
   // Senza una fonte configurata non c'e' niente da mostrare: si parte dal primo avvio.
   redirect: (_, state) {
@@ -85,11 +103,3 @@ class _ScorteCaloreAppState extends ConsumerState<ScorteCaloreApp> {
   }
 }
 
-/// La pagina provvisoria del bootstrap (F5.1): la sostituiscono il primo avvio (F5.5) e la
-/// dashboard (F5.6).
-class _Provvisoria extends StatelessWidget {
-  const _Provvisoria();
-
-  @override
-  Widget build(BuildContext context) => Scaffold(body: Center(child: Text(L.of(context).appTitle)));
-}

@@ -13,6 +13,11 @@ abstract final class Routes {
 
   static const String settings = '/settings';
 
+  /// Nuova fonte (oltre la prima passa da `openNewSource`, che controlla il limite gratuito).
+  static const String sourceNew = '/sources/new';
+  static const String sourceEdit = '/sources/:sourceId/edit';
+  static String sourceEditOf(int id) => '/sources/$id/edit';
+
   /// Schema dei deep link che arrivano dalle notifiche e dal widget.
   static const String scheme = 'scortecalore';
 }

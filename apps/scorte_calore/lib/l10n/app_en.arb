@@ -58,6 +58,136 @@
       }
     }
   },
+  "source_newTitle": "Your heat source",
+  "source_editTitle": "Heat source",
+  "source_intro": "Tell Scorte Calore what you burn: it will work out when to reorder.",
+  "source_name": "Name",
+  "source_nameHint": "Living room stove",
+  "source_fuel": "Fuel",
+  "source_unit": "You count it in",
+  "source_tank": "Tank capacity",
+  "source_tankHelp": "In litres, as written on the tank or the contract.",
+  "source_usable": "Usable share",
+  "source_usableHelp": "LPG tanks are filled to about 80%: the gauge reading is applied to this share.",
+  "source_weight": "Weight of one {unit}",
+  "@source_weight": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "source_weightHelp": "Optional: only to show the total in kg.",
+  "source_stock": "How much you have now",
+  "source_cost": "Price per {unit}",
+  "@source_cost": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "source_warning": "Remind me before running out",
+  "source_warningDays": "{days, plural, =1{1 day before} other{{days} days before}}",
+  "@source_warningDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "source_save": "Save",
+  "source_delete": "Delete source",
+  "source_deleteTitle": "Delete “{name}”?",
+  "@source_deleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "source_deleteBody": "All its readings and purchases will be deleted too.",
+  "home_addSource": "Add a heat source",
+  "home_remaining": "left",
+  "home_days": "{days, plural, =0{Runs out today} =1{1 day left} other{{days} days left}}",
+  "@home_days": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "home_rate": "Average use: {rate} a day",
+  "@home_rate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "home_reorder": "Reorder by {date}",
+  "@home_reorder": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "home_reorderPast": "Time to reorder: the date was {date}",
+  "@home_reorderPast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "home_runsOut": "Runs out around {date}",
+  "@home_runsOut": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "home_lastUpdate": "Last update: {date}",
+  "@home_lastUpdate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "home_stale": "Not updated for a while",
+  "home_provisional": "{count, plural, =1{Provisional estimate, from 1 interval} other{Provisional estimate, from {count} intervals}}",
+  "@home_provisional": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_needMore": "Add another reading in a few days to get an estimate.",
+  "home_update": "Update stock",
+  "update_title": "Update stock",
+  "update_date": "Date",
+  "update_quantity": "How much is left",
+  "update_asPercent": "Gauge reading (%)",
+  "update_conversion": "{reading}% of {capacity} L → about {liters} L usable",
+  "@update_conversion": {
+    "placeholders": {
+      "reading": {
+        "type": "String"
+      },
+      "capacity": {
+        "type": "String"
+      },
+      "liters": {
+        "type": "String"
+      }
+    }
+  },
+  "update_saved": "Stock updated",
+  "update_refill": "More than last time: counted as a refill, not as use.",
   "paywall_headline": "Scorte Calore Pro",
   "paywall_subhead": "One payment. No subscription. Yours for good.",
   "paywall_buy": "Unlock Pro",

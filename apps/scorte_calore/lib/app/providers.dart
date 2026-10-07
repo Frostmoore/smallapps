@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../data/database.dart';
+import '../data/scorte_repository.dart';
+import '../domain/consumption.dart';
+
 /// I provider radice dell'app.
 ///
 /// ⚑ Perche' tutto passa da qui e niente e' globale: un singleton in una variabile di
@@ -53,3 +57,39 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 }
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+
+/// Il database, aperto alla prima lettura e chiuso con il `ProviderScope`.
+final databaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase.open();
+  ref.onDispose(db.close);
+  return db;
+});
+
+final repositoryProvider = Provider<ScorteRepository>((ref) => ScorteRepository(ref.watch(databaseProvider)));
+
+/// Le fonti attive, nell'ordine scelto dall'utente.
+final sourcesProvider = StreamProvider<List<FuelSource>>(
+  (ref) => ref.watch(repositoryProvider).watchSources(activeOnly: true),
+);
+
+/// Le misurazioni di una fonte, in ordine di data.
+final measurementsProvider = StreamProvider.family<List<StockMeasurement>, int>(
+  (ref, sourceId) => ref.watch(repositoryProvider).watchMeasurements(sourceId),
+);
+
+/// La stima di una fonte, ricalcolata a ogni misurazione e a ogni cambio di giorno.
+///
+/// ⚑ Usa **tutte** le misurazioni anche nel piano gratuito: il limite dei 90 giorni (F5.9)
+/// riguarda cosa si vede nello storico, non la stima, che comunque usa solo gli ultimi 5
+/// intervalli.
+final estimateProvider = Provider.family<ConsumptionEstimate?, int>((ref, sourceId) {
+  final sources = ref.watch(sourcesProvider).value;
+  final rows = ref.watch(measurementsProvider(sourceId)).value;
+  final source = sources?.where((s) => s.id == sourceId).firstOrNull;
+  if (source == null || rows == null) return null;
+  return const ConsumptionCalculator().estimate(
+    measurements: rows.toMeasurements(),
+    source: source.toSpec(),
+    today: ref.watch(todayProvider),
+  );
+});

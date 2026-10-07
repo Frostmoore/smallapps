@@ -1020,12 +1020,12 @@ tutte fatte e provate sull'emulatore:
 
 - [x] **F5.0** Decisioni di partenza (vedi §8 F5.0): Android e iPhone, notifiche **Pro**, widget su entrambe le piattaforme, prezzo 2,99 €, colori dall'icona, interfaccia essenziale prima e proposte grafiche dopo (2026-10-07)
 - [x] **F5.1** Bootstrap progetto, tema, l10n, router (2026-10-07: `com.smp.scortecalore` su Android e iOS, solo iPhone, team, firma e ProGuard come Full Freezer, `licenseAppId`, limiti Pro e paywall, testi da `tool/testi.py`, icone e splash da `tool/genera_icone.py` sull'icona del proprietario con sfondo ripulito, avvio provato sull'emulatore)
-- [ ] **F5.2** Data layer Drift: fonti, misurazioni, acquisti, promemoria calendario
+- [x] **F5.2** Data layer Drift: fonti, misurazioni, acquisti, promemoria calendario (2026-10-07: `lib/data/{tables,database,scorte_repository}.dart`, una misura al giorno con sovrascrittura, ricalcolo delle letture in percentuale quando cambiano capienza o quota utile, 38 test)
 - [x] **F5.3** `ConsumptionCalculator`: media mobile, rilevamento rifornimenti, qualità della stima + test (2026-10-07: `lib/domain/consumption.dart`, `reorder_plan.dart`; ⚑ esaurimento contato dall'**ultima misura** e non da oggi, altrimenti senza misure nuove la data slitterebbe ogni giorno e il widget non scenderebbe mai; 62 test di dominio)
 - [x] **F5.4** Conversioni unità e capacità serbatoio (litri, percentuale, sacchi, kg, steri) (2026-10-07: `lib/domain/{fuel_units,fuel_source,quantity_converter}.dart`; nessuna stringa nel dominio, i nomi dagli ARB)
-- [ ] **F5.5** Configurazione fonte combustibile (wizard)
-- [ ] **F5.6** Dashboard: residuo, consumo medio, autonomia, data di riordino
-- [ ] **F5.7** Aggiornamento scorta (il gesto più frequente dell'app)
+- [x] **F5.5** Configurazione fonte combustibile (2026-10-07, interfaccia essenziale: `features/sources/source_editor_page.dart`, ⚑ una pagina sola con i campi che compaiono solo quando servono, invece della procedura a otto passi)
+- [x] **F5.6** Dashboard: residuo, consumo medio, autonomia, data di riordino (2026-10-07, essenziale: `features/home/home_page.dart`; grafica da scegliere con le proposte, F5.0 punto 6)
+- [x] **F5.7** Aggiornamento scorta (2026-10-07: `features/stock/update_sheet.dart`, valore dell'ultima volta precompilato, manometro con conversione in tempo reale, avviso di rifornimento)
 - [ ] **F5.8** Notifiche di riordino e di superamento data
 - [ ] **F5.9** Storico e grafici (Pro)
 - [ ] **F5.10** Integrazione Google Calendar del dispositivo (Pro)
