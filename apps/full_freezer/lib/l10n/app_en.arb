@@ -289,6 +289,72 @@
       }
     }
   },
+  "notif_digestTitle": "In the freezer for too long",
+  "notif_digestOne": "{name} has been in the freezer for {days} days.",
+  "@notif_digestOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_digestMany": "{count} things have been in the freezer too long. The oldest is {name}, frozen {days} days ago.",
+  "@notif_digestMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_fullTitle": "{name} is nearly full",
+  "@notif_fullTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_fullBody": "It's {percent}% full: before freezing anything else, use something up.",
+  "@notif_fullBody": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_emptyTitle": "{name} is nearly empty",
+  "@notif_emptyTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_emptyBody": "It's only {percent}% full: a good weekend to cook something to freeze.",
+  "@notif_emptyBody": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_alerts": "Alerts",
+  "settings_alertsToggle": "Freezer alerts",
+  "settings_alertsBody": "What's been in too long, and when it's nearly full or nearly empty.",
+  "settings_alertsDenied": "Notifications are off for Full Freezer in the phone settings.",
+  "settings_frequency": "Reminder of old things",
+  "freq_weekly": "Every Sunday at 6 pm",
+  "freq_biweekly": "Every other Sunday at 6 pm",
+  "freq_monthly": "Every four weeks, on Sunday at 6 pm",
   "settings_numbers": "Your numbers",
   "stats_title": "Statistics",
   "stats_subtitle": "What you eat, what you throw away, how long things stay in.",

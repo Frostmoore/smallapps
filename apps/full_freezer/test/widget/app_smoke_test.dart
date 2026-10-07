@@ -65,6 +65,8 @@ void main() {
           freezersProvider.overrideWith((ref) => Stream.value([freezer()])),
           storedItemsProvider.overrideWith((ref) => Stream.value(items)),
           compartmentsByFreezerProvider.overrideWith((ref) => Stream.value(const <int, List<Compartment>>{})),
+          // Lo scheduler delle notifiche aprirebbe il database vero e il plugin: qui no.
+          notificationSyncProvider.overrideWith((ref) {}),
         ],
         child: const FullFreezerApp(),
       ),

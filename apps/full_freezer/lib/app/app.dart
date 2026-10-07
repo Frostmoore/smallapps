@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -80,24 +82,52 @@ class _FullFreezerAppState extends ConsumerState<FullFreezerApp> {
   // cronologia di navigazione a ogni cambio di stato.
   late final GoRouter _router = buildRouter(ref);
   AppLifecycleListener? _lifecycle;
+  StreamSubscription<String>? _taps;
 
   @override
   void initState() {
     super.initState();
-    // Al ritorno in primo piano "oggi" si ricalcola: chi ha lasciato l'app aperta da ieri
-    // deve vedere i giorni di oggi, non quelli di ieri.
-    _lifecycle = AppLifecycleListener(onResume: () => ref.invalidate(todayProvider));
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        // "Oggi" si ricalcola: chi ha lasciato l'app aperta da ieri deve vedere i giorni di
+        // oggi. E il piano delle notifiche si rifa': i testi dei riepiloghi dipendono dai
+        // giorni, che nel frattempo sono cambiati.
+        ref.invalidate(todayProvider);
+        unawaited(ref.read(schedulerProvider).rescheduleAll());
+      },
+    );
+
+    // Il servizio delle notifiche arriva dopo il primo frame: ci si iscrive appena c'e'.
+    ref.listenManual(notificationServiceProvider, (_, next) {
+      final service = next.value;
+      if (service == null || _taps != null) return;
+      _taps = service.taps.listen(_openPayload);
+      // Se l'app era chiusa, il tocco che l'ha aperta non passa dallo stream.
+      final launch = service.consumeLaunchPayload();
+      if (launch != null) _openPayload(launch);
+    }, fireImmediately: true);
+  }
+
+  /// Apre la pagina della notifica lasciandosi dietro la home: con il solo `go`, il tasto
+  /// indietro uscirebbe dall'app invece di tornare alla home (trappola gia' pagata in
+  /// TrashCan).
+  void _openPayload(String payload) {
+    _router.go(Routes.home);
+    unawaited(_router.push(payload));
   }
 
   @override
   void dispose() {
     _lifecycle?.dispose();
+    unawaited(_taps?.cancel());
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(appConfigProvider);
+    // Tiene vivo il collegamento fra le modifiche ai dati e il piano delle notifiche.
+    ref.watch(notificationSyncProvider);
 
     return MaterialApp.router(
       title: config.appName,

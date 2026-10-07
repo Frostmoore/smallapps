@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:micro_core/micro_core.dart';
@@ -5,6 +8,10 @@ import 'package:micro_core/micro_core.dart';
 import '../data/database.dart';
 import '../data/freezer_repository.dart';
 import '../domain/home_view.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../services/freezer_scheduler.dart';
+import 'entitlement.dart';
+import 'locale_resolution.dart';
 
 /// I provider radice dell'app.
 ///
@@ -148,3 +155,83 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 }
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+
+/// Il servizio delle notifiche, inizializzato pigramente (non serve al primo frame).
+final notificationServiceProvider = FutureProvider<NotificationService>((ref) async {
+  final service = await NotificationService.create(
+    // ☠ L'icona della barra di stato e' monocromatica su trasparente: Android ne usa solo
+    // l'alfa. Con l'icona del launcher, opaca, verrebbe una macchia bianca.
+    androidIconResource: '@drawable/ic_notification',
+    channels: const <MicroNotificationChannel>[freezerChannel],
+  );
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+/// Le traduzioni per i testi delle notifiche, che si scrivono fuori da ogni widget.
+L _systemL() => lookupL(resolveAppLocale(PlatformDispatcher.instance.locales, kSupportedLocales));
+
+final schedulerProvider = Provider<FreezerScheduler>(
+  (ref) => FreezerScheduler(
+    repo: ref.watch(repositoryProvider),
+    settings: ref.watch(settingsProvider),
+    gate: ref.watch(featureGateProvider),
+    l: _systemL(),
+    notifications: ref.watch(notificationServiceProvider).value,
+  ),
+);
+
+/// Tiene il piano delle notifiche allineato ai dati: una passata all'avvio e una (con mezzo
+/// secondo di attesa, perche' un'azione fa piu' scritture) dopo ogni modifica, preceduta
+/// dalla valutazione della capienza. Stesso schema di TrashCan.
+final notificationSyncProvider = Provider<void>((ref) {
+  final scheduler = ref.watch(schedulerProvider);
+  final repo = ref.watch(repositoryProvider);
+  if (scheduler.isReady) unawaited(scheduler.rescheduleAll());
+
+  Timer? debounce;
+  final sub = repo.watchAnyChange().listen((_) {
+    debounce?.cancel();
+    debounce = Timer(const Duration(milliseconds: 500), () async {
+      await scheduler.evaluateCapacity();
+      await scheduler.rescheduleAll();
+    });
+  });
+  ref.onDispose(() {
+    debounce?.cancel();
+    unawaited(sub.cancel());
+  });
+});
+
+/// L'interruttore delle notifiche. Spegnerlo cancella subito quelle in attesa.
+///
+/// ☠ **Parte spento**, al contrario di TrashCan. Li' il primo avvio chiede il permesso; qui
+/// gli avvisi sono Pro e il permesso si chiede solo quando li si accende. Con il default
+/// acceso l'interruttore si mostrava acceso senza che il permesso fosse mai stato chiesto,
+/// e il primo tocco lo SPEGNEVA (trovato sull'emulatore il 2026-10-07).
+class NotificationsEnabled extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(settingsProvider).getBool(SettingKeys.notificationsEnabled, orElse: false);
+
+  Future<void> set(bool value) async {
+    state = value;
+    await ref.read(settingsProvider).setBool(SettingKeys.notificationsEnabled, value);
+    await ref.read(schedulerProvider).rescheduleAll();
+  }
+}
+
+final notificationsEnabledProvider = NotifierProvider<NotificationsEnabled, bool>(NotificationsEnabled.new);
+
+/// Ogni quanto arriva il riepilogo (F4.9).
+class DigestFrequencyNotifier extends Notifier<String> {
+  @override
+  String build() => ref.watch(settingsProvider).getString(NotificationSettingKeys.digestFrequency) ?? 'weekly';
+
+  Future<void> set(String value) async {
+    state = value;
+    await ref.read(settingsProvider).setString(NotificationSettingKeys.digestFrequency, value);
+    await ref.read(schedulerProvider).rescheduleAll();
+  }
+}
+
+final digestFrequencyProvider = NotifierProvider<DigestFrequencyNotifier, String>(DigestFrequencyNotifier.new);

@@ -8,6 +8,12 @@
          (F4.11) si aggiungono con le loro sottofasi, non prima: un permesso dichiarato e
          non usato e' una domanda in piu' nella revisione di Play. -->
     <uses-permission android:name="com.android.vending.BILLING"/>
+
+    <!-- Notifiche (F4.9). Gli allarmi di Android non sopravvivono al riavvio: senza
+         RECEIVE_BOOT_COMPLETED e il receiver qui sotto, dopo un riavvio i riepiloghi
+         smettono di arrivare e niente lo dice. Niente SCHEDULE_EXACT_ALARM: i riepiloghi
+         sono inesatti per scelta (ADR-009), arrivare alle 18:07 invece che alle 18 va bene. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application
         android:label="Full Freezer"
         android:name="${applicationName}"
@@ -39,6 +45,20 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Senza questi due receiver il plugin non ha nessuno a cui consegnare la notifica
+             quando l'allarme scatta: si pianifica senza errori e la notifica non arriva mai.
+             Stessa trappola gia' disinnescata in TrashCan. -->
+        <receiver android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

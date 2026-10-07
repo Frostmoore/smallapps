@@ -199,6 +199,28 @@ TESTI = {
     'theme_dark': ('Dark', 'Scuro'),
     'settings_version': ('Full Freezer {version}', 'Full Freezer {version}'),
 
+    # ── Notifiche ──
+    'notif_digestTitle': ('In the freezer for too long', 'Nel freezer da troppo tempo'),
+    'notif_digestOne': ('{name} has been in the freezer for {days} days.', '{name} è nel freezer da {days} giorni.'),
+    'notif_digestMany': ('{count} things have been in the freezer too long. The oldest is {name}, frozen {days} days ago.',
+                         'Hai {count} prodotti nel freezer da troppo tempo. Il più vecchio è {name}, congelato {days} giorni fa.'),
+    'notif_fullTitle': ('{name} is nearly full', '{name} è quasi pieno'),
+    'notif_fullBody': ("It's {percent}% full: before freezing anything else, use something up.",
+                       'È pieno al {percent}%: prima di congelare altro, consuma qualcosa.'),
+    'notif_emptyTitle': ('{name} is nearly empty', '{name} è quasi vuoto'),
+    'notif_emptyBody': ("It's only {percent}% full: a good weekend to cook something to freeze.",
+                        'È pieno solo al {percent}%: buon fine settimana per cucinare qualcosa da congelare.'),
+    'settings_alerts': ('Alerts', 'Avvisi'),
+    'settings_alertsToggle': ('Freezer alerts', 'Avvisi del freezer'),
+    'settings_alertsBody': ("What's been in too long, and when it's nearly full or nearly empty.",
+                            'Cosa c’è da troppo, e quando è quasi pieno o quasi vuoto.'),
+    'settings_alertsDenied': ('Notifications are off for Full Freezer in the phone settings.',
+                              'Le notifiche di Full Freezer sono spente nelle impostazioni del telefono.'),
+    'settings_frequency': ('Reminder of old things', 'Promemoria delle cose vecchie'),
+    'freq_weekly': ('Every Sunday at 6 pm', 'Ogni domenica alle 18'),
+    'freq_biweekly': ('Every other Sunday at 6 pm', 'Una domenica sì e una no, alle 18'),
+    'freq_monthly': ('Every four weeks, on Sunday at 6 pm', 'Ogni quattro settimane, la domenica alle 18'),
+
     # ── Storico e statistiche ──
     'settings_numbers': ('Your numbers', 'I tuoi numeri'),
     'stats_title': ('Statistics', 'Statistiche'),

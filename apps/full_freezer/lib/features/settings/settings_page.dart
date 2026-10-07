@@ -33,6 +33,8 @@ class SettingsPage extends ConsumerWidget {
     final freezers = ref.watch(freezersProvider).value ?? const <Freezer>[];
     final items = ref.watch(storedItemsProvider).value ?? const <Item>[];
     final removed = ref.watch(removedItemsProvider).value ?? const <Item>[];
+    final alertsOn = ref.watch(notificationsEnabledProvider);
+    final frequency = ref.watch(digestFrequencyProvider);
     final mode = ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -61,6 +63,58 @@ class SettingsPage extends ConsumerWidget {
             trailing: pro || freezers.isEmpty ? null : const ProBadge(),
             onTap: () => unawaited(openNewFreezer(context, ref)),
           ),
+          GhiaccioSectionLabel(text: l.settings_alerts, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
+          GhiaccioTile(
+            leading: const Icon(Icons.notifications_active_outlined),
+            title: l.settings_alertsToggle,
+            subtitle: l.settings_alertsBody,
+            trailing: pro
+                ? Switch(
+                    value: alertsOn,
+                    onChanged: (v) => unawaited(_setAlerts(context, ref, v)),
+                  )
+                : const ProBadge(),
+            onTap: pro
+                ? () => unawaited(_setAlerts(context, ref, !alertsOn))
+                : () => unawaited(showFreezerPaywall(context, ref, highlight: FeatureKey.notifications)),
+          ),
+          if (pro && alertsOn) ...[
+            const SizedBox(height: 6),
+            GhiaccioTile(
+              leading: const Icon(Icons.event_repeat_outlined),
+              title: l.settings_frequency,
+              subtitle: switch (frequency) {
+                'biweekly' => l.freq_biweekly,
+                'monthly' => l.freq_monthly,
+                _ => l.freq_weekly,
+              },
+              trailing: Icon(Icons.chevron_right, color: p.inkMuted),
+              onTap: () async {
+                final picked = await showModalBottomSheet<String>(
+                  context: context,
+                  showDragHandle: true,
+                  builder: (sheet) => SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final (key, label) in [
+                          ('weekly', l.freq_weekly),
+                          ('biweekly', l.freq_biweekly),
+                          ('monthly', l.freq_monthly),
+                        ])
+                          ListTile(
+                            title: Text(label),
+                            trailing: key == frequency ? const Icon(Icons.check) : null,
+                            onTap: () => Navigator.of(sheet).pop(key),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+                if (picked != null) await ref.read(digestFrequencyProvider.notifier).set(picked);
+              },
+            ),
+          ],
           GhiaccioSectionLabel(text: l.settings_numbers, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
           GhiaccioTile(
             leading: const Icon(Icons.insights_outlined),
@@ -139,6 +193,27 @@ class SettingsPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+/// Accende o spegne gli avvisi. Accendendoli si chiede il permesso: e' il momento in cui
+/// l'utente ha un motivo per dire di si' (non al primo avvio, quando un no e' definitivo).
+Future<void> _setAlerts(BuildContext context, WidgetRef ref, bool on) async {
+  final l = L.of(context);
+  if (on) {
+    final service = await ref.read(notificationServiceProvider.future);
+    final outcome = await service.ensurePermission();
+    if (outcome == PermissionOutcome.denied || outcome == PermissionOutcome.permanentlyDenied) {
+      if (context.mounted) MicroSnack.error(context, l.settings_alertsDenied);
+      return;
+    }
+  }
+  await ref.read(notificationsEnabledProvider.notifier).set(on);
+  if (on) {
+    // Subito la valutazione della capienza: chi accende gli avvisi con il freezer quasi pieno
+    // deve saperlo adesso, non alla prossima modifica.
+    await ref.read(schedulerProvider).evaluateCapacity();
+    await ref.read(schedulerProvider).rescheduleAll();
   }
 }
 

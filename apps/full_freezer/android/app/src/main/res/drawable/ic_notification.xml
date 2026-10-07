@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  L'icona della barra di stato: un fiocco di neve, in silhouette.
+
+  Android ne usa solo il canale alfa e la ridisegna in bianco: niente colori, niente
+  sfumature. A 24dp i dettagli spariscono, quindi sei bracci grossi e due punte per braccio.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group android:pivotX="12" android:pivotY="12">
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.2" android:strokeLineCap="round"
+            android:pathData="M12,2 L12,22 M9,4.5 L12,7 L15,4.5 M9,19.5 L12,17 L15,19.5" />
+    </group>
+    <group android:pivotX="12" android:pivotY="12" android:rotation="60">
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.2" android:strokeLineCap="round"
+            android:pathData="M12,2 L12,22 M9,4.5 L12,7 L15,4.5 M9,19.5 L12,17 L15,19.5" />
+    </group>
+    <group android:pivotX="12" android:pivotY="12" android:rotation="120">
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.2" android:strokeLineCap="round"
+            android:pathData="M12,2 L12,22 M9,4.5 L12,7 L15,4.5 M9,19.5 L12,17 L15,19.5" />
+    </group>
+</vector>

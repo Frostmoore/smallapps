@@ -3,8 +3,11 @@ import 'package:intl/intl.dart';
 /// I litri come li legge una persona: "1,2 L" in italiano, "1.2 L" in inglese, senza
 /// decimali inutili ("70 L", non "70,0 L").
 String formatLiters(double liters, String locale) {
-  final digits = liters >= 10 ? 0 : 1;
-  final f = NumberFormat.decimalPatternDigits(locale: locale, decimalDigits: digits);
+  // Sotto il litro due decimali al massimo ("0,25 L": con uno solo la misura "piccolo" si
+  // leggeva 0,3, visto sull'emulatore il 2026-10-07); fino a 10 uno; oltre nessuno.
+  final f = NumberFormat.decimalPattern(locale)
+    ..minimumFractionDigits = 0
+    ..maximumFractionDigits = liters >= 10 ? 0 : (liters < 1 ? 2 : 1);
   return '${f.format(liters)} L';
 }
 
