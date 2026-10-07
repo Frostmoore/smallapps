@@ -29,6 +29,7 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^3.4.3
   go_router: ^18.0.1
+  image_picker: ^1.2.4
   intl: ^0.20.3
   meta: ^1.19.0
   micro_core:

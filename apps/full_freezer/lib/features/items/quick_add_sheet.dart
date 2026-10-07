@@ -13,6 +13,7 @@ import '../../domain/capacity.dart';
 import '../../domain/units.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'item_draft.dart';
+import 'item_photo.dart';
 import 'item_pickers.dart';
 
 /// Apre l'inserimento rapido (develop_microapps.md F4.5).
@@ -69,10 +70,18 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
   bool _saving = false;
   int _query = 0;
 
+  /// True quando la bozza ha lasciato il foglio (salvata, o passata ad "Altri dettagli"):
+  /// da li' in poi la foto non e' piu' affare del foglio.
+  bool _handedOff = false;
+  late final AppPaths _paths = ref.read(appPathsProvider);
+
   ItemDraft get d => widget.draft;
 
   @override
   void dispose() {
+    // Foglio chiuso senza salvare: la foto scattata non serve a nessuno.
+    final photo = d.photoPath;
+    if (!_handedOff && photo != null) unawaited(deleteItemPhoto(_paths, photo));
     _name.dispose();
     super.dispose();
   }
@@ -100,6 +109,7 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
     if (!d.isValid || _saving) return;
     setState(() => _saving = true);
     await ref.read(repositoryProvider).addItem(d.toNewItem());
+    _handedOff = true;
     final settings = ref.read(settingsProvider);
     await settings.setInt(FreezerSettingKeys.lastFreezer, d.freezerId);
     if (d.compartmentId == null) {
@@ -116,6 +126,7 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
   }
 
   void _moreDetails() {
+    _handedOff = true;
     final router = GoRouter.of(context);
     Navigator.of(context).pop();
     unawaited(router.push(Routes.itemNew, extra: d));
@@ -168,6 +179,25 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                   labelText: l.quickAdd_nameLabel,
                   hintText: l.quickAdd_nameHint,
                   counterText: '',
+                  // La foto e' facoltativa e non aggiunge tocchi al percorso minimo (F4.5).
+                  suffixIcon: d.photoPath == null
+                      ? IconButton(
+                          tooltip: l.photo_add,
+                          icon: const Icon(Icons.photo_camera_outlined),
+                          onPressed: () async {
+                            final added = await pickItemPhoto(context, ref);
+                            if (added != null) setState(() => d.photoPath = added);
+                          },
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: ItemPhotoThumb(
+                            photoPath: d.photoPath!,
+                            size: 36,
+                            radius: 8,
+                            fallback: const Icon(Icons.photo_outlined),
+                          ),
+                        ),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(12),
                     child: categoryGlyph(d.category),

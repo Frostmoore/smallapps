@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../../app/formats.dart';
+import '../../app/freezer_palette.dart';
 import '../../app/providers.dart';
 import '../../app/routes.dart';
 import '../../domain/capacity.dart';
@@ -155,7 +156,7 @@ class _FreezerEditorPageState extends ConsumerState<FreezerEditorPage> {
                   physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: MicroSpacing.s,
                   crossAxisSpacing: MicroSpacing.s,
-                  childAspectRatio: 1.05,
+                  childAspectRatio: 1.2,
                   children: [
                     for (final m in FreezerModels.all)
                       _ModelCard(
@@ -216,39 +217,37 @@ class _ModelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
+    final p = FreezerPalette.of(context);
+    // Interfaccia "Ghiaccio": schede bianche; quella scelta prende il riquadro azzurro e il
+    // bordo blu acceso, come le icone di categoria in home.
     return Semantics(
       selected: selected,
       button: true,
       child: Material(
-        color: selected ? scheme.primaryContainer.withValues(alpha: 0.45) : scheme.surfaceContainerLow,
+        color: selected ? p.iconTile : p.card,
         shape: RoundedRectangleBorder(
-          borderRadius: MicroRadius.card,
-          side: BorderSide(
-            color: selected ? scheme.primary : scheme.outlineVariant,
-            width: selected ? 2 : 1,
-          ),
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: selected ? p.accent : Colors.transparent, width: 2),
         ),
         child: InkWell(
-          borderRadius: MicroRadius.card,
+          borderRadius: BorderRadius.circular(18),
           onTap: onTap,
           child: Padding(
-            padding: MicroSpacing.cardTight,
+            padding: const EdgeInsets.all(12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FreezerSilhouette(iconKey: silhouette),
-                MicroSpacing.gapS,
+                FreezerSilhouette(iconKey: silhouette, size: 48),
+                const SizedBox(height: 8),
                 Text(
                   name,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: text.labelLarge,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink, height: 1.2),
                 ),
-                MicroSpacing.gapXS,
-                Text(liters, style: text.bodySmall?.copyWith(color: scheme.primary)),
+                const SizedBox(height: 4),
+                Text(liters, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: p.accent)),
               ],
             ),
           ),

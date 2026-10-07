@@ -14,6 +14,7 @@ import '../../domain/capacity.dart';
 import '../../domain/units.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'item_draft.dart';
+import 'item_photo.dart';
 import 'item_pickers.dart';
 
 /// L'inserimento completo e la modifica di un alimento (develop_microapps.md F4.5).
@@ -21,7 +22,6 @@ import 'item_pickers.dart';
 /// Con [itemId] modifica un alimento esistente; altrimenti ne crea uno partendo da
 /// [draft] (quello che si era scritto nell'inserimento rapido) o da una bozza vuota.
 ///
-/// La foto arriva con F4.5b (image_picker): finche' non c'e', il campo non si mostra.
 class ItemEditPage extends ConsumerStatefulWidget {
   const ItemEditPage({this.itemId, this.draft, super.key});
 
@@ -41,6 +41,13 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
   final _reminder = TextEditingController();
   bool _saving = false;
 
+  /// Le foto scattate in questa pagina. Se l'utente esce senza salvare, o ne scatta una e
+  /// poi un'altra, quelle non usate si cancellano: altrimenti restano file orfani che fanno
+  /// crescere lo spazio occupato senza che nessuno capisca perche'.
+  final Set<String> _photosTaken = <String>{};
+  bool _saved = false;
+  late final AppPaths _paths = ref.read(appPathsProvider);
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +66,10 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
       _original = item;
       d = ItemDraft.fromItem(item);
     } else {
+      // Una foto scattata nel foglio rapido e' ora di questa pagina: se si esce senza
+      // salvare, si cancella anche lei.
+      final fromSheet = widget.draft?.photoPath;
+      if (fromSheet != null) _photosTaken.add(fromSheet);
       d = widget.draft ??
           ItemDraft(
             freezerId: (ref.read(freezersProvider).value ?? const <Freezer>[]).first.id,
@@ -77,6 +88,11 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
 
   @override
   void dispose() {
+    if (!_saved) {
+      for (final photo in _photosTaken) {
+        unawaited(deleteItemPhoto(_paths, photo));
+      }
+    }
     _name.dispose();
     _quantity.dispose();
     _note.dispose();
@@ -95,6 +111,12 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
       await repo.addItem(d.toNewItem());
     } else {
       await repo.updateItem(d.applyTo(original));
+    }
+    _saved = true;
+    // Le foto non piu' usate: quelle scattate e poi sostituite, e la vecchia se e' cambiata.
+    final orfane = {..._photosTaken, ?original?.photoPath}..remove(d.photoPath);
+    for (final photo in orfane) {
+      await deleteItemPhoto(_paths, photo);
     }
     if (mounted) context.pop();
   }
@@ -169,6 +191,15 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
       body: ListView(
         padding: MicroSpacing.page,
         children: [
+          // F4.5b: la foto, gratis. In cima perche' e' la cosa che si riconosce piu' in fretta.
+          ItemPhotoEditor(
+            photoPath: d.photoPath,
+            onChanged: (path) => setState(() {
+              if (path != null) _photosTaken.add(path);
+              d.photoPath = path;
+            }),
+          ),
+          MicroSpacing.gapM,
           TextField(
             controller: _name,
             maxLength: 60,

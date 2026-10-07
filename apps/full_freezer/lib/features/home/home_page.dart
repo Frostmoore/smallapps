@@ -12,6 +12,7 @@ import '../../app/routes.dart';
 import '../../data/database.dart';
 import '../../domain/home_view.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../common/ghiaccio.dart';
 import '../freezers/freezer_widgets.dart';
 import '../items/quick_add_sheet.dart';
 import 'item_row_tile.dart';
@@ -56,7 +57,7 @@ class HomePage extends ConsumerWidget {
                     _NightHeader(view: view),
                     if (view.isEmpty) _EmptyHint(),
                     if (view.useSoonTotal > 0) ...[
-                      _SectionLabel(
+                      GhiaccioSectionLabel(
                         text: l.home_useSoon,
                         trailing: view.useSoonTotal > _cardsShown
                             ? TextButton(
@@ -84,7 +85,7 @@ class HomePage extends ConsumerWidget {
                       ),
                     ],
                     if (view.rest.isNotEmpty) ...[
-                      _SectionLabel(text: '${l.home_rest} · ${view.rest.length}'),
+                      GhiaccioSectionLabel(text: '${l.home_rest} · ${view.rest.length}'),
                       for (final r in view.rest)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(18, 0, 18, 6),
@@ -100,7 +101,7 @@ class HomePage extends ConsumerWidget {
                         ),
                     ],
                     if (view.freezers.length > 1) ...[
-                      _SectionLabel(text: l.home_where),
+                      GhiaccioSectionLabel(text: l.home_where),
                       for (final s in view.freezers) _FreezerRow(summary: s),
                     ],
                     // Spazio per il pulsante fisso in fondo.
@@ -334,32 +335,6 @@ class _Badge extends StatelessWidget {
             style: TextStyle(color: p.onBadge, fontSize: 24, fontWeight: FontWeight.w800, height: 1),
           ),
           Text(label, style: TextStyle(color: p.onBadge, fontSize: 11, fontWeight: FontWeight.w700)),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.text, this.trailing});
-
-  final String text;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = FreezerPalette.of(context);
-    return Padding(
-      padding: EdgeInsets.fromLTRB(22, 22, trailing == null ? 22 : 8, trailing == null ? 10 : 2),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              text.toUpperCase(),
-              style: TextStyle(color: p.inkMuted, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.8),
-            ),
-          ),
-          ?trailing,
         ],
       ),
     );

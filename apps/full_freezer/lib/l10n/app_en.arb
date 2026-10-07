@@ -131,6 +131,8 @@
   "freezerModel_custom": "Other",
   "calibrate_button": "How full is it really?",
   "calibrate_reset": "Go back to the estimate",
+  "calibrate_hint": "Open the door and set the bar to what you see.",
+  "calibrate_active": "Adjusted by you: the bar follows what you told it.",
   "calibrate_title": "How full is it really?",
   "calibrate_body": "Open the door and tell the app what you see: from now on the bar will match it.",
   "compartments_title": "Compartments",
@@ -226,6 +228,12 @@
       }
     }
   },
+  "photo_add": "Add a photo",
+  "photo_camera": "Take a photo",
+  "photo_gallery": "Choose from gallery",
+  "photo_change": "Change",
+  "photo_remove": "Remove",
+  "photo_failed": "The photo couldn't be loaded.",
   "item_newTitle": "New item",
   "item_editTitle": "Item",
   "item_category": "Category",

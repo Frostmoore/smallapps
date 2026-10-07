@@ -13,6 +13,7 @@ import '../../data/database.dart';
 import '../../domain/capacity.dart';
 import '../../domain/home_view.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../common/ghiaccio.dart';
 import 'freezer_widgets.dart';
 
 final compartmentsProvider = StreamProvider.family<List<Compartment>, int>(
@@ -114,40 +115,51 @@ class FreezerPage extends ConsumerWidget {
             ),
           ),
           MicroSpacing.gapM,
-          Text(
-            '${freezerModelName(l, freezer.modelKey)} · ${formatLiters(freezer.capacityLiters, locale)}',
-            style: text.bodySmall,
+          MicroSpacing.gapS,
+          // Le due azioni sulla capienza, come righe "Ghiaccio": il modello (che si cambia
+          // dalla modifica del freezer) e la taratura.
+          GhiaccioTile(
+            leading: FreezerSilhouette(iconKey: silhouetteKeyFor(freezer.modelKey), size: 26),
+            title: freezerModelName(l, freezer.modelKey),
+            subtitle: formatLiters(freezer.capacityLiters, locale),
+            trailing: Icon(Icons.chevron_right, color: p.inkMuted),
+            onTap: () => context.push(Routes.freezerEditOf(freezer.id)),
           ),
-          MicroSpacing.gapM,
-          OutlinedButton.icon(
-            icon: const Icon(Icons.tune),
-            label: Text(l.calibrate_button),
-            onPressed: () => unawaited(_calibrate(context, ref, freezer, items)),
+          const SizedBox(height: 6),
+          GhiaccioTile(
+            leading: const Icon(Icons.tune),
+            title: l.calibrate_button,
+            subtitle: freezer.calibration == 1.0 ? l.calibrate_hint : l.calibrate_active,
+            trailing: Icon(Icons.chevron_right, color: p.inkMuted),
+            onTap: () => unawaited(_calibrate(context, ref, freezer, items)),
           ),
           if (freezer.calibration != 1.0)
-            TextButton(
-              onPressed: () => unawaited(ref.read(repositoryProvider).setCalibration(freezer.id, 1)),
-              child: Text(l.calibrate_reset),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => unawaited(ref.read(repositoryProvider).setCalibration(freezer.id, 1)),
+                child: Text(l.calibrate_reset),
+              ),
             ),
-          MicroSpacing.gapXL,
-          MicroSectionHeader(
-            title: l.compartments_title,
+          GhiaccioSectionLabel(
+            text: l.compartments_title,
+            padding: const EdgeInsets.fromLTRB(4, 22, 4, 10),
             trailing: IconButton(
               tooltip: l.compartments_add,
-              icon: const Icon(Icons.add),
+              icon: Icon(Icons.add, color: p.accent),
               onPressed: () => unawaited(_addCompartment(context, ref, freezer.id)),
             ),
           ),
           if (compartments.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: MicroSpacing.s),
-              child: Text(l.compartments_empty, style: text.bodySmall),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: MicroSpacing.s),
+              child: Text(l.compartments_empty, style: text.bodySmall?.copyWith(color: p.inkMuted)),
             )
           else
             ReorderableListView(
               shrinkWrap: true,
+              buildDefaultDragHandles: false,
               physics: const NeverScrollableScrollPhysics(),
-              buildDefaultDragHandles: true,
               // onReorderItem da' l'indice di arrivo gia' corretto per l'elemento tolto.
               onReorderItem: (from, to) {
                 final ids = [for (final c in compartments) c.id];
@@ -156,16 +168,21 @@ class FreezerPage extends ConsumerWidget {
                 unawaited(ref.read(repositoryProvider).reorderCompartments(ids));
               },
               children: [
-                for (final c in compartments)
-                  ListTile(
+                for (final (i, c) in compartments.indexed)
+                  Padding(
                     key: ValueKey(c.id),
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.view_agenda_outlined),
-                    title: Text(c.name),
-                    subtitle: Text(
-                      l.home_itemCount(items.where((i) => i.compartmentId == c.id).length),
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: GhiaccioTile(
+                      leading: const Icon(Icons.view_agenda_outlined),
+                      title: c.name,
+                      subtitle: l.home_itemCount(items.where((i) => i.compartmentId == c.id).length),
+                      // La maniglia trascina subito; il resto della riga apre rinomina/elimina.
+                      trailing: ReorderableDragStartListener(
+                        index: i,
+                        child: Icon(Icons.drag_handle, color: p.inkMuted),
+                      ),
+                      onTap: () => unawaited(_renameCompartment(context, ref, c)),
                     ),
-                    onTap: () => unawaited(_renameCompartment(context, ref, c)),
                   ),
               ],
             ),

@@ -91,6 +91,8 @@ TESTI = {
     # ── Taratura ──
     'calibrate_button': ('How full is it really?', 'Quanto è pieno davvero?'),
     'calibrate_reset': ('Go back to the estimate', 'Torna alla stima'),
+    'calibrate_hint': ('Open the door and set the bar to what you see.', 'Apri lo sportello e porta la barra a quello che vedi.'),
+    'calibrate_active': ('Adjusted by you: the bar follows what you told it.', 'Tarato da te: la barra segue quello che le hai detto.'),
     'calibrate_title': ('How full is it really?', 'Quanto è pieno davvero?'),
     'calibrate_body': ('Open the door and tell the app what you see: from now on the bar will match it.',
                        'Apri lo sportello e di’ all’app quello che vedi: da qui in poi la barra corrisponderà.'),
@@ -145,6 +147,14 @@ TESTI = {
                             '≈ {liters} · il freezer sarà pieno al {percent}%'),
     'quickAdd_moreDetails': ('More details', 'Altri dettagli'),
     'quickAdd_saved': ('{name} is in the freezer', '{name} è nel freezer'),
+
+    # ── Foto ──
+    'photo_add': ('Add a photo', 'Aggiungi una foto'),
+    'photo_camera': ('Take a photo', 'Scatta una foto'),
+    'photo_gallery': ('Choose from gallery', 'Scegli dalla galleria'),
+    'photo_change': ('Change', 'Cambia'),
+    'photo_remove': ('Remove', 'Togli'),
+    'photo_failed': ("The photo couldn't be loaded.", 'Non è stato possibile caricare la foto.'),
 
     # ── Alimento ──
     'item_newTitle': ('New item', 'Nuovo prodotto'),

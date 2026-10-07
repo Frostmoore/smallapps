@@ -12,6 +12,7 @@ import '../../app/routes.dart';
 import '../../domain/aging.dart';
 import '../../domain/home_view.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../items/item_photo.dart';
 import '../items/item_pickers.dart';
 
 /// I gesti comuni a schede e righe (develop_microapps.md F4.4).
@@ -176,13 +177,11 @@ class ItemRowTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(color: p.iconTile, borderRadius: BorderRadius.circular(10)),
-              alignment: Alignment.center,
-              child: categoryGlyph(row.item.category, size: 22, color: p.onIconTile),
-            ),
+            // Con una foto, la foto: si riconosce prima di qualunque icona.
+            if (row.item.photoPath case final photo?)
+              ItemPhotoThumb(photoPath: photo, size: 38, fallback: _glyphTile(row, p))
+            else
+              _glyphTile(row, p),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -214,6 +213,14 @@ class ItemRowTile extends StatelessWidget {
     );
   }
 }
+
+Widget _glyphTile(ItemRow row, FreezerPalette p) => Container(
+  width: 38,
+  height: 38,
+  decoration: BoxDecoration(color: p.iconTile, borderRadius: BorderRadius.circular(10)),
+  alignment: Alignment.center,
+  child: categoryGlyph(row.item.category, size: 22, color: p.onIconTile),
+);
 
 class _SwipeBackground extends StatelessWidget {
   const _SwipeBackground({
