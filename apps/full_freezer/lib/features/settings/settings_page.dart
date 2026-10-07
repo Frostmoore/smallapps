@@ -16,8 +16,9 @@ import '../../l10n/generated/app_localizations.dart';
 import '../common/ghiaccio.dart';
 import '../freezers/freezer_actions.dart';
 import '../freezers/freezer_widgets.dart';
+import 'data_actions.dart';
 
-/// Le impostazioni: il Pro, i freezer, l'acquisto, l'aspetto.
+/// Le impostazioni: il Pro, i freezer, gli avvisi, i numeri, i dati, l'acquisto, l'aspetto.
 ///
 /// ⚑ La scheda del Pro sta in cima e si tocca tutta (non solo il pulsante): in TrashCan il
 /// riquadro Pro delle impostazioni non rispondeva al tocco, e il proprietario l'ha trovato
@@ -132,6 +133,30 @@ class SettingsPage extends ConsumerWidget {
             subtitle: l.history_count(removed.length),
             trailing: pro ? Icon(Icons.chevron_right, color: p.inkMuted) : const ProBadge(),
             onTap: () => unawaited(openProFeature(context, ref, FeatureKey.fullHistory, Routes.history)),
+          ),
+          GhiaccioSectionLabel(text: l.settings_data, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
+          GhiaccioTile(
+            leading: const Icon(Icons.table_view_outlined),
+            title: l.csv_export,
+            subtitle: l.csv_exportBody,
+            trailing: pro ? null : const ProBadge(),
+            onTap: () => unawaited(exportCsv(context, ref)),
+          ),
+          const SizedBox(height: 6),
+          GhiaccioTile(
+            leading: const Icon(Icons.save_alt),
+            title: l.backup_create,
+            subtitle: l.backup_createBody,
+            trailing: pro ? null : const ProBadge(),
+            onTap: () => unawaited(createBackup(context, ref)),
+          ),
+          const SizedBox(height: 6),
+          // Il ripristino e' gratis: vedi restoreBackup in data_actions.dart.
+          GhiaccioTile(
+            leading: const Icon(Icons.settings_backup_restore),
+            title: l.backup_restore,
+            subtitle: l.backup_restoreBody,
+            onTap: () => unawaited(restoreBackup(context, ref)),
           ),
           GhiaccioSectionLabel(text: l.settings_purchase, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
           GhiaccioTile(

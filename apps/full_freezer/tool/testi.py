@@ -287,10 +287,39 @@ TESTI = {
     'item_discard': ('Thrown away', 'Buttato'),
     'item_consumed': ('{name}: eaten', '{name}: consumato'),
     'item_discarded': ('{name}: thrown away', '{name}: buttato'),
+    # ── Dati: CSV e backup ──
+    'settings_data': ('Your data', 'I tuoi dati'),
+    'csv_export': ('Export to a spreadsheet', 'Esporta in un foglio di calcolo'),
+    'csv_exportBody': ("What's in the freezer, as a CSV file that opens in Excel.", "Cosa c'è nel freezer, in un file CSV che si apre con Excel."),
+    'csv_subject': ('Full Freezer - what is in the freezer', 'Full Freezer - cosa c’è nel freezer'),
+    'csv_name': ('Name', 'Nome'),
+    'csv_unit': ('Unit', 'Unità'),
+    'csv_days': ('Days in the freezer', 'Giorni nel freezer'),
+    'csv_freezer': ('Freezer', 'Freezer'),
+    'csv_compartment': ('Compartment', 'Scomparto'),
+    'backup_create': ('Back up everything', 'Fai un backup di tutto'),
+    'backup_createBody': ('Freezers, items, photos and history in one file, to keep or move to a new phone.',
+                          'Freezer, prodotti, foto e storico in un solo file, da conservare o portare su un telefono nuovo.'),
+    'backup_subject': ('Full Freezer backup', 'Backup di Full Freezer'),
+    'backup_restore': ('Restore from a backup', 'Ripristina da un backup'),
+    'backup_restoreBody': ('Bring back the data from a file made with "Back up everything".',
+                           'Riporta i dati da un file fatto con «Fai un backup di tutto».'),
+    'backup_restoreTitle': ('What to do with this backup?', 'Cosa faccio con questo backup?'),
+    'backup_restoreSummary': ('It contains {freezers} freezers, {items} items inside and {history} in the history.',
+                              'Contiene {freezers} freezer, {items} prodotti dentro e {history} nello storico.'),
+    'backup_modeReplace': ('Replace everything', 'Sostituisci tutto'),
+    'backup_modeReplaceBody': ("What's on this phone now is deleted and replaced by the backup.",
+                               'Quello che c’è ora su questo telefono si cancella e al suo posto va il backup.'),
+    'backup_modeMerge': ('Add to what I have', 'Aggiungi a quello che ho'),
+    'backup_modeMergeBody': ('Freezers with the same name as one already here are skipped.',
+                             'I freezer con lo stesso nome di uno già presente vengono saltati.'),
+    'backup_restored': ('Backup restored', 'Backup ripristinato'),
+    'backup_failed': ("That file isn't a Full Freezer backup, or it's damaged.", 'Quel file non è un backup di Full Freezer, o è rovinato.'),
 }
 
 TIPI = {
     'percent': 'int', 'count': 'int', 'n': 'int', 'days': 'int', 'discarded': 'int', 'total': 'int',
+    'freezers': 'int', 'items': 'int', 'history': 'int',
 }
 
 

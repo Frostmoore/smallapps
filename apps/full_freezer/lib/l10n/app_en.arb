@@ -501,5 +501,40 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settings_data": "Your data",
+  "csv_export": "Export to a spreadsheet",
+  "csv_exportBody": "What's in the freezer, as a CSV file that opens in Excel.",
+  "csv_subject": "Full Freezer - what is in the freezer",
+  "csv_name": "Name",
+  "csv_unit": "Unit",
+  "csv_days": "Days in the freezer",
+  "csv_freezer": "Freezer",
+  "csv_compartment": "Compartment",
+  "backup_create": "Back up everything",
+  "backup_createBody": "Freezers, items, photos and history in one file, to keep or move to a new phone.",
+  "backup_subject": "Full Freezer backup",
+  "backup_restore": "Restore from a backup",
+  "backup_restoreBody": "Bring back the data from a file made with \"Back up everything\".",
+  "backup_restoreTitle": "What to do with this backup?",
+  "backup_restoreSummary": "It contains {freezers} freezers, {items} items inside and {history} in the history.",
+  "@backup_restoreSummary": {
+    "placeholders": {
+      "freezers": {
+        "type": "int"
+      },
+      "items": {
+        "type": "int"
+      },
+      "history": {
+        "type": "int"
+      }
+    }
+  },
+  "backup_modeReplace": "Replace everything",
+  "backup_modeReplaceBody": "What's on this phone now is deleted and replaced by the backup.",
+  "backup_modeMerge": "Add to what I have",
+  "backup_modeMergeBody": "Freezers with the same name as one already here are skipped.",
+  "backup_restored": "Backup restored",
+  "backup_failed": "That file isn't a Full Freezer backup, or it's damaged."
 }
