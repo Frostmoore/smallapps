@@ -88,6 +88,17 @@ TESTI = {
     'home_needMore': ('Add another reading in a few days to get an estimate.',
                       'Aggiungi un’altra misurazione fra qualche giorno per avere una stima.'),
     'home_update': ('Update stock', 'Aggiorna scorta'),
+    'home_daysWord': ('{days, plural, =1{day} other{days}}', '{days, plural, =1{giorno} other{giorni}}'),
+    'home_autonomy': ('left to burn', 'di autonomia'),
+    'home_amountLeft': ('{amount} left', '{amount} rimasti'),
+    'home_fromRefill': ('{percent}% since the last refill', '{percent}% dall’ultimo carico'),
+    'home_perDay': ('{rate} a day', '{rate} al giorno'),
+    'home_reorderBox': ('Reorder by {date}', 'Riordina entro il {date}'),
+    'home_reorderBoxPast': ('Reorder now: the date was {date}', 'Riordina ora: la data era il {date}'),
+    'home_runsOutShort': ('runs out around {date}', 'finisce verso il {date}'),
+    'home_otherSources': ('OTHER SOURCES', 'ALTRE FONTI'),
+    'home_rowDetail': ('{amount} · {rate} a day', '{amount} · {rate} al giorno'),
+    'home_lastUpdateShort': ('Updated {date}', 'Aggiornato il {date}'),
 
     # ── Aggiornamento della scorta (F5.7) ──
     'update_title': ('Update stock', 'Aggiorna scorta'),

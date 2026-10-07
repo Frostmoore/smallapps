@@ -4201,7 +4201,9 @@ Prese con il proprietario prima di F5.1. Dove contraddicono il resto della fase,
    `#C4622D`; i valori esatti li misura `tool/genera_icone.py`.
 6. **Prima un'interfaccia essenziale, poi le proposte grafiche** (proprietario): appena
    l'app funziona si disegnano 2-3 direzioni (artifact, come per Full Freezer) e il
-   proprietario sceglie.
+   proprietario sceglie. **Scelta: «A · Brace»** (2026-10-07, https://claude.ai/artifact/Q1GQPG7gKkuJJz31py8pLt):
+   testata blu notte con la fonte principale e i giorni in arancio brace, altre fonti in righe
+   compatte, pulsante «Aggiorna scorta» in fondo; resta Plus Jakarta Sans (non Sora).
 7. **Trappole gia' pagate da non ripetere** (Full Freezer, 2026-10-07):
    - ☠ **Id per il License Server senza trattino basso**: `appId` locale `scorte_calore`, ma
      il server conosce `scortecalore` → costante `licenseAppId` in `app_config.dart` usata dal

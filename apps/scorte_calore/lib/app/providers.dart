@@ -93,3 +93,32 @@ final estimateProvider = Provider.family<ConsumptionEstimate?, int>((ref, source
     today: ref.watch(todayProvider),
   );
 });
+
+/// La fonte mostrata nella testata della home ("A · Brace"), persistita.
+///
+/// ⚑ Una preferenza e non sempre "la prima": chi ha stufa e bombolone guarda di solito una
+/// delle due, e la riga toccata deve restare in testata anche dopo aver chiuso l'app.
+class SelectedSource extends Notifier<int?> {
+  static const String key = 'selected_source';
+
+  @override
+  int? build() {
+    final saved = ref.watch(settingsProvider).getInt(key, orElse: -1);
+    return saved < 0 ? null : saved;
+  }
+
+  Future<void> select(int sourceId) async {
+    state = sourceId;
+    await ref.read(settingsProvider).setInt(key, sourceId);
+  }
+}
+
+final selectedSourceProvider = NotifierProvider<SelectedSource, int?>(SelectedSource.new);
+
+/// La fonte in testata: quella scelta se esiste ancora, altrimenti la prima.
+final heroSourceProvider = Provider<FuelSource?>((ref) {
+  final sources = ref.watch(sourcesProvider).value ?? const <FuelSource>[];
+  if (sources.isEmpty) return null;
+  final chosen = ref.watch(selectedSourceProvider);
+  return sources.where((s) => s.id == chosen).firstOrNull ?? sources.first;
+});

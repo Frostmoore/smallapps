@@ -168,6 +168,83 @@
   },
   "home_needMore": "Add another reading in a few days to get an estimate.",
   "home_update": "Update stock",
+  "home_daysWord": "{days, plural, =1{day} other{days}}",
+  "@home_daysWord": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "home_autonomy": "left to burn",
+  "home_amountLeft": "{amount} left",
+  "@home_amountLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "home_fromRefill": "{percent}% since the last refill",
+  "@home_fromRefill": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "home_perDay": "{rate} a day",
+  "@home_perDay": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "home_reorderBox": "Reorder by {date}",
+  "@home_reorderBox": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "home_reorderBoxPast": "Reorder now: the date was {date}",
+  "@home_reorderBoxPast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "home_runsOutShort": "runs out around {date}",
+  "@home_runsOutShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "home_otherSources": "OTHER SOURCES",
+  "home_rowDetail": "{amount} · {rate} a day",
+  "@home_rowDetail": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "home_lastUpdateShort": "Updated {date}",
+  "@home_lastUpdateShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "update_title": "Update stock",
   "update_date": "Date",
   "update_quantity": "How much is left",

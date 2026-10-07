@@ -12,6 +12,7 @@ import '../l10n/generated/app_localizations.dart';
 import 'locale_resolution.dart';
 import 'providers.dart';
 import 'routes.dart';
+import 'scorte_palette.dart';
 
 /// Il router dell'app.
 ///
@@ -80,15 +81,14 @@ class _ScorteCaloreAppState extends ConsumerState<ScorteCaloreApp> {
       routerConfig: _router,
       // `fidelity`: l'arancio resta quello acceso della fiamma invece del bruno che Material
       // ricaverebbe dal seme (stessa scelta di Full Freezer col suo blu).
-      theme: MicroTheme.light(
-        seed: config.seedColor,
-        fontFamily: config.fontFamily,
-        variant: DynamicSchemeVariant.fidelity,
+      // Sopra, il fondo caldo e i colori "A · Brace" (ScortePalette).
+      theme: withScorteLook(
+        MicroTheme.light(seed: config.seedColor, fontFamily: config.fontFamily, variant: DynamicSchemeVariant.fidelity),
+        ScortePalette.light,
       ),
-      darkTheme: MicroTheme.dark(
-        seed: config.seedColor,
-        fontFamily: config.fontFamily,
-        variant: DynamicSchemeVariant.fidelity,
+      darkTheme: withScorteLook(
+        MicroTheme.dark(seed: config.seedColor, fontFamily: config.fontFamily, variant: DynamicSchemeVariant.fidelity),
+        ScortePalette.dark,
       ),
       themeMode: ref.watch(themeModeProvider),
       supportedLocales: kSupportedLocales,
