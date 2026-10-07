@@ -65,11 +65,14 @@ Write-Host "Versione: $nome+$codice" -ForegroundColor Cyan
 # nel terminale ne' in un log di build.
 Write-Host 'Recupero il segreto dal server...' -NoNewline
 $riga = ssh clawserver 'sudo grep -m1 ^APP_SECRETS= /opt/microapps/server/.env'
-$segreto = [regex]::Match((($riga | Out-String).Trim()), "$App`:([^,\s]+)").Groups[1].Value
+# ⚑ Sul server gli id non hanno il trattino basso: la cartella `full_freezer` e' l'app
+#   `fullfreezer` (vedi licenseAppId in apps/full_freezer/lib/app/app_config.dart).
+$idServer = $App -replace '_', ''
+$segreto = [regex]::Match((($riga | Out-String).Trim()), "(?:^|[=,])$idServer`:([^,\s]+)").Groups[1].Value
 
 if ($segreto.Length -lt 16) {
     Write-Host ''
-    Write-Error "Segreto per '$App' non trovato in APP_SECRETS sul server."
+    Write-Error "Segreto per '$idServer' non trovato in APP_SECRETS sul server."
     exit 1
 }
 Write-Host " ok ($($segreto.Length) caratteri)" -ForegroundColor Green

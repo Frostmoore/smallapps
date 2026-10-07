@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:micro_core/micro_core.dart';
 
+import 'app_config.dart';
 import 'feature_limits.dart';
 import 'providers.dart';
 
@@ -89,7 +90,7 @@ class EntitlementNotifier extends Notifier<EntitlementView> {
     final api = (config.serverEnabled && installId != null)
         ? LicenseApiClient(
             baseUri: config.licenseBaseUrl!,
-            appId: config.appId,
+            appId: licenseAppId,
             appSecret: config.appSecret,
             installId: installId.value,
             appVersion: appVersion,
@@ -97,7 +98,7 @@ class EntitlementNotifier extends Notifier<EntitlementView> {
         : null;
 
     final service = EntitlementService(
-      appId: config.appId,
+      appId: licenseAppId,
       proSku: config.proSku,
       gateway: ref.watch(purchaseGatewayProvider),
       store: EntitlementStore(file: paths.file(paths.support, 'entitlement.json')),
