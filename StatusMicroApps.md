@@ -16,7 +16,7 @@ Ultimo aggiornamento: **2026-10-07**
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
 | **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
-| **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🔵 **TestFlight** (build 1), Pro pronto per l'invio, scheda da compilare | card grigia «In arrivo» |
+| **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
 | **Scorte Calore** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 
@@ -89,6 +89,9 @@ sul simulatore iPhone.
 | 2026-10-07 | App creata su App Store Connect (id `6820155659`, SKU `com.smp.fullfreezer`); App ID e App Group registrati dal proprietario |
 | 2026-10-07 | Prodotto `fullfreezer_pro_lifetime` (id `6820155793`): testi it/en-GB, 3,99 € (base Italia, ricavo 2,77 €), 175 paesi, screenshot di revisione → **READY_TO_SUBMIT** |
 | 2026-10-07 | Build **1.0.0 (1)** su **TestFlight**, gruppo interno «Sviluppatore» (accesso a tutte le build) |
+| 2026-10-07 | Provata dal proprietario su **iPad** (compatibilita' iPhone): acquisto Pro e voce funzionano |
+| 2026-10-07 | Scheda caricata via API (`apps/full_freezer/tool/scheda_app_store.py`); nome inglese **«Full Freezer – Freezer Tracker»** perche' «Full Freezer» in inglese e' gia' di un altro sviluppatore; intestazione e risultato di ricerca caricati a mano |
+| 2026-10-07 | **Inviata per la verifica**: versione 1.0.0 e Pro in **WAITING_FOR_REVIEW** |
 
 Grafiche pronte in `apps/full_freezer/store/grafiche/` (testata 1024x500, 6 schede 1320x2868 per
 App Store e 1080x2160 per Play, it/en). ☠ Firma: Xcode 27 non crea piu' profili nuovi con la chiave
