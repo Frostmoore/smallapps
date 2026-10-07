@@ -1001,7 +1001,7 @@ tutte fatte e provate sull'emulatore:
 - [ ] **F4.7** Uscita alimento: consumato / buttato, con storico
 - [x] **F4.8** Ricerca istantanea (2026-10-07: `lib/domain/search.dart` filtra in memoria nome e note normalizzati, tutte le parole in qualunque ordine; `lib/features/search/search_page.dart`; lente nella testata)
 - [ ] **F4.9** Notifiche (**Pro**): digest aggregato settimanale/quindicinale/mensile + avvisi «quasi pieno» / «quasi vuoto»
-- [ ] **F4.10** Feature Pro: freezer multipli, notifiche, storico, statistiche, CSV, backup, categorie personalizzate (le foto sono **gratis**)
+- [ ] **F4.10** Feature Pro: freezer multipli, notifiche, storico, statistiche, CSV, backup, categorie personalizzate (le foto sono **gratis**) — FATTO il 2026-10-07: `lib/app/{feature_limits,entitlement,paywall_config}.dart`, impostazioni con scheda Pro e ripristino, limite di un freezer (`openNewFreezer`), provato con lo store finto sull'emulatore. MANCANO le funzioni che il paywall gia' elenca: storico (F4.7), statistiche, CSV, backup, categorie personalizzate, notifiche (F4.9). ☠ Non si pubblica finche' ogni beneficio del paywall non esiste davvero.
 - [ ] **F4.11** Widget "da consumare presto": Android (Kotlin) **e** iOS (WidgetKit), stesso payload
 - [ ] **F4.12** Voice input per l'inserimento rapido, Android e iOS (permessi microfono e riconoscimento vocale)
 - [ ] **F4.13** Test (unit, DB, widget, golden, integrazione)

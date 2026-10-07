@@ -17,6 +17,8 @@ abstract final class Routes {
 
   static const String search = '/search';
 
+  static const String settings = '/settings';
+
   static const String freezerNew = '/freezers/new';
   static const String freezer = '/freezers/:freezerId';
   static const String freezerEdit = '/freezers/:freezerId/edit';

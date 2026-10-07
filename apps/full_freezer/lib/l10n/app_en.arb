@@ -92,6 +92,14 @@
     }
   },
   "freezer_defaultName": "Kitchen freezer",
+  "freezer_defaultNameN": "Freezer {n}",
+  "@freezer_defaultNameN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "freezer_newTitle": "New freezer",
   "freezer_editTitle": "Edit freezer",
   "freezer_nameLabel": "Name",
@@ -224,6 +232,59 @@
   "@quickAdd_saved": {
     "placeholders": {
       "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_headline": "Full Freezer Pro",
+  "paywall_subhead": "One payment. No subscription. Yours for good.",
+  "paywall_buy": "Unlock Pro",
+  "paywall_buyWithPrice": "Unlock Pro — {price}",
+  "@paywall_buyWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_restore": "Restore purchase",
+  "paywall_pending": "Payment is being processed. We'll unlock Pro as soon as it goes through.",
+  "paywall_thanks": "Thank you. Pro is unlocked.",
+  "paywall_restoredNothing": "No previous purchase found on this account.",
+  "paywall_unavailable": "The store isn't responding on this device. Check your connection and try again.",
+  "paywall_productUnavailable": "The Pro price hasn't arrived from the store. Try again in a moment.",
+  "common_retry": "Try again",
+  "paywall_benefitFreezersTitle": "Every freezer you have",
+  "paywall_benefitFreezersBody": "The chest freezer in the garage, the one at your parents': each with its own fill level.",
+  "paywall_benefitAlertsTitle": "The freezer tells you",
+  "paywall_benefitAlertsBody": "A weekly reminder of what's been in too long, and a heads-up when it's nearly full or nearly empty.",
+  "paywall_benefitStatsTitle": "How much you waste",
+  "paywall_benefitStatsBody": "Eaten versus thrown away, how long things stay in, what you waste most.",
+  "paywall_benefitHistoryTitle": "The history",
+  "paywall_benefitHistoryBody": "Everything you ate and threw away, day by day.",
+  "paywall_benefitBackupTitle": "Backup and new phone",
+  "paywall_benefitBackupBody": "Move everything to a new phone with one file.",
+  "paywall_benefitCsvTitle": "Export to a spreadsheet",
+  "paywall_benefitCsvBody": "What's in the freezer, ready to print or share.",
+  "paywall_benefitCategoriesTitle": "Your own categories",
+  "paywall_benefitCategoriesBody": "Beyond the ready-made ones, with their own reminder.",
+  "pro_activeTitle": "Full Freezer Pro is active",
+  "pro_ctaBody": "Every freezer, the alerts and the numbers on what you waste. One payment.",
+  "settings_title": "Settings",
+  "settings_freezers": "Your freezers",
+  "settings_addFreezerPro": "The free version has one freezer.",
+  "settings_purchase": "Purchase",
+  "settings_restoreGoogle": "Bought Pro on another phone with the same Google account?",
+  "settings_restoreApple": "Bought Pro on another iPhone with the same Apple ID?",
+  "settings_appearance": "Appearance",
+  "settings_theme": "Theme",
+  "theme_system": "Like the phone",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
+  "settings_version": "Full Freezer {version}",
+  "@settings_version": {
+    "placeholders": {
+      "version": {
         "type": "String"
       }
     }

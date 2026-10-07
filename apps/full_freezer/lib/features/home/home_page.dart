@@ -189,10 +189,12 @@ class _NightHeader extends ConsumerWidget {
                 onPressed: () => context.push(Routes.search),
               ),
               const SizedBox(width: 8),
+              // Le impostazioni: il Pro, i freezer (e l'aggiunta di un altro, che passa dal
+              // limite del piano gratuito), l'acquisto, il tema.
               _NightIconButton(
-                tooltip: l.home_addFreezer,
-                icon: Icons.add_home_work_outlined,
-                onPressed: () => context.push(Routes.freezerNew),
+                tooltip: l.settings_title,
+                icon: Icons.settings_outlined,
+                onPressed: () => context.push(Routes.settings),
               ),
             ],
           ),

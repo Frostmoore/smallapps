@@ -62,7 +62,10 @@ class _FreezerEditorPageState extends ConsumerState<FreezerEditorPage> {
     // Il nome proposto si scrive solo per un freezer nuovo e solo se il campo e' vuoto: va
     // fatto qui e non in initState perche' serve la lingua.
     if (widget.freezerId == null && _name.text.isEmpty) {
-      _name.text = L.of(context).freezer_defaultName;
+      // Il primo e' quasi sempre quello della cucina; dal secondo "Freezer cucina" sarebbe
+      // un doppione (visto sull'emulatore, 2026-10-07): si propone "Freezer 2", "Freezer 3".
+      final count = ref.read(freezersProvider).value?.length ?? 0;
+      _name.text = count == 0 ? L.of(context).freezer_defaultName : L.of(context).freezer_defaultNameN(count + 1);
     }
   }
 
