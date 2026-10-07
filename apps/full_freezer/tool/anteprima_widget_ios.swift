@@ -21,6 +21,42 @@ import WidgetKit
 struct Anteprima {
     @MainActor
     static func main() {
+        // `--vetrina it|en <file> <cartella icone>`: il widget medio da solo, grande e su fondo
+        // trasparente, per la grafica delle schede degli store
+        // (apps/full_freezer/tool/genera_grafiche_store.py). Le icone sono i PNG che l'app
+        // scrive nel contenitore condiviso (home_widget/icon_<chiave>.png).
+        if CommandLine.arguments.count > 4, CommandLine.arguments[1] == "--vetrina" {
+            let it = CommandLine.arguments[2] == "it"
+            let icone = CommandLine.arguments[4]
+            let righe = [
+                "2026-05-23\u{1F}\(it ? "Spezzatino" : "Beef stew")\u{1F}meat\u{1F}180",
+                "2026-06-05\u{1F}\(it ? "Merluzzo" : "Cod")\u{1F}fish\u{1F}120",
+                "2026-07-03\u{1F}\(it ? "Pane" : "Bread")\u{1F}bread\u{1F}90",
+            ].joined(separator: "\n")
+            let valori: [String: String] = [
+                Chiavi.titolo: it ? "DA USARE PRIMA" : "USE FIRST",
+                Chiavi.conteggio: it ? "23 prodotti" : "23 items",
+                Chiavi.oggi: it ? "oggi" : "today",
+                Chiavi.modelloGiorni: it ? "{n} gg" : "{n} d",
+                Chiavi.righe: righe,
+                Chiavi.prefissoIcona + "meat": icone + "/icon_meat.png",
+                Chiavi.prefissoIcona + "fish": icone + "/icon_fish.png",
+                Chiavi.prefissoIcona + "bread": icone + "/icon_bread.png",
+            ]
+            let voce = Deposito { valori[$0] }.voce(al: Deposito.formatoData.date(from: "2026-10-07")!)
+            let vista = VistaFreezer(entry: voce, famiglia: .systemMedium)
+                .frame(width: 338, height: 158)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            let render = ImageRenderer(content: vista)
+            render.scale = 4
+            guard let img = render.nsImage, let tiff = img.tiffRepresentation,
+                  let bmp = NSBitmapImageRep(data: tiff),
+                  let png = bmp.representation(using: .png, properties: [:])
+            else { exit(1) }
+            try? png.write(to: URL(fileURLWithPath: CommandLine.arguments[3]))
+            print("vetrina scritta")
+            return
+        }
         let uscita = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "/tmp/anteprima_ff.png"
         var reale: Deposito?
         if CommandLine.arguments.count > 2,

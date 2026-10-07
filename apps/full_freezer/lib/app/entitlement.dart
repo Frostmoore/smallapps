@@ -28,7 +28,9 @@ final purchaseGatewayProvider = Provider<PurchaseGateway>((ref) {
   final gateway = switch (config.billingMode) {
     BillingMode.store => StorePurchaseGateway(),
     // Il gateway finto parte senza Pro: in sviluppo si vuole vedere il paywall.
-    BillingMode.fake => FakePurchaseGateway.withProduct(config.proSku),
+    // Il prezzo vero del Pro di Full Freezer: lo screenshot del paywall per la revisione di
+    // Apple viene da qui, e con il 2,39 € predefinito (quello di TrashCan) sarebbe sbagliato.
+    BillingMode.fake => FakePurchaseGateway.withProduct(config.proSku, formattedPrice: '3,99 €'),
   };
   ref.onDispose(gateway.dispose);
   return gateway;

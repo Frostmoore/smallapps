@@ -16,7 +16,7 @@ Ultimo aggiornamento: **2026-10-07**
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
 | **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
-| **Full Freezer** | 1.0.0 (1) | 🔵 in sviluppo: codice completo, mancano prodotto e scheda | 🔵 in sviluppo: codice completo, mancano App ID, App Group, prodotto | card grigia «In arrivo» |
+| **Full Freezer** | 1.0.0 (1) | 🔵 in sviluppo: codice completo, mancano app su Console, prodotto e scheda | 🔵 **TestFlight** (build 1), Pro pronto per l'invio, scheda da compilare | card grigia «In arrivo» |
 | **Scorte Calore** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 
@@ -82,7 +82,20 @@ cd ~/microapps && python3 tool/asc_api.py GET '/v2/appAvailabilities/6818986320/
 | Piattaforme | Android e solo iPhone |
 
 Codice completo (F4 di `develop_microapps.md`, 2026-10-07), provato sull'emulatore Android e
-sul simulatore iPhone. **Nessuna build inviata.** Prima del primo invio, il proprietario deve:
+sul simulatore iPhone.
+
+| Data | App Store |
+|---|---|
+| 2026-10-07 | App creata su App Store Connect (id `6820155659`, SKU `com.smp.fullfreezer`); App ID e App Group registrati dal proprietario |
+| 2026-10-07 | Prodotto `fullfreezer_pro_lifetime` (id `6820155793`): testi it/en-GB, 3,99 € (base Italia, ricavo 2,77 €), 175 paesi, screenshot di revisione → **READY_TO_SUBMIT** |
+| 2026-10-07 | Build **1.0.0 (1)** su **TestFlight**, gruppo interno «Sviluppatore» (accesso a tutte le build) |
+
+Grafiche pronte in `apps/full_freezer/store/grafiche/` (testata 1024x500, 6 schede 1320x2868 per
+App Store e 1080x2160 per Play, it/en). ☠ Firma: Xcode 27 non crea piu' profili nuovi con la chiave
+API; per Full Freezer i profili «MicroApps AppStore …» sono stati creati via API (vedi
+`tool/build_ios.sh`).
+
+Cosa resta (prima versione era: prima del primo invio, il proprietario deve):
 
 - **Apple**: registrare gli App ID `com.smp.fullfreezer` e `com.smp.fullfreezer.FullFreezerWidget`
   con la capability App Groups, creare il gruppo `group.com.smp.fullfreezer`, creare l'app su
