@@ -1,0 +1,112 @@
+{
+  "@@locale": "en",
+  "appTitle": "Scorte Calore",
+  "common_save": "Save",
+  "common_cancel": "Cancel",
+  "common_edit": "Edit",
+  "common_ok": "OK",
+  "common_next": "Next",
+  "common_back": "Back",
+  "common_retry": "Try again",
+  "common_delete": "Delete",
+  "common_optional": "Optional",
+  "fuel_pellet": "Pellets",
+  "fuel_lpg": "LPG",
+  "fuel_diesel": "Heating oil",
+  "fuel_wood": "Firewood",
+  "fuel_biomass": "Other biomass",
+  "unit_bags": "{n, plural, =1{bag} other{bags}}",
+  "@unit_bags": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "unit_kg": "kg",
+  "unit_pallets": "{n, plural, =1{pallet} other{pallets}}",
+  "@unit_pallets": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "unit_liters": "L",
+  "unit_percent": "%",
+  "unit_quintals": "{n, plural, =1{quintal} other{quintals}}",
+  "@unit_quintals": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "unit_steres": "{n, plural, =1{stere} other{steres}}",
+  "@unit_steres": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "unit_crates": "{n, plural, =1{crate} other{crates}}",
+  "@unit_crates": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "paywall_headline": "Scorte Calore Pro",
+  "paywall_subhead": "One payment. No subscription. Yours for good.",
+  "paywall_buy": "Unlock Pro",
+  "paywall_buyWithPrice": "Unlock Pro — {price}",
+  "@paywall_buyWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_restore": "Restore purchase",
+  "paywall_pending": "Payment is being processed. We'll unlock Pro as soon as it goes through.",
+  "paywall_thanks": "Thank you. Pro is unlocked.",
+  "paywall_restoredNothing": "No previous purchase found on this account.",
+  "paywall_unavailable": "The store isn't responding on this device. Check your connection and try again.",
+  "paywall_productUnavailable": "The Pro price hasn't arrived from the store. Try again in a moment.",
+  "paywall_benefitAlertsTitle": "A reminder before you run out",
+  "paywall_benefitAlertsBody": "A notification on the day to reorder, and another if the date passes and you haven’t updated.",
+  "paywall_benefitSourcesTitle": "Every heat source you have",
+  "paywall_benefitSourcesBody": "The pellet stove and the LPG tank, home and the holiday house.",
+  "paywall_benefitHistoryTitle": "Full history and charts",
+  "paywall_benefitHistoryBody": "Compare winters: how much you burn and when.",
+  "paywall_benefitCalendarTitle": "In your calendar",
+  "paywall_benefitCalendarBody": "The reorder date as an event, updated only when you say so.",
+  "paywall_benefitCostsTitle": "Purchases and costs",
+  "paywall_benefitCostsBody": "What you spend per season, average price per unit.",
+  "paywall_benefitBackupTitle": "Backup and new phone",
+  "paywall_benefitBackupBody": "Move everything to a new phone with one file.",
+  "paywall_benefitCsvTitle": "Export to a spreadsheet",
+  "paywall_benefitCsvBody": "Readings and purchases, ready to open in Excel.",
+  "pro_locked": "This is part of Scorte Calore Pro.",
+  "settings_title": "Settings",
+  "settings_purchase": "Purchase",
+  "settings_restoreGoogle": "Bought Pro on another phone with the same Google account?",
+  "settings_restoreApple": "Bought Pro on another iPhone with the same Apple ID?",
+  "settings_appearance": "Appearance",
+  "settings_theme": "Theme",
+  "theme_system": "Like the phone",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
+  "settings_version": "Scorte Calore {version}",
+  "@settings_version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_proActive": "Scorte Calore Pro is active",
+  "settings_proCta": "Discover Scorte Calore Pro"
+}

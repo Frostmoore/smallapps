@@ -1,0 +1,24 @@
+# La schermata di avvio di Scorte Calore.
+#
+# Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
+#
+# L'immagine e' il disegno dell'icona senza sfondo (splash_logo.png, da tool/genera_icone.py),
+# sul blu notte dell'icona (#183450), come Full Freezer tiene il suo blu: chi apre l'app vede
+# continuare l'icona che ha appena toccato. Nel tema scuro, il blu piu' profondo #0F1828.
+flutter_native_splash:
+  color: "#183450"
+  image: assets/icons/splash_logo.png
+  color_dark: "#0F1828"
+  image_dark: assets/icons/splash_logo.png
+
+  android: true
+  ios: true
+  web: false
+
+  # ☠ Android 12+ ritaglia l'immagine a cerchio e tiene solo i due terzi centrali:
+  # splash_android12.png e' il disegno gia' confinato nel cerchio sopravvissuto.
+  android_12:
+    color: "#183450"
+    color_dark: "#0F1828"
+    image: assets/icons/splash_android12.png
+    image_dark: assets/icons/splash_android12.png

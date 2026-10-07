@@ -1019,10 +1019,10 @@ tutte fatte e provate sull'emulatore:
 ### F5 — Scorte Calore → `v7.0.0`
 
 - [x] **F5.0** Decisioni di partenza (vedi §8 F5.0): Android e iPhone, notifiche **Pro**, widget su entrambe le piattaforme, prezzo 2,99 €, colori dall'icona, interfaccia essenziale prima e proposte grafiche dopo (2026-10-07)
-- [ ] **F5.1** Bootstrap progetto, tema, l10n, router
+- [x] **F5.1** Bootstrap progetto, tema, l10n, router (2026-10-07: `com.smp.scortecalore` su Android e iOS, solo iPhone, team, firma e ProGuard come Full Freezer, `licenseAppId`, limiti Pro e paywall, testi da `tool/testi.py`, icone e splash da `tool/genera_icone.py` sull'icona del proprietario con sfondo ripulito, avvio provato sull'emulatore)
 - [ ] **F5.2** Data layer Drift: fonti, misurazioni, acquisti, promemoria calendario
-- [ ] **F5.3** `ConsumptionCalculator`: media mobile, rilevamento rifornimenti, qualità della stima + test
-- [ ] **F5.4** Conversioni unità e capacità serbatoio (litri, percentuale, sacchi, kg, steri)
+- [x] **F5.3** `ConsumptionCalculator`: media mobile, rilevamento rifornimenti, qualità della stima + test (2026-10-07: `lib/domain/consumption.dart`, `reorder_plan.dart`; ⚑ esaurimento contato dall'**ultima misura** e non da oggi, altrimenti senza misure nuove la data slitterebbe ogni giorno e il widget non scenderebbe mai; 62 test di dominio)
+- [x] **F5.4** Conversioni unità e capacità serbatoio (litri, percentuale, sacchi, kg, steri) (2026-10-07: `lib/domain/{fuel_units,fuel_source,quantity_converter}.dart`; nessuna stringa nel dominio, i nomi dagli ARB)
 - [ ] **F5.5** Configurazione fonte combustibile (wizard)
 - [ ] **F5.6** Dashboard: residuo, consumo medio, autonomia, data di riordino
 - [ ] **F5.7** Aggiornamento scorta (il gesto più frequente dell'app)
