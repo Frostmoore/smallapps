@@ -31,6 +31,24 @@
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
+		<!-- Il widget apre l'app con fullfreezer:///use-soon?homeWidget (F4.11). Lo schema va
+		     dichiarato perche' l'URL arrivi all'app. -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>com.smp.fullfreezer</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>fullfreezer</string>
+				</array>
+			</dict>
+		</array>
+		<!-- ☠ Spento come su Android: altrimenti Flutter passa da solo l'URL del widget a
+		     go_router con un `go`, che sostituisce la pila e toglie la freccia indietro.
+		     Gli URL li gestisce solo app.dart (_openWidgetUri). -->
+		<key>FlutterDeepLinkingEnabled</key>
+		<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Full Freezer uses the camera only when you take a photo of something you put in the freezer, so you can recognise it later.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
