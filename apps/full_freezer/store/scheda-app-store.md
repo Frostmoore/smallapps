@@ -18,6 +18,13 @@
 | `grafiche/appstore/it|en/*.png` | Facoltative, iPhone 6,9" (1320×2868) |
 | `screenshots/ios/it/paywall-revisione.png` | Acquisto in-app → screenshot per la revisione — **gia' caricato** (API, 2026-10-07) |
 
+| `grafiche/apple/intestazione-3840x1646-it|en.png` | Versione → **Intestazione e risultati di ricerca → Intestazione** (21:9), per lingua — a mano |
+| `grafiche/apple/ricerca-3840x2560-it|en.png` | Versione → **Intestazione e risultati di ricerca → Risultati della ricerca** (3:2), per lingua — a mano |
+
+⚑ Le risorse «Intestazione» e «Risultati della ricerca» sono nuove (Apple, 5 ottobre 2026): niente
+trasparenza, frasi brevi e tradotte, niente prezzi, URL o ©; contenuti 4+; l'elemento chiave al
+centro perche' i bordi si tagliano sui vari dispositivi. Si rigenerano con le altre grafiche.
+
 ☠ Spazio obbligatorio = **6,5"**: Apple rifiuta le 6,9" trascinate li' (lezione di TrashCan).
 **Niente iPad**: l'app e' solo iPhone (`TARGETED_DEVICE_FAMILY = 1`); su iPad gira in compatibilita'.
 

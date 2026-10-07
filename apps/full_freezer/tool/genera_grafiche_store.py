@@ -177,9 +177,72 @@ def testata(lingua: str) -> Image.Image:
     return img.convert('RGB')
 
 
+FRASI_APPLE = {
+    # (intestazione, risultati di ricerca: titolo, riga sotto). Frasi brevi: Apple chiede che
+    # accompagnino l'immagine invece di descriverla, e vieta prezzi, URL e simbolo del copyright.
+    'it': ('Il più vecchio, sempre in cima', ("Cosa c'è nel freezer,\ne da quanto tempo", 'Inserisci in tre tocchi.\nIl widget conta i giorni.')),
+    'en': ('The oldest, always on top', ("What's in your freezer,\nand since when", 'Add in three taps.\nThe widget counts the days.')),
+}
+
+
+def fila_di_telefoni(img, lingua, nomi, altezza, cx, cy, passo, scala_lati=0.86):
+    """Telefoni affiancati, quello centrale piu' grande e davanti: profondita' senza prospettive finte."""
+    centro = len(nomi) // 2
+    ordine = sorted(range(len(nomi)), key=lambda i: -abs(i - centro))
+    for i in ordine:
+        sch = Image.open(SCREEN / lingua / f'{nomi[i]}.png')
+        h = altezza if i == centro else round(altezza * scala_lati)
+        w = round(h * sch.width / sch.height)
+        tel = telefono(sch, round(w / (1 - 2 * 0.022) * (1 - 2 * 0.022)))
+        x = round(cx + (i - centro) * passo - tel.width / 2)
+        y = round(cy - tel.height / 2)
+        con_ombra(img, tel, (x, y), round(altezza * 0.03))
+
+
+def intestazione_apple(lingua: str) -> Image.Image:
+    """La testata della pagina prodotto: 3840x1646 (21:9), senza trasparenza.
+
+    Apple taglia i bordi a seconda del dispositivo: tutto l'importante sta nel centro, i
+    telefoni laterali possono perdere un pezzo senza danno.
+    """
+    w, h = 3840, 1646
+    img = sfumatura(w, h, alto=(7, 84, 214), basso=NOTTE).convert('RGBA')
+    d = ImageDraw.Draw(img)
+    frase = FRASI_APPLE[lingua][0]
+    f = font(118, 800)
+    box = d.textbbox((0, 0), frase, font=f)
+    d.text(((w - (box[2] - box[0])) / 2 - box[0], 120), frase, font=f, fill=(255, 255, 255))
+    fila_di_telefoni(img, lingua, ['inserimento', 'home', 'freezer'], altezza=1420, cx=w // 2, cy=1080, passo=760)
+    return img.convert('RGB')
+
+
+def ricerca_apple(lingua: str) -> Image.Image:
+    """La risorsa dei risultati di ricerca: 3:2 a 3840x2560, senza trasparenza.
+
+    "State the obvious": a sinistra cosa fa l'app in due righe, a destra l'interfaccia vera.
+    """
+    w, h = 3840, 2560
+    img = sfumatura(w, h, alto=(7, 84, 214), basso=NOTTE).convert('RGBA')
+    d = ImageDraw.Draw(img)
+    titolo, sotto = FRASI_APPLE[lingua][1]
+    y = 860
+    for riga in titolo.split('\n'):
+        d.text((260, y), riga, font=font(150, 800), fill=(255, 255, 255))
+        y += 176
+    y += 70
+    for riga in sotto.split('\n'):
+        d.text((264, y), riga, font=font(84, 500), fill=SPENTO)
+        y += 108
+    fila_di_telefoni(img, lingua, ['inserimento', 'home'], altezza=2240, cx=2860, cy=h // 2 + 40, passo=560, scala_lati=0.9)
+    return img.convert('RGB')
+
+
 def main():
     for lingua in ('it', 'en'):
         testata(lingua).save(USCITA / f'testata-1024x500-{lingua}.png')
+        (USCITA / 'apple').mkdir(exist_ok=True)
+        intestazione_apple(lingua).save(USCITA / 'apple' / f'intestazione-3840x1646-{lingua}.png')
+        ricerca_apple(lingua).save(USCITA / 'apple' / f'ricerca-3840x2560-{lingua}.png')
         # ☠ App Store Connect chiede la misura da 6,5" (1284x2778) e rifiuta le 6,9" trascinate in
         #   quello spazio (lezione di TrashCan, 2026-10-05): si compongono tutte e due, native.
         for cartella, (w, h) in (('appstore', (1320, 2868)), ('appstore-6.5', (1284, 2778)), ('play', (1080, 2160))):
