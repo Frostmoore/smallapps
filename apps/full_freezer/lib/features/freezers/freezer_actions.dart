@@ -8,6 +8,15 @@ import '../../app/paywall_config.dart';
 import '../../app/providers.dart';
 import '../../app/routes.dart';
 
+/// Apre una pagina Pro, passando dal paywall (con quella funzione evidenziata) se serve.
+Future<void> openProFeature(BuildContext context, WidgetRef ref, FeatureKey key, String route) async {
+  if (!ref.read(featureGateProvider).allows(key)) {
+    final unlocked = await showFreezerPaywall(context, ref, highlight: key);
+    if (!unlocked || !context.mounted) return;
+  }
+  if (context.mounted) await context.push(route);
+}
+
 /// Apre la creazione di un freezer, passando dal paywall se il piano gratuito e' pieno.
 ///
 /// ⚑ In una funzione sola perche' "aggiungi un freezer" si tocca da piu' punti

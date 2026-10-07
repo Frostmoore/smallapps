@@ -135,7 +135,7 @@ TESTI = {
     'size_medium': ('Medium', 'Medio'),
     'size_large': ('Large', 'Grande'),
     'size_xlarge': ('Very large', 'Molto grande'),
-    'size_perUnit': ('{perUnit} each · {total} in all', '{perUnit} l’uno · {total} in tutto'),
+    'size_perUnit': ('{perUnit} each · {inAll} in all', '{perUnit} l’uno · {inAll} in tutto'),
     'size_customLabel': ('Litres in all', 'Litri in tutto'),
 
     # ── Inserimento rapido ──
@@ -199,6 +199,30 @@ TESTI = {
     'theme_dark': ('Dark', 'Scuro'),
     'settings_version': ('Full Freezer {version}', 'Full Freezer {version}'),
 
+    # ── Storico e statistiche ──
+    'settings_numbers': ('Your numbers', 'I tuoi numeri'),
+    'stats_title': ('Statistics', 'Statistiche'),
+    'stats_subtitle': ('What you eat, what you throw away, how long things stay in.', 'Cosa consumi, cosa butti, quanto restano dentro le cose.'),
+    'stats_lockedSubtitle': ('{count, plural, =0{Unlock them to see what you waste.} =1{You already have 1 item out: unlock the statistics to see it.} other{You already have {count} items out: unlock the statistics to see them.}}',
+                             '{count, plural, =0{Sbloccale per vedere cosa sprechi.} =1{Hai già 1 uscita registrata: sblocca le statistiche per vederla.} other{Hai già {count} uscite registrate: sblocca le statistiche per vederle.}}'),
+    'stats_month': ('30 days', '30 giorni'),
+    'stats_year': ('12 months', '12 mesi'),
+    'stats_all': ('All time', 'Sempre'),
+    'stats_empty': ('Nothing has come out of the freezer in this period yet.', 'In questo periodo dal freezer non è ancora uscito niente.'),
+    'stats_wastedLabel': ('Thrown away', 'Buttato'),
+    'stats_wastedLine': ('{discarded} of the {total} things taken out were thrown away', '{discarded} buttati su {total} usciti dal freezer'),
+    'stats_averageStay': ('average time in the freezer', 'in media nel freezer'),
+    'stats_mostWasted': ('most thrown away', 'il più buttato'),
+    'stats_months': ('Last six months', 'Ultimi sei mesi'),
+    'history_title': ('History', 'Storico'),
+    'history_count': ('{count, plural, =0{Nothing out yet} =1{1 item out} other{{count} items out}}',
+                      '{count, plural, =0{Ancora nessuna uscita} =1{1 uscita} other{{count} uscite}}'),
+    'history_empty': ("When you mark something as eaten or thrown away, you'll find it here.", 'Quando segni qualcosa come consumato o buttato, lo trovi qui.'),
+    'history_stayed': ('{days, plural, =0{same day} =1{1 day inside} other{{days} days inside}}', '{days, plural, =0{in giornata} =1{1 giorno dentro} other{{days} giorni dentro}}'),
+    'item_wasConsumed': ('This was eaten.', 'Questo è stato consumato.'),
+    'item_wasDiscarded': ('This was thrown away.', 'Questo è stato buttato.'),
+    'item_putBack': ('Put back', 'Rimetti dentro'),
+
     # ── Ricerca ──
     'search_hint': ('Search the freezer', 'Cerca nel freezer'),
     'search_clear': ('Clear', 'Cancella'),
@@ -244,7 +268,7 @@ TESTI = {
 }
 
 TIPI = {
-    'percent': 'int', 'count': 'int', 'n': 'int', 'days': 'int',
+    'percent': 'int', 'count': 'int', 'n': 'int', 'days': 'int', 'discarded': 'int', 'total': 'int',
 }
 
 

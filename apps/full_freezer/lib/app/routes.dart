@@ -19,6 +19,10 @@ abstract final class Routes {
 
   static const String settings = '/settings';
 
+  /// Pro (F4.7, F4.10): ci si arriva da `openProFeature`, che passa dal paywall.
+  static const String stats = '/stats';
+  static const String history = '/history';
+
   static const String freezerNew = '/freezers/new';
   static const String freezer = '/freezers/:freezerId';
   static const String freezerEdit = '/freezers/:freezerId/edit';

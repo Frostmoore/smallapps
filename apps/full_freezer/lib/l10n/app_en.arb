@@ -199,13 +199,13 @@
   "size_medium": "Medium",
   "size_large": "Large",
   "size_xlarge": "Very large",
-  "size_perUnit": "{perUnit} each · {total} in all",
+  "size_perUnit": "{perUnit} each · {inAll} in all",
   "@size_perUnit": {
     "placeholders": {
       "perUnit": {
         "type": "String"
       },
-      "total": {
+      "inAll": {
         "type": "String"
       }
     }
@@ -289,6 +289,57 @@
       }
     }
   },
+  "settings_numbers": "Your numbers",
+  "stats_title": "Statistics",
+  "stats_subtitle": "What you eat, what you throw away, how long things stay in.",
+  "stats_lockedSubtitle": "{count, plural, =0{Unlock them to see what you waste.} =1{You already have 1 item out: unlock the statistics to see it.} other{You already have {count} items out: unlock the statistics to see them.}}",
+  "@stats_lockedSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stats_month": "30 days",
+  "stats_year": "12 months",
+  "stats_all": "All time",
+  "stats_empty": "Nothing has come out of the freezer in this period yet.",
+  "stats_wastedLabel": "Thrown away",
+  "stats_wastedLine": "{discarded} of the {total} things taken out were thrown away",
+  "@stats_wastedLine": {
+    "placeholders": {
+      "discarded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "stats_averageStay": "average time in the freezer",
+  "stats_mostWasted": "most thrown away",
+  "stats_months": "Last six months",
+  "history_title": "History",
+  "history_count": "{count, plural, =0{Nothing out yet} =1{1 item out} other{{count} items out}}",
+  "@history_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "history_empty": "When you mark something as eaten or thrown away, you'll find it here.",
+  "history_stayed": "{days, plural, =0{same day} =1{1 day inside} other{{days} days inside}}",
+  "@history_stayed": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "item_wasConsumed": "This was eaten.",
+  "item_wasDiscarded": "This was thrown away.",
+  "item_putBack": "Put back",
   "search_hint": "Search the freezer",
   "search_clear": "Clear",
   "search_empty": "Type a name or a word from the notes: accents and capitals don't matter.",

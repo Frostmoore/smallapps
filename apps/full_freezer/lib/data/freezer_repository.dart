@@ -202,6 +202,16 @@ class FreezerRepository {
           (t) => OrderingTerm(expression: t.id),
         ]);
 
+  /// Gli alimenti usciti (consumati o buttati), **i piu' recenti per primi**: lo storico e
+  /// le statistiche (F4.7). Restano nel database proprio per questo.
+  Stream<List<Item>> watchRemovedItems() => (_db.select(_db.items)
+        ..where((t) => t.status.isNotValue(ItemStatus.stored))
+        ..orderBy([
+          (t) => OrderingTerm(expression: t.removedAt, mode: OrderingMode.desc),
+          (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc),
+        ]))
+      .watch();
+
   Future<Item?> itemById(int id) =>
       (_db.select(_db.items)..where((t) => t.id.equals(id))).getSingleOrNull();
 

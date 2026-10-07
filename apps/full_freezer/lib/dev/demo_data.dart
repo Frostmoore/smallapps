@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../data/database.dart';
 import '../data/freezer_repository.dart';
 import '../domain/capacity.dart';
 import '../domain/units.dart';
@@ -21,8 +22,9 @@ const bool demoRequested = bool.fromEnvironment('FF_DEMO');
 bool get demoEnabled => demoRequested && !kReleaseMode;
 
 /// Riempie il database se e' vuoto. Restituisce true se ha scritto qualcosa.
-Future<bool> seedDemoData(FreezerRepository repo, SettingsStore settings, {required String freezerName}) async {
+Future<bool> seedDemoData(AppDatabase db, SettingsStore settings, {required String freezerName}) async {
   if (!demoEnabled) return false;
+  final repo = FreezerRepository(db);
   if ((await repo.allFreezers()).isNotEmpty) return false;
 
   final oggi = CivilDate.today();
@@ -75,6 +77,46 @@ Future<bool> seedDemoData(FreezerRepository repo, SettingsStore settings, {requi
       ),
     );
   }
+  // Le uscite degli ultimi sei mesi, per lo storico e le statistiche (F4.7): ognuna scritta
+  // da un repository con l'orologio fermo al giorno dell'uscita, cosi' removedAt e' vero.
+  final uscite = <(String, String, int, int, bool)>[
+    // (nome, categoria, congelato giorni fa, uscito giorni fa, consumato)
+    ('Lasagne', 'prepared', 200, 170, true),
+    ('Pane', 'bread', 190, 160, false),
+    ('Piselli', 'vegetables', 160, 140, true),
+    ('Merluzzo', 'fish', 150, 120, true),
+    ('Spezzatino', 'meat_red', 140, 110, true),
+    ('Focaccia', 'bread', 130, 100, false),
+    ('Gelato', 'ice_cream', 120, 90, true),
+    ('Fragole', 'fruit', 110, 75, false),
+    ('Ragù', 'prepared', 90, 60, true),
+    ('Salsicce', 'meat_red', 80, 50, true),
+    ('Pizza', 'bread', 100, 45, false),
+    ('Minestrone', 'vegetables', 70, 35, true),
+    ('Petto di pollo', 'meat_white', 60, 25, true),
+    ('Spinaci', 'vegetables', 55, 20, true),
+    ('Panini', 'bread', 50, 12, false),
+    ('Gamberi', 'fish', 40, 8, true),
+    ('Polpette', 'meat_red', 30, 4, true),
+    ('Mirtilli', 'fruit', 45, 2, true),
+  ];
+  for (final (nome, categoria, congelato, uscito, consumato) in uscite) {
+    final giorno = oggi.addDays(-uscito).toLocalDateTime(19);
+    final allora = FreezerRepository(db, clock: () => giorno);
+    final id = await allora.addItem(
+      NewItem(
+        name: nome,
+        freezerId: freezer,
+        quantity: 1,
+        unit: Units.portions,
+        category: categoria,
+        frozenAt: oggi.addDays(-congelato),
+        volumeLiters: 0.5,
+      ),
+    );
+    await allora.removeItem(id, consumed: consumato);
+  }
+
   await settings.setBool(SettingKeys.onboardingDone, true);
   return true;
 }

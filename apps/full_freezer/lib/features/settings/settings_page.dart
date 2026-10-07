@@ -32,6 +32,7 @@ class SettingsPage extends ConsumerWidget {
     final pro = ref.watch(isProProvider);
     final freezers = ref.watch(freezersProvider).value ?? const <Freezer>[];
     final items = ref.watch(storedItemsProvider).value ?? const <Item>[];
+    final removed = ref.watch(removedItemsProvider).value ?? const <Item>[];
     final mode = ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -59,6 +60,24 @@ class SettingsPage extends ConsumerWidget {
             subtitle: pro || freezers.isEmpty ? null : l.settings_addFreezerPro,
             trailing: pro || freezers.isEmpty ? null : const ProBadge(),
             onTap: () => unawaited(openNewFreezer(context, ref)),
+          ),
+          GhiaccioSectionLabel(text: l.settings_numbers, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
+          GhiaccioTile(
+            leading: const Icon(Icons.insights_outlined),
+            title: l.stats_title,
+            // Senza Pro si dice quante uscite ci sono gia' (develop_microapps.md F4.7): il dato
+            // l'utente l'ha gia' prodotto, il Pro glielo fa vedere.
+            subtitle: pro ? l.stats_subtitle : l.stats_lockedSubtitle(removed.length),
+            trailing: pro ? Icon(Icons.chevron_right, color: p.inkMuted) : const ProBadge(),
+            onTap: () => unawaited(openProFeature(context, ref, FeatureKey.statistics, Routes.stats)),
+          ),
+          const SizedBox(height: 6),
+          GhiaccioTile(
+            leading: const Icon(Icons.history),
+            title: l.history_title,
+            subtitle: l.history_count(removed.length),
+            trailing: pro ? Icon(Icons.chevron_right, color: p.inkMuted) : const ProBadge(),
+            onTap: () => unawaited(openProFeature(context, ref, FeatureKey.fullHistory, Routes.history)),
           ),
           GhiaccioSectionLabel(text: l.settings_purchase, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
           GhiaccioTile(

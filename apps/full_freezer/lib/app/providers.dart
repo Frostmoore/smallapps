@@ -64,6 +64,11 @@ final storedItemsProvider = StreamProvider<List<Item>>(
   (ref) => ref.watch(repositoryProvider).watchStoredItems(),
 );
 
+/// Gli alimenti usciti, i piu' recenti per primi (storico e statistiche, F4.7).
+final removedItemsProvider = StreamProvider<List<Item>>(
+  (ref) => ref.watch(repositoryProvider).watchRemovedItems(),
+);
+
 /// Gli scomparti di tutti i freezer, raggruppati per freezer.
 final compartmentsByFreezerProvider = StreamProvider<Map<int, List<Compartment>>>(
   (ref) => ref.watch(repositoryProvider).watchAllCompartments().map((all) {

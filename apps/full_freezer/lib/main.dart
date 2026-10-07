@@ -6,7 +6,6 @@ import 'app/app.dart';
 import 'app/app_config.dart';
 import 'app/providers.dart';
 import 'data/database.dart';
-import 'data/freezer_repository.dart';
 import 'dev/demo_data.dart';
 
 /// L'avvio di Full Freezer.
@@ -44,7 +43,7 @@ Future<void> main() async {
   // avvio; usa una connessione sua, chiusa prima che l'app apra la propria.
   if (demoEnabled) {
     final db = AppDatabase.open();
-    await seedDemoData(FreezerRepository(db), settings, freezerName: 'Freezer cucina');
+    await seedDemoData(db, settings, freezerName: 'Freezer cucina');
     await db.close();
   }
 

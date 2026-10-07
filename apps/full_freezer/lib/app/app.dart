@@ -6,6 +6,8 @@ import 'package:micro_core/micro_core.dart';
 
 import '../features/freezers/freezer_editor_page.dart';
 import '../features/freezers/freezer_page.dart';
+import '../features/history/history_page.dart';
+import '../features/history/stats_page.dart';
 import '../features/home/home_page.dart';
 import '../features/items/item_draft.dart';
 import '../features/items/item_edit_page.dart';
@@ -33,6 +35,8 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
     GoRoute(path: Routes.useSoon, builder: (_, __) => const UseSoonPage()),
     GoRoute(path: Routes.search, builder: (_, __) => const SearchPage()),
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
+    GoRoute(path: Routes.stats, builder: (_, __) => const StatsPage()),
+    GoRoute(path: Routes.history, builder: (_, __) => const HistoryPage()),
     // ⚑ `new` prima di `:freezerId`: go_router prova le rotte in ordine, e "new" e' anche
     // un valore valido per il parametro.
     GoRoute(path: Routes.freezerNew, builder: (_, __) => const FreezerEditorPage()),

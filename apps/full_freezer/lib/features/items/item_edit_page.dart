@@ -182,8 +182,11 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
               }),
               itemBuilder: (_) => [
                 PopupMenuItem(value: 'duplicate', child: Text(l.item_duplicate)),
-                PopupMenuItem(value: 'consume', child: Text(l.item_consume)),
-                PopupMenuItem(value: 'discard', child: Text(l.item_discard)),
+                // Un alimento gia' uscito non si consuma una seconda volta.
+                if (_original!.status == ItemStatus.stored) ...[
+                  PopupMenuItem(value: 'consume', child: Text(l.item_consume)),
+                  PopupMenuItem(value: 'discard', child: Text(l.item_discard)),
+                ],
               ],
             ),
         ],
@@ -191,6 +194,29 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
       body: ListView(
         padding: MicroSpacing.page,
         children: [
+          // Un alimento uscito (dallo storico, F4.7): lo si dice e lo si puo' rimettere dentro.
+          if (_original case final o? when o.status != ItemStatus.stored)
+            Padding(
+              padding: const EdgeInsets.only(bottom: MicroSpacing.m),
+              child: MicroCard(
+                child: Row(
+                  children: [
+                    Icon(o.status == ItemStatus.consumed ? Icons.check_circle_outline : Icons.delete_outline),
+                    MicroSpacing.hGapM,
+                    Expanded(
+                      child: Text(o.status == ItemStatus.consumed ? l.item_wasConsumed : l.item_wasDiscarded),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await ref.read(repositoryProvider).undoRemoval(o.id);
+                        if (context.mounted) context.pop();
+                      },
+                      child: Text(l.item_putBack),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           // F4.5b: la foto, gratis. In cima perche' e' la cosa che si riconosce piu' in fretta.
           ItemPhotoEditor(
             photoPath: d.photoPath,
