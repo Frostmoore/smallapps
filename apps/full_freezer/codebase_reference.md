@@ -4,8 +4,8 @@
 > per primo, e quanto e' pieno.
 > **Obiettivo**: capire il codice, trovare cio' che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-10-07 · **Fase**: F4.0–F4.14 concluse, F4.15 (questo atlante) e
-> F4.16 (rituale) in corso · **Ramo git**: `v5.5.2` · **versionName+Code**: `1.0.0+1`
+> **Aggiornato al**: 2026-10-07 · **Fase**: F4.0–F4.16 concluse (resta F4.17, gli store, che
+> dipende dal proprietario) · **Ramo git**: `v6.0.0` · **versionName+Code**: `1.0.0+1`
 > **Package Android / bundle iOS**: `com.smp.fullfreezer` (immutabile dopo il primo upload)
 > **Estensione widget iOS**: `com.smp.fullfreezer.FullFreezerWidget` · **App Group**: `group.com.smp.fullfreezer`
 > **SKU Pro**: `fullfreezer_pro_lifetime` — 3,99 € una tantum (stesso gradino su Play e App Store)
@@ -18,7 +18,10 @@
 > segnala solo i nomi **di quest'app** che non esistono piu'.
 >
 > Stato: l'app gira su Android (emulatore Android 15) e su iOS (simulatore iPhone, con
-> l'estensione WidgetKit). **137 test verdi** propri, oltre a quelli di `micro_core`.
+> l'estensione WidgetKit). **140 test verdi** propri, oltre a quelli di `micro_core`.
+>
+> Allineato al commit `b018f90` (correzioni emerse scrivendo l'atlante: movimento `moved`
+> dalla pagina dell'alimento, freezer riordinabili, `ProGate`, F4.9 completa).
 >
 > Convenzioni dei simboli: ⚑ = scelta non ovvia, con il suo perche'. ☠ = trappola gia' pagata.
 
@@ -77,6 +80,7 @@
 | Le categorie personalizzate (Pro) | `lib/features/categories/` |
 | Le impostazioni | `lib/features/settings/settings_page.dart` |
 | Le righe e le etichette "Ghiaccio" comuni | `lib/features/common/ghiaccio.dart` |
+| Il lucchetto delle pagine Pro aperte senza Pro (`ProGate`) | `lib/features/common/pro_gate.dart` |
 | Permessi, receiver, widget, deep link spento (Android) | `android/app/src/main/AndroidManifest.xml` |
 | L'intent del widget ad app chiusa | `android/app/src/main/kotlin/com/smp/fullfreezer/MainActivity.kt` |
 | Permessi, schema URL, deep link spento (iOS) | `ios/Runner/Info.plist` (+ `{it,en}.lproj/InfoPlist.strings`) |
@@ -127,6 +131,7 @@ apps/full_freezer/
 │   ├── features/
 │   │   ├── categories/custom_categories_page.dart, custom_category_editor.dart   (Pro)
 │   │   ├── common/ghiaccio.dart          GhiaccioSectionLabel, GhiaccioTile
+│   │   ├── common/pro_gate.dart          ProGate: il Pro controllato sulla pagina
 │   │   ├── freezers/freezer_actions.dart, freezer_editor_page.dart, freezer_page.dart, freezer_widgets.dart
 │   │   ├── history/history_page.dart, stats_page.dart                             (Pro)
 │   │   ├── home/home_page.dart, item_row_tile.dart
@@ -141,10 +146,10 @@ apps/full_freezer/
 │   │   ├── notification_plan.dart        DigestFrequency, digestDates, digestFor, alertTime, PendingAlert, digestId
 │   │   └── voice_input.dart              VoiceInput (speech_to_text)
 │   └── l10n/
-│       ├── app_en.arb                    template (245 chiavi) — GENERATO da tool/testi.py
+│       ├── app_en.arb                    template (249 chiavi) — GENERATO da tool/testi.py
 │       ├── app_it.arb                    italiano, stesse chiavi — GENERATO da tool/testi.py
 │       └── untranslated.json             vuoto: nessuna chiave senza traduzione
-├── test/                                 137 test (§12)
+├── test/                                 140 test (§12)
 │   ├── data/freezer_repository_test.dart
 │   ├── domain/{aging,capacity,formats,home_view,item_photo,search,stats,text_norm,voice_parser}_test.dart
 │   ├── services/{backup_csv,freezer_widget,notification_plan}_test.dart
@@ -446,6 +451,9 @@ Costanti `abstract final class MovementKind`: `stored`, `consumed`, `discarded`,
 ⚑ Un'uscita annullata **non cancella** il movimento d'uscita: aggiunge `restored`. Uno storico
 che si riscrive non e' piu' uno storico.
 
+`moved` lo scrive `FreezerRepository.moveItem`, chiamato da `ItemEditPage` quando si salva un
+alimento con freezer o scomparto cambiati.
+
 ⚠️ Oggi **nessuna schermata legge `item_movements`**: le statistiche lavorano su
 `items.status`/`removed_at`. La tabella e' scritta fedelmente (repository e import) per lo
 storico dettagliato futuro.
@@ -660,7 +668,7 @@ un gelato).
 | costruttore | `const HomeView({required Freezer? selectedFreezer, required List<ItemRow> useSoonAll, required List<ItemRow> rest, required List<FreezerSummary> freezers})` | |
 | `selectedFreezer` | `final Freezer?` | null = "Tutti" |
 | `useSoonAll` | `final List<ItemRow>` | tutti i `watch`/`old`, il piu' vecchio per primo |
-| `useSoon` | `List<ItemRow> get useSoon` | i primi `useSoonPreview` (**usato solo dai test**, §14) |
+| `useSoon` | `List<ItemRow> get useSoon` | i primi `useSoonPreview`: le schede della home |
 | `useSoonTotal` | `int get useSoonTotal` | il numero del bollino |
 | `rest` | `final List<ItemRow>` | solo i `fresh`, dal piu' vecchio |
 | `freezers` | `final List<FreezerSummary>` | **tutti** i freezer, anche con un filtro attivo |
@@ -668,7 +676,12 @@ un gelato).
 | `selectedFill` | `FillInfo? get selectedFill` | null con "Tutti" |
 | `isEmpty` | `bool get isEmpty` | |
 
-Costante `const int useSoonPreview = 5`.
+Costante `const int useSoonPreview = 4` — la usano `HomeView.useSoon` e `HomePage` ("Vedi
+tutti" compare oltre questo numero).
+
+⚑ Quattro e non cinque: le schede stanno in una griglia di due colonne, e con cinque l'ultima
+resterebbe sola in una riga (deciso guardando la home "A · Ghiaccio", 2026-10-07; il piano
+diceva 5).
 
 Funzione di modulo:
 `HomeView buildHomeView({required List<Freezer> freezers, required List<Item> storedItems, required int? selectedFreezerId, required CivilDate today, AgingCalculator aging = const AgingCalculator(), CapacityEstimator capacity = const CapacityEstimator()})`.
@@ -795,7 +808,7 @@ che non trova, un riempimento nel freezer sbagliato, una statistica falsa.
 | `setCalibration` | `Future<void> setCalibration(int freezerId, double calibration)` | |
 | `setLastAlertLevel` | `Future<void> setLastAlertLevel(int freezerId, String? level)` | lo stato dell'isteresi |
 | `deleteFreezer` | `Future<void> deleteFreezer(int id)` | **con tutto il contenuto** (cascade) |
-| `reorderFreezers` | `Future<void> reorderFreezers(List<int> idsInOrder)` | in transazione. **Nessuna UI lo chiama** (§14) |
+| `reorderFreezers` | `Future<void> reorderFreezers(List<int> idsInOrder)` | in transazione; lo chiama il trascinamento dei freezer in `SettingsPage` |
 | `watchCompartments` | `Stream<List<Compartment>> watchCompartments(int freezerId)` | |
 | `watchAllCompartments` | `Stream<List<Compartment>> watchAllCompartments()` | per freezer, ordine, id |
 | `addCompartment` | `Future<int> addCompartment(int freezerId, String name)` | in fondo |
@@ -811,10 +824,10 @@ che non trova, un riempimento nel freezer sbagliato, una statistica falsa.
 | `watchRemovedItems` | `Stream<List<Item>> watchRemovedItems()` | non `stored`, `removed_at` **decrescente** |
 | `itemById` | `Future<Item?> itemById(int id)` | |
 | `addItem` | `Future<int> addItem(NewItem item)` | transazione: freezer coerente, `nameNorm`, movimento `stored` |
-| `updateItem` | `Future<void> updateItem(Item item)` | transazione: freezer coerente, `trim`, `nameNorm`. **Non** scrive movimenti |
+| `updateItem` | `Future<void> updateItem(Item item)` | transazione: freezer coerente, `trim`, `nameNorm`. **Non** scrive movimenti: lo spostamento passa prima da `moveItem` |
 | `removeItem` | `Future<void> removeItem(int id, {required bool consumed})` | `status`, `removedAt`, movimento `consumed`/`discarded` |
 | `undoRemoval` | `Future<void> undoRemoval(int id)` | torna `stored`, `removedAt` null, movimento `restored`; la data di congelamento resta quella vera |
-| `moveItem` | `Future<void> moveItem(int id, {required int freezerId, int? compartmentId})` | movimento `moved` con da/a. **Nessuna UI lo chiama** (§14) |
+| `moveItem` | `Future<void> moveItem(int id, {required int freezerId, int? compartmentId})` | movimento `moved` con da/a; lo chiama `ItemEditPage._save` se freezer o scomparto cambiano, **prima** di `updateItem` |
 | `duplicateAsToday` | `Future<int> duplicateAsToday(int id, {CivilDate? today})` | copia tutto **tranne data e foto**; lancia StateError se l'id non esiste |
 | `suggestNames` | `Future<List<String>> suggestNames(String prefix, {int limit = 8})` | nomi usati che iniziano col prefisso normalizzato, **anche fra gli usciti**, i piu' frequenti poi i piu' recenti; `%` e `_` scappati |
 | `watchAnyChange` | `Stream<void> watchAnyChange()` | un segnale a ogni modifica di `freezers`, `compartments`, `items`, `custom_categories` |
@@ -1016,10 +1029,10 @@ Dichiarate in `lib/app/routes.dart` (`abstract final class Routes`), registrate 
 | `Routes.useSoon` | `/use-soon` | `UseSoonPage` | | **bersaglio di riepilogo e widget** |
 | `Routes.search` | `/search` | `SearchPage` | | |
 | `Routes.settings` | `/settings` | `SettingsPage` | | |
-| `Routes.stats` | `/stats` | `StatsPage` | | Pro, **solo all'ingresso** (`openProFeature`) |
-| `Routes.history` | `/history` | `HistoryPage` | | Pro, idem |
-| `Routes.categories` | `/categories` | `CustomCategoriesPage` | | Pro, idem |
-| `Routes.freezerNew` | `/freezers/new` | `FreezerEditorPage()` | | limite di 1 freezer, **all'ingresso** (`openNewFreezer`) |
+| `Routes.stats` | `/stats` | `ProGate(statistics)` → `StatsPage` | | Pro: `openProFeature` all'ingresso **e** `ProGate` sulla pagina |
+| `Routes.history` | `/history` | `ProGate(fullHistory)` → `HistoryPage` | | Pro, idem |
+| `Routes.categories` | `/categories` | `ProGate(customCategories)` → `CustomCategoriesPage` | | Pro, idem |
+| `Routes.freezerNew` | `/freezers/new` | `ProGate(unlimitedEntities, allowed: withinLimit)` → `FreezerEditorPage()` | | limite di 1 freezer: `openNewFreezer` all'ingresso **e** `ProGate` |
 | `Routes.freezer` | `/freezers/:freezerId` | `FreezerPage` | `freezerId` (non numerico → -1, pagina vuota) | **bersaglio degli avvisi di capienza** |
 | `Routes.freezerEdit` | `/freezers/:freezerId/edit` | `FreezerEditorPage(freezerId:)` | `freezerId` | |
 | `Routes.itemNew` | `/items/new` | `ItemEditPage(draft:)` | `extra`: un `ItemDraft` (dall'inserimento rapido) o niente | |
@@ -1038,9 +1051,17 @@ inesistente e' un deep link rotto in attesa di essere usato.
 **Redirect**: chi non ha l'onboarding fatto va su `/welcome` da qualunque punto entri (anche da
 deep link); chi l'ha fatto e va su `/welcome` torna alla home.
 
-⚠️ I gate Pro di `/stats`, `/history`, `/categories` e il limite di `/freezers/new` stanno nei
-punti d'ingresso, **non nel router**: un `push` diretto li salterebbe. Oggi nessun link esterno
-ci porta (§14).
+**Il Pro sulla pagina**: `/stats`, `/history`, `/categories` e `/freezers/new` sono avvolte in
+`ProGate` (§9, `features/common/pro_gate.dart`). Le porte normali (`openProFeature`,
+`openNewFreezer`) mostrano il paywall **prima** di aprire; `ProGate` copre le porte che non lo
+fanno (un deep link, una notifica, una pagina scritta domani che fa `push` diretto): senza il
+Pro la pagina mostra un lucchetto (`pro_locked`) col pulsante del paywall, e appena il Pro
+arriva mostra se stessa. Per `/freezers/new` il controllo e' `allowed: (gate) =>
+gate.withinLimit(FeatureKey.unlimitedEntities, numero di freezer)`, con il numero letto da
+`freezersProvider` nel builder della rotta.
+
+☠ **Non un `redirect` di go_router**: un `push` che redireziona a "/" mette "/" due volte nella
+pila, e go_router mostra la sua pagina d'errore (provato in un test il 2026-10-07).
 
 ### Chi apre l'app su una pagina
 
@@ -1137,6 +1158,8 @@ Costante `const MicroNotificationChannel freezerChannel` — id `freezer_alerts`
 | `frequency` | `DigestFrequency get frequency` | dalla preferenza, default settimanale |
 | `cancelAll` | `Future<void> cancelAll()` | cancella le notifiche **e** la coda degli avvisi |
 | `evaluateCapacity` | `Future<void> evaluateCapacity()` | per ogni freezer: `CapacityAlertPolicy.decide`, scrive `lastAlertLevel` **sempre**; se c'e' un avviso e `allowed`, sostituisce quello in coda per lo stesso freezer |
+| `capacityAlertBody` | `@visibleForTesting String capacityAlertBody({required bool full, required int percent, required List<Item> items})` | vuoto: `notif_emptyBody`; pieno: `notif_fullBodyOldest(percent, nome del piu' vecchio per frozenAt)`, o `notif_fullBody` se il freezer non ha niente |
+| `digestCapacityLines` | `@visibleForTesting List<String> digestCapacityLines(Iterable<Freezer> freezers, List<Item> stored)` | una riga per ogni freezer **con qualcosa dentro** e pieno (≥ `fullAt`: `notif_digestFull`) o quasi vuoto (< `emptyAt`: `notif_digestEmpty`) |
 | `rescheduleAll` | `Future<void> rescheduleAll()` | senza servizio: niente; senza `allowed`: `cancelAll`; altrimenti riepiloghi (`digestDates` x `digestFor`) + avvisi in coda ancora futuri (1 minuto di tolleranza), `replaceSchedule`, scrive `SettingKeys.lastRescheduleAt` |
 
 ☠ **Il controllo del Pro sta qui**, dove il piano si consegna, e non solo nelle impostazioni:
@@ -1148,8 +1171,23 @@ dell'isteresi. Altrimenti chi accende gli avvisi con il freezer gia' pieno ricev
 "quasi pieno" vecchio di settimane.
 
 Testi (chiavi `notif_*`): riepilogo `notif_digestTitle` + `notif_digestOne(name, days)` o
-`notif_digestMany(count, name, days)`; avvisi `notif_fullTitle(name)`/`notif_fullBody(percent)`,
-`notif_emptyTitle(name)`/`notif_emptyBody(percent)`.
+`notif_digestMany(count, name, days)`, **seguito** dalle righe di `digestCapacityLines`
+(`notif_digestFull(name, percent)`, `notif_digestEmpty(name, percent)`), uniti da uno spazio;
+avvisi `notif_fullTitle(name)` / `notif_fullBodyOldest(percent, name)` (o `notif_fullBody(percent)`
+se il freezer e' vuoto), `notif_emptyTitle(name)` / `notif_emptyBody(percent)`.
+
+⚑ "Quasi pieno" **cita il piu' vecchio del freezer**: "consuma qualcosa" non dice cosa,
+"comincia dallo spezzatino" si'.
+
+⚑ Le righe di capienza del riepilogo usano il riempimento **di adesso**, non quello del giorno
+del riepilogo: lo spazio cambia solo quando cambiano i dati, e ogni modifica ripianifica tutto.
+
+⚑ Un freezer **senza niente dentro** non entra: "quasi vuoto" ogni settimana su un freezer
+appena creato sarebbe un rimprovero (stessa ragione per cui `lastAlertLevel` parte da `empty`).
+
+⚠️ Le righe si **aggiungono** a un riepilogo che c'e' gia': se quel giorno nessun alimento e'
+`old`, `digestFor` restituisce null e non parte niente, nemmeno le righe di capienza (gli
+avvisi "quasi pieno/vuoto" restano a parte).
 
 ### `freezer_widget.dart` — il widget di sistema (lato Dart)
 
@@ -1260,8 +1298,8 @@ di… lasagne" non deve vedersi chiudere il microfono.
    percentuale grande (tocco → `/freezers/<id>`); con "Tutti", `home_allFreezersHint`; bollino
    ambra con `useSoonTotal`. Barra di stato chiara (AnnotatedRegion) e striscia blu notte fissa
    sotto la barra di stato.
-2. **"Da usare prima"**: schede `UseSoonCard` su due colonne, **al massimo 4**
-   (`_cardsShown = 4`), "Vedi tutti" → `/use-soon` se sono di piu'.
+2. **"Da usare prima"**: schede `UseSoonCard` su due colonne, `view.useSoon` (**al massimo
+   `useSoonPreview` = 4**), "Vedi tutti" → `/use-soon` se `useSoonTotal > useSoonPreview`.
 3. **"Tutto il resto · N"**: righe `ItemRowTile`.
 4. **"Dove sono"**: solo con piu' di un freezer (con uno, la testata e' il freezer): silhouette,
    conteggio, `FillBar`, tocco → pagina del freezer.
@@ -1350,6 +1388,9 @@ scritto**, e le due schermate non possono stimare l'ingombro in due modi diversi
 `item_edit_page.dart` — `class ItemEditPage extends ConsumerStatefulWidget`,
 `const ItemEditPage({int? itemId, ItemDraft? draft, Key? key})`: con `itemId` modifica (id
 inesistente → `pop`), altrimenti crea da `draft` o da una bozza vuota nel primo freezer.
+Salvando una modifica: **se freezer o scomparto sono cambiati chiama prima `moveItem`**
+(movimento `moved`, regola 3 del repository), poi `updateItem`; con il solo `updateItem` lo
+spostamento non lasciava traccia (trovato rileggendo il codice per l'atlante, 2026-10-07).
 Campi: foto (`ItemPhotoEditor`, in cima), nome, categoria (`chooseCategory`), quantita' +
 unita', data di congelamento (fino a 5 anni indietro, non nel futuro), posizione
 (`pickLocation`), ingombro (`pickSize`), promemoria personale con l'aiuto del promemoria di
@@ -1432,7 +1473,8 @@ tolto; `onReorder` lo darebbe incrementato).
 prima), "Consumato/Buttato · data · rimasto N giorni", tocco → pagina dell'alimento (da cui lo
 si rimette dentro).
 
-`StatsPage` (`const StatsPage({Key? key})`): periodo 30 giorni / 12 mesi / sempre (default
+`StatsPage` (`const StatsPage({Key? key})`): "adesso" e' `ref.watch(todayProvider).toLocalMidnight()`
+(la pagina non legge l'orologio da sola); periodo 30 giorni / 12 mesi / sempre (default
 anno), pannello blu notte con la quota buttata, permanenza media, categoria piu' buttata,
 grafico degli ultimi sei mesi disegnato a mano (privati `_MonthChart`, `_Bar`, `_Legend`,
 `_NumberTile`), riga verso lo storico.
@@ -1466,8 +1508,11 @@ scomparto sempre e freezer se ce n'e' piu' d'uno; testi per query vuota e senza 
 `SettingsPage` (`const SettingsPage({Key? key})`), dall'alto:
 
 1. **Scheda Pro** blu notte, **tutta toccabile** (in TrashCan il riquadro non rispondeva).
-2. **Freezer**: elenco → pagina del freezer; "Aggiungi un freezer" (`openNewFreezer`), con
-   ProBadge e "serve il Pro" gia' prima del tocco.
+2. **Freezer**: elenco in un ReorderableListView (tocco → pagina del freezer); **con piu'
+   di un freezer** la coda della riga e' una maniglia (ReorderableDragStartListener) e il
+   trascinamento chiama `reorderFreezers` (`onReorderItem`); con uno solo, una freccia.
+   L'ordine e' quello di "Dove sono" e del menu della testata. "Aggiungi un freezer"
+   (`openNewFreezer`), con ProBadge e "serve il Pro" gia' prima del tocco.
 3. **Avvisi**: interruttore (senza Pro: ProBadge e tocco → paywall); con Pro e acceso,
    frequenza del riepilogo.
 4. **I numeri**: statistiche (senza Pro dice quante uscite ci sono gia') e storico, via
@@ -1500,6 +1545,16 @@ di miniature rotte.
 
 ☠ Un ripristino "sostituisci tutto" e' irreversibile: il riepilogo prima della conferma e' il
 solo modo di accorgersi del file sbagliato.
+
+### Il lucchetto Pro — `features/common/pro_gate.dart`
+
+`class ProGate extends ConsumerWidget` —
+`const ProGate({required FeatureKey feature, required Widget child, bool Function(FeatureGate gate)? allowed, Key? key})`.
+`build` guarda `featureGateProvider`: se `allowed?.call(gate) ?? gate.allows(feature)` e' vero
+restituisce `child`; altrimenti uno Scaffold con lucchetto, `pro_locked` ("Questa funzione fa
+parte di Full Freezer Pro.") e il pulsante `paywall_buy` → `showFreezerPaywall(highlight: feature)`.
+Si ridisegna da solo quando il Pro arriva. `allowed` serve ai limiti numerici (il secondo
+freezer). Usato in `buildRouter` (§7), dove c'e' anche il perche' non e' un redirect.
 
 ### Componenti comuni — `features/common/ghiaccio.dart`
 
@@ -1663,13 +1718,13 @@ posto in cui cambiarla. Decisioni del proprietario del 2026-10-06 (F4.0 punti 8,
 
 | Funzione | Chiave | Piano gratuito | Dove si controlla |
 |---|---|---|---|
-| Secondo freezer e oltre | `unlimitedEntities` | **uno** (`count(freeMax: 1)`) | `openNewFreezer` |
+| Secondo freezer e oltre | `unlimitedEntities` | **uno** (`count(freeMax: 1)`) | `openNewFreezer` + `ProGate` su `/freezers/new` |
 | Riepilogo e avvisi quasi pieno/vuoto | `notifications` | no | impostazioni **e** `FreezerScheduler.allowed` |
-| Storico degli usciti | `fullHistory` | no (i dati restano nel DB) | `openProFeature` |
-| Statistiche dello spreco | `statistics` | no | `openProFeature` |
+| Storico degli usciti | `fullHistory` | no (i dati restano nel DB) | `openProFeature` + `ProGate` |
+| Statistiche dello spreco | `statistics` | no | `openProFeature` + `ProGate` |
 | Export CSV | `csvExport` | no | `exportCsv` |
 | Creazione del backup | `backupRestore` | no — **il ripristino e' gratis** | `createBackup` |
-| Categorie personalizzate | `customCategories` | no (quelle esistenti restano visibili) | `openProFeature`, `chooseCategory` |
+| Categorie personalizzate | `customCategories` | no (quelle esistenti restano visibili) | `openProFeature` + `ProGate`, `chooseCategory` |
 | Foto dei prodotti | `photos` | **si'** | |
 | Scomparti | `secondaryEntities` | **illimitati** | |
 | Widget | `advancedWidget` | **si'** (ADR-019) | |
@@ -1758,7 +1813,7 @@ sulla stessa riga; lo script scrive `app_en.arb` (con i segnaposto tipizzati da 
 `app_it.arb`. Un ARB modificato a mano viene **sovrascritto** al giro dopo.
 
 ```
-python tool/testi.py                    # dalla cartella dell'app: "245 chiavi scritte"
+python tool/testi.py                    # dalla cartella dell'app: "249 chiavi scritte"
 pwsh ../../tool/fl.ps1 gen-l10n         # rigenera lib/l10n/generated/
 ```
 
@@ -1772,16 +1827,21 @@ Il codice generato sta in `lib/l10n/generated/` (non si tocca): la classe astrat
 lo stesso (gen_l10n ripiega sull'inglese) e l'app italiana mostra una frase inglese senza che
 nessuno se ne accorga. Il template e' l'inglese per lo stesso motivo (ADR-011).
 
-Virgolette: l'italiano usa le caporali «», l'inglese le tipografiche “ ” (F4.14, insieme alla
-verifica delle etichette di accessibilita' nei dump di uiautomator). Tre testi inglesi usano
-ancora le dritte (§14).
+Virgolette: l'italiano usa le caporali «», l'inglese le tipografiche “ ”, **ovunque** (anche
+`freezer_deleteTitle`, `categories_deleteTitle`, `search_noResults`). ☠ Il perche' pratico,
+oltre alla correttezza tipografica: con una `"` dritta nel testo, il dump di uiautomator scrive
+l'attributo `content-desc` fra apici singoli, e lo script di prova adb (una regex su
+`content-desc="..."`) non trovava piu' il riquadro. Nessuna `"` dritta nei testi visibili.
+
+Chiave aggiunta col `ProGate`: `pro_locked`. Chiavi aggiunte con F4.9 completa:
+`notif_fullBodyOldest`, `notif_digestFull`, `notif_digestEmpty`.
 
 ### Comandi
 
 Dalla cartella `apps/full_freezer`:
 
 ```
-pwsh ../../tool/fl.ps1 test                                        # 137 test
+pwsh ../../tool/fl.ps1 test                                        # 140 test
 pwsh ../../tool/fl.ps1 analyze
 pwsh ../../tool/fl.ps1 gen-l10n
 pwsh ../../tool/fl.ps1 run -d emulator-5554 --dart-define=FF_DEMO=true
@@ -1800,7 +1860,7 @@ la catena supporta la 14.5.
 
 ## 12. Catalogo dei test
 
-**137 test** in `apps/full_freezer/` (il file del parser vocale ne genera 20 da una tabella).
+**140 test** in `apps/full_freezer/` (il file del parser vocale ne genera 20 da una tabella).
 
 | File | N. | Cosa dimostra |
 |---|---|---|
@@ -1808,7 +1868,7 @@ la catena supporta la 14.5.
 | `test/domain/aging_test.dart` | 8 | giorni di calendario (ora legale, anno bisestile), il giorno stesso vale 0, data futura 0; soglie fresh/watch/old; `overdueBy`; promemoria dell'alimento sopra quello della categoria; senza promemoria sempre fresh; **l'ordinamento guarda la data, non il livello** |
 | `test/domain/capacity_test.dart` | 19 | modelli ordinati e chiavi uniche, litri delle schede; stima per ogni unita', pezzi per categoria, mai zero; 80% utile; freezer vuoto senza divisioni per zero; oltre il 100% → 100 e `full`; soglie esatte 85%/20%; la taratura moltiplica; 60/40 → 1,5; limiti 0,25–4; stima zero → 1; **due tarature non si moltiplicano**; isteresi: freezer nuovo non avvisa vuoto, pieno una volta sola, riarmo sotto 70%, vuoto dopo riempimento, riarmo sopra 40% |
 | `test/domain/formats_test.dart` | 2 | decimali dei litri per fascia; numeri con virgola o punto |
-| `test/domain/home_view_test.dart` | 10 | un alimento sta in una sezione sola; "Da usare prima" ha i 5 piu' vecchi (`useSoon`) e il resto dietro "vedi tutti"; il piu' vecchio senza promemoria resta in "Tutto il resto" ma in cima; il filtro per freezer non toglie freezer da "Dove sono"; "Tutti" senza riempimento unico; riempimento con litri, capacita' e taratura; deduzione della categoria it/en, solo parole intere, null meglio che sbagliata, **ogni chiave del dizionario esiste** |
+| `test/domain/home_view_test.dart` | 10 | un alimento sta in una sezione sola; "Da usare prima" ha i `useSoonPreview` (4) piu' vecchi (`useSoon`) e il resto dietro "vedi tutti"; il piu' vecchio senza promemoria resta in "Tutto il resto" ma in cima; il filtro per freezer non toglie freezer da "Dove sono"; "Tutti" senza riempimento unico; riempimento con litri, capacita' e taratura; deduzione della categoria it/en, solo parole intere, null meglio che sbagliata, **ogni chiave del dizionario esiste** |
 | `test/domain/item_photo_test.dart` | 2 | la miniatura sta in `images/thumbs/<bucket>/`; solo il primo `images/` cambia |
 | `test/domain/search_test.dart` | 6 | "pure" trova "Purè"; maiuscole indifferenti; cerca nelle note senza accenti; tutte le parole in qualunque ordine; query vuota = niente; l'ordine ricevuto resta |
 | `test/domain/stats_test.dart` | 6 | conteggio nel periodo; "sempre" vs 30 giorni; permanenza media in giorni di calendario; categoria piu' buttata con conteggio; **sempre sei mesi**, dal piu' vecchio; nessuna uscita senza divisioni per zero |
@@ -1816,10 +1876,10 @@ la catena supporta la 14.5.
 | `test/domain/voice_parser_test.dart` | 22 | **20 frasi reali** it/en (numeri in lettere e cifre, "mezzo chilo", "un chilo e mezzo", "due etti" = 200 g, "d'agnello", "half a kilo", "a kilo and a half", "ice cream" senza categoria); quantita' senza nome → frase intera nel nome con confidenza 0; confidenza 1 / 0,8 / 0,5 |
 | `test/services/backup_csv_test.dart` | 3 | "sostituisci tutto" riporta freezer, scomparti, alimenti, **storico**, foto, e **rimappa `custom:<id>`** quando gli id si spostano (payload passato da JSON come nel file vero); "aggiungi" salta i freezer omonimi; CSV con una riga per alimento, giorni, freezer, scomparto, `;` nella nota senza spezzare la colonna |
 | `test/services/freezer_widget_test.dart` | 5 | i tre piu' vecchi con **data e non giorni**; promemoria dell'alimento sopra la categoria, vuoto senza nessuno, icona `other` di ripiego; icona della categoria personalizzata e a capo nel nome; modello dei giorni "{n} gg" / "{n} d"; le icone escono PNG |
-| `test/services/notification_plan_test.dart` | 12 | date del riepilogo (oggi compreso se domenica; 14 e 28 giorni); **il riepilogo conta chi sara' vecchio quel giorno, con i giorni di quel giorno**; chi invecchia entra nei successivi; il piu' vecchio e' quello con piu' giorni; niente di vecchio → niente riepilogo; quasi pieno subito; quasi vuoto il sabato alle 10 (anche sabato alle 9 e alle 11); `PendingAlert` codifica/decodifica con id stabile; `evaluateCapacity` con Pro mette in coda "quasi pieno", **senza Pro nessun avviso ma isteresi aggiornata**, freezer nuovo non manda "quasi vuoto" |
+| `test/services/notification_plan_test.dart` | 14 | date del riepilogo (oggi compreso se domenica; 14 e 28 giorni); **il riepilogo conta chi sara' vecchio quel giorno, con i giorni di quel giorno**; chi invecchia entra nei successivi; il piu' vecchio e' quello con piu' giorni; niente di vecchio → niente riepilogo; quasi pieno subito; quasi vuoto il sabato alle 10 (anche sabato alle 9 e alle 11); `PendingAlert` codifica/decodifica con id stabile; `evaluateCapacity` con Pro mette in coda "quasi pieno", **senza Pro nessun avviso ma isteresi aggiornata**, freezer nuovo non manda "quasi vuoto"; **"quasi pieno" cita il piu' vecchio del freezer** (`capacityAlertBody`); **il riepilogo aggiunge una riga per i freezer pieni o quasi vuoti, non per quelli vuoti** (`digestCapacityLines`) |
 | `test/widget/app_smoke_test.dart` | 6 | primo avvio in italiano con il nome proposto; **in tedesco ripiega sull'inglese**; home con il piu' vecchio in "Da usare prima", etichette maiuscole, bollino, percentuale e litri in testata, ordine giusto; home vuota; tema dal blu dell'icona e dal font; l'inglese e' il primo delle lingue |
 | `test/widget/paywall_config_test.dart` | 6 | **ogni blocco e' nel paywall e il paywall non promette altro**; ogni chiave dichiarata; un freezer si', il secondo no (con Pro si'); foto, scomparti e widget gratis; notifiche, storico, statistiche, CSV, backup e categorie Pro |
-| `test/widget/quick_add_test.dart` | 2 | **il vincolo dell'app misurato**: "+", nome, Salva = 3 interazioni; con un suggerimento = 4. Repository finto (`_RepoFinto`) |
+| `test/widget/quick_add_test.dart` | 3 | **il vincolo dell'app misurato**: "+", nome, Salva = 3 interazioni; con un suggerimento = 4; **senza Pro le pagine Pro aperte con un `push` diretto** (`/stats`, `/history`, `/categories`, `/freezers/new`) **mostrano il lucchetto** di `ProGate`. Repository finto (`_RepoFinto`); piano gratuito con override di `isProProvider` e `featureGateProvider` (`freezerFeatureLimits`, `isPro: false`) |
 
 `integration_test/flusso_test.dart` (1 test, sul dispositivo:
 `flutter test integration_test/flusso_test.dart -d <device>`): primo avvio con il modello,
@@ -1855,6 +1915,10 @@ Ognuna e' costata tempo almeno una volta. Sono qui perche' il sintomo non nomina
 | "Quasi pieno" ogni giorno | soglia attraversata avanti e indietro | `CapacityAlertPolicy` con isteresi 70% / 40% |
 | Accendo gli avvisi e arriva subito un "quasi pieno" vecchio | l'isteresi si aggiornava solo con le notifiche attive | `evaluateCapacity` scrive `lastAlertLevel` sempre |
 | Freezer nuovo e vuoto riceve "quasi vuoto" | `last_alert_level` partiva da null | default `'empty'` nella tabella |
+| Una pagina Pro aperta da un `push` diretto si vede gratis | il Pro si controllava solo nelle porte d'ingresso | `ProGate` sulla pagina |
+| Pagina d'errore di go_router aprendo una pagina Pro | un `redirect` a "/" su un `push` mette "/" due volte nella pila | niente redirect: `ProGate` |
+| Lo script adb non trova un riquadro con un titolo fra virgolette | con `"` nel testo uiautomator scrive `content-desc` fra apici singoli | virgolette tipografiche in tutti i testi |
+| Spostare un alimento dalla sua pagina non lascia traccia | `updateItem` non scrive movimenti | `ItemEditPage._save` chiama prima `moveItem` |
 | Il "quasi vuoto" di sabato sparisce | `replaceSchedule` cancella cio' che non e' nel piano | coda `pending_capacity_alerts` rimessa a ogni ripianificazione |
 | Il riepilogo fra tre settimane dice i giorni di oggi | il testo si fissa quando si pianifica | `digestFor(stored, giornoDiConsegna)` |
 | Dopo un rimborso le notifiche continuano | il Pro si controllava solo nella UI | `FreezerScheduler.allowed` |
@@ -1931,16 +1995,15 @@ Ognuna e' costata tempo almeno una volta. Sono qui perche' il sintomo non nomina
   non e' comprabile e il widget iOS firmato scrive in un contenitore nullo.
 - **Nessuna build TestFlight / Play** di Full Freezer, nessuna scheda store, nessuno
   screenshot da test (F4.17).
-- **Nessuna UI per riordinare i freezer** (`reorderFreezers` esiste ed e' testato, ma nessuna
-  pagina lo chiama) e **nessuna azione "sposta"** che usi `moveItem`: cambiare posizione dalla
-  pagina dell'alimento passa da `updateItem`, che **non scrive il movimento `moved`**.
+- **Nessuna azione "sposta" separata**: si sposta cambiando la posizione nella pagina
+  dell'alimento (che chiama `moveItem`).
 - **Nessuna schermata legge `item_movements`**.
-- **Nessun gate Pro nel router**: `/stats`, `/history`, `/categories`, `/freezers/new` si
-  proteggono solo nei punti d'ingresso.
+- **Nessun redirect Pro in go_router**, di proposito: il controllo sta sulla pagina
+  (`ProGate`, §7).
 - **Nessun valore economico dello spreco** nelle statistiche (il piano lo prevedeva come
-  opzionale).
-- **Nessuna riga sui freezer pieni/vuoti nel riepilogo periodico** (il piano F4.9 la
-  prevedeva).
+  opzionale): il modello non ha prezzi.
+- **Nessun file `lib/services/capacity_alerts.dart`**: la logica sta in `CapacityAlertPolicy`
+  e in `FreezerScheduler` (§14, differenze).
 - **Nessun barcode, nessun inserimento a lotti** (post-MVP).
 - **Nessun golden test** (scelta, §12) e **nessun test di migrazione** (schema 1).
 - **Nessuna verifica del Pro sul server dalla build iOS**: il ripristino su iOS passa
@@ -1955,10 +2018,6 @@ Ognuna e' costata tempo almeno una volta. Sono qui perche' il sintomo non nomina
 | **Tocco del widget iOS e voce vera da provare su telefono** | serve un iPhone in mano, e per la voce un telefono qualunque | prima di F4.17 / TestFlight |
 | **App ID, App Group, prodotto Pro da registrare sugli store** | richiedono gli account del proprietario | F4.17, prima della prima build firmata |
 | **Flaky test di entitlement in `micro_core`** | un test di `micro_core/test/entitlement` fallisce ogni tanto e passa al giro dopo; non e' di quest'app | alla prossima sessione su `micro_core` |
-| **`updateItem` non registra lo spostamento** | lo storico dettagliato non e' ancora letto da nessuno | prima di mostrare i movimenti: far passare il cambio di posizione da `moveItem`, o farlo rilevare a `updateItem` |
-| **`HomeView.useSoon` / `useSoonPreview = 5` usati solo dai test** | la home mostra 4 schede (`_cardsShown`), perche' una scheda occupa il doppio di una riga | togliere il getter o allineare la costante, insieme a un ritocco della home |
-| **`StatsPage` legge `DateTime.now()`** invece di `todayProvider` | innocuo in uso; rende la pagina non fissabile nei test | se si scrive un widget test delle statistiche |
-| **Tre testi inglesi con virgolette dritte** (`freezer_deleteTitle`, `categories_deleteTitle`, `search_noResults`) | sfuggiti alla passata di F4.14 | al prossimo giro sui testi, in `tool/testi.py` |
 | **Copia del codice sul Mac non-git** | sincronizzazione a mano con tar | se il lavoro iOS diventa frequente: un clone vero sul Mac |
 | **Informativa privacy del sito** | deve dire che il riconoscimento vocale lo fa il servizio del telefono (Google/Apple), che puo' usare i loro server | prima della pubblicazione |
 
@@ -1968,12 +2027,13 @@ Il codice ha la precedenza; il piano e' la storia delle intenzioni.
 
 | Il piano diceva | Il codice fa | Perche' |
 |---|---|---|
-| "Da usare prima": massimo 5 | 4 schede in home | schede a due colonne (interfaccia Ghiaccio) |
+| "Da usare prima": massimo 5 | `useSoonPreview = 4` | schede a due colonne: con cinque l'ultima resta sola (interfaccia Ghiaccio) |
 | `lib/features/locations/`, `lib/features/stats/` | `features/freezers/`, `features/history/` | |
-| `lib/services/capacity_alerts.dart` | `CapacityAlertPolicy` in `domain/capacity.dart` + `FreezerScheduler.evaluateCapacity` | la regola e' pura, la consegna sta col pianificatore |
+| `lib/services/capacity_alerts.dart` | `CapacityAlertPolicy` in `domain/capacity.dart` + `FreezerScheduler.evaluateCapacity` / `capacityAlertBody` / `digestCapacityLines` | scelta consapevole: la regola e' pura, la consegna e i testi stanno col pianificatore |
 | ricerca LIKE con debounce 200 ms | filtro in memoria | §4 `search.dart` |
 | `fl_chart` per le statistiche | grafico disegnato a mano | §9 |
+| valore indicativo dello spreco | non calcolato | il modello non ha prezzi |
 | indice `idx_items_name` | `idx_items_name_norm` | si cerca sulla colonna normalizzata |
 | `kind` senza `restored` | anche `restored` | annullare un'uscita senza riscrivere lo storico |
-| il test d'integrazione misura i tocchi | lo misura un widget test | l'integrazione non e' affidabile sull'emulatore |
+| il test d'integrazione misura i tocchi (F4.13) | lo misura un widget test (`quick_add_test.dart`) | l'integrazione resta, ma non e' affidabile sull'emulatore |
 | "Ne ho congelato un altro uguale" dal menu di una riga | pressione lunga sulla riga, e voce di menu nella pagina dell'alimento | |

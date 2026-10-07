@@ -745,11 +745,15 @@ commit intermedi):
 | F1 micro_core | `v2.0.0` |
 | F2 License Server | `v3.0.0` |
 | F3 TrashCan | `v4.0.0` |
-| F4 Full Freezer | `v5.0.0` |
-| F5 Scorte Calore | `v6.0.0` |
-| F6 Film Tracker | `v7.0.0` |
-| F7 Hardening trasversale | `v8.0.0` |
-| F8 Deploy e pubblicazione | `v9.0.0` |
+| F9 Porting iOS (fatto prima di F4) | `v5.0.0` |
+| F4 Full Freezer | `v6.0.0` |
+| F5 Scorte Calore | `v7.0.0` |
+| F6 Film Tracker | `v8.0.0` |
+| F7 Hardening trasversale | `v9.0.0` |
+| F8 Deploy e pubblicazione | `v10.0.0` |
+
+⚑ Aggiornata il 2026-10-07: il porting iOS (F9) e' stato fatto dopo TrashCan e ha preso
+`v5.0.0`, quindi tutte le fasi successive scalano di uno.
 
 ### §5.4 versionName / versionCode delle app
 
@@ -988,7 +992,7 @@ tutte fatte e provate sull'emulatore:
   spinner "Sblocca Pro" su un acquisto in attesa, perche' il ramo `PurchasePending` spegneva
   `isBusy` dopo la scrittura invece che prima. Corretto in `micro_core`.
 
-### F4 — Full Freezer → `v5.0.0`
+### F4 — Full Freezer → `v6.0.0` (era `v5.0.0`, gia' usato dal porting iOS F9)
 
 - [x] **F4.0** Decisioni di partenza (vedi §8 F4.0): due piattaforme, solo iPhone, prezzo 3,99 €, foto gratis e notifiche Pro, capienza (2026-10-06)
 - [x] **F4.1** Bootstrap progetto, tema, l10n, router — **`android/` e `ios/` insieme** (2026-10-06: `com.smp.fullfreezer`, seme `#0461E5`, Plus Jakarta Sans, icone da `tool/genera_icone.py`; 4 test; provata su emulatore Android 15 e simulatore iPhone 18 Pro)
@@ -997,30 +1001,22 @@ tutte fatte e provate sull'emulatore:
 - [x] **F4.3b** `CapacityEstimator`: modelli di freezer, ingombro stimato degli alimenti, taratura, soglie + test (2026-10-06: `lib/domain/capacity.dart`, con anche `CapacityAlertPolicy` dell'isteresi di F4.9, che e' logica pura; 18 test)
 - [x] **F4.4** Home ordinata per anzianità, con sezione "Da usare prima" (2026-10-07: interfaccia "A · Ghiaccio" scelta dal proprietario, vedi `memory/decisioni.md`; `lib/features/home/`, `lib/app/freezer_palette.dart`, icone disegnate in `lib/app/category_glyphs.dart`)
 - [x] **F4.5** Inserimento rapido (obiettivo: sotto i 5 secondi) e inserimento completo (foglio rapido in 2 tocchi, pagina completa, ingombro; F4.5b foto con `image_picker` e `ImageStore`, provata sull'emulatore il 2026-10-07. Il debito dei testi d'uso iOS solo in inglese e' chiuso in F4.14: `ios/Runner/{it,en}.lproj/InfoPlist.strings`, aggiunti con `tool/aggiungi_infoplist_strings.rb`)
-- [x] **F4.6** Posizioni: freezer (scelto da una serie di modelli, dal più piccolo al più grande) e scomparti, con conteggi e barra di riempimento (2026-10-06; manca solo il limite di un freezer nel piano gratuito, che arriva con il Pro in F4.10)
+- [x] **F4.6** Posizioni: freezer (scelto da una serie di modelli, dal più piccolo al più grande) e scomparti, con conteggi e barra di riempimento (2026-10-06; il limite di un freezer nel piano gratuito e' arrivato con F4.10; il riordino dei freezer per trascinamento nelle impostazioni il 2026-10-07)
 - [x] **F4.7** Uscita alimento: consumato / buttato, con storico (2026-10-07: swipe con annulla in home; storico Pro per mese in lib/features/history/history_page.dart; statistiche Pro in stats_page.dart su lib/domain/stats.dart: quota buttata, permanenza media, categoria piu buttata, ultimi sei mesi; un alimento uscito si rimette dentro dalla sua pagina)
 - [x] **F4.8** Ricerca istantanea (2026-10-07: `lib/domain/search.dart` filtra in memoria nome e note normalizzati, tutte le parole in qualunque ordine; `lib/features/search/search_page.dart`; lente nella testata)
-- [x] **F4.9** Notifiche (**Pro**): digest aggregato settimanale/quindicinale/mensile + avvisi «quasi pieno» / «quasi vuoto» (2026-10-07: `lib/services/{notification_plan,freezer_scheduler}.dart`; testo del riepilogo calcolato per il giorno di consegna; avvisi in coda nelle preferenze perche' `replaceSchedule` non li cancelli; interruttore spento di default, permesso chiesto all'accensione; provato sull'emulatore: avviso «quasi pieno» consegnato all'89%, riepiloghi pianificati la domenica alle 18)
+- [x] **F4.9** Notifiche (**Pro**): digest aggregato settimanale/quindicinale/mensile + avvisi «quasi pieno» / «quasi vuoto» (2026-10-07: `lib/services/{notification_plan,freezer_scheduler}.dart`; testo del riepilogo calcolato per il giorno di consegna; avvisi in coda nelle preferenze perche' `replaceSchedule` non li cancelli; interruttore spento di default, permesso chiesto all'accensione; provato sull'emulatore: avviso «quasi pieno» consegnato all'89%, riepiloghi pianificati la domenica alle 18. Completato il 2026-10-07 dopo la rilettura per l'atlante: «quasi pieno» cita il piu' vecchio del freezer (`FreezerScheduler.capacityAlertBody`) e il riepilogo aggiunge una riga per ogni freezer pieno o quasi vuoto, esclusi quelli senza niente dentro (`digestCapacityLines`). ⚑ `lib/services/capacity_alerts.dart` non esiste: la logica sta in `CapacityAlertPolicy` (dominio) e `FreezerScheduler.evaluateCapacity`, scelta consapevole)
 - [x] **F4.10** Feature Pro: freezer multipli, notifiche, storico, statistiche, CSV, backup, categorie personalizzate (le foto sono **gratis**) — FATTO il 2026-10-07: `lib/app/{feature_limits,entitlement,paywall_config}.dart`, impostazioni con scheda Pro e ripristino, limite di un freezer (`openNewFreezer`), provato con lo store finto sull'emulatore. Storico, statistiche (F4.7) e notifiche (F4.9) fatti; CSV e backup/ripristino fatti il 2026-10-07 (`lib/services/{csv_export,freezer_backup_source}.dart`, `lib/features/settings/data_actions.dart`, sezione "I tuoi dati"; ripristino **gratis**, creazione Pro; provati con `test/services/backup_csv_test.dart` e sull'emulatore). Categorie personalizzate fatte il 2026-10-07 (`lib/features/categories/`, `chooseCategory` in `item_pickers.dart`, chiave `custom:<id>`, promemoria copiato nell'alimento, cancellazione che azzera la categoria degli alimenti; provate sull'emulatore). Ogni beneficio del paywall ora esiste.
 - [x] **F4.11** Widget "da consumare presto": Android (Kotlin) **e** iOS (WidgetKit), stesso payload — FATTO il 2026-10-07: `lib/services/freezer_widget.dart` (i tre piu' vecchi, payload con `frozenAt` e promemoria, giorni calcolati dal widget per ADR-018), `FullFreezerWidgetProvider.kt` + `res/layout/full_freezer_widget*.xml`, `ios/FullFreezerWidget/` (timeline di 8 voci), anteprima Mac `apps/full_freezer/tool/anteprima_widget_ios.swift`. Provato: Android sull'emulatore (disegno, colori, tocco da app aperta e da app chiusa); iOS sul simulatore (build con estensione, contenitore App Group scritto, disegno con icone vere). MANCA: tocco sul widget iOS provato a mano (il simulatore headless chiede conferma a `simctl openurl`); registrare `group.com.smp.fullfreezer` e l'App ID dell'estensione sul portale (proprietario). ☠ Trappole pagate: deep link di Flutter da spegnere (`flutter_deeplinking_enabled` / `FlutterDeepLinkingEnabled`), `onNewIntent` con `setIntent` in `MainActivity`, righe a peso 1 (widget mezzo vuoto).
 - [x] **F4.12** Voice input per l'inserimento rapido, Android e iOS (permessi microfono e riconoscimento vocale) — FATTO il 2026-10-07: `lib/domain/voice_parser.dart` (`VoiceItemParser`, italiano e inglese insieme, numeri in lettere, "etto" = 100 g, "e mezzo", ripiego sul nome), `lib/services/voice_input.dart` (`VoiceInput` su speech_to_text 7.5, dettatura, pausa 3 s, limite 15 s), microfono nel campo nome del `QuickAddSheet`; `RECORD_AUDIO` + `<queries>` RecognitionService su Android, `NSMicrophoneUsageDescription`/`NSSpeechRecognitionUsageDescription` su iOS. Provato: 20 frasi in `test/domain/voice_parser_test.dart`; sull'emulatore permesso, avvio e chiusura per silenzio (non si puo' parlare all'emulatore). MANCA: prova con la voce vera su telefono. I testi dei permessi iOS in italiano ci sono (F4.14). ⚑ L'informativa privacy del sito deve dire che il riconoscimento lo fa il servizio del telefono (Google/Apple), che puo' usare i loro server.
 - [x] **F4.13** Test (unit, DB, widget, golden, integrazione) — FATTO il 2026-10-07, 137 test verdi. Il vincolo dei 4 tocchi e' **misurato** in `test/widget/quick_add_test.dart` (3 interazioni il percorso minimo, 4 con un suggerimento), con repository finto. Parser vocale su 20 frasi (`test/domain/voice_parser_test.dart`), ricerca senza accenti (`test/domain/search_test.dart`), riepilogo con 0, 1 e N vecchi (`test/services/notification_plan_test.dart`), backup/CSV (`test/services/backup_csv_test.dart`), widget (`test/services/freezer_widget_test.dart`). ⚑ Scelte: niente golden (i caratteri cambiano fra Windows e Mac e un golden instabile si impara a ignorarlo; l'aspetto lo verificano gli scatti sull'emulatore e l'anteprima del widget iOS); il test di integrazione `integration_test/flusso_test.dart` resta ma non e' affidabile sull'emulatore (connessione alla VM appesa): il flusso lo coprono il test dei tocchi e i giri adb.
 - [x] **F4.14** Rifinitura visiva, onboarding, empty state, accessibilità — FATTO il 2026-10-07: tema scuro provato su home, inserimento, prodotto, impostazioni, statistiche, freezer; carattere al 130% su home, inserimento, statistiche (regge, i testi lunghi si troncano con i puntini); stati vuoti presenti (home, storico, categorie, ricerca, widget); etichette di accessibilita' leggibili (verificate nei dump di uiautomator); virgolette tipografiche nei testi inglesi; testi dei permessi iOS in italiano.
-- [ ] **F4.15** `apps/full_freezer/codebase_reference.md`
-- [ ] **F4.16** Rituale di fine fase F4
+- [x] **F4.15** `apps/full_freezer/codebase_reference.md` — FATTO il 2026-10-07: ~2000 righe, `tool/verify_atlas.ps1 -Project apps/full_freezer` pulito, firme controllate a campione contro il sorgente. La rilettura per scriverlo ha trovato e fatto correggere: spostamento senza movimento `moved`, freezer non riordinabili, pagine Pro protette solo all'ingresso (ora `ProGate` anche sulla pagina), F4.9 incompleto, 5 schede previste contro 4 mostrate (deciso 4), virgolette dritte residue, `StatsPage` su `DateTime.now()`. Differenze consapevoli dal piano, scritte nell'atlante: niente valore economico dello spreco (il modello non ha prezzi), grafico disegnato a mano invece di fl_chart, cartelle `features/freezers` e `features/history`.
+- [x] **F4.16** Rituale di fine fase F4 — 2026-10-07: piano e atlante aggiornati, documenti nel Projects Tracker (progetto 17), messaggio di fine fase, branch `v6.0.0` (il `v5.0.0` previsto qui era gia' andato al porting iOS F9, quindi le fasi successive scalano di uno)
 
-**Ripresa (stato al 2026-10-07, 2:00).** Da fare, in quest'ordine: allineare allo stile
-"Ghiaccio" la pagina del freezer sotto il pannello e la scelta del modello; F4.5b foto;
-F4.7 storico usciti (Pro); F4.8 ricerca; F4.9 notifiche Pro e avvisi di capienza
-(`CapacityAlertPolicy` e' gia' scritta e provata); F4.10 Pro e paywall; F4.11 widget
-Android e iOS; F4.12 voce. Aperti: il test d'integrazione `integration_test/flusso_test.dart`
-non si collega all'app sull'emulatore (resta sulla splash: problema del collegamento
-PC-emulatore, non dell'app; il giro manuale via adb funziona); un test di
-`micro_core/test/entitlement` fallisce ogni tanto e al giro dopo passa. Per provare l'app
-piena: `flutter run --dart-define=FF_DEMO=true` (dati di esempio, mai in release).
+**Ripresa (stato al 2026-10-07, sera).** Il codice di F4 e' completo: 140 test verdi, analisi pulita, provato sull'emulatore Android e sul simulatore iPhone. Resta solo **F4.17**, che dipende dal proprietario: registrare su Apple gli App ID `com.smp.fullfreezer` e `com.smp.fullfreezer.FullFreezerWidget` con l'App Group `group.com.smp.fullfreezer`, creare le app e il prodotto `fullfreezer_pro_lifetime` (3,99 €) su App Store Connect e Play Console. Da provare sul telefono vero perche' l'emulatore non lo permette: la voce, e il tocco sul widget iPhone. Aperti fuori da F4: un test di `micro_core/test/entitlement` fallisce ogni tanto e al giro dopo passa; `EntitlementView`/`EntitlementNotifier` sono copiati da TrashCan e vanno spostati in `micro_core` alla terza app. Per provare l'app piena: `flutter run --dart-define=FF_DEMO=true` (dati di esempio, mai in release).
 - [ ] **F4.17** Store: prodotto Pro su Play Console e App Store Connect, schede, screenshot da test, TestFlight, invii (aggiornare `StatusMicroApps.md`)
 
-### F5 — Scorte Calore → `v6.0.0`
+### F5 — Scorte Calore → `v7.0.0`
 
 - [ ] **F5.1** Bootstrap progetto, tema, l10n, router
 - [ ] **F5.2** Data layer Drift: fonti, misurazioni, acquisti, promemoria calendario
@@ -1038,7 +1034,7 @@ piena: `flutter run --dart-define=FF_DEMO=true` (dati di esempio, mai in release
 - [ ] **F5.14** `apps/scorte_calore/codebase_reference.md`
 - [ ] **F5.15** Rituale di fine fase F5
 
-### F6 — Film Tracker → `v7.0.0`
+### F6 — Film Tracker → `v8.0.0`
 
 - [ ] **F6.1** Bootstrap progetto, tema scuro, l10n, router
 - [ ] **F6.2** Data layer Drift: macchine, rullini, sviluppi, stampe, immagini, catalogo pellicole
@@ -1057,7 +1053,7 @@ piena: `flutter run --dart-define=FF_DEMO=true` (dati di esempio, mai in release
 - [ ] **F6.15** `apps/film_tracker/codebase_reference.md`
 - [ ] **F6.16** Rituale di fine fase F6
 
-### F7 — Hardening trasversale e preparazione allo store → `v8.0.0`
+### F7 — Hardening trasversale e preparazione allo store → `v9.0.0`
 
 - [ ] **F7.1** Revisione l10n completa (it/en) su tutte e quattro le app
 - [ ] **F7.2** Accessibilità: contrasto, dimensioni dinamiche del testo, TalkBack, target di tocco
@@ -1109,7 +1105,7 @@ il 4 ottobre è costato un quarto d'ora prima che qualcuno guardasse lo schermo 
 simulatore. Finché resta così, il dispositivo di prova va messo in inglese a mano (vedi
 l'atlante di TrashCan, §9).
 
-### F8 — Deploy e pubblicazione → `v9.0.0`
+### F8 — Deploy e pubblicazione → `v10.0.0`
 
 - [x] **F8.1** Accesso SSH a `clawserver` verificato (anticipata il 2026-09-09)
 - [x] **F8.2** Ricognizione di `clawserver` (anticipata l'11 settembre 2026): nginx con quattro vhost, php-fpm 8.3 e 8.4, Docker, nessun MTA installato. OpenClaw vive su `hesclaw.ovh` e `wa-webhook.hesclaw.ovh` e non si tocca
@@ -4169,7 +4165,7 @@ Oltre allo standard: test di integrazione che **misura** il flusso di inseriment
 fallisce se supera 4 interazioni; test del parser vocale su venti frasi reali; test della
 ricerca accent-insensitive; test del digest con 0, 1 e N prodotti vecchi.
 
-### F4.14 — Rifinitura · F4.15 — Atlante · F4.16 — Rituale (branch `v5.0.0`)
+### F4.14 — Rifinitura · F4.15 — Atlante · F4.16 — Rituale (branch `v6.0.0`)
 
 ---
 
@@ -4453,7 +4449,7 @@ const FeatureLimits scorteLimits = {
 };
 ```
 
-### F5.12 — Test · F5.13 — Rifinitura · F5.14 — Atlante · F5.15 — Rituale (branch `v6.0.0`)
+### F5.12 — Test · F5.13 — Rifinitura · F5.14 — Atlante · F5.15 — Rituale (branch `v7.0.0`)
 
 ---
 
@@ -4865,7 +4861,7 @@ sono analytics, come chiedere la cancellazione.
 
 `tool/verify_atlas.ps1` su tutti e sei i progetti. Zero differenze.
 
-### F7.9 — Rituale di fine fase F7 (branch `v8.0.0`)
+### F7.9 — Rituale di fine fase F7 (branch `v9.0.0`)
 
 ---
 
@@ -4995,7 +4991,7 @@ sviluppatore è di tipo organizzazione, il requisito non si applica: **va verifi
 Rilascio graduale (20% → 50% → 100%), monitoraggio di Android Vitals e delle recensioni per
 la prima settimana, e una versione correttiva pronta.
 
-### F8.10 — Rituale di fine fase F8 (branch `v9.0.0`)
+### F8.10 — Rituale di fine fase F8 (branch `v10.0.0`)
 
 ---
 
