@@ -11,7 +11,7 @@ import 'entitlement.dart';
 /// pozzetto in garage ha gia' il problema e paga volentieri), poi gli avvisi (il richiamo
 /// che fa tornare nell'app), poi i numeri dello spreco. Il resto e' contorno.
 ///
-/// ☠ Ogni beneficio corrisponde a una chiave `locked()` in `freezer_feature_limits` e
+/// ☠ Ogni beneficio corrisponde a una chiave `locked()` in `freezerFeatureLimits` (`feature_limits.dart`) e
 /// viceversa: lo verifica test/widget/paywall_config_test.dart.
 PaywallConfig buildFreezerPaywall(L l) => PaywallConfig(
   appName: l.appTitle,

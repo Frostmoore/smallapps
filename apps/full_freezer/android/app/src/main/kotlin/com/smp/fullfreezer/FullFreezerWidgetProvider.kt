@@ -74,7 +74,7 @@ class FullFreezerWidgetProvider : HomeWidgetProvider() {
 
                 val giorni = giorniDa(campi[0], oggi)
                 views.setTextViewText(id.days, testoGiorni(giorni, widgetData))
-                // Arancione quando si e' superato il promemoria, come i badge della home.
+                // Ambra (#FFB547, il colore del badge della home) quando si e' superato il promemoria.
                 val promemoria = campi[3].toIntOrNull()
                 val vecchio = giorni != null && promemoria != null && promemoria > 0 && giorni >= promemoria
                 views.setTextColor(id.days, if (vecchio) OLD else DAYS)

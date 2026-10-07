@@ -1,8 +1,9 @@
 # MicroApps
 
-Monorepo di quattro app Flutter per Android, gratuite nella versione base e sbloccabili con
-un **acquisto una tantum**, più il server di licenze che verifica gli acquisti e tiene il
-registro di chi ha comprato cosa.
+Monorepo delle MicroApp Flutter per Android e iPhone, gratuite nella versione base e
+sbloccabili con un **acquisto una tantum**, più il server di licenze che verifica gli
+acquisti Play e tiene il registro di chi ha comprato cosa. Le app previste sono quattro, ma
+il monorepo e' la base per tutte le microapp che verranno.
 
 | Progetto | Cartella | Cos'è | Atlante |
 |---|---|---|---|
@@ -14,9 +15,9 @@ registro di chi ha comprato cosa.
 | **Vetrina** | `site/` | Il sito pubblico su smpmicroapps.it, in italiano e inglese: catalogo, pagina di TrashCan, contatti, pagine legali | `site/codebase_reference.md` |
 | **License Server** | `server/` — **repo separata** | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
 
-> **Stato al 2026-09-11**: esistono e sono aggiornati gli atlanti di `micro_core`, del
-> License Server e di TrashCan. Gli altri tre vengono creati alla fine della fase che
-> costruisce il rispettivo progetto. Vedi `develop_microapps.md`.
+> **Stato al 2026-10-07**: esistono e sono aggiornati gli atlanti di `micro_core`, del
+> License Server, di TrashCan, della Vetrina e di Full Freezer. Gli altri vengono creati alla
+> fine della fase che costruisce il rispettivo progetto. Vedi `develop_microapps.md`.
 
 ## A che punto siamo
 
@@ -27,22 +28,21 @@ registro di chi ha comprato cosa.
 | F2 | License Server (Node + Fastify + SQLite), repo separata su Gitea | chiusa, 43 test |
 | **F3** | **TrashCan**, l'app pilota | **chiusa**, 122 test |
 | — | **Vetrina** `smpmicroapps.it` | online, bilingue, con le pagine legali |
-| F4 | Full Freezer | da fare |
+| **F4** | **Full Freezer**, Android e iPhone | **completa nel codice**, 137 test; manca la creazione del prodotto Pro e degli ID sugli store |
 | F5 | Scorte Calore | da fare |
 | F6 | Film Tracker | da fare |
 | F7 | Hardening | da fare |
 | F8 | Deploy e pubblicazione | da fare |
 
-TrashCan e' completa e provata su dispositivo in ogni schermata: wizard iniziale, home,
-tipi di rifiuto e regole con tutte e cinque le forme di ricorrenza, eccezioni, notifiche
-serali, calendari multipli con paywall, backup e condivisione, widget della schermata
-iniziale.
+TrashCan e' pubblicata: su App Store in vendita in 148 paesi (l'Unione Europea attende la
+verifica DSA di Apple), su Google Play in revisione. Lo stato aggiornato delle build e delle
+pubblicazioni sta in [`StatusMicroApps.md`](StatusMicroApps.md).
 
-Resta fuori una sola cosa, ed e' bloccata su un'azione che non si puo' fare da qui:
-**la pubblicazione su Play Console** (creazione dell'app, prodotto in-app, canale interno)
-richiede l'account Google Play del proprietario. Da questo lato e' gia' pronto tutto quello
-che serve: firma di release collegata al keystore, regole ProGuard, e un AAB firmato e
-verificato.
+Full Freezer e' completa nel codice e provata sull'emulatore Android e sul simulatore iPhone:
+inserimento rapido, a voce e con foto, riempimento stimato, avvisi, storico e statistiche,
+categorie personalizzate, CSV e backup, widget su entrambe le piattaforme. Per pubblicarla
+serve che il proprietario crei il prodotto `fullfreezer_pro_lifetime` su Play Console e App
+Store Connect e registri App ID e App Group su Apple.
 
 ## Repository
 

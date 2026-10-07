@@ -70,7 +70,10 @@ class HomeView {
 }
 
 /// Quanti alimenti mostra "Da usare prima" prima del "vedi tutti".
-const int useSoonPreview = 5;
+///
+/// ⚑ Quattro e non cinque: le schede stanno in una griglia di due colonne, e con cinque
+/// l'ultima resta sola in una riga (deciso guardando la home "A · Ghiaccio", 2026-10-07).
+const int useSoonPreview = 4;
 
 /// Costruisce la home dai dati grezzi. Funzione pura: niente Flutter, niente database.
 ///

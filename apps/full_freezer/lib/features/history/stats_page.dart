@@ -31,7 +31,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
     final l = L.of(context);
     final p = FreezerPalette.of(context);
     final removed = ref.watch(removedItemsProvider).value ?? const <Item>[];
-    final stats = computeStats(removed, period: _period, now: DateTime.now());
+    final stats = computeStats(removed, period: _period, now: ref.watch(todayProvider).toLocalMidnight());
     final locale = Localizations.localeOf(context).toLanguageTag();
 
     return Scaffold(

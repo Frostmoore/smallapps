@@ -110,6 +110,12 @@ class _ItemEditPageState extends ConsumerState<ItemEditPage> {
     if (original == null) {
       await repo.addItem(d.toNewItem());
     } else {
+      // Un cambio di posizione passa da moveItem, che scrive il movimento `moved`: con il
+      // solo updateItem lo spostamento non lasciava traccia (regola 3 del repository,
+      // trovato rileggendo il codice per l'atlante il 2026-10-07).
+      if (original.freezerId != d.freezerId || original.compartmentId != d.compartmentId) {
+        await repo.moveItem(original.id, freezerId: d.freezerId, compartmentId: d.compartmentId);
+      }
       await repo.updateItem(d.applyTo(original));
     }
     _saved = true;

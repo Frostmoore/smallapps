@@ -155,6 +155,36 @@ void main() {
       expect(settings.getStringList(NotificationSettingKeys.pendingAlerts), isEmpty);
     });
 
+    test('"quasi pieno" cita il piu vecchio del freezer', () async {
+      final f = await repo.addFreezer(name: 'Cucina', modelKey: 'custom', capacityLiters: 100);
+      await riempi(f, 70);
+      await repo.addItem(
+        NewItem(
+          name: 'Spezzatino',
+          freezerId: f,
+          quantity: 1,
+          unit: Units.portions,
+          frozenAt: CivilDate(2026, 5, 23),
+          volumeLiters: 1,
+        ),
+      );
+      final body = scheduler(pro: true).capacityAlertBody(full: true, percent: 89, items: await repo.storedItems());
+      expect(body, 'È pieno al 89%: prima di congelare altro, comincia da Spezzatino, il più vecchio.');
+    });
+
+    test('il riepilogo aggiunge una riga per i freezer pieni o quasi vuoti, non per quelli vuoti', () async {
+      final pieno = await repo.addFreezer(name: 'Cucina', modelKey: 'custom', capacityLiters: 100);
+      final scarso = await repo.addFreezer(name: 'Garage', modelKey: 'custom', capacityLiters: 100);
+      await repo.addFreezer(name: 'Cantina', modelKey: 'custom', capacityLiters: 100);
+      await repo.addFreezer(name: 'Mezzo', modelKey: 'custom', capacityLiters: 100);
+      await riempi(pieno, 70);
+      await riempi(scarso, 2);
+      final mezzo = (await repo.allFreezers()).last.id;
+      await riempi(mezzo, 40);
+      final righe = scheduler(pro: true).digestCapacityLines(await repo.allFreezers(), await repo.storedItems());
+      expect(righe, ['Cucina è pieno al 88%.', 'Garage è pieno solo al 3%.']);
+    });
+
     test('un freezer nuovo e vuoto non manda "quasi vuoto"', () async {
       final f = await repo.addFreezer(name: 'Cucina', modelKey: 'custom', capacityLiters: 100);
       await riempi(f, 1);

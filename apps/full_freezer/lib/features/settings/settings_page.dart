@@ -47,17 +47,38 @@ class SettingsPage extends ConsumerWidget {
         children: [
           _ProCard(pro: pro),
           GhiaccioSectionLabel(text: l.settings_freezers, padding: const EdgeInsets.fromLTRB(4, 26, 4, 10)),
-          for (final f in freezers)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: GhiaccioTile(
-                leading: FreezerSilhouette(iconKey: silhouetteKeyFor(f.modelKey), size: 26),
-                title: f.name,
-                subtitle: l.home_itemCount(items.where((i) => i.freezerId == f.id).length),
-                trailing: Icon(Icons.chevron_right, color: p.inkMuted),
-                onTap: () => context.push(Routes.freezerOf(f.id)),
-              ),
-            ),
+          // ⚑ Con piu' freezer si riordinano trascinando la maniglia (F4.6): l'ordine e'
+          // quello delle schede in home e di "Dove sono". Con uno solo la maniglia non serve.
+          ReorderableListView(
+            shrinkWrap: true,
+            buildDefaultDragHandles: false,
+            physics: const NeverScrollableScrollPhysics(),
+            onReorderItem: (from, to) {
+              final ids = [for (final f in freezers) f.id];
+              final moved = ids.removeAt(from);
+              ids.insert(to, moved);
+              unawaited(ref.read(repositoryProvider).reorderFreezers(ids));
+            },
+            children: [
+              for (final (index, f) in freezers.indexed)
+                Padding(
+                  key: ValueKey(f.id),
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: GhiaccioTile(
+                    leading: FreezerSilhouette(iconKey: silhouetteKeyFor(f.modelKey), size: 26),
+                    title: f.name,
+                    subtitle: l.home_itemCount(items.where((i) => i.freezerId == f.id).length),
+                    trailing: freezers.length > 1
+                        ? ReorderableDragStartListener(
+                            index: index,
+                            child: Icon(Icons.drag_handle, color: p.inkMuted),
+                          )
+                        : Icon(Icons.chevron_right, color: p.inkMuted),
+                    onTap: () => context.push(Routes.freezerOf(f.id)),
+                  ),
+                ),
+            ],
+          ),
           GhiaccioTile(
             leading: const Icon(Icons.add),
             title: l.home_addFreezer,

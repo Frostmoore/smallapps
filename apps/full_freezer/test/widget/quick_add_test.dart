@@ -1,11 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:full_freezer/app/app.dart';
 import 'package:full_freezer/app/app_config.dart';
+import 'package:full_freezer/app/entitlement.dart';
+import 'package:full_freezer/app/feature_limits.dart';
 import 'package:full_freezer/app/providers.dart';
+import 'package:full_freezer/app/routes.dart';
 import 'package:full_freezer/data/database.dart';
 import 'package:full_freezer/data/freezer_repository.dart';
+import 'package:full_freezer/features/home/home_page.dart';
+import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -85,6 +92,9 @@ void main() {
           customCategoriesProvider.overrideWith((ref) => Stream.value(const <CustomCategory>[])),
           compartmentsByFreezerProvider.overrideWith((ref) => Stream.value(const <int, List<Compartment>>{})),
           notificationSyncProvider.overrideWith((ref) {}),
+          // Il piano gratuito, senza passare dallo store vero.
+          isProProvider.overrideWithValue(false),
+          featureGateProvider.overrideWithValue(const FeatureGate(limits: freezerFeatureLimits, isPro: false)),
         ],
         child: const FullFreezerApp(),
       ),
@@ -113,5 +123,17 @@ void main() {
 
     expect(repo.salvati.single.name, 'Lasagne della nonna');
     expect(interazioni, lessThanOrEqualTo(4));
+  });
+
+  testWidgets('senza Pro le pagine Pro, aperte con un push diretto, mostrano il lucchetto', (tester) async {
+    await avvia(tester);
+    final router = GoRouter.of(tester.element(find.byType(HomePage)));
+    for (final route in [Routes.stats, Routes.history, Routes.categories, Routes.freezerNew]) {
+      unawaited(router.push(route));
+      await tester.pumpAndSettle();
+      expect(find.text('Questa funzione fa parte di Full Freezer Pro.'), findsOneWidget, reason: route);
+      router.pop();
+      await tester.pumpAndSettle();
+    }
   });
 }

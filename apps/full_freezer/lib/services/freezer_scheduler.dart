@@ -1,6 +1,8 @@
+import 'package:meta/meta.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../app/routes.dart';
+import '../data/database.dart';
 import '../data/freezer_repository.dart';
 import '../domain/capacity.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -114,6 +116,7 @@ class FreezerScheduler implements NotificationScheduler {
     final today = CivilDate.fromDateTime(now);
     final stored = await repo.storedItems();
     final freezers = {for (final f in await repo.allFreezers()) f.id: f};
+    final capacityLines = digestCapacityLines(freezers.values, stored);
 
     final wanted = <ScheduledNotification>[];
     for (final day in digestDates(today, frequency)) {
@@ -124,9 +127,13 @@ class FreezerScheduler implements NotificationScheduler {
           id: digestId(day),
           localWhen: day.toLocalDateTime(digestHour),
           title: l.notif_digestTitle,
-          body: content.oldCount == 1
-              ? l.notif_digestOne(content.oldest, content.oldestDays)
-              : l.notif_digestMany(content.oldCount, content.oldest, content.oldestDays),
+          body: [
+            if (content.oldCount == 1)
+              l.notif_digestOne(content.oldest, content.oldestDays)
+            else
+              l.notif_digestMany(content.oldCount, content.oldest, content.oldestDays),
+            ...capacityLines,
+          ].join(' '),
           channelId: freezerChannel.id,
           payload: Routes.useSoon,
         ),
@@ -151,7 +158,7 @@ class FreezerScheduler implements NotificationScheduler {
           id: a.notificationId,
           localWhen: a.when,
           title: a.full ? l.notif_fullTitle(f.name) : l.notif_emptyTitle(f.name),
-          body: a.full ? l.notif_fullBody(fill.percent) : l.notif_emptyBody(fill.percent),
+          body: capacityAlertBody(full: a.full, percent: fill.percent, items: mine),
           channelId: freezerChannel.id,
           payload: Routes.freezerOf(f.id),
         ),
@@ -161,6 +168,38 @@ class FreezerScheduler implements NotificationScheduler {
     await service.replaceSchedule(wanted);
     await settings.setInstant(SettingKeys.lastRescheduleAt, now.toUtc());
   }
+
+  /// Il testo di un avviso di capienza. "Quasi pieno" cita il piu' vecchio del freezer
+  /// (F4.9): "consuma qualcosa" non dice cosa, "comincia dallo spezzatino" si'.
+  @visibleForTesting
+  String capacityAlertBody({required bool full, required int percent, required List<Item> items}) {
+    if (!full) return l.notif_emptyBody(percent);
+    final oldest = ([...items]..sort((a, b) => a.frozenAt.compareTo(b.frozenAt))).firstOrNull;
+    return oldest == null ? l.notif_fullBody(percent) : l.notif_fullBodyOldest(percent, oldest.name);
+  }
+
+  /// Le righe che il riepilogo aggiunge per ogni freezer pieno o quasi vuoto (F4.9).
+  ///
+  /// ⚑ Il riempimento e' quello di adesso, non quello del giorno del riepilogo: lo spazio
+  /// cambia solo quando cambiano i dati, e ogni modifica ripianifica tutto.
+  ///
+  /// ⚑ Un freezer **senza niente dentro** non entra: "quasi vuoto" ogni settimana su un
+  /// freezer appena creato sarebbe un rimprovero, non un'informazione (stessa ragione per
+  /// cui `lastAlertLevel` parte da `empty`).
+  @visibleForTesting
+  List<String> digestCapacityLines(Iterable<Freezer> freezers, List<Item> stored) => [
+    for (final f in freezers)
+      if (stored.where((i) => i.freezerId == f.id).toList() case final mine when mine.isNotEmpty)
+        if (_capacity.fill(
+              capacityLiters: f.capacityLiters,
+              calibration: f.calibration,
+              itemLiters: mine.map((i) => i.volumeLiters),
+            ) case final fill)
+          if (fill.fraction >= _capacity.fullAt)
+            l.notif_digestFull(f.name, fill.percent)
+          else if (fill.fraction < _capacity.emptyAt)
+            l.notif_digestEmpty(f.name, fill.percent),
+  ];
 
   List<PendingAlert> _readPending() => [
     for (final raw in settings.getStringList(NotificationSettingKeys.pendingAlerts))

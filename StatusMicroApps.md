@@ -7,7 +7,7 @@
 > `site/src/apps.php`) **solo** quando qui la riga dice «pubblicata» per quello store **e per
 > l'Italia**.
 
-Ultimo aggiornamento: **2026-10-06**
+Ultimo aggiornamento: **2026-10-07**
 
 ---
 
@@ -16,7 +16,7 @@ Ultimo aggiornamento: **2026-10-06**
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
 | **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
-| **Full Freezer** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
+| **Full Freezer** | 1.0.0 (1) | 🔵 in sviluppo: codice completo, mancano prodotto e scheda | 🔵 in sviluppo: codice completo, mancano App ID, App Group, prodotto | card grigia «In arrivo» |
 | **Scorte Calore** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 
@@ -55,6 +55,7 @@ Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubbl
 | 2026-10-06 | Build 11 + TrashCan Pro inviati insieme (12:41) |
 | 2026-10-06 | **Approvata**, rilascio automatico: «Pronta per la distribuzione» |
 | 2026-10-06 | In vendita in **148 paesi**; nei **27 paesi UE (Italia compresa)** bloccata con `TRADER_STATUS_NOT_PROVIDED` |
+| 2026-10-07 | Ricontrollato via API: Italia ancora `TRADER_STATUS_NOT_PROVIDED` (verifica DSA di Apple in corso, niente da fare da parte nostra) |
 
 ⏳ **In attesa di Apple:** Business → Conformità → *Normativa sui servizi digitali* =
 «Verifica in corso» (dati inviati il 2026-10-05, niente da cliccare). Quando diventa «Attivo»
@@ -73,8 +74,24 @@ cd ~/microapps && python3 tool/asc_api.py GET '/v2/appAvailabilities/6818986320/
 
 ## Full Freezer
 
-Non iniziata. Pacchetto previsto `com.smp.fullfreezer`, Pro `fullfreezer_pro_lifetime`.
-Fase F4 di `develop_microapps.md`.
+| Dato | Valore |
+|---|---|
+| Pacchetto / bundle | `com.smp.fullfreezer` · estensione widget iOS `com.smp.fullfreezer.FullFreezerWidget` |
+| App Group iOS | `group.com.smp.fullfreezer` (app ed estensione) |
+| Prodotto Pro | `fullfreezer_pro_lifetime`, non consumabile, **3,99 €** |
+| Piattaforme | Android e solo iPhone |
+
+Codice completo (F4 di `develop_microapps.md`, 2026-10-07), provato sull'emulatore Android e
+sul simulatore iPhone. **Nessuna build inviata.** Prima del primo invio, il proprietario deve:
+
+- **Apple**: registrare gli App ID `com.smp.fullfreezer` e `com.smp.fullfreezer.FullFreezerWidget`
+  con la capability App Groups, creare il gruppo `group.com.smp.fullfreezer`, creare l'app su
+  App Store Connect e il prodotto non consumabile `fullfreezer_pro_lifetime` a 3,99 €
+  (il primo prodotto si allega alla versione, come per TrashCan).
+- **Google**: creare l'app su Play Console, caricare un primo AAB (serve perche' compaia la
+  sezione prodotti), creare `fullfreezer_pro_lifetime` a 3,99 €.
+- Provare sul proprio telefono: voce vera e tocco del widget su iPhone (sul simulatore non si
+  potevano provare).
 
 ## Scorte Calore
 

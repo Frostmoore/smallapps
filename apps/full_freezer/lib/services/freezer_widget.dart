@@ -26,7 +26,7 @@ import '../l10n/generated/app_localizations.dart';
 /// quindi andrebbe ricalcolato ogni notte, e a calcolarlo dovrebbe essere il widget. L'ordine
 /// per data di congelamento invece **non cambia mai col passare dei giorni**: i tre piu'
 /// vecchi di oggi sono i tre piu' vecchi di domani finche' qualcuno non tocca i dati, e
-/// toccare i dati vuol dire aprire l'app, che ripubblica. Il colore "vecchio" (arancione) lo
+/// toccare i dati vuol dire aprire l'app, che ripubblica. Il colore "vecchio" (ambra) lo
 /// decide il widget confrontando i giorni con il promemoria della riga, che viaggia nel
 /// payload.
 ///

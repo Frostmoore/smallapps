@@ -109,7 +109,7 @@
   "freezer_customLitersLabel": "Freezer litres",
   "freezer_customLitersHelp": "Printed on the energy label, next to the snowflake.",
   "freezer_delete": "Delete freezer",
-  "freezer_deleteTitle": "Delete \"{name}\"?",
+  "freezer_deleteTitle": "Delete “{name}”?",
   "@freezer_deleteTitle": {
     "placeholders": {
       "name": {
@@ -239,6 +239,7 @@
   "paywall_headline": "Full Freezer Pro",
   "paywall_subhead": "One payment. No subscription. Yours for good.",
   "paywall_buy": "Unlock Pro",
+  "pro_locked": "This is part of Full Freezer Pro.",
   "paywall_buyWithPrice": "Unlock Pro — {price}",
   "@paywall_buyWithPrice": {
     "placeholders": {
@@ -331,6 +332,39 @@
       }
     }
   },
+  "notif_fullBodyOldest": "It's {percent}% full: before freezing anything else, start with {name}, the oldest.",
+  "@notif_fullBodyOldest": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_digestFull": "{name} is {percent}% full.",
+  "@notif_digestFull": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_digestEmpty": "{name} is only {percent}% full.",
+  "@notif_digestEmpty": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "notif_emptyTitle": "{name} is nearly empty",
   "@notif_emptyTitle": {
     "placeholders": {
@@ -409,7 +443,7 @@
   "search_hint": "Search the freezer",
   "search_clear": "Clear",
   "search_empty": "Type a name or a word from the notes: accents and capitals don't matter.",
-  "search_noResults": "Nothing in the freezer matches \"{query}\".",
+  "search_noResults": "Nothing in the freezer matches “{query}”.",
   "@search_noResults": {
     "placeholders": {
       "query": {
@@ -519,7 +553,7 @@
   "categories_icon": "Icon",
   "categories_reminderHelp": "Optional. Items you put in this category get this reminder.",
   "categories_delete": "Delete category",
-  "categories_deleteTitle": "Delete \"{name}\"?",
+  "categories_deleteTitle": "Delete “{name}”?",
   "@categories_deleteTitle": {
     "placeholders": {
       "name": {

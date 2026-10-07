@@ -8,6 +8,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../features/categories/custom_categories_page.dart';
+import '../features/common/pro_gate.dart';
 import '../features/freezers/freezer_editor_page.dart';
 import '../features/freezers/freezer_page.dart';
 import '../features/history/history_page.dart';
@@ -40,12 +41,30 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
     GoRoute(path: Routes.useSoon, builder: (_, __) => const UseSoonPage()),
     GoRoute(path: Routes.search, builder: (_, __) => const SearchPage()),
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
-    GoRoute(path: Routes.stats, builder: (_, __) => const StatsPage()),
-    GoRoute(path: Routes.history, builder: (_, __) => const HistoryPage()),
-    GoRoute(path: Routes.categories, builder: (_, __) => const CustomCategoriesPage()),
+    // ⚑ Il Pro si controlla **anche sulla pagina** (ProGate), non solo dove si entra: vedi
+    // `features/common/pro_gate.dart`.
+    GoRoute(
+      path: Routes.stats,
+      builder: (_, __) => const ProGate(feature: FeatureKey.statistics, child: StatsPage()),
+    ),
+    GoRoute(
+      path: Routes.history,
+      builder: (_, __) => const ProGate(feature: FeatureKey.fullHistory, child: HistoryPage()),
+    ),
+    GoRoute(
+      path: Routes.categories,
+      builder: (_, __) => const ProGate(feature: FeatureKey.customCategories, child: CustomCategoriesPage()),
+    ),
     // ⚑ `new` prima di `:freezerId`: go_router prova le rotte in ordine, e "new" e' anche
     // un valore valido per il parametro.
-    GoRoute(path: Routes.freezerNew, builder: (_, __) => const FreezerEditorPage()),
+    GoRoute(
+      path: Routes.freezerNew,
+      builder: (_, __) => ProGate(
+        feature: FeatureKey.unlimitedEntities,
+        allowed: (gate) => gate.withinLimit(FeatureKey.unlimitedEntities, ref.read(freezersProvider).value?.length ?? 0),
+        child: const FreezerEditorPage(),
+      ),
+    ),
     GoRoute(
       path: Routes.freezerEdit,
       builder: (_, s) => FreezerEditorPage(freezerId: int.tryParse(s.pathParameters['freezerId'] ?? '')),

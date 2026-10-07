@@ -59,7 +59,7 @@ class HomePage extends ConsumerWidget {
                     if (view.useSoonTotal > 0) ...[
                       GhiaccioSectionLabel(
                         text: l.home_useSoon,
-                        trailing: view.useSoonTotal > _cardsShown
+                        trailing: view.useSoonTotal > useSoonPreview
                             ? TextButton(
                                 onPressed: () => context.push(Routes.useSoon),
                                 child: Text(l.home_seeAll),
@@ -70,7 +70,7 @@ class HomePage extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 18),
                         child: _CardGrid(
                           children: [
-                            for (final r in view.useSoonAll.take(_cardsShown))
+                            for (final r in view.useSoon)
                               UseSoonCard(
                                 row: r,
                                 subtitle: itemSubtitle(
@@ -133,9 +133,6 @@ class HomePage extends ConsumerWidget {
     );
   }
 }
-
-/// Quante schede di "Da usare prima" si mostrano prima del "vedi tutti".
-const int _cardsShown = 4;
 
 /// La testata blu notte.
 class _NightHeader extends ConsumerWidget {

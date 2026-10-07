@@ -79,7 +79,7 @@ struct VoceFreezer: TimelineEntry {
         return n == 0 ? oggi : modelloGiorni.replacingOccurrences(of: "{n}", with: String(n))
     }
 
-    /// Arancione quando si e' superato il promemoria, come i badge della home.
+    /// Ambra (il colore del badge della home) quando si e' superato il promemoria.
     func vecchio(_ riga: RigaAlimento) -> Bool {
         guard let p = riga.promemoria, p > 0 else { return false }
         return giorni(riga) >= p
