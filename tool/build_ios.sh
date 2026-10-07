@@ -137,6 +137,45 @@ trap 'rm -f "$OPZIONI"' EXIT
 cp ios/ExportOptions.plist "$OPZIONI"
 /usr/libexec/PlistBuddy -c "Add :teamID string $ASC_TEAM_ID" "$OPZIONI"
 
+# ── Firma con i nostri profili, quando ci sono ──────────────────────────────
+#
+# ☠ **Xcode 27 non crea piu' i profili nuovi con la chiave API** (visto il 2026-10-07 con
+#   Full Freezer): "Authentication failed" e "No profiles were found", mentre la stessa
+#   chiave crea profili via API senza problemi e TrashCan, che i profili li aveva gia', si
+#   esporta ancora. Per un'app nuova quindi i profili si fanno a parte, via API, con un
+#   certificato "Apple Distribution" nostro:
+#     - chiave privata e certificato in ~/.microapps-firma/ (solo su questo Mac);
+#     - un portachiavi dedicato, ~/Library/Keychains/microapps-firma.keychain-db, con la
+#       password casuale in ~/.microapps-firma/portachiavi.pwd: da ssh il portachiavi di
+#       login e' chiuso, questo lo si apre da qui senza la password dell'utente;
+#     - profili App Store chiamati "MicroApps AppStore <bundle>", uno per l'app e uno per
+#       ogni estensione. Procedura in apps/full_freezer/codebase_reference.md, sezione iOS.
+#
+# ☠ I profili prendono l'App Group **dall'App ID**: se il gruppo non e' agganciato all'App
+#   ID nel portale (Identifiers > App Groups > Configure), il profilo ha l'elenco vuoto e la
+#   firma fallisce. L'API non sa agganciarlo: si fa a mano, una volta per App ID.
+PROFILI="$HOME/Library/MobileDevice/Provisioning Profiles"
+PORTACHIAVI="$HOME/Library/Keychains/microapps-firma.keychain-db"
+ARCH_APP=build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app
+ID_APP=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$ARCH_APP/Info.plist")
+profilo_per() { grep -l -a "<string>MicroApps AppStore $1</string>" "$PROFILI"/*.mobileprovision 2>/dev/null | head -1; }
+if [ -f "$PORTACHIAVI" ] && [ -n "$(profilo_per "$ID_APP")" ]; then
+  echo "==> firma con i profili MicroApps (certificato nostro)"
+  security unlock-keychain -p "$(cat "$HOME/.microapps-firma/portachiavi.pwd")" "$PORTACHIAVI"
+  /usr/libexec/PlistBuddy -c "Set :signingStyle manual" "$OPZIONI"
+  /usr/libexec/PlistBuddy -c "Add :signingCertificate string Apple Distribution" "$OPZIONI"
+  /usr/libexec/PlistBuddy -c "Add :provisioningProfiles dict" "$OPZIONI"
+  for bundle in "$ARCH_APP" "$ARCH_APP"/PlugIns/*.appex; do
+    [ -e "$bundle" ] || continue
+    ident=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$bundle/Info.plist")
+    if [ -z "$(profilo_per "$ident")" ]; then
+      echo "!! manca il profilo 'MicroApps AppStore $ident'" >&2
+      exit 1
+    fi
+    /usr/libexec/PlistBuddy -c "Add :provisioningProfiles:$ident string MicroApps AppStore $ident" "$OPZIONI"
+  done
+fi
+
 xcodebuild -exportArchive \
   -archivePath build/ios/archive/Runner.xcarchive \
   -exportOptionsPlist "$OPZIONI" \

@@ -21,20 +21,57 @@ const bool demoRequested = bool.fromEnvironment('FF_DEMO');
 
 bool get demoEnabled => demoRequested && !kReleaseMode;
 
+/// I nomi in inglese, per gli screenshot della scheda inglese: una scheda inglese piena di
+/// "Spezzatino" e "Cassetto 1" sembrerebbe un'app non tradotta.
+const Map<String, String> _inglese = <String, String>{
+  'Freezer cucina': 'Kitchen freezer',
+  'Cassetto 1': 'Drawer 1',
+  'Cassetto 2': 'Drawer 2',
+  'Spezzatino': 'Beef stew',
+  'Merluzzo': 'Cod',
+  'Pane': 'Bread',
+  'Lasagne': 'Lasagne',
+  'Fragole': 'Strawberries',
+  'Piselli': 'Peas',
+  'Petto di pollo': 'Chicken breast',
+  'Gelato al pistacchio': 'Pistachio ice cream',
+  'Ragù': 'Bolognese sauce',
+  'Minestrone': 'Minestrone',
+  'Macinato': 'Minced beef',
+  'Pizza': 'Pizza',
+  'Spinaci': 'Spinach',
+  'Salmone': 'Salmon',
+  'Brodo': 'Stock',
+  'Ghiaccioli': 'Ice lollies',
+  'Mirtilli': 'Blueberries',
+  'Salsicce': 'Sausages',
+  'Polpette': 'Meatballs',
+  'Fagiolini': 'Green beans',
+  'Focaccia': 'Focaccia',
+  'Gamberi': 'Prawns',
+  'Sugo di pomodoro': 'Tomato sauce',
+  'Gelato': 'Ice cream',
+  'Panini': 'Bread rolls',
+};
+
 /// Riempie il database se e' vuoto. Restituisce true se ha scritto qualcosa.
-Future<bool> seedDemoData(AppDatabase db, SettingsStore settings, {required String freezerName}) async {
+///
+/// [english] sceglie i nomi inglesi: lo decide l'avvio dalla lingua del telefono.
+Future<bool> seedDemoData(AppDatabase db, SettingsStore settings, {bool english = false}) async {
+  String t(String nome) => english ? (_inglese[nome] ?? nome) : nome;
+  const freezerName = 'Freezer cucina';
   if (!demoEnabled) return false;
   final repo = FreezerRepository(db);
   if ((await repo.allFreezers()).isNotEmpty) return false;
 
   final oggi = CivilDate.today();
   final freezer = await repo.addFreezer(
-    name: freezerName,
+    name: t(freezerName),
     modelKey: 'combi_compact',
     capacityLiters: FreezerModels.byKey('combi_compact')!.liters,
   );
-  final cassetto1 = await repo.addCompartment(freezer, 'Cassetto 1');
-  final cassetto2 = await repo.addCompartment(freezer, 'Cassetto 2');
+  final cassetto1 = await repo.addCompartment(freezer, t('Cassetto 1'));
+  final cassetto2 = await repo.addCompartment(freezer, t('Cassetto 2'));
 
   // (nome, giorni fa, quantita', unita', categoria, litri, scomparto)
   final dati = <(String, int, double, String, String, double, int?)>[
@@ -65,7 +102,7 @@ Future<bool> seedDemoData(AppDatabase db, SettingsStore settings, {required Stri
   for (final (nome, giorni, q, unita, categoria, litri, scomparto) in dati) {
     await repo.addItem(
       NewItem(
-        name: nome,
+        name: t(nome),
         freezerId: freezer,
         compartmentId: scomparto,
         quantity: q,
@@ -105,7 +142,7 @@ Future<bool> seedDemoData(AppDatabase db, SettingsStore settings, {required Stri
     final allora = FreezerRepository(db, clock: () => giorno);
     final id = await allora.addItem(
       NewItem(
-        name: nome,
+        name: t(nome),
         freezerId: freezer,
         quantity: 1,
         unit: Units.portions,

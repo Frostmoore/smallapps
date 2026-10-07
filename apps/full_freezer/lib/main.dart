@@ -4,6 +4,7 @@ import 'package:micro_core/micro_core.dart';
 
 import 'app/app.dart';
 import 'app/app_config.dart';
+import 'app/locale_resolution.dart';
 import 'app/providers.dart';
 import 'data/database.dart';
 import 'dev/demo_data.dart';
@@ -43,7 +44,8 @@ Future<void> main() async {
   // avvio; usa una connessione sua, chiusa prima che l'app apra la propria.
   if (demoEnabled) {
     final db = AppDatabase.open();
-    await seedDemoData(db, settings, freezerName: 'Freezer cucina');
+    final lingua = resolveAppLocale(WidgetsBinding.instance.platformDispatcher.locales, kSupportedLocales);
+    await seedDemoData(db, settings, english: lingua.languageCode != 'it');
     await db.close();
   }
 

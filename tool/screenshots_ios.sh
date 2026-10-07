@@ -1,8 +1,11 @@
 #!/bin/bash
 #
-# Screenshot di TrashCan per l'App Store, su un simulatore iOS.
+# Screenshot di un'app per l'App Store, su un simulatore iOS.
 #
-#   ssh mac 'bash ~/microapps/tool/screenshots_ios.sh <UDID> <it|en> <cartella>'
+#   ssh mac 'bash ~/microapps/tool/screenshots_ios.sh <UDID> <it|en> <cartella> [app]'
+#
+# [app] e' la cartella in apps/ (predefinita: trashcan). Per full_freezer si aggiunge da
+# solo FF_DEMO=true, cioe' i dati di esempio.
 #
 # Gira `integration_test/screenshots_test.dart` e fotografa lo schermo ogni volta che il
 # test scrive `SCATTO:<nome>`. Vedi l'intestazione del test per il perche' lo scatto lo
@@ -17,6 +20,9 @@ set -euo pipefail
 UDID="${1:?manca l UDID del simulatore}"
 LINGUA="${2:?manca la lingua, it o en}"
 USCITA="${3:?manca la cartella di uscita}"
+APP="${4:-trashcan}"
+EXTRA=()
+[ "$APP" = "full_freezer" ] && EXTRA=(--dart-define=FF_DEMO=true)
 
 export PATH="$HOME/microapps-toolchain/flutter/bin:/opt/homebrew/bin:$PATH"
 export LANG=en_US.UTF-8
@@ -32,10 +38,10 @@ xcrun simctl status_bar "$UDID" override \
   --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 \
   --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
 
-cd "$HOME/microapps/apps/trashcan"
+cd "$HOME/microapps/apps/$APP"
 REGISTRO=$(mktemp -t scatti)
 flutter test integration_test/screenshots_test.dart -d "$UDID" \
-  --dart-define=LINGUA="$LINGUA" > "$REGISTRO" 2>&1 &
+  --dart-define=LINGUA="$LINGUA" "${EXTRA[@]}" > "$REGISTRO" 2>&1 &
 TEST=$!
 
 FATTI=" "
