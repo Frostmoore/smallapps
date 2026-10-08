@@ -1,0 +1,4 @@
+/* Testi dei permessi in inglese (F5.10): gli stessi di Info.plist. */
+"CFBundleDisplayName" = "Scorte Calore";
+"NSCalendarsUsageDescription" = "Scorte Calore adds the reorder date of your heat sources to the calendar you choose, and moves or removes that event only when you ask.";
+"NSCalendarsFullAccessUsageDescription" = "Scorte Calore adds the reorder date of your heat sources to the calendar you choose, and moves or removes that event only when you ask.";

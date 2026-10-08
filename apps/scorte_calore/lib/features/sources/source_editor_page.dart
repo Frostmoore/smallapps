@@ -13,6 +13,7 @@ import '../../data/database.dart';
 import '../../domain/fuel_source.dart';
 import '../../domain/fuel_units.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../services/calendar_providers.dart';
 
 /// Configurazione di una fonte di calore (F5.5): nuova (anche al primo avvio) o esistente.
 ///
@@ -80,10 +81,10 @@ class _SourceEditorPageState extends ConsumerState<SourceEditorPage> {
   }
 
   void _setFuel(FuelType fuel) => setState(() {
-    _fuel = fuel;
-    if (!FuelUnits.isAllowed(fuel, _unit)) _unit = fuel.defaultUnitKey;
-    _usable = fuel.defaultUsableFraction;
-  });
+        _fuel = fuel;
+        if (!FuelUnits.isAllowed(fuel, _unit)) _unit = fuel.defaultUnitKey;
+        _usable = fuel.defaultUsableFraction;
+      });
 
   bool get _valid {
     if (_name.text.trim().isEmpty) return false;
@@ -153,6 +154,8 @@ class _SourceEditorPageState extends ConsumerState<SourceEditorPage> {
       destructive: true,
     );
     if (!ok || !mounted) return;
+    // ☠ Prima l'evento nel calendario: dopo, la riga che dice quale togliere sparisce (cascade).
+    await ref.read(calendarSyncProvider).forgetSource(widget.sourceId!);
     await ref.read(repositoryProvider).deleteSource(widget.sourceId!);
     if (mounted) context.pop();
   }

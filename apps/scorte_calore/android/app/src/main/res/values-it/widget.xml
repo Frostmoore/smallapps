@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_label">Scorte Calore</string>
+    <string name="widget_description">I giorni di autonomia e la data di riordino delle tue fonti di calore.</string>
+    <string name="widget_title">SCORTE</string>
+    <string name="widget_open_app">Apri Scorte Calore per aggiungere una fonte.</string>
+    <string name="widget_sample1">Stufa soggiorno</string>
+    <string name="widget_sample2">Bombolone GPL</string>
+</resources>

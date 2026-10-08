@@ -20,6 +20,7 @@ dependencies:
   # Senza, qualche widget di Material mostra quadrati vuoti nei menu di selezione del
   # testo. Vedi apps/trashcan/pubspec.yaml.
   cupertino_icons: ^1.0.8
+  device_calendar_plus: ^0.10.1
   drift: ^2.35.0
   flutter:
     sdk: flutter
@@ -27,6 +28,7 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^3.4.3
   go_router: ^18.0.1
+  home_widget: ^0.9.4
   intl: ^0.20.3
   meta: ^1.19.0
   micro_core:

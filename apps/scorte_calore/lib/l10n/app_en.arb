@@ -315,5 +315,282 @@
     }
   },
   "settings_proActive": "Scorte Calore Pro is active",
-  "settings_proCta": "Discover Scorte Calore Pro"
+  "settings_proCta": "Discover Scorte Calore Pro",
+  "calendar_add": "Add to calendar",
+  "calendar_inCalendar": "In your calendar",
+  "calendar_drift": "The estimate has moved: the event still says {date}.",
+  "@calendar_drift": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "calendar_update": "Update event",
+  "calendar_remove": "Remove from calendar",
+  "calendar_pick": "Which calendar?",
+  "calendar_added": "Added to your calendar on {date}",
+  "@calendar_added": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "calendar_updated": "Event moved to {date}",
+  "@calendar_updated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "calendar_removed": "Removed from your calendar",
+  "calendar_denied": "Scorte Calore can’t use the calendar. Allow it in the phone’s settings.",
+  "calendar_none": "There’s no calendar to write in on this phone.",
+  "calendar_failed": "The calendar didn’t respond. Try again.",
+  "calendar_eventTitle": "Reorder {fuel} · {source}",
+  "@calendar_eventTitle": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "calendar_eventBody": "Estimated to last until {date}. Created by Scorte Calore.",
+  "@calendar_eventBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "data_title": "Your data",
+  "csv_export": "Export to a spreadsheet",
+  "csv_exportBody": "Readings and purchases of every heat source, as a CSV file that opens in Excel.",
+  "csv_subject": "Scorte Calore - readings and purchases",
+  "csv_kind": "Type",
+  "csv_kindMeasurement": "Reading",
+  "csv_kindPurchase": "Purchase",
+  "csv_source": "Heat source",
+  "csv_date": "Date",
+  "csv_quantity": "Quantity",
+  "csv_unit": "Unit",
+  "csv_reading": "Gauge reading %",
+  "csv_cost": "Cost (€)",
+  "csv_supplier": "Supplier",
+  "csv_note": "Note",
+  "backup_create": "Back up everything",
+  "backup_createBody": "Heat sources, readings and purchases in one file, to keep or move to a new phone. Calendar reminders stay out: set them again after restoring.",
+  "backup_createFailed": "The backup could not be created. Try again.",
+  "backup_subject": "Scorte Calore backup",
+  "backup_restore": "Restore from a backup",
+  "backup_restoreBody": "Bring back the data from a file made with “Back up everything”.",
+  "backup_restoreTitle": "What to do with this backup?",
+  "backup_restoreSummary": "Heat sources: {sources} · readings: {measurements} · purchases: {purchases}.",
+  "@backup_restoreSummary": {
+    "placeholders": {
+      "sources": {
+        "type": "int"
+      },
+      "measurements": {
+        "type": "int"
+      },
+      "purchases": {
+        "type": "int"
+      }
+    }
+  },
+  "backup_modeReplace": "Replace everything",
+  "backup_modeReplaceBody": "What’s on this phone now is deleted and replaced by the backup.",
+  "backup_modeMerge": "Add to what I have",
+  "backup_modeMergeBody": "Heat sources with the same name as one already here are skipped.",
+  "backup_restored": "Backup restored",
+  "backup_failed": "That file isn’t a Scorte Calore backup, or it’s damaged.",
+  "notif_channelName": "Reorder reminders",
+  "notif_channelDescription": "When to reorder fuel, and when the reorder date has passed",
+  "notif_reorderTitle": "{source}: time to reorder",
+  "@notif_reorderTitle": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_reorderBody": "{fuel} could run out {days, plural, =0{today} =1{in about 1 day} other{in about {days} days}}. About {amount} left.",
+  "@notif_reorderBody": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_overdueTitle": "{source}: reorder date passed",
+  "@notif_overdueTitle": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_overdueBody": "You’ve passed the expected reorder date ({fuel}). If you’ve already refilled, update the stock and the estimate starts again from there.",
+  "@notif_overdueBody": {
+    "placeholders": {
+      "fuel": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_notifTitle": "Reorder reminders",
+  "settings_notifBody": "A notification on the day to reorder, and another if the date passes without an update.",
+  "settings_notifDenied": "Notifications are blocked for Scorte Calore. Allow them in the phone’s settings.",
+  "history_title": "History",
+  "history_open": "History and charts",
+  "history_empty": "No readings yet.",
+  "history_refillDelta": "+{amount} · refill",
+  "@history_refillDelta": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "history_gauge": "gauge {reading}%",
+  "@history_gauge": {
+    "placeholders": {
+      "reading": {
+        "type": "String"
+      }
+    }
+  },
+  "history_deleted": "Reading deleted",
+  "history_undo": "Undo",
+  "history_freeLimitTitle": "The free plan shows the last {days} days",
+  "@history_freeLimitTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "history_freeLimitBody": "{count, plural, =1{1 older reading is kept: you’ll see it with Pro.} other{{count} older readings are kept: you’ll see them with Pro.}}",
+  "@history_freeLimitBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "history_purchases": "Purchases and costs",
+  "history_purchasesHint": "Average price, spending per winter",
+  "chart_stockTitle": "Stock over time",
+  "chart_rateTitle": "Daily use between readings",
+  "chart_refill": "Refill",
+  "chart_reading": "Reading",
+  "chart_estimate": "Current estimate",
+  "chart_notEnough": "The charts appear after two readings.",
+  "chart_lockedTitle": "Charts",
+  "chart_lockedBody": "See how your stock goes down and compare one winter with the next.",
+  "chart_stockSemantics": "Stock chart, {count} readings from {from} to {to}",
+  "@chart_stockSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "chart_rateSemantics": "Daily use chart, {count} intervals",
+  "@chart_rateSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "purchase_title": "Purchases",
+  "purchase_add": "Add purchase",
+  "purchase_newTitle": "New purchase",
+  "purchase_editTitle": "Purchase",
+  "purchase_date": "Date",
+  "purchase_quantity": "Quantity",
+  "purchase_cost": "Total cost",
+  "purchase_costHelp": "Optional. Leave it empty if you don’t know it.",
+  "purchase_supplier": "Supplier",
+  "purchase_note": "Note",
+  "purchase_saved": "Purchase saved",
+  "purchase_deleted": "Purchase deleted",
+  "purchase_undo": "Undo",
+  "purchase_empty": "No purchases yet. Add the next delivery to see what keeping warm costs you.",
+  "purchase_noCost": "no cost",
+  "costs_seasonSpent": "SPENT IN WINTER {season}",
+  "@costs_seasonSpent": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      }
+    }
+  },
+  "costs_perUnit": "{price}/{unit}",
+  "@costs_perUnit": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "costs_averagePrice": "Average price",
+  "costs_seasonQuantity": "Bought in the winter",
+  "costs_uncosted": "{count, plural, =1{1 purchase without a cost is not counted.} other{{count} purchases without a cost are not counted.}}",
+  "@costs_uncosted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "costs_seasonRule": "A winter runs from 1 October to 31 March.",
+  "costs_seasonsTitle": "WINTER BY WINTER",
+  "costs_seasonName": "Winter {season}",
+  "@costs_seasonName": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      }
+    }
+  },
+  "widget_title": "HEATING STOCK",
+  "widget_runsOutToday": "Runs out today",
+  "widget_reorderBy": "Reorder by {date}",
+  "@widget_reorderBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "widget_reorderNow": "Reorder now",
+  "widget_needMore": "Needs another reading",
+  "widget_empty": "Open Scorte Calore to add a heat source",
+  "widget_addTitle": "Put the widget on the home screen",
+  "widget_addBody": "Days left and the reorder date, without opening the app.",
+  "widget_addUnsupported": "This launcher can’t add widgets by itself. Touch and hold the home screen and look for Scorte Calore.",
+  "widget_addIos": "Touch and hold the Home Screen, tap + at the top and look for Scorte Calore."
 }

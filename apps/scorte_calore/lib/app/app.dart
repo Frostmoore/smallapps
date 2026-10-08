@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,10 +7,14 @@ import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../features/common/pro_gate.dart';
+import '../features/history/history_page.dart';
 import '../features/home/home_page.dart';
+import '../features/purchases/purchases_page.dart';
 import '../features/settings/settings_page.dart';
 import '../features/sources/source_editor_page.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../services/notification_providers.dart';
+import '../services/widget_sync.dart';
 import 'locale_resolution.dart';
 import 'providers.dart';
 import 'routes.dart';
@@ -37,6 +43,19 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
       path: Routes.sourceEdit,
       builder: (_, s) => SourceEditorPage(sourceId: int.tryParse(s.pathParameters['sourceId'] ?? '')),
     ),
+    GoRoute(
+      path: Routes.history,
+      builder: (_, s) => HistoryPage(sourceId: int.tryParse(s.pathParameters['sourceId'] ?? '') ?? -1),
+    ),
+    // ☠ Protetta sulla pagina (ProGate), non solo da `openPurchases`: un deep link non passa
+    // dalla porta col paywall.
+    GoRoute(
+      path: Routes.purchases,
+      builder: (_, s) => ProGate(
+        feature: FeatureKey.statistics,
+        child: PurchasesPage(sourceId: int.tryParse(s.pathParameters['sourceId'] ?? '') ?? -1),
+      ),
+    ),
   ],
   // Senza una fonte configurata non c'e' niente da mostrare: si parte dal primo avvio.
   redirect: (_, state) {
@@ -57,17 +76,40 @@ class ScorteCaloreApp extends ConsumerStatefulWidget {
 class _ScorteCaloreAppState extends ConsumerState<ScorteCaloreApp> {
   late final GoRouter _router = buildRouter(ref);
   AppLifecycleListener? _lifecycle;
+  StreamSubscription<String>? _taps;
 
   @override
   void initState() {
     super.initState();
     // "Oggi" si ricalcola tornando in primo piano: l'autonomia si conta in giorni.
-    _lifecycle = AppLifecycleListener(onResume: () => ref.invalidate(todayProvider));
+    // Tornando in primo piano si ripianificano anche le notifiche: le date di riordino
+    // dipendono da "oggi".
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        ref.invalidate(todayProvider);
+        unawaited(ref.read(scorteSchedulerProvider).rescheduleAll());
+      },
+    );
+    // Il tocco su una notifica (ad app aperta o che la fa partire) apre il suo percorso.
+    ref.listenManual(notificationServiceProvider, (_, next) {
+      final service = next.value;
+      if (service == null || _taps != null) return;
+      _taps = service.taps.listen(_openPayload);
+      final launch = service.consumeLaunchPayload();
+      if (launch != null) _openPayload(launch);
+    }, fireImmediately: true);
+  }
+
+  /// ☠ Il payload oggi e' la home: senza il controllo la home finirebbe due volte nella pila.
+  void _openPayload(String payload) {
+    _router.go(Routes.home);
+    if (payload != Routes.home) unawaited(_router.push(payload));
   }
 
   @override
   void dispose() {
     _lifecycle?.dispose();
+    unawaited(_taps?.cancel());
     _router.dispose();
     super.dispose();
   }
@@ -75,6 +117,11 @@ class _ScorteCaloreAppState extends ConsumerState<ScorteCaloreApp> {
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(appConfigProvider);
+    // Widget e notifiche seguono i dati da soli (widget_sync.dart, notification_providers.dart).
+    ref
+      ..watch(widgetSyncProvider)
+      ..watch(widgetRefreshProvider)
+      ..watch(notificationSyncProvider);
     return MaterialApp.router(
       title: config.appName,
       debugShowCheckedModeBanner: false,

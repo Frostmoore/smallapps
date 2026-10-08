@@ -6,6 +6,10 @@
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>NSCalendarsUsageDescription</key>
+		<string>Scorte Calore adds the reorder date of your heat sources to the calendar you choose, and moves or removes that event only when you ask.</string>
+		<key>NSCalendarsFullAccessUsageDescription</key>
+		<string>Scorte Calore adds the reorder date of your heat sources to the calendar you choose, and moves or removes that event only when you ask.</string>
 		<key>CFBundleDisplayName</key>
 		<string>Scorte Calore</string>
 		<key>CFBundleExecutable</key>

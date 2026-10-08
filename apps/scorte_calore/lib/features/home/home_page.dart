@@ -16,6 +16,7 @@ import '../../app/scorte_palette.dart';
 import '../../data/database.dart';
 import '../../domain/consumption.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../calendar/calendar_reminder_bar.dart';
 import '../stock/update_sheet.dart';
 
 /// La home "A · Brace" (scelta del proprietario, 2026-10-07).
@@ -33,7 +34,10 @@ class HomePage extends ConsumerWidget {
     final p = ScortePalette.of(context);
     final sources = ref.watch(sourcesProvider).value ?? const <FuelSource>[];
     final hero = ref.watch(heroSourceProvider);
-    final others = [for (final s in sources) if (s.id != hero?.id) s];
+    final others = [
+      for (final s in sources)
+        if (s.id != hero?.id) s
+    ];
 
     // La testata e' blu notte: icone chiare nella barra di stato anche nel tema chiaro.
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -51,7 +55,8 @@ class HomePage extends ConsumerWidget {
                   if (others.isNotEmpty) ...[
                     Text(
                       l.home_otherSources,
-                      style: TextStyle(fontSize: 12, letterSpacing: 1.4, fontWeight: FontWeight.w700, color: p.inkMuted),
+                      style:
+                          TextStyle(fontSize: 12, letterSpacing: 1.4, fontWeight: FontWeight.w700, color: p.inkMuted),
                     ),
                     const SizedBox(height: 12),
                     for (final s in others) ...[_SourceRow(source: s), const SizedBox(height: 10)],
@@ -139,7 +144,8 @@ class _Hero extends ConsumerWidget {
                       etichetta,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, letterSpacing: 1.4, fontWeight: FontWeight.w700, color: p.emberLabel),
+                      style:
+                          TextStyle(fontSize: 12, letterSpacing: 1.4, fontWeight: FontWeight.w700, color: p.emberLabel),
                     ),
                     const SizedBox(height: 2),
                     if (hasData)
@@ -150,6 +156,13 @@ class _Hero extends ConsumerWidget {
                   ],
                 ),
               ),
+              // Storico e grafici (F5.9); da li' si arriva anche ad acquisti e costi (F5.11).
+              _NightButton(
+                tooltip: l.history_open,
+                icon: Icons.history,
+                onPressed: () => context.push(Routes.historyOf(source.id)),
+              ),
+              const SizedBox(width: 8),
               _NightButton(
                 tooltip: l.common_edit,
                 icon: Icons.tune,
@@ -170,7 +183,8 @@ class _Hero extends ConsumerWidget {
               children: [
                 Text(
                   '${e.daysRemaining ?? 0}',
-                  style: TextStyle(fontSize: 92, height: 0.85, fontWeight: FontWeight.w800, letterSpacing: -3, color: p.ember),
+                  style: TextStyle(
+                      fontSize: 92, height: 0.85, fontWeight: FontWeight.w800, letterSpacing: -3, color: p.ember),
                 ),
                 const SizedBox(width: 14),
                 Padding(
@@ -207,7 +221,8 @@ class _Hero extends ConsumerWidget {
               child: Row(
                 children: [
                   if (e.percentRemaining != null) Expanded(child: Text(l.home_fromRefill(e.percentRemaining!))),
-                  if (e.dailyRate != null) Text(l.home_perDay(formatAmount(l, source.unit, e.dailyRate!, minDecimals: 1))),
+                  if (e.dailyRate != null)
+                    Text(l.home_perDay(formatAmount(l, source.unit, e.dailyRate!, minDecimals: 1))),
                 ],
               ),
             ),
@@ -217,26 +232,34 @@ class _Hero extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(color: p.nightRaised, borderRadius: BorderRadius.circular(16)),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.event_outlined, color: p.badge, size: 22),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        style: TextStyle(fontSize: 15, color: p.onNight),
-                        children: [
+                  Row(
+                    children: [
+                      Icon(Icons.event_outlined, color: p.badge, size: 22),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text.rich(
                           TextSpan(
-                            text: e.reorderDate!.isBefore(today)
-                                ? l.home_reorderBoxPast(_day(context, e.reorderDate!))
-                                : l.home_reorderBox(_day(context, e.reorderDate!)),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                            style: TextStyle(fontSize: 15, color: p.onNight),
+                            children: [
+                              TextSpan(
+                                text: e.reorderDate!.isBefore(today)
+                                    ? l.home_reorderBoxPast(_day(context, e.reorderDate!))
+                                    : l.home_reorderBox(_day(context, e.reorderDate!)),
+                                style: const TextStyle(fontWeight: FontWeight.w700),
+                              ),
+                              if (e.depletionDate != null)
+                                TextSpan(text: ' · ${l.home_runsOutShort(_day(context, e.depletionDate!))}'),
+                            ],
                           ),
-                          if (e.depletionDate != null) TextSpan(text: ' · ${l.home_runsOutShort(_day(context, e.depletionDate!))}'),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
+                  // L'evento nel calendario del telefono (F5.10, Pro).
+                  CalendarReminderBar(source: source, reorderDate: e.reorderDate!, depletionDate: e.depletionDate),
                 ],
               ),
             ),
@@ -310,11 +333,11 @@ class _SourceRow extends ConsumerWidget {
     final detail = !hasData
         ? l.home_needMore
         : e.dailyRate == null
-        ? formatAmount(l, source.unit, e.currentQuantity)
-        : l.home_rowDetail(
-            formatAmount(l, source.unit, e.currentQuantity),
-            formatAmount(l, source.unit, e.dailyRate!, minDecimals: 1),
-          );
+            ? formatAmount(l, source.unit, e.currentQuantity)
+            : l.home_rowDetail(
+                formatAmount(l, source.unit, e.currentQuantity),
+                formatAmount(l, source.unit, e.dailyRate!, minDecimals: 1),
+              );
 
     return Material(
       color: p.card,

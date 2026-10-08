@@ -18,6 +18,14 @@ abstract final class Routes {
   static const String sourceEdit = '/sources/:sourceId/edit';
   static String sourceEditOf(int id) => '/sources/$id/edit';
 
+  /// Lo storico delle misure di una fonte, con i grafici (F5.9; grafici Pro).
+  static const String history = '/sources/:sourceId/history';
+  static String historyOf(int id) => '/sources/$id/history';
+
+  /// Acquisti e costi di una fonte (F5.11, Pro: la rotta e' avvolta in `ProGate`).
+  static const String purchases = '/sources/:sourceId/purchases';
+  static String purchasesOf(int id) => '/sources/$id/purchases';
+
   /// Schema dei deep link che arrivano dalle notifiche e dal widget.
   static const String scheme = 'scortecalore';
 }

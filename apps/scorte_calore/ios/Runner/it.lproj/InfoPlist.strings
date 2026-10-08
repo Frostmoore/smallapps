@@ -1,0 +1,5 @@
+/* Testi dei permessi in italiano (F5.10). Le chiavi sono quelle di Info.plist, dove
+   restano i testi inglesi di ripiego. */
+"CFBundleDisplayName" = "Scorte Calore";
+"NSCalendarsUsageDescription" = "Scorte Calore aggiunge la data di riordino delle tue fonti di calore al calendario che scegli, e sposta o toglie quell’evento solo quando lo chiedi tu.";
+"NSCalendarsFullAccessUsageDescription" = "Scorte Calore aggiunge la data di riordino delle tue fonti di calore al calendario che scegli, e sposta o toglie quell’evento solo quando lo chiedi tu.";

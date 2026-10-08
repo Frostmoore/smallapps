@@ -6,6 +6,12 @@
     <!-- Notifiche di riordino (F5.8, Pro). Gli allarmi non sopravvivono al riavvio: senza questo
          permesso e il receiver qui sotto, dopo un riavvio le notifiche smettono di arrivare. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <!-- L'evento di riordino nel calendario del telefono (F5.10, Pro, facoltativo). Lettura
+         compresa: per spostare o togliere l'evento bisogna ritrovarlo. ☠ Solo in Scorte Calore:
+         Play chiede di giustificarli nella scheda, e nelle altre app non servono. -->
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
     <application
         android:label="Scorte Calore"
         android:name="${applicationName}"
@@ -41,6 +47,33 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Il widget (F5). Vedi ScorteCaloreWidgetProvider.kt. exported="true": APPWIDGET_UPDATE
+             lo manda il sistema, che e' un'altra app. -->
+        <receiver
+            android:name=".ScorteCaloreWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/scorte_calore_widget_info" />
+        </receiver>
+
+        <!-- ☠ Senza questo receiver l'allarme delle 00:05 scatta e non arriva a nessuno: il widget
+             resterebbe ai giorni di ieri (lezione di TrashCan). -->
+        <receiver
+            android:name="es.antonborri.home_widget.HomeWidgetScheduledUpdateReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.SCHEDULED_UPDATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Senza questi due receiver il plugin delle notifiche pianifica senza errori e la
              notifica non arriva mai (trappola gia' disinnescata in TrashCan). -->
         <receiver android:exported="false"

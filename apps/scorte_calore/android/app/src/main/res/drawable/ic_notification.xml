@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  L'icona della barra di stato: una fiamma, in silhouette.
+
+  Android ne usa solo il canale alfa e la ridisegna in bianco: niente colori, niente
+  sfumature. A 24dp i dettagli spariscono, quindi una fiamma piena con una lingua interna
+  ritagliata (evenOdd), che resta leggibile anche a 16px.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M12,1.5 C12.6,4.6 14.4,6.6 16.2,8.6 C18,10.6 19.5,12.6 19.5,15.2 C19.5,19.4 16.2,22.5 12,22.5 C7.8,22.5 4.5,19.4 4.5,15.2 C4.5,12.4 6,10.3 7.6,8.8 C7.7,10.6 8.4,11.9 9.6,12.6 C9.3,8.6 10.4,4.6 12,1.5 Z M12,12.2 C11.2,14.2 9.4,15.4 9.4,17.6 C9.4,19.1 10.6,20.2 12,20.2 C13.4,20.2 14.6,19.1 14.6,17.6 C14.6,15.6 13,14.4 12,12.2 Z" />
+</vector>

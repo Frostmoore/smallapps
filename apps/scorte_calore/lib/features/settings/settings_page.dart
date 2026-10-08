@@ -3,16 +3,19 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:micro_core/micro_core.dart';
 
 import '../../app/entitlement.dart';
 import '../../app/paywall_config.dart';
 import '../../app/providers.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../services/scorte_widget.dart';
+import 'data_section.dart';
+import 'notifications_section.dart';
 
-/// Le impostazioni essenziali: il Pro, il ripristino dell'acquisto, il tema.
-///
-/// Le voci di notifiche, calendario, dati e widget arrivano con le loro sottofasi.
+/// Le impostazioni: il Pro, le notifiche, il widget, i dati, il ripristino dell'acquisto, il
+/// tema.
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
@@ -38,10 +41,21 @@ class SettingsPage extends ConsumerWidget {
           // ⚑ Ogni parte dell'app aggiunge la sua sezione con UNA riga qui, scritta in un file
           // suo (features/settings/*_section.dart): notifiche, calendario, dati, widget.
           const Divider(),
+          const NotificationsSection(),
+          if (ScorteWidget.available)
+            ListTile(
+              leading: const Icon(Icons.widgets_outlined),
+              title: Text(l.widget_addTitle),
+              subtitle: Text(l.widget_addBody),
+              onTap: () => unawaited(_pinWidget(context, l)),
+            ),
+          const DataSection(),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.restore),
             title: Text(l.paywall_restore),
-            subtitle: Text(defaultTargetPlatform == TargetPlatform.iOS ? l.settings_restoreApple : l.settings_restoreGoogle),
+            subtitle:
+                Text(defaultTargetPlatform == TargetPlatform.iOS ? l.settings_restoreApple : l.settings_restoreGoogle),
             onTap: () async {
               final service = ref.read(entitlementProvider.notifier).service;
               final result = await service.restorePurchases();
@@ -91,4 +105,20 @@ class SettingsPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Su Android chiede al launcher di aggiungere il widget; dove non si puo' (iOS, launcher
+/// vecchi) spiega come farlo a mano. Il widget e' gratuito (ADR-019).
+Future<void> _pinWidget(BuildContext context, L l) async {
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    MicroSnack.show(context, l.widget_addIos);
+    return;
+  }
+  final supported = await HomeWidget.isRequestPinWidgetSupported() ?? false;
+  if (!context.mounted) return;
+  if (!supported) {
+    MicroSnack.show(context, l.widget_addUnsupported);
+    return;
+  }
+  await HomeWidget.requestPinWidget(qualifiedAndroidName: ScorteWidget.androidName);
 }
