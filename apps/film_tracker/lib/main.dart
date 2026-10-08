@@ -8,6 +8,7 @@ import 'app/locale_resolution.dart';
 import 'app/providers.dart';
 import 'data/database.dart';
 import 'dev/demo_data.dart';
+import 'dev/demo_photos.dart';
 
 /// L'avvio di Film Tracker: il minimo indispensabile (configurazione, cartelle, preferenze).
 ///
@@ -42,6 +43,8 @@ Future<void> main() async {
       kSupportedLocales,
     );
     await seedDemoData(db, english: lingua.languageCode != 'it');
+    // Le foto dell'archivio, disegnate: il foglio provini e gli screenshot degli store.
+    await seedDemoPhotos(db, ImageStore(paths: paths));
     await db.close();
   }
 
