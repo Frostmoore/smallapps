@@ -31,6 +31,10 @@ Come si rifanno:
 3. `python tool/genera_grafiche_store.py`.
 4. Video: `tool/anteprima_app_store.sh` sul Mac, copia del `.mov` in `video/`, `pwsh tool/converti_anteprima.ps1`.
 
+☠ **TestFlight: aggiungere il tester al gruppo interno NON manda l'invito.** Va mandato a parte
+con `POST /v1/betaTesterInvitations` (app + tester): senza, la build e' "in test" ma al
+proprietario non arriva niente (dimenticato con Scorte Calore il 2026-10-08).
+
 ☠ Spazio obbligatorio = **6,5"**: Apple rifiuta le 6,9" trascinate li' (lezione di TrashCan).
 **Niente iPad**: l'app e' solo iPhone (`TARGETED_DEVICE_FAMILY = 1`); su iPad gira in compatibilita'.
 
