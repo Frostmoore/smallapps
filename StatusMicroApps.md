@@ -17,7 +17,7 @@ Ultimo aggiornamento: **2026-10-08**
 |---|---|---|---|---|
 | **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
 | **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
-| **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 **scheda completa e build 1 su TestFlight** (2026-10-08), da inviare | card grigia «In arrivo» |
+| **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 
 Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubblicata in parte ·
@@ -137,9 +137,10 @@ iPhone, widget compreso. Nessuna build caricata su nessuno store.
 - **Prodotto** `scortecalore_pro_lifetime` creato via API: non consumabile, 2,99 € (base Italia),
   tutti i paesi, testi it/en-GB, screenshot per la revisione.
 - **Build 1.0.0 (1)** caricata su TestFlight; gruppo interno «Sviluppatore» col proprietario.
-- **A mano, prima di inviare**: Intestazione e Risultati della ricerca (file sulla Scrivania del
-  Mac, `ScorteCalore-AppStore/`), etichetta privacy «Dati non raccolti», classificazione per
-  eta', scegliere la build e spuntare l'acquisto in-app nella pagina della versione.
+- Fatti a mano dal proprietario: Intestazione e Risultati della ricerca, etichetta privacy,
+  classificazione per eta', acquisto in-app spuntato. Build collegata alla versione via API.
+- **2026-10-08: inviata alla revisione.** Versione 1.0.0 e `scortecalore_pro_lifetime` in
+  WAITING_FOR_REVIEW (verificato via API).
 
 ### Google Play
 
