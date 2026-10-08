@@ -21,15 +21,15 @@ import '../domain/quantity_converter.dart';
 ///
 /// ☠ **I promemoria del calendario (`calendar_reminders`) restano fuori di proposito.** La riga
 /// contiene l'id di un evento e di un calendario che esistono **solo sul telefono dove sono
-/// stati creati** (`device_calendar`): portata su un altro telefono punterebbe al nulla, o
+/// stati creati** (`device_calendar_plus`): portata su un altro telefono punterebbe al nulla, o
 /// peggio a un evento di un altro calendario con lo stesso id, e l'app lo aggiornerebbe o lo
 /// cancellerebbe. Dopo il ripristino il promemoria si rimette dalla fonte.
 ///
-/// ☠ Conseguenza da ricordare per chi scrive il calendario (F5.10): "sostituisci tutto"
-/// cancella le fonti, e con loro (cascade) le righe di `calendar_reminders`, ma **non** gli
-/// eventi nel calendario del telefono, che restano orfani. Chi chiama [importPayload] con
-/// `ImportMode.replaceAll` su un telefono che ha promemoria dovrebbe prima toglierli con
-/// `CalendarSyncService.deleteEvent` (che al 2026-10-08 non esiste ancora).
+/// ☠ "Sostituisci tutto" cancella le fonti, e con loro (cascade) le righe di
+/// `calendar_reminders`, ma **non** gli eventi nel calendario del telefono. Per non lasciarli
+/// orfani `restoreBackup` (features/settings/data_section.dart) legge i promemoria prima del
+/// ripristino e, se il ripristino riesce, toglie gli eventi con
+/// `CalendarSyncService.deleteEvent`.
 class ScorteBackupSource implements BackupSource {
   const ScorteBackupSource(this.db, {this.clock});
 

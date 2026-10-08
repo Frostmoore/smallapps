@@ -13,8 +13,8 @@ environment:
 # Le versioni delle dipendenze si risolvono con "pwsh tool/fl.ps1 pub add <pacchetto>".
 # Non si scrivono a memoria: un vincolo inventato fa fallire la risoluzione.
 #
-# ⚑ Ogni dipendenza entra con la sottofase che la usa (home_widget col widget, device_calendar
-# con F5.10): una dipendenza aggiunta prima del suo codice e' un plugin nativo in piu' da
+# ⚑ Ogni dipendenza entra con la sottofase che la usa (home_widget col widget,
+# device_calendar_plus con F5.10): una dipendenza aggiunta prima del suo codice e' un plugin nativo in piu' da
 # compilare su due piattaforme senza che nessuno lo stia provando.
 dependencies:
   # Senza, qualche widget di Material mostra quadrati vuoti nei menu di selezione del
@@ -59,8 +59,8 @@ flutter:
   uses-material-design: true
   generate: true
 
-  # ⚑ Per ora lo stesso font di Full Freezer: il piano diceva Sora, ma il carattere si sceglie
-  #   con le proposte grafiche (F5.0 punto 6), dopo l'interfaccia essenziale.
+  # ⚑ Lo stesso font di Full Freezer (il piano diceva Sora): confermato con la scelta della
+  #   grafica "A · Brace" il 2026-10-07 (memory/decisioni.md).
   # Plus Jakarta Sans, font VARIABILE (pesi 200-800 in un file solo), dal repository
   # ufficiale google/fonts insieme alla sua licenza (assets/fonts/OFL.txt, SIL Open Font
   # License 1.1, che ne consente l'uso in app commerciali purche' la licenza sia inclusa).

@@ -132,8 +132,8 @@ class ScorteScheduler implements NotificationScheduler {
   /// alle 10:12 invece che alle 10:00 non cambia niente, e il permesso degli alarm esatti
   /// Play lo contesta a chi non e' una sveglia.
   ///
-  /// ⚑ Il payload e' la home: e' li' che si vede la stima e si aggiorna la scorta. Non
-  /// esiste (ancora) una pagina per fonte a cui portare.
+  /// ⚑ Il payload e' la home: e' li' che si vede la stima e si aggiorna la scorta (lo
+  /// storico per fonte esiste, ma per riordinare serve la stima, non le misure passate).
   @visibleForTesting
   ScheduledNotification toScheduled(PlannedNotification p) {
     final fuel = FuelType.byKey(p.fuelTypeKey);

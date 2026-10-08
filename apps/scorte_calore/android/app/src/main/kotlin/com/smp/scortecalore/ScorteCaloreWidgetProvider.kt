@@ -78,6 +78,9 @@ class ScorteCaloreWidgetProvider : HomeWidgetProvider() {
                     id.detail,
                     if (scaduto) {
                         widgetData.getString(KEY_REORDER_NOW, "").orEmpty()
+                    } else if (campi[3].isEmpty()) {
+                        // Come VistaScorte.swift: senza data niente "Riordina entro il " monco.
+                        ""
                     } else {
                         widgetData.getString(KEY_REORDER_TEMPLATE, "").orEmpty().replace("{d}", campi[3])
                     },

@@ -99,13 +99,13 @@ class ConsumptionEstimate {
   final CivilDate? lastMeasurementDate;
 
   /// La quantita' subito dopo l'ultimo rifornimento (o la prima misurazione, se non ce ne
-  /// sono stati): il "pieno" rispetto a cui l'anello della dashboard misura il residuo
+  /// sono stati): il "pieno" rispetto a cui la barra della dashboard misura il residuo
   /// (F5.6). Null senza misurazioni.
   final double? referenceQuantity;
 
   bool get isActionable => quality != EstimateQuality.insufficient;
 
-  /// Il residuo rispetto all'ultimo rifornimento, 0..1, per `MicroProgressRing`. Null se
+  /// Il residuo rispetto all'ultimo rifornimento, 0..1, per la barra del residuo in testata. Null se
   /// non c'e' un riferimento positivo. Tagliato a 0..1: un'ultima misura piu' alta del
   /// riferimento non esiste (sarebbe a sua volta un rifornimento), ma un arrotondamento si'.
   double? get fractionRemaining {

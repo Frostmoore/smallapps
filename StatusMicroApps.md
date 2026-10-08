@@ -7,7 +7,7 @@
 > `site/src/apps.php`) **solo** quando qui la riga dice «pubblicata» per quello store **e per
 > l'Italia**.
 
-Ultimo aggiornamento: **2026-10-07**
+Ultimo aggiornamento: **2026-10-08**
 
 ---
 
@@ -17,7 +17,7 @@ Ultimo aggiornamento: **2026-10-07**
 |---|---|---|---|---|
 | **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
 | **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
-| **Scorte Calore** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
+| **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 in sviluppo (codice completo, mai caricata) | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 
 Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubblicata in parte ·
@@ -118,7 +118,24 @@ Cosa resta (prima versione era: prima del primo invio, il proprietario deve):
 
 ## Scorte Calore
 
-Non iniziata. Pacchetto previsto `com.smp.scortecalore`, Pro `scortecalore_pro_lifetime`.
+**2026-10-08: codice completo** (F5.1–F5.11), provato sull'emulatore Android e sul simulatore
+iPhone, widget compreso. Nessuna build caricata su nessuno store.
+
+- Android: `com.smp.scortecalore`. Pro `scortecalore_pro_lifetime` a 2,99 € (su Play si scrive
+  **senza IVA**).
+- iOS: `com.smp.scortecalore` + `com.smp.scortecalore.ScorteCaloreWidget`, App Group
+  `group.com.smp.scortecalore`.
+
+Prima del primo invio, da fare dal proprietario:
+
+1. Apple Developer: i due App ID con l'App Group `group.com.smp.scortecalore` agganciato a
+   **entrambi**, poi i profili «MicroApps AppStore <bundle>» (li usa `tool/build_ios.sh`).
+2. App Store Connect: app nuova e prodotto `scortecalore_pro_lifetime` a 2,99 €.
+3. Play Console: app nuova e prodotto. ☠ La scheda deve giustificare `READ_CALENDAR` e
+   `WRITE_CALENDAR` (funzione Pro facoltativa: la data di riordino nel calendario).
+   ☠ Con l'account personale servono i 12 tester per 14 giorni: conviene aspettare il D-U-N-S
+   come per Full Freezer.
+4. Schede, screenshot e grafiche degli store (non ancora fatte).
 
 ## Film Tracker
 

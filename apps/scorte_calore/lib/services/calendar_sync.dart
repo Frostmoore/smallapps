@@ -227,7 +227,8 @@ class CalendarSyncService {
     await _repo.deleteReminder(sourceId);
   }
 
-  /// [forgetSource] per tutte le fonti che hanno un evento.
+  /// [forgetSource] per tutte le fonti che hanno un evento. (Il ripristino di un backup non
+  /// la usa: legge i promemoria prima e toglie gli eventi solo se il ripristino riesce.)
   Future<void> forgetAll() async {
     final all = await _repo.watchReminders().first;
     for (final r in all) {

@@ -167,7 +167,7 @@ class CalendarReminders extends Table {
   /// chiedono: senza, un evento creato non si potrebbe piu' aggiornare ne' cancellare.
   TextColumn get calendarId => text().withLength(min: 1, max: 255)();
 
-  /// L'id dell'evento restituito da `device_calendar`.
+  /// L'id dell'evento restituito da `device_calendar_plus`.
   TextColumn get externalEventId => text().withLength(min: 1, max: 255)();
 
   /// La `reorderDate` con cui l'evento e' stato scritto, `YYYY-MM-DD`. Serve a capire se la

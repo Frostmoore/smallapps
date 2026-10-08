@@ -179,13 +179,22 @@ Future<void> restoreBackup(BuildContext context, WidgetRef ref) async {
   );
   if (mode == null || !context.mounted) return;
 
-  // ☠ "Sostituisci tutto" cancella i promemoria (cascade), non gli eventi nel calendario:
-  //   si tolgono prima, finche' si sa quali sono. Il backup non li riporta (vedi
-  //   ScorteBackupSource), quindi dopo vanno rimessi dalla home.
-  if (mode == ImportMode.replaceAll) await ref.read(calendarSyncProvider).forgetAll();
+  // ☠ "Sostituisci tutto" cancella i promemoria (cascade), non gli eventi nel calendario.
+  //   Si leggono PRIMA (dopo la riga che dice quale evento togliere non c'e' piu') e si
+  //   tolgono DOPO, solo se il ripristino e' riuscito: con un file rotto gli eventi restano.
+  //   Il backup non li riporta (vedi ScorteBackupSource): vanno rimessi dalla home.
+  final orphans = mode == ImportMode.replaceAll
+      ? await ref.read(repositoryProvider).watchReminders().first
+      : const <CalendarReminder>[];
   if (!context.mounted) return;
 
   final restored = await service.restore(file, ScorteBackupSource(ref.read(databaseProvider)), mode: mode);
+  if (restored.isOk) {
+    final calendar = ref.read(calendarSyncProvider);
+    for (final r in orphans) {
+      await calendar.deleteEvent(r.calendarId, r.externalEventId);
+    }
+  }
   if (!context.mounted) return;
   await restored.fold(
     ok: (_) async {

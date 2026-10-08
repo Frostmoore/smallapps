@@ -15,8 +15,8 @@ il monorepo e' la base per tutte le microapp che verranno.
 | **Vetrina** | `site/` | Il sito pubblico su smpmicroapps.it, in italiano e inglese: catalogo, pagina di TrashCan, contatti, pagine legali | `site/codebase_reference.md` |
 | **License Server** | `server/` — **repo separata** | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
 
-> **Stato al 2026-10-07**: esistono e sono aggiornati gli atlanti di `micro_core`, del
-> License Server, di TrashCan, della Vetrina e di Full Freezer. Gli altri vengono creati alla
+> **Stato al 2026-10-08**: esistono e sono aggiornati gli atlanti di `micro_core`, del
+> License Server, di TrashCan, della Vetrina, di Full Freezer e di Scorte Calore. Gli altri vengono creati alla
 > fine della fase che costruisce il rispettivo progetto. Vedi `develop_microapps.md`.
 
 ## A che punto siamo
@@ -28,8 +28,8 @@ il monorepo e' la base per tutte le microapp che verranno.
 | F2 | License Server (Node + Fastify + SQLite), repo separata su Gitea | chiusa, 43 test |
 | **F3** | **TrashCan**, l'app pilota | **chiusa**, 122 test |
 | — | **Vetrina** `smpmicroapps.it` | online, bilingue, con le pagine legali |
-| **F4** | **Full Freezer**, Android e iPhone | **completa nel codice**, 137 test; manca la creazione del prodotto Pro e degli ID sugli store |
-| F5 | Scorte Calore | da fare |
+| **F4** | **Full Freezer**, Android e iPhone | **completa nel codice**, 140 test; App Store in revisione, Play in attesa del D-U-N-S |
+| **F5** | **Scorte Calore**, Android e iPhone | **completa nel codice**, 158 test; mancano grafiche definitive, ID e prodotto sugli store |
 | F6 | Film Tracker | da fare |
 | F7 | Hardening | da fare |
 | F8 | Deploy e pubblicazione | da fare |
@@ -43,6 +43,13 @@ inserimento rapido, a voce e con foto, riempimento stimato, avvisi, storico e st
 categorie personalizzate, CSV e backup, widget su entrambe le piattaforme. Per pubblicarla
 serve che il proprietario crei il prodotto `fullfreezer_pro_lifetime` su Play Console e App
 Store Connect e registri App ID e App Group su Apple.
+
+Scorte Calore e' completa nel codice e provata sull'emulatore Android e sul simulatore
+iPhone: fonti di calore con conversione delle unita' (anche la percentuale del manometro),
+stima del consumo con rilevamento dei rifornimenti, data di riordino, notifiche, storico e
+grafici, acquisti e costi per inverno, evento nel calendario del telefono, CSV e backup,
+widget su entrambe le piattaforme. Interfaccia «A · Brace»; le grafiche definitive si
+scelgono con il proprietario.
 
 ## Repository
 

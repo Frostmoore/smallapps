@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 /// si rinomina il valore dell'enum. Per questo e' scritto a mano e non e' `name`.
 ///
 /// I nomi visibili ("Pellet", "GPL"...) NON stanno qui: il dominio porta solo chiavi, i testi
-/// li risolve la UI dagli ARB (`fuelType_<key>`), cosi' il dominio resta Dart puro e
+/// li risolve la UI dagli ARB (`fuel_<key>`, vedi `fuelName` in lib/app/labels.dart), cosi' il dominio resta Dart puro e
 /// traducibile senza toccarlo.
 enum FuelType {
   pellet('pellet', defaultUnitKey: FuelUnits.bags),
@@ -57,7 +57,7 @@ enum FuelType {
 ///
 /// ⚑ Rispetto alla firma del piano mancano `label` e `shortLabel` **di proposito**: niente
 /// stringhe localizzate nel dominio. "sacchi"/"bags" e "sacchi"/"sacco" (plurali) li risolve
-/// la UI dagli ARB con la chiave (`fuelUnit_<key>`, `fuelUnitShort_<key>`); una stringa
+/// la UI dagli ARB con la chiave (`unit_<key>`, vedi `unitName` in lib/app/labels.dart); una stringa
 /// italiana fissa qui finirebbe tale e quale nell'app inglese.
 @immutable
 class FuelUnit {
