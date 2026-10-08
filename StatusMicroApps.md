@@ -15,7 +15,7 @@ Ultimo aggiornamento: **2026-10-08**
 
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
-| **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
+| **TrashCan** | 1.0.0 (11) | 🟢 **pubblicata** (2026-10-08) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store»): si accendono insieme quando c'e' anche iOS in Italia |
 | **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
@@ -43,8 +43,11 @@ Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubbl
 | 2026-09 | Test chiuso: 14 giorni con 12 tester completati |
 | entro 2026-10-06 | Inviata in **produzione** con la **build 11** (confermato dal proprietario) |
 | 2026-10-06 | Stato: **in revisione** |
+| 2026-10-08 | **Pubblicata, disponibile su Google Play** (comunicato dal proprietario; scheda raggiungibile dall'Italia, HTTP 200) |
 
 **Per accendere il pulsante sul sito:** app visibile su Play dall'Italia → `suPlay => true`.
+⚑ **Decisione del 2026-10-08:** il pulsante Play di TrashCan si accende **insieme** a quello
+App Store, quando l'app e' disponibile anche su iOS in Italia (vedi `memory/decisioni.md`).
 
 ### App Store
 
@@ -56,6 +59,7 @@ Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubbl
 | 2026-10-06 | **Approvata**, rilascio automatico: «Pronta per la distribuzione» |
 | 2026-10-06 | In vendita in **148 paesi**; nei **27 paesi UE (Italia compresa)** bloccata con `TRADER_STATUS_NOT_PROVIDED` |
 | 2026-10-07 | Ricontrollato via API: Italia ancora `TRADER_STATUS_NOT_PROVIDED` (verifica DSA di Apple in corso, niente da fare da parte nostra) |
+| 2026-10-08 | Ricontrollato via API: Italia ancora `TRADER_STATUS_NOT_PROVIDED` |
 
 ⏳ **In attesa di Apple:** Business → Conformità → *Normativa sui servizi digitali* =
 «Verifica in corso» (dati inviati il 2026-10-05, niente da cliccare). Quando diventa «Attivo»
