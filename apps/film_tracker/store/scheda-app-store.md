@@ -40,7 +40,7 @@ con `POST /v1/betaTesterInvitations` (lezione di Scorte Calore).
 | Campo | Valore |
 |---|---|
 | Nome (it) | `Film Tracker` |
-| Nome (en-GB) | `Film Tracker` |
+| Nome (en-GB) | `Film Tracker – Roll Diary` (25 su 30): «Film Tracker» in inglese e' gia' di un altro sviluppatore |
 | Sottotitolo (it) | `Diario dei rullini analogici` (28 su 30) |
 | Sottotitolo (en-GB) | `Your analogue film roll diary` (29 su 30) |
 | Categoria principale | **Foto e video** (PHOTO_AND_VIDEO) |

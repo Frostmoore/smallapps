@@ -18,7 +18,7 @@ Ultimo aggiornamento: **2026-10-08**
 | **TrashCan** | 1.0.0 (11) | 🟢 **pubblicata** (2026-10-08) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store»): si accendono insieme quando c'e' anche iOS in Italia |
 | **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
-| **Film Tracker** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 in sviluppo (codice completo, mai caricata) | card grigia «In arrivo» |
+| **Film Tracker** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 **scheda completa e build 1 su TestFlight** (2026-10-08), da inviare | card grigia «In arrivo» |
 
 Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubblicata in parte ·
 🟢 pubblicata · 🔴 respinta
@@ -159,9 +159,21 @@ iPhone. Nessuna build caricata.
 - Android e iOS: `com.smp.filmtracker` (nessun widget, nessun App Group).
 - Pro `filmtracker_pro_lifetime` a **4,99 €** (decisione del proprietario; su Play 4,09 EUR
   senza IVA).
-- Prossimo passo: la scheda App Store (testi, screenshot, video, intestazione e risultati di
-  ricerca, prodotto Pro), come per Scorte Calore con `tool/scheda_app_store.py`. Serve prima
-  l'App ID `com.smp.filmtracker` e l'app su App Store Connect (proprietario).
+### App Store (2026-10-08)
+
+- App `6820633385`, App ID `com.smp.filmtracker` creati dal proprietario; profilo «MicroApps
+  AppStore com.smp.filmtracker» creato via API.
+- **Via API** (`apps/film_tracker/tool/scheda_app_store.py`): nomi (it «Film Tracker», en-GB
+  «Film Tracker – Roll Diary»: in inglese «Film Tracker» e' di un altro sviluppatore),
+  sottotitoli, categorie Foto e video + Stile di vita, privacy, diritti, disponibilita',
+  gratuita, testi it/en-GB, 5 screenshot 6,5" e video per lingua (COMPLETE), revisione.
+- **Prodotto** `filmtracker_pro_lifetime`: 4,99 € base Italia, tutti i paesi, testi it/en-GB,
+  screenshot di revisione → READY_TO_SUBMIT.
+- **Build 1.0.0 (1)** su TestFlight e collegata alla versione; gruppo «Sviluppatore» col
+  proprietario, invito mandato.
+- **A mano, prima di inviare**: Intestazione e Risultati della ricerca (Scrivania del Mac,
+  `FilmTracker-AppStore/`), etichetta privacy «Dati non raccolti», classificazione per eta',
+  spuntare l'acquisto in-app nella pagina della versione.
 - Play: dopo il D-U-N-S, come Full Freezer e Scorte Calore.
 
 ---

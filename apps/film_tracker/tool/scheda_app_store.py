@@ -33,7 +33,10 @@ APP = '6820633385'
 VERSIONE = '1.0.0'
 VERSIONE_TRASHCAN = 'c682f9c7-cf2a-4f46-9c1f-871adb0be6b3'
 LINGUE = {'it': 'it', 'en-GB': 'en'}
-NOMI = {'it': 'Film Tracker', 'en-GB': 'Film Tracker'}
+# ☠ In inglese "Film Tracker" e' gia' di un altro sviluppatore (409 DUPLICATE.DIFFERENT_ACCOUNT,
+#   2026-10-08, come per Full Freezer): il nome della scheda inglese e' diverso. Sotto l'icona
+#   resta "Film Tracker" (CFBundleDisplayName), questo cambia solo lo store.
+NOMI = {'it': 'Film Tracker', 'en-GB': 'Film Tracker – Roll Diary'}
 
 IAP_ID = 'filmtracker_pro_lifetime'
 IAP_PREZZO = '4.99'
