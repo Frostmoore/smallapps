@@ -1,0 +1,70 @@
+name: film_tracker
+description: Il diario dei tuoi rullini analogici, con le anteprime.
+publish_to: none
+
+# versionName+versionCode. Il versionCode e' monotono crescente e non si riusa mai:
+# Play rifiuta un AAB con un numero gia' visto e quel numero non si libera.
+# Vedi develop_microapps.md §5.4.
+version: 1.0.0+1
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.35.0"
+
+# Le versioni delle dipendenze si risolvono con "pwsh tool/fl.ps1 pub add <pacchetto>".
+# Non si scrivono a memoria: un vincolo inventato fa fallire la risoluzione.
+#
+# ⚑ Ogni dipendenza entra con la sottofase che la usa (image_picker con le foto, qr_flutter
+# col QR, pdf con il riepilogo annuale): una dipendenza aggiunta prima del suo codice e' un plugin nativo in piu' da
+# compilare su due piattaforme senza che nessuno lo stia provando.
+dependencies:
+  # Senza, qualche widget di Material mostra quadrati vuoti nei menu di selezione del
+  # testo. Vedi apps/trashcan/pubspec.yaml.
+  cupertino_icons: ^1.0.8
+  drift: ^2.35.0
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.1
+  intl: ^0.20.3
+  meta: ^1.19.0
+  micro_core:
+    path: ../../packages/micro_core
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  sqlite3: ^3.5.2
+  sqlite3_flutter_libs: ^0.6.0+eol
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
+  shared_preferences: ^2.5.6
+  drift_dev: ^2.35.0
+  build_runner: ^2.16.1
+  # ☠ Tetto all'analyzer usato da build_runner. Con analyzer 14.5.0 la generazione di Drift
+  # muore con "The setter 'contextFeatures' isn't defined for AnalysisOptionsImpl": la 14.5
+  # ha cambiato un'API interna che la catena di generazione usa ancora. TrashCan gira con la
+  # 14.3.0. Si toglie quando la catena supporta la 14.5 (scoperto il 2026-10-06).
+  analyzer: ">=14.0.0 <14.4.0"
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  # ⚑ Per ora lo stesso font di Full Freezer e Scorte Calore: il piano dice Inter + Fraunces,
+  #   ma i caratteri si scelgono con le proposte grafiche (F6.0 punto 6), dopo l'interfaccia
+  #   essenziale.
+  # Plus Jakarta Sans, font VARIABILE (pesi 200-800 in un file solo), dal repository
+  # ufficiale google/fonts insieme alla sua licenza (assets/fonts/OFL.txt, SIL Open Font
+  # License 1.1, che ne consente l'uso in app commerciali purche' la licenza sia inclusa).
+  # I pesi si ottengono con FontVariation in MicroTheme, come per Outfit in TrashCan.
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf

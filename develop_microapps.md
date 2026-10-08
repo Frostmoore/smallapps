@@ -1039,6 +1039,7 @@ tutte fatte e provate sull'emulatore:
 
 ### F6 — Film Tracker → `v8.0.0`
 
+- [x] **F6.0** Decisioni di partenza (vedi §8 F6.0): Android e iPhone, Pro 4,99 €, foto **gratis**, nessun widget, icona del proprietario, tema scuro, interfaccia essenziale prima e proposte grafiche dopo (2026-10-08)
 - [ ] **F6.1** Bootstrap progetto, tema scuro, l10n, router
 - [ ] **F6.2** Data layer Drift: macchine, rullini, sviluppi, stampe, immagini, catalogo pellicole
 - [ ] **F6.3** Macchina a stati del rullino + test
@@ -4517,6 +4518,37 @@ dalla sua anteprima e non dal numero.
 Va per ultima perché è la più costosa (gestione immagini, quattro entità collegate, tema
 scuro curato) e perché a quel punto `micro_core` e la catena di billing sono già collaudate
 da tre app.
+
+### F6.0 — Decisioni di partenza (2026-10-08)
+
+Prese con il proprietario prima di F6.1. Dove contraddicono il resto della fase, vincono queste.
+
+1. **Android e iPhone dal primo commit**, come Full Freezer e Scorte Calore:
+   `flutter create --platforms=android,ios`, `TARGETED_DEVICE_FAMILY = 1`, bundle
+   `com.smp.filmtracker`. Nessun App Group (non c'e' widget). ☠ L'App ID lo registra il
+   proprietario nel portale.
+2. **Prezzo Pro 4,99 €** (proprietario), non i 6,99 € di §1.3. App Store: 4,99 € con base
+   Italia. Play: il prezzo si scrive **senza IVA** → base **4,09 EUR** per avere 4,99 € in
+   Italia. SKU `filmtracker_pro_lifetime` (definitivo, §1.3).
+3. **Foto tutte gratis** (proprietario): copertina, provini, stampe, galleria, zoom. Ribalta
+   F6.9, dove la photo overview era Pro: `FeatureKey.photos` → `open()`. ⚑ L'archivio con le
+   anteprime e' l'identita' dell'app (obiettivo della fase): chiuderlo dietro il Pro
+   renderebbe brutta proprio la versione che deve far conoscere l'app. Il Pro si regge su:
+   macchine multiple (`secondaryEntities`, una gratis), statistiche e costi (`statistics`),
+   PDF annuale (`pdfReport`), CSV (`csvExport`), backup completo (`backupRestore`).
+4. **Nessun widget** (§ "Nessun widget in Scorte Calore e Film Tracker", confermato dal
+   proprietario): niente home_widget, niente estensione iOS, niente App Group.
+5. **Icona dal proprietario** (in Download, come per Scorte Calore): la si ripulisce con
+   `tool/genera_icone.py` e da li' si prendono i colori del tema. Il seme `#E0A458` del piano
+   resta valido finche' l'icona non dice altro.
+6. **Tema scuro di default** (F6.1, invariato) e, come per Scorte Calore, **prima
+   un'interfaccia essenziale, poi 2-3 proposte grafiche** fra cui il proprietario sceglie.
+7. **Trappole gia' pagate** (F5.0 punto 7, valgono tutte): `licenseAppId` senza trattino
+   basso (`filmtracker`), deep link di Flutter spento (qui serve il **nostro** deep link
+   `filmtracker://roll/<n>` del QR, F6.12: va gestito da go_router con
+   `FlutterDeepLinkingEnabled` acceso **oppure** dal plugin `app_links`; decidere in F6.12),
+   `ProGate` sulle pagine Pro, virgolette tipografiche, profili iOS via API, invito TestFlight
+   mandato a parte (`POST /v1/betaTesterInvitations`).
 
 ### F6.1 — Bootstrap
 
