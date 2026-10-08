@@ -123,7 +123,14 @@ for est in "$APP_ARCHIVIATA"/PlugIns/*.appex; do
   nome_est=$(basename "$est" .appex)
   codesign -f -s - --entitlements "ios/$nome_est/$nome_est.entitlements" "$est"
 done
-codesign -f -s - --entitlements ios/Runner/Runner.entitlements "$APP_ARCHIVIATA"
+# ☠ Un'app senza widget (Film Tracker) non ha App Group e quindi nemmeno Runner.entitlements:
+#   prima lo script si fermava qui ("cannot read entitlement data", 2026-10-08). Senza file
+#   la si firma provvisoriamente senza diritti; l'esportazione mette poi quelli del profilo.
+if [ -f ios/Runner/Runner.entitlements ]; then
+  codesign -f -s - --entitlements ios/Runner/Runner.entitlements "$APP_ARCHIVIATA"
+else
+  codesign -f -s - "$APP_ARCHIVIATA"
+fi
 
 # ☠ Il Team ID va messo nelle opzioni di esportazione, e si aggiunge **qui**, non nel file
 #   versionato: archiviando senza firma il team non finisce nei metadati dell'archivio, e
