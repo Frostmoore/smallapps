@@ -133,7 +133,7 @@ Elenco esplicito, per evitare che qualcuno lo cerchi invano o lo aggiunga per in
 - Nessun analytics, nessun crash reporter di terze parti (ADR-016).
 - Nessuna funzione OCR/AI nell'MVP (foto del calendario cartaceo TrashCan: post-MVP).
 
----
+
 ### §1.5 Questa è una piattaforma, non un progetto da quattro app
 
 **MicroApps è la base permanente su cui verranno costruite tutte le microapp future.** Le
@@ -173,6 +173,45 @@ per cui esiste il monorepo. Si applica §8.T, che è la stessa cosa fatta senza 
 dietro il dominio dell'app precedente.
 
 
+
+### §1.6 Le app successive: dieci idee del proprietario (aggiunte il 2026-10-08)
+
+Il 2026-10-08 il proprietario ha consegnato un elenco di idee selezionate
+(`docs/specs/idee-2026-10.md`, copia versionata di `smp_microapps_idee.md` dal suo Desktop) e ha
+deciso: **andranno sviluppate anche queste.** Ognuna prende una fase propria (F10–F19 in §7),
+secondo §1.5. Le spec di prodotto sono, per ora, le poche righe di quel file: **la prima
+sottofase di ogni app (Fx.0) e' scrivere con il proprietario le decisioni di partenza e la
+specsheet completa in §8**, come per F3–F6.
+
+| Fase | App | Problema risolto | applicationId (provvisorio) | Cosa pesa davvero |
+|---|---|---|---|---|
+| F10 | **Te l'ho prestato** | Chi ha cosa e da quanto: oggetti prestati e presi in prestito | `com.smp.prestato` | Nulla di critico: dati locali, notifiche di promemoria (gia' in `micro_core`) |
+| F11 | **Dove l'ho lasciato?** | Dove ho lasciato auto, bici, ombrellone, armadietto: posizione + foto + nota | `com.smp.dovelholasciato` | Posizione **in primo piano** (permesso), mappa o bussola senza servizi a pagamento, foto (come Film Tracker) |
+| F12 | **Quanto sto spendendo?** | Il totale del carrello mentre si fa la spesa, contro un budget | `com.smp.quantospendo` | Inserimento rapidissimo (tastierino, voce come Full Freezer); nessun permesso |
+| F13 | **Quanto dividiamo?** | Dividere un conto: in parti uguali, a quote, per voce, con sconti e mancia | `com.smp.quantodividiamo` | Aritmetica in centesimi con arrotondamenti onesti (`Money`); lettura dello scontrino = OCR (§1.4: fuori dall'MVP salvo decisione) |
+| F14 | **Ricordamelo qui** | Promemoria quando si arriva o si esce da un luogo | `com.smp.ricordamelo` | **Geofencing**: posizione **in background**, permesso sensibile su Play (dichiarazione e video) e su iOS; limiti dei sistemi sul numero di aree |
+| F15 | **Quanti sono?** | Contare oggetti ripetuti con la fotocamera | `com.smp.quantisono` | **Visione on-device** (sperimentale per il proprietario stesso); §1.4 esclude l'AI dall'MVP: serve una decisione |
+| F16 | **Riassumilo** | Riassunto breve di un link o testo condiviso (Share Sheet) | `com.smp.riassumilo` | **Modello di linguaggio** on-device o remoto: costi, privacy, qualita'; §1.4 esclude l'AI dall'MVP: serve una decisione. Estensione di condivisione iOS |
+| F17 | **Fammi un QR** | QR a tutto schermo da qualunque cosa condivisa | `com.smp.fammiunqr` | Ricezione da Share Sheet (intent `SEND` su Android, **Share Extension** su iOS); `qr_flutter` gia' usato in Film Tracker |
+| F18 | **Leggimelo** | Un articolo condiviso letto ad alta voce | `com.smp.leggimelo` | Estrazione del testo principale da una pagina (rete) + sintesi vocale del sistema; Share Extension |
+| F19 | **Dove porta?** | Dove porta davvero un link abbreviato o sospetto, prima di aprirlo | `com.smp.doveporta` | Segue i redirect via rete **senza aprire la pagina**; segnali sospetti (punycode, domini strani); cambia l'informativa privacy ("l'app non parla con nessun server" non vale piu') |
+
+⚑ **Il numero di fase non e' l'ordine di sviluppo.** Le fasi seguono l'ordine del file del
+proprietario; quale si fa per prima lo decide lui. Proposta, dal meno al piu' rischioso:
+F17 Fammi un QR, F13 Quanto dividiamo?, F12 Quanto sto spendendo?, F10 Te l'ho prestato,
+F11 Dove l'ho lasciato?, F19 Dove porta?, F18 Leggimelo, F14 Ricordamelo qui; per ultime
+F15 Quanti sono? e F16 Riassumilo, che richiedono prima di decidere se e come usare l'AI.
+
+☠ **Cose nuove per la piattaforma**, da affrontare **una volta** in `micro_core` alla prima app
+che le chiede, non copiate app per app:
+- **ricezione da Share Sheet** (F16, F17, F18, F19): intent `ACTION_SEND` su Android e un target
+  **Share Extension** su iOS, sul modello di `tool/aggiungi_widget_ios.rb`;
+- **posizione** (F11, F14): permessi in primo piano e in background, con le dichiarazioni che
+  Play e Apple chiedono;
+- **rete dall'app** (F18, F19, forse F16): oggi le app non parlano con nessun server se non per
+  le licenze; l'informativa privacy del sito va aggiornata per quelle app.
+
+---
 
 ## §2 — Decisioni architetturali (ADR)
 
@@ -751,6 +790,7 @@ commit intermedi):
 | F6 Film Tracker | `v8.0.0` |
 | F7 Hardening trasversale | `v9.0.0` |
 | F8 Deploy e pubblicazione | `v10.0.0` |
+| F10–F19 App nuove (§1.6), nell'ordine in cui si chiudono | da `v11.0.0` in su, una versione maggiore per fase |
 
 ⚑ Aggiornata il 2026-10-07: il porting iOS (F9) e' stato fatto dopo TrashCan e ha preso
 `v5.0.0`, quindi tutte le fasi successive scalano di uno.
@@ -1070,6 +1110,37 @@ tutte fatte e provate sull'emulatore:
 - [ ] **F7.7** Informative privacy pubblicate e raggiungibili da URL
 - [ ] **F7.8** Verifica finale dei sei `codebase_reference.md` con `verify_atlas`
 - [ ] **F7.9** Rituale di fine fase F7
+
+### F10–F19 — App nuove (idee del proprietario del 2026-10-08, §1.6)
+
+Ogni app nuova segue le **stesse sottofasi standard**, numerate `Fx.0`–`Fx.9`. Si scrivono qui una
+volta sola; nella fase di ciascuna app si spuntano.
+
+| Sottofase | Cosa | Quando e' chiusa |
+|---|---|---|
+| **Fx.0** | Decisioni di partenza **con il proprietario**: piattaforme, cosa e' gratis e cosa Pro, prezzo, icona (in Download), colori, widget si'/no | scritte in §8 (Fx.0) e in `memory/decisioni.md` |
+| **Fx.1** | Specsheet completa in §8: dati, schermate, limiti, permessi, trappole, come per F3–F6 | un coding agent puo' svilupparla senza fare domande |
+| **Fx.2** | Bootstrap §8.T, icona e splash, `licenseAppId` senza trattino basso | l'app parte sull'emulatore in Android e iOS |
+| **Fx.3** | Dominio e dati, con test | test verdi, dominio senza Flutter |
+| **Fx.4** | Interfaccia essenziale | tutte le funzioni raggiungibili e provate sull'emulatore |
+| **Fx.5** | Pro: limiti, paywall, test di coerenza | `paywall_config_test.dart` verde |
+| **Fx.6** | Proposte grafiche (artifact con 2-3 direzioni), scelta del proprietario applicata | decisione in `memory/decisioni.md` |
+| **Fx.7** | Test, rifinitura, iOS sul simulatore | analisi pulita, testo al 130%, tema scuro |
+| **Fx.8** | Atlante `apps/<nome>/codebase_reference.md` con `verify_atlas` | 0 simboli mancanti |
+| **Fx.9** | Rituale di fine fase **e card «In arrivo» nella vetrina** (poi pagina dedicata all'uscita) | branch di versione nuova |
+
+- [ ] **F10** Te l'ho prestato — `apps/prestato/` (nome della cartella da confermare in F10.0)
+- [ ] **F11** Dove l'ho lasciato? — posizione in primo piano + foto
+- [ ] **F12** Quanto sto spendendo? — contatore della spesa con budget
+- [ ] **F13** Quanto dividiamo? — divisione del conto
+- [ ] **F14** Ricordamelo qui — promemoria per luogo (geofencing, permesso in background)
+- [ ] **F15** Quanti sono? — conteggio con la fotocamera (**decisione sull'AI prima di F15.0**)
+- [ ] **F16** Riassumilo — riassunto da Share Sheet (**decisione sull'AI prima di F16.0**)
+- [ ] **F17** Fammi un QR — QR a tutto schermo da Share Sheet
+- [ ] **F18** Leggimelo — lettura ad alta voce di un articolo condiviso
+- [ ] **F19** Dove porta? — destinazione reale di un link, prima di aprirlo
+- [ ] **Card «In arrivo»** delle dieci app nella vetrina `smpmicroapps.it` (regola: ogni microapp
+  ha la sua card, anche prima di esistere; la pubblicazione del sito la decide il proprietario)
 
 ### F9 — Porting iOS → `v5.0.0`
 
@@ -5087,6 +5158,125 @@ Rilascio graduale (20% → 50% → 100%), monitoraggio di Android Vitals e delle
 la prima settimana, e una versione correttiva pronta.
 
 ### F8.10 — Rituale di fine fase F8 (branch `v10.0.0`)
+
+---
+
+## F10–F19 — App nuove: le idee e le prime valutazioni
+
+Testo del proprietario (`docs/specs/idee-2026-10.md`) e, sotto, quello che gia' si sa dal lato
+tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decisioni `Fx.0`.
+
+### F10 — Te l'ho prestato
+
+> Una micro-app per tenere traccia degli oggetti prestati o presi in prestito. L'utente registra
+> rapidamente oggetto, persona e data, così da sapere sempre chi ha cosa e da quanto tempo.
+
+- Due liste speculari: prestati e presi in prestito; "da quanto" si conta come in Full Freezer
+  (date civili, ADR-008). Promemoria di restituzione: `NotificationService` di `micro_core`.
+- Persona: testo libero, oppure scelta dalla rubrica (permesso contatti: da decidere, si puo'
+  evitare). Foto dell'oggetto: come Film Tracker.
+- Pro possibile: promemoria, foto, storico, backup (da decidere in F10.0).
+
+### F11 — Dove l'ho lasciato?
+
+> Una memoria temporanea basata su posizione, foto e nota. Serve per ricordare dove si è lasciata
+> l'auto, la bici, un ombrellone, una tenda, un armadietto o qualsiasi altra cosa legata a un
+> luogo preciso.
+
+- Posizione **solo in primo piano**, al momento del salvataggio. Ritorno: bussola e distanza
+  calcolate sul telefono, oppure apertura della mappa di sistema (Google Maps / Apple Maps) con
+  le coordinate: niente SDK di mappe a pagamento.
+- Foto e nota come Film Tracker; "temporanea": scadenza automatica dei ricordi.
+- ☠ Al chiuso o sottoterra (parcheggi) il GPS sbaglia di decine di metri: la foto e la nota
+  ("piano -2, colonna B7") contano piu' delle coordinate.
+
+### F12 — Quanto sto spendendo?
+
+> Un contatore rapido per la spesa. Durante gli acquisti si aggiungono i prezzi degli articoli e
+> l'app mostra in tempo reale il totale del carrello, eventualmente confrontandolo con un budget
+> impostato.
+
+- Tastierino numerico grande, una mano sola; quantita' ("x3"); togliere l'ultimo; budget con
+  barra. Importi in centesimi (`Money`). Voce: il parser di Full Freezer e' un buon punto di
+  partenza.
+- Nessun permesso. Widget possibile (totale corrente).
+
+### F13 — Quanto dividiamo?
+
+> Una utility per dividere velocemente un conto tra più persone. Può gestire divisione uguale,
+> quote diverse, singole voci dello scontrino, sconti e mancia, mostrando subito quanto deve
+> pagare ciascuno.
+
+- Il cuore e' **l'arrotondamento**: 100 € in 3 fa 33,33 + 33,33 + 33,34, e chi paga il centesimo
+  va detto. Dominio puro, testato come le statistiche di Film Tracker.
+- Leggere lo scontrino con la fotocamera e' OCR: §1.4 lo esclude dall'MVP. Si parte a mano.
+
+### F14 — Ricordamelo qui
+
+> Un sistema di promemoria basati sulla posizione invece che sull'orario. L'utente può chiedere
+> di ricevere un avviso quando arriva o esce da un determinato luogo, ad esempio casa, ufficio,
+> farmacia o supermercato.
+
+- ☠ **Geofencing = posizione in background**: su Play e' un permesso a dichiarazione obbligatoria
+  (modulo, video, motivazione) e puo' essere respinto; su iOS richiede "Sempre" con i suoi
+  passaggi. Limiti dei sistemi: circa 100 aree su Android, 20 su iOS.
+- "Supermercato" generico (qualunque supermercato) richiederebbe un servizio di luoghi: fuori,
+  salvo decisione; si parte da luoghi scelti dall'utente.
+
+### F15 — Quanti sono?
+
+> Una utility che usa la fotocamera per contare automaticamente oggetti visibili in una scena.
+> Potrebbe essere utile per scatole, bottiglie, componenti, monete o altri elementi ripetuti. Da
+> considerare sperimentale: il riconoscimento potrebbe funzionare male con oggetti sovrapposti,
+> piccoli, riflettenti o disposti in modo irregolare.
+
+- Serve visione artificiale **on-device** (ML Kit / Core ML, o un modello di conteggio): §1.4
+  esclude l'AI dall'MVP, quindi **prima di F15.0 si decide se e come**.
+- Mitigazione da progettare: conteggio assistito (l'utente tocca per aggiungere o togliere i
+  punti trovati), mai un numero dato per certo.
+
+### F16 — Riassumilo
+
+> Una utility da Share Sheet: si condivide un link, un articolo o del testo e l'app restituisce un
+> riassunto breve e leggibile. È un'idea forte, ma richiede un sistema di summarization
+> affidabile, idealmente tramite modello on-device o con un fallback remoto.
+
+- **Decisione sull'AI prima di F16.0**: modello di sistema on-device (dove esiste), oppure un
+  servizio remoto (costi per richiesta, privacy, chiavi lato server: il License Server
+  potrebbe fare da proxy).
+- Prima Share Extension della piattaforma insieme a F17/F18/F19 (§1.6).
+
+### F17 — Fammi un QR
+
+> Si condivide un link, un testo, un indirizzo o un altro contenuto e l'app genera immediatamente
+> un QR code a tutto schermo. Utile per trasferire velocemente informazioni tra dispositivi o
+> mostrarle a un'altra persona senza copiare e incollare.
+
+- La piu' semplice: `qr_flutter` (gia' in Film Tracker), luminosita' al massimo mentre il QR e'
+  mostrato, ricezione da Share Sheet. Buona candidata per **costruire l'infrastruttura di
+  condivisione** che poi servira' a F16, F18, F19.
+
+### F18 — Leggimelo
+
+> Una utility che riceve un articolo o una pagina tramite Share Sheet, ne estrae il contenuto
+> principale e lo legge con il text-to-speech del dispositivo. L'obiettivo è trasformare qualsiasi
+> articolo in una sorta di audiolettura istantanea.
+
+- Estrazione del testo principale (stile "modalita' lettura") scaricando la pagina: rete
+  dall'app; pagine con paywall o caricate da JavaScript non si leggono.
+- Sintesi vocale del sistema, con lettura in background e controlli dalla schermata di blocco.
+
+### F19 — Dove porta?
+
+> Si condivide un link abbreviato o sospetto e l'app mostra la destinazione finale prima di
+> aprirlo. Può seguire la catena dei redirect, mostrare il dominio effettivo ed evidenziare
+> eventuali segnali sospetti come domini strani o punycode.
+
+- Seguire i redirect **senza aprire la pagina** (richieste HEAD/GET senza eseguire nulla,
+  limite al numero di salti), mostrare la catena; segnali: punycode, domini simili a marchi noti,
+  IP al posto del dominio, tanti salti.
+- ☠ La richiesta parte dal telefono: chi ha creato il link vede l'IP. Va detto nell'app e
+  nell'informativa.
 
 ---
 

@@ -24,6 +24,23 @@ Ultimo aggiornamento: **2026-10-08** (stati App Store verificati via API la sera
 | **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
 | **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
 
+**App in programma** (decise il 2026-10-08, fasi F10–F19 di `develop_microapps.md` §1.6): non
+ancora iniziate, quindi ⚪ su **Google Play** e ⚪ su **App Store** per tutte e dieci; card in
+vetrina da aggiungere.
+
+| App | Fase | Google Play | App Store |
+|---|---|---|---|
+| Te l'ho prestato | F10 | ⚪ non iniziata | ⚪ non iniziata |
+| Dove l'ho lasciato? | F11 | ⚪ non iniziata | ⚪ non iniziata |
+| Quanto sto spendendo? | F12 | ⚪ non iniziata | ⚪ non iniziata |
+| Quanto dividiamo? | F13 | ⚪ non iniziata | ⚪ non iniziata |
+| Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
+| Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
+| Riassumilo | F16 | ⚪ non iniziata | ⚪ non iniziata |
+| Fammi un QR | F17 | ⚪ non iniziata | ⚪ non iniziata |
+| Leggimelo | F18 | ⚪ non iniziata | ⚪ non iniziata |
+| Dove porta? | F19 | ⚪ non iniziata | ⚪ non iniziata |
+
 Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in revisione ·
 🟠 pubblicata in parte · 🟢 pubblicata · 🔴 respinta
 

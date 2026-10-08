@@ -33,6 +33,7 @@ il monorepo e' la base per tutte le microapp che verranno.
 | **F6** | **Film Tracker**, Android e iPhone | **completa**, 185 test; App Store in revisione (2026-10-08), Play dopo il D-U-N-S |
 | F7 | Hardening | da fare |
 | F8 | Deploy e pubblicazione | da fare |
+| F10–F19 | **Dieci app nuove** (Te l'ho prestato, Dove l'ho lasciato?, Quanto sto spendendo?, Quanto dividiamo?, Ricordamelo qui, Quanti sono?, Riassumilo, Fammi un QR, Leggimelo, Dove porta?) | da fare, decise il 2026-10-08 (`develop_microapps.md` §1.6) |
 
 TrashCan e' pubblicata: su App Store in vendita in 148 paesi (l'Unione Europea attende la
 verifica DSA di Apple), su Google Play in revisione. Lo stato aggiornato delle build e delle
