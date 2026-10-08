@@ -1,0 +1,5 @@
+/* Permission texts in English: the same as Info.plist, kept here so that both languages
+   live in the same place (F6.9). */
+"CFBundleDisplayName" = "Film Tracker";
+"NSCameraUsageDescription" = "Film Tracker uses the camera only when you photograph a contact sheet, a print or a scan to add it to a roll.";
+"NSPhotoLibraryUsageDescription" = "Film Tracker opens your photos only when you choose the ones to add to a roll.";

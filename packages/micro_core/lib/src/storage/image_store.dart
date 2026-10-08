@@ -164,7 +164,10 @@ class ImageStore {
           createdAt: DateTime.now().toUtc(),
         ),
       );
-    } on Exception catch (error, stack) {
+    } on Object catch (error, stack) {
+      // ☠ `on Object` e non `on Exception`: su un file corrotto il decoder del pacchetto
+      // `image` lancia un *Error* (RangeError), che `on Exception` lasciava uscire e faceva
+      // fallire l'import di tutta la selezione (trovato con Film Tracker, 2026-10-08).
       MicroLog.e('import immagine fallito', error: error, stackTrace: stack);
       return Err(MicroError.unexpected(error, stack));
     }

@@ -24,10 +24,29 @@
 		<!-- Nessuna crittografia oltre a quella del sistema: evita la domanda a ogni build. -->
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
-		<!-- ☠ Deep link di Flutter spento (vedi Full Freezer). Lo schema filmtracker:// del QR del
-		     rullino (F6.12) si dichiara con quella sottofase. -->
+		<!-- ☠ Deep link di Flutter spento (vedi Full Freezer): acceso, Flutter passa l'URI a
+		     go_router come `go` e la pila perde la freccia indietro. Lo schema filmtracker:// del
+		     QR del rullino (F6.12) lo riceve il plugin app_links, e app.dart apre il rullino con
+		     `push` (lib/features/qr/qr_links.dart). -->
 		<key>FlutterDeepLinkingEnabled</key>
 		<false/>
+		<!-- Lo schema del QR del rullino: filmtracker://roll/<n> (F6.12). -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>com.smp.filmtracker</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>filmtracker</string>
+				</array>
+			</dict>
+		</array>
+		<!-- Testi inglesi di ripiego; quelli italiani in it.lproj/InfoPlist.strings (F6.9). -->
+		<key>NSCameraUsageDescription</key>
+		<string>Film Tracker uses the camera only when you photograph a contact sheet, a print or a scan to add it to a roll.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Film Tracker opens your photos only when you choose the ones to add to a roll.</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>

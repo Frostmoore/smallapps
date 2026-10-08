@@ -1,0 +1,110 @@
+"""Testi di sviluppo e stampe (F6.7), macchine (F6.5) e catalogo pellicole (F6.4).
+
+Vedi tool/testi.py, che li raccoglie con tutti gli altri tool/testi_*.py.
+Prefissi: dev_ (sviluppo e campi comuni di laboratorio), print_, camera_, stock_.
+Virgolette tipografiche anche in inglese.
+"""
+
+TESTI = {
+    # ── Campi comuni di laboratorio (lib/features/lab/lab_fields.dart) ──
+    'dev_costInvalid': ('Write an amount, like 12.50', 'Scrivi un importo, come 12,50'),
+    'dev_dateNone': ('Not set', 'Non indicata'),
+    'dev_dateClear': ('Remove date', 'Togli la data'),
+    'dev_saved': ('Saved.', 'Salvato.'),
+    'dev_savedNowExposed': ('Saved. The roll is now marked as finished.', 'Salvato. Il rullino ora risulta terminato.'),
+    'dev_savedNowAtLab': ('Saved. The roll is now at the lab.', 'Salvato. Il rullino ora risulta in laboratorio.'),
+    'dev_savedNowDeveloped': ('Saved. The roll is now developed.', 'Salvato. Il rullino ora risulta sviluppato.'),
+    'dev_savedNowPrinted': ('Saved. The roll is now printed.', 'Salvato. Il rullino ora risulta stampato.'),
+
+    # ── Sviluppo (lib/features/lab/development_page.dart) ──
+    'dev_newTitle': ('Developing', 'Sviluppo'),
+    'dev_editTitle': ('Edit developing', 'Modifica sviluppo'),
+    'dev_selfDeveloped': ('Developed at home', 'Sviluppato in casa'),
+    'dev_selfDevelopedHelp': ('No lab: you did it yourself.', 'Niente laboratorio: l’hai fatto tu.'),
+    'dev_laboratory': ('Lab', 'Laboratorio'),
+    'dev_submittedAt': ('Dropped off', 'Consegnato il'),
+    'dev_returnedAt': ('Back from the lab', 'Ritirato il'),
+    'dev_developedOn': ('Developed on', 'Sviluppato il'),
+    'dev_process': ('Process', 'Processo'),
+    'dev_developmentCost': ('Developing cost', 'Costo dello sviluppo'),
+    'dev_scanCost': ('Scanning cost', 'Costo delle scansioni'),
+    'dev_note': ('Note', 'Nota'),
+    'dev_deleteTitle': ('Delete the developing?', 'Eliminare lo sviluppo?'),
+    'dev_deleteBody': ('Dates, lab and costs of the developing are removed. The roll and its photos stay.',
+                       'Date, laboratorio e costi dello sviluppo vengono tolti. Il rullino e le sue foto restano.'),
+    'dev_deleted': ('Developing deleted.', 'Sviluppo eliminato.'),
+    'dev_rollMissingTitle': ('Roll not found', 'Rullino non trovato'),
+    'dev_rollMissingBody': ('It may have been deleted.', 'Forse è stato eliminato.'),
+
+    # ── Stampe (lib/features/lab/print_page.dart) ──
+    'print_newTitle': ('New print order', 'Nuove stampe'),
+    'print_editTitle': ('Edit print order', 'Modifica stampe'),
+    'print_laboratory': ('Lab', 'Laboratorio'),
+    'print_submittedAt': ('Ordered', 'Ordinate il'),
+    'print_returnedAt': ('Picked up', 'Ritirate il'),
+    'print_format': ('Size', 'Formato'),
+    'print_formatHint': ('e.g. 10x15', 'es. 10x15'),
+    'print_count': ('Prints', 'Stampe'),
+    'print_countInvalid': ('At least 1', 'Almeno 1'),
+    'print_cost': ('Cost', 'Costo'),
+    'print_note': ('Note', 'Nota'),
+    'print_saved': ('Prints saved.', 'Stampe salvate.'),
+    'print_deleteTitle': ('Delete this print order?', 'Eliminare queste stampe?'),
+    'print_deleteBody': ('The order is removed from the roll. Photos of the prints, if any, stay.',
+                         'L’ordine viene tolto dal rullino. Le foto delle stampe, se ci sono, restano.'),
+    'print_deleted': ('Print order deleted.', 'Stampe eliminate.'),
+    'print_missingTitle': ('Print order not found', 'Stampe non trovate'),
+    'print_missingBody': ('It may have been deleted.', 'Forse sono state eliminate.'),
+
+    # ── Macchine (lib/features/cameras/*) ──
+    'camera_title': ('Cameras', 'Macchine fotografiche'),
+    'camera_add': ('Add camera', 'Aggiungi macchina'),
+    'camera_emptyTitle': ('No cameras yet', 'Ancora nessuna macchina'),
+    'camera_emptyBody': ('Add the camera you shoot with, to know which roll came from where.',
+                         'Aggiungi la macchina con cui scatti, per sapere da dove viene ogni rullino.'),
+    'camera_inactive': ('no longer in use', 'non più in uso'),
+    'camera_rollCount': ('{n, plural, =0{no rolls} =1{1 roll} other{{n} rolls}}',
+                         '{n, plural, =0{nessun rullino} =1{1 rullino} other{{n} rullini}}'),
+    'camera_newTitle': ('New camera', 'Nuova macchina'),
+    'camera_editTitle': ('Edit camera', 'Modifica macchina'),
+    'camera_manufacturer': ('Make', 'Produttore'),
+    'camera_manufacturerHint': ('e.g. Olympus', 'es. Olympus'),
+    'camera_model': ('Model', 'Modello'),
+    'camera_modelHint': ('e.g. OM-2', 'es. OM-2'),
+    'camera_format': ('Format', 'Formato'),
+    'camera_note': ('Note', 'Nota'),
+    'camera_deleteTitle': ('Delete “{name}”?', 'Eliminare “{name}”?'),
+    'camera_deleteBody': ('{n, plural, =1{The roll shot with it stays, without a camera.} other{The {n} rolls shot with it stay, without a camera.}}',
+                          '{n, plural, =1{Il rullino scattato con questa macchina resta, senza macchina.} other{I {n} rullini scattati con questa macchina restano, senza macchina.}}'),
+    'camera_deleteBodyNoRolls': ('No roll was shot with it.', 'Nessun rullino è stato scattato con questa macchina.'),
+    'camera_deleted': ('Camera deleted.', 'Macchina eliminata.'),
+    'camera_missingTitle': ('Camera not found', 'Macchina non trovata'),
+    'camera_missingBody': ('It may have been deleted.', 'Forse è stata eliminata.'),
+
+    # ── Catalogo pellicole (lib/features/stocks/*) ──
+    'stock_title': ('Film stocks', 'Pellicole'),
+    'stock_search': ('Search brand, name or ISO', 'Cerca marca, nome o ISO'),
+    'stock_add': ('Custom film', 'Pellicola personalizzata'),
+    'stock_noResults': ('No film found', 'Nessuna pellicola trovata'),
+    'stock_noResultsBody': ('If it isn’t in the catalogue, add it yourself.', 'Se non è nel catalogo, aggiungila tu.'),
+    'stock_customBadge': ('Custom', 'Tua'),
+    'stock_newTitle': ('Custom film', 'Pellicola personalizzata'),
+    'stock_editTitle': ('Edit film', 'Modifica pellicola'),
+    'stock_editKeepsRolls': ('Rolls already shot keep the name they had.', 'I rullini già scattati tengono il nome che avevano.'),
+    'stock_brand': ('Brand', 'Marca'),
+    'stock_name': ('Name', 'Nome'),
+    'stock_nameHint': ('e.g. Portra 400', 'es. Portra 400'),
+    'stock_process': ('Process', 'Processo'),
+    'stock_format': ('Format', 'Formato'),
+    'stock_duplicate': ('“{name}” in {format} is already in the list.', '“{name}” in {format} è già nell’elenco.'),
+    'stock_duplicateHelp': ('Change brand, name or format, or use the one already there.',
+                            'Cambia marca, nome o formato, oppure usa quella che c’è già.'),
+    'stock_useExisting': ('Use that one', 'Usa quella'),
+    'stock_deleteTitle': ('Delete “{name}”?', 'Eliminare “{name}”?'),
+    'stock_deleteBody': ('Rolls shot with this film keep its name.', 'I rullini scattati con questa pellicola ne tengono il nome.'),
+    'stock_deleted': ('Film deleted.', 'Pellicola eliminata.'),
+}
+
+TIPI = {
+    'n': 'int',
+}

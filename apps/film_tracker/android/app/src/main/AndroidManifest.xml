@@ -26,12 +26,20 @@
               />
             <!-- ☠ Deep link di Flutter spento (pagato con Full Freezer, 2026-10-07): acceso, Flutter
                  passa gli URI a go_router come `go` e la pila perde la freccia indietro. Il QR del
-                 rullino (filmtracker://roll/<n>, F6.12) lo gestira' app.dart; lo schema si dichiara
-                 con quella sottofase. -->
+                 rullino (filmtracker://roll/<n>, F6.12) lo riceve il plugin app_links e app.dart
+                 apre il rullino con `push` (lib/features/qr/qr_links.dart). -->
             <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Lo schema del QR del rullino (F6.12): il lettore di QR di sistema apre l'app.
+                 Niente autoVerify: e' uno schema nostro, non un dominio https da verificare. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="filmtracker" android:host="roll"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

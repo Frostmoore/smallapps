@@ -28,11 +28,7 @@ TESTI = {
     'common_delete': ('Delete', 'Elimina'),
     'common_optional': ('Optional', 'Facoltativo'),
 
-    # ── Home (F6.8; per ora lo scheletro) ──
-    'home_inCamera': ('In camera', 'In macchina'),
-    'home_atLab': ('At the lab', 'In laboratorio'),
-    'home_archive': ('Archive', 'Archivio'),
-    'home_emptySection': ('Nothing here yet.', 'Ancora niente qui.'),
+    # ── Home (F6.8): in tool/testi_rullini.py ──
 
     # ── Pro ──
     'paywall_headline': ('Film Tracker Pro', 'Film Tracker Pro'),

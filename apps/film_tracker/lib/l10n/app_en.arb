@@ -7,10 +7,6 @@
   "common_retry": "Try again",
   "common_delete": "Delete",
   "common_optional": "Optional",
-  "home_inCamera": "In camera",
-  "home_atLab": "At the lab",
-  "home_archive": "Archive",
-  "home_emptySection": "Nothing here yet.",
   "paywall_headline": "Film Tracker Pro",
   "paywall_subhead": "One payment. No subscription. Yours for good.",
   "paywall_buy": "Unlock Pro",
@@ -55,5 +51,441 @@
     }
   },
   "settings_proActive": "Film Tracker Pro is active",
-  "settings_proCta": "Discover Film Tracker Pro"
+  "settings_proCta": "Discover Film Tracker Pro",
+  "photo_sectionTitle": "Photos",
+  "photo_add": "Add",
+  "photo_emptyTitle": "No photos yet",
+  "photo_emptyBody": "Add the contact sheet, the prints or the scans: the roll will show its cover in the archive.",
+  "photo_camera": "Take a photo",
+  "photo_gallery": "Choose from photos",
+  "photo_galleryHint": "You can pick more than one.",
+  "photo_kindLabel": "What is it?",
+  "photo_kind_contactSheet": "Contact sheet",
+  "photo_kind_print": "Print",
+  "photo_kind_scan": "Scan",
+  "photo_kind_other": "Other",
+  "photo_importing": "Importing {done} of {total}…",
+  "@photo_importing": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_importCancelling": "Stopping after this photo…",
+  "photo_imported": "{count, plural, =1{1 photo added} other{{count} photos added}}",
+  "@photo_imported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_importFailed": "{count, plural, =1{1 photo couldn’t be read} other{{count} photos couldn’t be read}}",
+  "@photo_importFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_pickFailed": "Couldn’t open the camera or your photos. Check the permissions in Settings.",
+  "photo_cover": "Cover",
+  "photo_setCover": "Use as cover",
+  "photo_coverSet": "Cover changed",
+  "photo_open": "Open",
+  "photo_reorder": "Reorder",
+  "photo_reorderHint": "Drag the photos into the order you want.",
+  "photo_done": "Done",
+  "photo_delete": "Delete photo",
+  "photo_deleteTitle": "Delete this photo?",
+  "photo_deleteBody": "It is removed from the roll and from the phone. The original in your photos stays where it is.",
+  "photo_deleted": "Photo deleted",
+  "photo_missing": "This photo is no longer on the phone.",
+  "photo_position": "{index} of {total}",
+  "@photo_position": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_thumbLabel": "Photo {index}",
+  "@photo_thumbLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_storageTitle": "Photo storage",
+  "photo_storageUsed": "{size} used. Tap to free up space.",
+  "@photo_storageUsed": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "photo_storageLoading": "Calculating…",
+  "photo_freeTitle": "Free up space?",
+  "photo_freeBody": "Removes the files no roll uses any more, left behind by interrupted deletions. Your rolls’ photos stay.",
+  "photo_freeConfirm": "Free up space",
+  "photo_freed": "{count, plural, =1{1 file removed} other{{count} files removed}}",
+  "@photo_freed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photo_freedNothing": "Nothing to remove: every file belongs to a roll.",
+  "qr_title": "Roll label",
+  "qr_action": "QR label",
+  "qr_hint": "Print it or take a photo of it and stick it on the roll’s canister. Scanning it with the camera opens this roll.",
+  "qr_number": "#{n}",
+  "@qr_number": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qr_semantics": "QR code of roll {n}",
+  "@qr_semantics": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qr_rollMissing": "This roll doesn’t exist any more.",
+  "dev_costInvalid": "Write an amount, like 12.50",
+  "dev_dateNone": "Not set",
+  "dev_dateClear": "Remove date",
+  "dev_saved": "Saved.",
+  "dev_savedNowExposed": "Saved. The roll is now marked as finished.",
+  "dev_savedNowAtLab": "Saved. The roll is now at the lab.",
+  "dev_savedNowDeveloped": "Saved. The roll is now developed.",
+  "dev_savedNowPrinted": "Saved. The roll is now printed.",
+  "dev_newTitle": "Developing",
+  "dev_editTitle": "Edit developing",
+  "dev_selfDeveloped": "Developed at home",
+  "dev_selfDevelopedHelp": "No lab: you did it yourself.",
+  "dev_laboratory": "Lab",
+  "dev_submittedAt": "Dropped off",
+  "dev_returnedAt": "Back from the lab",
+  "dev_developedOn": "Developed on",
+  "dev_process": "Process",
+  "dev_developmentCost": "Developing cost",
+  "dev_scanCost": "Scanning cost",
+  "dev_note": "Note",
+  "dev_deleteTitle": "Delete the developing?",
+  "dev_deleteBody": "Dates, lab and costs of the developing are removed. The roll and its photos stay.",
+  "dev_deleted": "Developing deleted.",
+  "dev_rollMissingTitle": "Roll not found",
+  "dev_rollMissingBody": "It may have been deleted.",
+  "print_newTitle": "New print order",
+  "print_editTitle": "Edit print order",
+  "print_laboratory": "Lab",
+  "print_submittedAt": "Ordered",
+  "print_returnedAt": "Picked up",
+  "print_format": "Size",
+  "print_formatHint": "e.g. 10x15",
+  "print_count": "Prints",
+  "print_countInvalid": "At least 1",
+  "print_cost": "Cost",
+  "print_note": "Note",
+  "print_saved": "Prints saved.",
+  "print_deleteTitle": "Delete this print order?",
+  "print_deleteBody": "The order is removed from the roll. Photos of the prints, if any, stay.",
+  "print_deleted": "Print order deleted.",
+  "print_missingTitle": "Print order not found",
+  "print_missingBody": "It may have been deleted.",
+  "camera_title": "Cameras",
+  "camera_add": "Add camera",
+  "camera_emptyTitle": "No cameras yet",
+  "camera_emptyBody": "Add the camera you shoot with, to know which roll came from where.",
+  "camera_inactive": "no longer in use",
+  "camera_rollCount": "{n, plural, =0{no rolls} =1{1 roll} other{{n} rolls}}",
+  "@camera_rollCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "camera_newTitle": "New camera",
+  "camera_editTitle": "Edit camera",
+  "camera_manufacturer": "Make",
+  "camera_manufacturerHint": "e.g. Olympus",
+  "camera_model": "Model",
+  "camera_modelHint": "e.g. OM-2",
+  "camera_format": "Format",
+  "camera_note": "Note",
+  "camera_deleteTitle": "Delete “{name}”?",
+  "@camera_deleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "camera_deleteBody": "{n, plural, =1{The roll shot with it stays, without a camera.} other{The {n} rolls shot with it stay, without a camera.}}",
+  "@camera_deleteBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "camera_deleteBodyNoRolls": "No roll was shot with it.",
+  "camera_deleted": "Camera deleted.",
+  "camera_missingTitle": "Camera not found",
+  "camera_missingBody": "It may have been deleted.",
+  "stock_title": "Film stocks",
+  "stock_search": "Search brand, name or ISO",
+  "stock_add": "Custom film",
+  "stock_noResults": "No film found",
+  "stock_noResultsBody": "If it isn’t in the catalogue, add it yourself.",
+  "stock_customBadge": "Custom",
+  "stock_newTitle": "Custom film",
+  "stock_editTitle": "Edit film",
+  "stock_editKeepsRolls": "Rolls already shot keep the name they had.",
+  "stock_brand": "Brand",
+  "stock_name": "Name",
+  "stock_nameHint": "e.g. Portra 400",
+  "stock_process": "Process",
+  "stock_format": "Format",
+  "stock_duplicate": "“{name}” in {format} is already in the list.",
+  "@stock_duplicate": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "stock_duplicateHelp": "Change brand, name or format, or use the one already there.",
+  "stock_useExisting": "Use that one",
+  "stock_deleteTitle": "Delete “{name}”?",
+  "@stock_deleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "stock_deleteBody": "Rolls shot with this film keep its name.",
+  "stock_deleted": "Film deleted.",
+  "home_inCamera": "In camera",
+  "home_atLab": "At the lab",
+  "home_archive": "Archive",
+  "home_newRoll": "New roll",
+  "home_menuCameras": "Cameras",
+  "home_menuStocks": "Film stocks",
+  "home_menuMore": "More",
+  "home_emptyTitle": "Your first roll",
+  "home_emptyBody": "Note the film you load in the camera: it will follow you to the lab and into the archive, with its photos.",
+  "home_emptyAction": "Load a roll",
+  "home_inCameraEmpty": "No roll in a camera. Tap “New roll” when you load one.",
+  "home_atLabEmpty": "Nothing at the lab right now.",
+  "home_archiveEmpty": "Developed rolls end up here, with their photos.",
+  "home_loadedDaysAgo": "{days, plural, =0{Loaded today} =1{Loaded yesterday} other{Loaded {days} days ago}}",
+  "@home_loadedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "home_notLoadedYet": "No loading date",
+  "home_finishedToDeliver": "Finished · to deliver",
+  "home_deliveredDaysAgo": "{days, plural, =0{delivered today} =1{delivered yesterday} other{delivered {days} days ago}}",
+  "@home_deliveredDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "home_delivered": "delivered",
+  "home_loadError": "Couldn’t read your rolls",
+  "home_loadErrorBody": "Your data is still there. Try again in a moment.",
+  "roll_newTitle": "New roll",
+  "roll_editTitle": "Edit roll",
+  "roll_film": "Film",
+  "roll_filmChoose": "Choose the film",
+  "roll_camera": "Camera",
+  "roll_cameraNone": "No camera",
+  "roll_cameraEmpty": "You haven’t added a camera yet. It’s optional.",
+  "roll_cameraAdd": "Add a camera",
+  "roll_format": "Format",
+  "roll_exposedIso": "Exposed at ISO",
+  "roll_exposedIsoHelp": "Nominal {iso}. Change it if you push or pull the film.",
+  "@roll_exposedIsoHelp": {
+    "placeholders": {
+      "iso": {
+        "type": "int"
+      }
+    }
+  },
+  "roll_frames": "Frames",
+  "roll_loadedAt": "Loaded on",
+  "roll_finishedAt": "Finished on",
+  "roll_details": "Optional details",
+  "roll_title": "Title",
+  "roll_titleHint": "“Prague — September”",
+  "roll_note": "Note",
+  "roll_cost": "Cost of the roll",
+  "roll_costInvalid": "Write an amount, like 6.50",
+  "roll_saveError": "Couldn’t save. Check the dates: a roll can’t finish before it’s loaded.",
+  "roll_stockSearch": "Search film",
+  "roll_stockMostUsed": "Most used",
+  "roll_stockCustom": "Custom film",
+  "roll_stockCustomHelp": "Not in the list? Add it.",
+  "roll_stockNoResults": "No film matches “{query}”.",
+  "@roll_stockNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "roll_detailTitle": "Roll #{n}",
+  "@roll_detailTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "roll_notFound": "This roll no longer exists.",
+  "roll_framesCount": "{n, plural, =1{1 frame} other{{n} frames}}",
+  "@roll_framesCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "roll_exposedAt": "exposed at {iso}",
+  "@roll_exposedAt": {
+    "placeholders": {
+      "iso": {
+        "type": "int"
+      }
+    }
+  },
+  "roll_timeline": "Timeline",
+  "roll_eventLoaded": "Loaded",
+  "roll_eventFinished": "Finished",
+  "roll_eventDelivered": "Delivered to the lab",
+  "roll_eventSelfDeveloped": "Developed at home",
+  "roll_eventDeveloped": "Developed",
+  "roll_eventPrinted": "Printed",
+  "roll_eventPrintOrdered": "Prints ordered",
+  "roll_eventPrintBack": "Prints back",
+  "roll_eventNotYet": "Not yet",
+  "roll_noDate": "No date",
+  "roll_costDevelopment": "developing {amount}",
+  "@roll_costDevelopment": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "roll_costScan": "scans {amount}",
+  "@roll_costScan": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "roll_printsCount": "{n, plural, =1{1 print} other{{n} prints}}",
+  "@roll_printsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "roll_totalCost": "Total spent: {amount}",
+  "@roll_totalCost": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "roll_actionFinished": "Roll finished",
+  "roll_actionDeliver": "Deliver to the lab",
+  "roll_actionDevelopment": "Record development",
+  "roll_actionAddPrint": "Add prints",
+  "roll_actionArchive": "Archive",
+  "roll_finishedDone": "Marked as finished.",
+  "roll_changeStatus": "Change status",
+  "roll_changeStatusHelp": "From “{status}” you can go to:",
+  "@roll_changeStatusHelp": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "roll_statusChanged": "Status: {status}.",
+  "@roll_statusChanged": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "roll_suggestion": "Development and prints say “{status}”.",
+  "@roll_suggestion": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "roll_suggestionApply": "Apply",
+  "roll_qr": "QR label",
+  "roll_delete": "Delete roll",
+  "roll_deleteTitle": "Delete roll #{n}?",
+  "@roll_deleteTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "roll_deleteBody": "Development, prints and photos go with it, including the photo files on this phone. This can’t be undone.",
+  "roll_deleted": "Roll deleted.",
+  "roll_format_mm35": "35 mm",
+  "roll_format_medium120": "120",
+  "roll_format_mm110": "110",
+  "roll_format_large": "Large format",
+  "roll_format_other": "Other",
+  "roll_process_c41": "C-41",
+  "roll_process_e6": "E-6",
+  "roll_process_bw": "Black & white",
+  "roll_process_ecn2": "ECN-2",
+  "roll_process_other": "Other",
+  "status_loaded": "In camera",
+  "status_exposed": "Finished",
+  "status_sentForDevelopment": "At the lab",
+  "status_developed": "Developed",
+  "status_printed": "Printed",
+  "status_archived": "Archived"
 }

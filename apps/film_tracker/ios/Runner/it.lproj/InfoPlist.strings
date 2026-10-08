@@ -1,0 +1,6 @@
+/* Testi dei permessi in italiano (F6.9). Le chiavi sono quelle di Info.plist, dove restano
+   i testi inglesi di ripiego. ☠ Il file va aggiunto al progetto Xcode (lo fa lo script sul Mac):
+   presente solo su disco, iOS non lo legge e mostra l'inglese. */
+"CFBundleDisplayName" = "Film Tracker";
+"NSCameraUsageDescription" = "Film Tracker usa la fotocamera solo quando fotografi un provino, una stampa o una scansione per aggiungerla a un rullino.";
+"NSPhotoLibraryUsageDescription" = "Film Tracker apre le tue foto solo quando scegli quelle da aggiungere a un rullino.";

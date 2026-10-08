@@ -9,6 +9,7 @@ import '../../app/entitlement.dart';
 import '../../app/paywall_config.dart';
 import '../../app/providers.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../photos/photo_storage_tile.dart';
 
 /// Le impostazioni essenziali: il Pro, il ripristino dell'acquisto, il tema.
 ///
@@ -83,6 +84,9 @@ class SettingsPage extends ConsumerWidget {
               if (picked != null) await ref.read(themeModeProvider.notifier).set(picked);
             },
           ),
+          const Divider(),
+          // Lo spazio occupato dalle foto e "libera spazio" (F6.9).
+          const PhotoStorageTile(),
           MicroSpacing.gapXL,
           Center(child: Text(l.settings_version(appVersion), style: Theme.of(context).textTheme.bodySmall)),
         ],
