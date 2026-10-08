@@ -8,7 +8,7 @@ class MainActivity : FlutterActivity() {
      * ☠ Un link aperto con l'app chiusa ma ancora nei recenti (visto con il widget di Full
      * Freezer, 2026-10-07): Android ricrea l'attivita' con l'intent **vecchio** del launcher e
      * consegna quello nuovo con `onNewIntent`. Rimpiazzarlo fa leggere quello giusto a chi lo
-     * cerca all'avvio. Servira' al QR del rullino (F6.12).
+     * cerca all'avvio. Serve al link del QR del rullino (F6.12, `app_links`).
      */
     override fun onNewIntent(intent: Intent) {
         setIntent(intent)

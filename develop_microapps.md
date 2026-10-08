@@ -1049,13 +1049,15 @@ tutte fatte e provate sull'emulatore:
 - [x] **F6.7** Sviluppo e stampa come eventi separati — FATTO il 2026-10-08: `features/lab/`, lo stato avanza da solo in avanti con uno snack (consegnato → in laboratorio, ritirato → sviluppato/stampato).
 - [x] **F6.8** Home a tre sezioni: In macchina / In laboratorio / Archivio — FATTO il 2026-10-08 (essenziale): archivio a griglia con copertina o striscia di pellicola disegnata; grafica da scegliere con le proposte (F6.0 punto 6).
 - [x] **F6.9** Photo overview: import, provini, contact sheet, miniature (**gratis**, F6.0) — FATTO il 2026-10-08: `features/photos/`, import una foto alla volta in isolate con avanzamento e annulla, galleria, riordino, copertina, visualizzatore con zoom, spazio occupato e "libera spazio". Corretto in `micro_core` `ImageStore.importBytes` (`on Object`: il decoder lancia Error). DA PROVARE su telefono: HEIC dalla galleria Android.
-- [ ] **F6.10** Statistiche e costi (Pro)
-- [ ] **F6.11** Export CSV, PDF di riepilogo, backup (Pro)
+- [x] **F6.10** Statistiche e costi (Pro) — FATTO il 2026-10-08: `features/stats/stats_page.dart` con `ProGate`, anni dal piu' recente, spesa per voce, media sui rullini con costi, costo per fotogramma dichiarato **stima** (titolo, "≈" e riga di spiegazione), piu' usati, grafico mensile con `CustomPainter` e `Semantics`.
+- [x] **F6.11** Export CSV, PDF di riepilogo, backup (Pro) — FATTO il 2026-10-08: `lib/services/{csv_export,film_backup_source,year_report}.dart`, `features/settings/data_section.dart` (ripristino gratis). PDF con `pdf` e `printing`, miniature da 400 px, Plus Jakarta Regular (niente grassetto). ⚑ DT-10 chiuso cosi': il riepilogo vive nell'app, un `PdfReportBuilder` generico in `micro_core` avrebbe un solo utente. Corretto in `micro_core` lo **zip slip** di `BackupService._restoreImages` (voci `images/../..` scartate, test aggiunto).
 - [x] **F6.12** QR identificativo del rullino — FATTO il 2026-10-08: `features/qr/`, etichetta bianca stampabile, link `filmtracker://roll/<n>` con `app_links` (push, non il deep link di Flutter), provato con adb.
-- [ ] **F6.13** Test (unit, DB, widget, golden, integrazione)
-- [ ] **F6.14** Rifinitura visiva, onboarding, empty state, accessibilità
-- [ ] **F6.15** `apps/film_tracker/codebase_reference.md`
-- [ ] **F6.16** Rituale di fine fase F6
+- [x] **F6.13** Test (unit, DB, widget, golden, integrazione) — FATTO il 2026-10-08: 184 test (matrice 6×6 e `suggestFrom`, statistiche su dataset noto, repository con vincoli e cascate, import delle foto con `ImageStore` vero, round-trip del backup con le foto, CSV, PDF, pagine con repository finto). Niente golden (stessa scelta delle altre app); integrazione: i giri su emulatore e simulatore.
+- [x] **F6.14** Rifinitura visiva, onboarding, empty state, accessibilità — FATTO il 2026-10-08: grafica **C · Provino** (`lib/app/film_palette.dart`, `features/common/film_strip.dart`, Space Mono), tema chiaro "tavolo luminoso", testo al 130% provato, stati vuoti curati, `Semantics` sulle righe del laboratorio e del provino, foto disegnate nei dati di esempio (`lib/dev/demo_photos.dart`); iOS provato sul simulatore (testi dei permessi it/en). ⚑ Non fatte, di proposito: transizione `Hero` fra provino e dettaglio (il dettaglio non mostra la copertina in alto) e caricamento progressivo delle miniature (gia' decodificate alla dimensione mostrata).
+- [x] **F6.15** `apps/film_tracker/codebase_reference.md` — FATTO il 2026-10-08: ~2400 righe, `tool/verify_atlas.ps1 -Project apps/film_tracker` pulito (76 simboli, 0 mancanti), 55 firme controllate. La rilettura ha trovato e fatto correggere: form di modifica sulla rotellina eterna con un rullino inesistente (test aggiunto), macchina creata dal form del rullino non selezionata, StateError non gestito nel cambio di stato, commenti superati. Le incoerenze minori rimaste sono in §14.
+- [x] **F6.16** Rituale di fine fase F6 — 2026-10-08: piano, atlante, StatusMicroApps, decisioni e README aggiornati, documenti nel Projects Tracker (progetto 17), messaggio di fine fase, branch `v8.0.0`.
+
+**Ripresa (stato al 2026-10-08).** Il codice di F6 e' completo: 185 test verdi, analisi pulita, grafica «C · Provino», provato sull'emulatore Android (dati di esempio con foto disegnate, tema scuro e chiaro, testo al 130%, QR via adb) e sul simulatore iPhone. Restano dal proprietario o con lui: (1) l'App ID `com.smp.filmtracker` e l'app su App Store Connect, poi la scheda come per Scorte Calore (`tool/scheda_app_store.py` da adattare, screenshot, video, intestazione e risultati di ricerca, prodotto `filmtracker_pro_lifetime` a 4,99 €); (2) Play dopo il D-U-N-S; (3) prove su dispositivo vero: HEIC dalla galleria Android, QR letto dalla fotocamera di sistema, acquisto, stampa del PDF; (4) icona monocromatica di Android 13 (serve il disegno senza sfondo). Debito: `EntitlementView`/`EntitlementNotifier` in quattro copie, da spostare in `micro_core` in F7. Dati di esempio: `--dart-define=FT_DEMO=true`.
 
 ### F7 — Hardening trasversale e preparazione allo store → `v9.0.0`
 
@@ -4837,7 +4839,7 @@ titoli dei rullini.
 
 ### F6.16 — Rituale di fine fase F6
 
-Eseguire §6. Branch previsto: `v7.0.0`.
+Eseguire §6. Branch: `v8.0.0` (la mappa delle versioni in testa al tracking; il `v7.0.0` qui era un refuso).
 
 ---
 

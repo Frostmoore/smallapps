@@ -210,6 +210,10 @@ class RollDetailPage extends ConsumerWidget {
       if (context.mounted) MicroSnack.success(context, l.roll_statusChanged(statusName(l, to)));
     } on RollTransitionException catch (e, st) {
       MicroLog.e('transizione rifiutata', error: e, stackTrace: st);
+    } on StateError catch (e, st) {
+      // Il rullino e' stato cancellato nel frattempo (un'altra pagina, un ripristino).
+      MicroLog.e('rullino sparito durante il cambio di stato', error: e, stackTrace: st);
+      if (context.mounted) MicroSnack.error(context, l.roll_notFound);
     }
   }
 }

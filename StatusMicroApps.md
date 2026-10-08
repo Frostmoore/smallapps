@@ -18,7 +18,7 @@ Ultimo aggiornamento: **2026-10-08**
 | **TrashCan** | 1.0.0 (11) | 🟢 **pubblicata** (2026-10-08) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store»): si accendono insieme quando c'e' anche iOS in Italia |
 | **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
-| **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
+| **Film Tracker** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 in sviluppo (codice completo, mai caricata) | card grigia «In arrivo» |
 
 Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubblicata in parte ·
 🟢 pubblicata · 🔴 respinta
@@ -153,7 +153,16 @@ Da fare dopo il D-U-N-S (come Full Freezer). ☠ La scheda deve giustificare `RE
 
 ## Film Tracker
 
-Non iniziata. Pacchetto previsto `com.smp.filmtracker`, Pro `filmtracker_pro_lifetime`.
+**2026-10-08: codice completo** (F6.1–F6.14), provato sull'emulatore Android e sul simulatore
+iPhone. Nessuna build caricata.
+
+- Android e iOS: `com.smp.filmtracker` (nessun widget, nessun App Group).
+- Pro `filmtracker_pro_lifetime` a **4,99 €** (decisione del proprietario; su Play 4,09 EUR
+  senza IVA).
+- Prossimo passo: la scheda App Store (testi, screenshot, video, intestazione e risultati di
+  ricerca, prodotto Pro), come per Scorte Calore con `tool/scheda_app_store.py`. Serve prima
+  l'App ID `com.smp.filmtracker` e l'app su App Store Connect (proprietario).
+- Play: dopo il D-U-N-S, come Full Freezer e Scorte Calore.
 
 ---
 

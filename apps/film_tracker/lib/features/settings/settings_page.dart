@@ -12,10 +12,8 @@ import '../../l10n/generated/app_localizations.dart';
 import '../photos/photo_storage_tile.dart';
 import 'data_section.dart';
 
-/// Le impostazioni essenziali: il Pro, il ripristino dell'acquisto, il tema.
-///
-/// Le voci di dati (CSV, backup, PDF) e lo spazio occupato dalle foto arrivano con le loro
-/// sottofasi (F6.9, F6.11).
+/// Le impostazioni: il Pro, il ripristino dell'acquisto, il tema, "I tuoi dati" (statistiche,
+/// PDF, CSV, backup e ripristino, F6.10-F6.11) e lo spazio occupato dalle foto (F6.9).
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 

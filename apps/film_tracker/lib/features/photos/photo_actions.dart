@@ -59,9 +59,9 @@ Future<ImportOutcome> importRollPhotos({
       result = await store.importFile(file, bucket: rollImageBucket);
       // ☠ Su un file corrotto o di un formato che il pacchetto `image` non conosce, il decoder
       // puo' lanciare un *Error* (RangeError, visto il 2026-10-08 con quattro byte a caso) e non
-      // un'Exception: `ImageStore.importBytes` cattura solo le Exception, quindi l'errore
-      // attraverserebbe tutto e fermerebbe l'import a meta' con la finestra aperta. Qui conta
-      // come una foto illeggibile e si passa alla successiva.
+      // un'Exception. Dal 2026-10-08 `ImageStore.importBytes` cattura `on Object`, ma questa
+      // rete resta: un errore che attraversasse tutto fermerebbe l'import a meta' con la
+      // finestra aperta. Qui conta come una foto illeggibile e si passa alla successiva.
       // ignore: avoid_catches_without_on_clauses
     } catch (e, s) {
       MicroLog.e('import foto fallito', error: e, stackTrace: s);

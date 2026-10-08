@@ -16,7 +16,7 @@ il monorepo e' la base per tutte le microapp che verranno.
 | **License Server** | `server/` — **repo separata** | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
 
 > **Stato al 2026-10-08**: esistono e sono aggiornati gli atlanti di `micro_core`, del
-> License Server, di TrashCan, della Vetrina, di Full Freezer e di Scorte Calore. Gli altri vengono creati alla
+> License Server, di TrashCan, della Vetrina, di Full Freezer, di Scorte Calore e di Film Tracker. Gli altri vengono creati alla
 > fine della fase che costruisce il rispettivo progetto. Vedi `develop_microapps.md`.
 
 ## A che punto siamo
@@ -30,7 +30,7 @@ il monorepo e' la base per tutte le microapp che verranno.
 | — | **Vetrina** `smpmicroapps.it` | online, bilingue, con le pagine legali |
 | **F4** | **Full Freezer**, Android e iPhone | **completa nel codice**, 140 test; App Store in revisione, Play in attesa del D-U-N-S |
 | **F5** | **Scorte Calore**, Android e iPhone | **completa nel codice**, 158 test; mancano grafiche definitive, ID e prodotto sugli store |
-| F6 | Film Tracker | da fare |
+| **F6** | **Film Tracker**, Android e iPhone | **completa nel codice**, 184 test; mancano ID, prodotto e scheda sugli store |
 | F7 | Hardening | da fare |
 | F8 | Deploy e pubblicazione | da fare |
 
@@ -50,6 +50,11 @@ stima del consumo con rilevamento dei rifornimenti, data di riordino, notifiche,
 grafici, acquisti e costi per inverno, evento nel calendario del telefono, CSV e backup,
 widget su entrambe le piattaforme. Interfaccia «A · Brace»; le grafiche definitive si
 scelgono con il proprietario.
+
+Film Tracker e' completa nel codice e provata sull'emulatore Android e sul simulatore iPhone:
+rullini con cronologia dal caricamento allo sviluppo e alle stampe, catalogo di pellicole,
+macchine, foto dei provini (gratis), foglio provini in archivio, etichetta QR del rullino,
+statistiche e costi per anno, PDF di riepilogo, CSV e backup con le foto. Grafica «C · Provino».
 
 ## Repository
 

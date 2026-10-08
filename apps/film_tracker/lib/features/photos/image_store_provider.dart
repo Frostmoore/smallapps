@@ -7,7 +7,7 @@ import 'package:micro_core/micro_core.dart';
 import '../../app/providers.dart';
 import '../../data/database.dart';
 
-/// L'archivio delle immagini dei rullini (F6.9), condiviso da foto, home e QR.
+/// L'archivio delle immagini dei rullini (F6.9), condiviso da foto, home (copertine) e PDF.
 ///
 /// ⚑ Un provider e non `ImageStore(paths: ...)` sparso nelle pagine: i test sostituiscono
 /// `appPathsProvider` con una cartella temporanea e tutto il resto segue da solo.

@@ -48,7 +48,7 @@ dependencies:
   pdf: ^3.13.1
   # Stampa e anteprima del PDF annuale con il dialogo di sistema (F6.11). ⚑ Nessun permesso e
   # nessuna configurazione a mano: su Android porta da solo un FileProvider nel manifest
-  # (fuso dal build), minSdk 21 (l'app e' a 24); su iOS solo il pod.
+  # (fuso dal build), minSdk 21 (l'app e' a 24); su iOS nessuna chiave in Info.plist.
   printing: ^5.15.1
   # L'etichetta QR del rullino (F6.12).
   qr_flutter: ^4.1.0

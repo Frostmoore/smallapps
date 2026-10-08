@@ -11,9 +11,9 @@ const String licenseAppId = 'filmtracker';
 
 /// La configurazione di Film Tracker. La forma vive in `micro_core`, qui solo i valori.
 ///
-/// Ambra `#E0A458` dal piano (§2): resta finche' l'icona del proprietario non dice altro
-/// (F6.0 punto 5). **Tema scuro di default** (F6.1): le foto su fondo chiaro perdono
-/// contrasto.
+/// Ambra `#E0A458` dal piano (§2): e' solo il seme da cui `MicroTheme` parte; i colori veri
+/// li impone la palette "C · Provino" (`film_palette.dart`, F6.0 punto 6). **Tema scuro di
+/// default** (F6.1): le foto su fondo chiaro perdono contrasto.
 MicroAppConfig buildFilmConfig() => MicroAppConfig.fromEnvironment(
   appId: 'film_tracker',
   appName: 'Film Tracker',

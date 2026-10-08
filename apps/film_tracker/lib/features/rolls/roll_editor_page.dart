@@ -64,6 +64,9 @@ class _RollEditorPageState extends ConsumerState<RollEditorPage> {
   bool _framesTouched = false;
 
   bool _loaded = false;
+
+  /// Il rullino da modificare non c'e' (id illeggibile o cancellato nel frattempo).
+  bool _missing = false;
   bool _saving = false;
 
   bool get _isNew => widget.rollId == null;
@@ -83,7 +86,13 @@ class _RollEditorPageState extends ConsumerState<RollEditorPage> {
   Future<void> _load() async {
     final repo = ref.read(repositoryProvider);
     final r = await repo.rollById(widget.rollId!);
-    if (r == null || !mounted) return;
+    if (!mounted) return;
+    if (r == null) {
+      // ☠ Senza questo la pagina restava sulla rotellina per sempre (trovato con l'atlante,
+      //   2026-10-08): `_loaded` non diventava mai vero.
+      setState(() => _missing = true);
+      return;
+    }
     final camera = r.cameraId == null ? null : await repo.cameraById(r.cameraId!);
     if (!mounted) return;
     final locale = Localizations.localeOf(context).toLanguageTag();
@@ -265,6 +274,12 @@ class _RollEditorPageState extends ConsumerState<RollEditorPage> {
     final l = L.of(context);
     final theme = Theme.of(context);
     final muted = theme.colorScheme.mutedText;
+    if (_missing) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: MicroEmptyState(icon: Icons.search_off, title: l.roll_notFound, message: ''),
+      );
+    }
     if (!_loaded) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
@@ -581,9 +596,15 @@ class _CameraPickerSheet extends ConsumerWidget {
             ),
             Padding(
               padding: MicroSpacing.pageH,
-              // Il foglio resta aperto: tornando dalla creazione, la macchina compare qui.
+              // La macchina appena creata si sceglie da sola: chi la crea da qui la vuole
+              // per questo rullino (prima andava toccata a mano, trovato con l'atlante).
               child: FilledButton.tonalIcon(
-                onPressed: () => context.push(Routes.cameraNew),
+                onPressed: () async {
+                  final id = await context.push<int>(Routes.cameraNew);
+                  if (id == null) return;
+                  final nuova = await ref.read(repositoryProvider).cameraById(id);
+                  if (nuova != null && context.mounted) Navigator.of(context).pop(_CameraPick(nuova));
+                },
                 icon: const Icon(Icons.add),
                 label: Text(l.roll_cameraAdd),
               ),

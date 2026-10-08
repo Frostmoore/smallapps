@@ -249,6 +249,10 @@ primo update, e tutte le foto degli utenti risultano mancanti.
 `StoredImage`: `path` (**relativo**) · `thumbPath` · `width` · `height` · `bytes` ·
 `createdAt` · `toJson()` · `fromJson()`
 
+☠ `importBytes` cattura **`on Object`**, non `on Exception` (2026-10-08, trovato con Film
+Tracker): su un file corrotto il decoder del pacchetto `image` lancia un *Error* (RangeError),
+che prima usciva dal `Result` e fermava l'import di tutta la selezione. Ora diventa un `Err`.
+
 ---
 
 ## 6. `prefs/`, `install/`, `config/`
@@ -477,6 +481,11 @@ Un orologio spostato all'indietro non blocca le ripianificazioni.
 `inspect(File)` · `restore(File, BackupSource, {required ImportMode mode})` ·
 `pickBackupFile()` · `shareBackup(File, {String? subject})` · `cleanupExports({Duration olderThan})`
 
+☠ **Zip slip** (2026-10-08, trovato con Film Tracker): il ripristino di uno ZIP scrive le voci
+`images/…` solo se, normalizzate, restano dentro `AppPaths.documents`; una voce come
+`images/../../x` (un backup arriva da email, chat, cloud) viene scartata e registrata nel log.
+Lo prova il test "zip slip" in `core_modules_test.dart`.
+
 `JsonBackupCodec`: `magic` = `MICROAPPS_BACKUP` · `formatVersion` = 1 · `encode(...)` ·
 `decode(String)`
 
@@ -570,15 +579,18 @@ niente; il contrario toglierebbe agli utenti gratuiti una funzione che doveva es
 
 ## 9. Catalogo dei test
 
-`pwsh tool/test_all.ps1 -Project micro_core` → **107 test verdi**.
+`pwsh tool/test_all.ps1 -Project micro_core` → **121 test verdi** (2026-10-08).
 
 | File | Test | Cosa dimostra |
 |---|---|---|
 | `util/civil_date_test.dart` | 28 | I due cambi d'ora italiani del 2026 non spostano le date; clamp di fine mese e sua non permanenza; regola dei 400 anni; `epochDay` e il suo inverso; intervalli inclusivi; normalizzazione dei fuori intervallo |
 | `gate/feature_gate_test.dart` | 20 | I quattro bordi di ogni tetto (0, max−1, max, max+1); le tre forme di limite; la distinzione fra `allows` e `withinLimit`; gli elenchi per il paywall |
-| `entitlement/entitlement_service_test.dart` | 23 | **ADR-007**: un Pro non si perde offline; solo una revoca dal server lo toglie; la revoca cede a un acquisto successivo; l'acquisto sblocca senza rete; l'acknowledge viene fatto; lo stato finisce su disco; deduplica dei token; i cinque esiti del gateway finto; file corrotto, di un'altra app, o con stati sconosciuti; **chiudere il servizio non chiude il gateway ricevuto per iniezione** (verificato contro il codice vecchio, dove fallisce) |
+| `entitlement/entitlement_service_test.dart` | 31 | **ADR-007**: un Pro non si perde offline; solo una revoca dal server lo toglie; la revoca cede a un acquisto successivo; l'acquisto sblocca senza rete; l'acknowledge viene fatto; lo stato finisce su disco; deduplica dei token; i cinque esiti del gateway finto; file corrotto, di un'altra app, o con stati sconosciuti; **chiudere il servizio non chiude il gateway ricevuto per iniezione** (verificato contro il codice vecchio, dove fallisce) |
 | `notifications/reschedule_guard_test.dart` | 6 | La prima volta si ripianifica sempre; dentro l'ora no; passata l'ora si'; un orologio spostato indietro non blocca; l'intervallo e' configurabile; lo stato sopravvive alla ricostruzione dello store |
-| `core_modules_test.dart` | 30 | `Money` (somme senza errore di virgola mobile, parsing di ciò che l'utente digita davvero); `CsvWriter` (BOM, separatore, escaping); backup (round-trip, rifiuto di app e schema sbagliati, file inesistente); `AtomicFile` (venti scritture concorrenti); `AppPaths` (i relativi sopravvivono a un cambio di radice); `NotificationIds` (stabilità e unicità); `InstallId` |
+| `core_modules_test.dart` | 31 | `Money` (somme senza errore di virgola mobile, parsing di ciò che l'utente digita davvero); `CsvWriter` (BOM, separatore, escaping); backup (round-trip, rifiuto di app e schema sbagliati, file inesistente, **zip slip**: una voce che esce dalla cartella non viene scritta); `AtomicFile` (venti scritture concorrenti); `AppPaths` (i relativi sopravvivono a un cambio di radice); `NotificationIds` (stabilità e unicità); `InstallId` |
+| `gate/paywall_test.dart` | 1 | Se il prezzo del Pro non arriva dallo store, la schermata lo dice e offre di riprovare invece della rotellina eterna (difetto iPhone del 2026-10-06) |
+| `notifications/permesso_ios_test.dart` | 2 | Il rifiuto di iOS per permesso mancante viene riconosciuto; gli altri errori non vengono scambiati per quello |
+| `ui/primary_button_test.dart` | 2 | `MicroPrimaryButton` non espanso si disegna in riga accanto a un altro pulsante; espanso occupa tutta la larghezza |
 
 ---
 

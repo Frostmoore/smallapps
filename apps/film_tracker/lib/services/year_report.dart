@@ -150,7 +150,8 @@ Future<Uint8List> buildYearReport({
 
 const pw.EdgeInsets _margin = pw.EdgeInsets.fromLTRB(40, 44, 40, 36);
 
-/// Inchiostro, grigio e ambra (il seme dell'app, F6.1). ⚑ Fondo bianco anche se l'app e'
+/// Inchiostro, grigio e un ambra scuro da stampa (non il seme dell'app: sul bianco serve piu'
+/// scuro). ⚑ Fondo bianco anche se l'app e'
 /// scura: e' carta, e un fondo scuro stampato consuma una cartuccia per pagina.
 const PdfColor _ink = PdfColor.fromInt(0xFF1E1B18);
 const PdfColor _muted = PdfColor.fromInt(0xFF6B6259);
