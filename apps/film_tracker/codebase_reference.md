@@ -183,10 +183,22 @@ apps/film_tracker/
 │   ├── features/stats/stats_page_test.dart
 │   ├── services/{csv_export,film_backup_source,year_report}_test.dart
 │   └── widget/paywall_config_test.dart
+├── integration_test/                     NON test di regressione: giri per lo store (sul Mac, con FT_DEMO)
+│   ├── screenshots_test.dart             stampa SCATTO:<nome>, lo scatto lo fa tool/screenshots_ios.sh
+│   └── anteprima_test.dart               il giro del video, fra REGISTRA e FINE (tool/anteprima_app_store.sh)
+├── store/                                scheda e grafiche dello store
+│   ├── scheda-app-store.md               testi it/en contati, cosa va dove (API o a mano), come si rifa' tutto
+│   ├── screenshots/ios/<lingua>/         screenshot veri dal simulatore (anche paywall-revisione.png)
+│   ├── grafiche/                         appstore (6,9"), appstore-6.5, play, apple (intestazione, ricerca), testata Play
+│   └── video/anteprima-886x1920-<lingua>.mp4   anteprima App Store (il .mov grezzo e' ignorato da git)
 ├── tool/
 │   ├── testi.py                          sorgente dei testi (TESTI comuni: appTitle, common, paywall, pro, settings, theme) → ARB
 │   ├── testi_{dati,foto,laboratorio,rullini}.py   testi per parte dell'app, caricati da testi.py
-│   └── genera_icone.py                   icone e splash dall'originale del proprietario
+│   ├── genera_icone.py                   icone e splash dall'originale del proprietario
+│   ├── genera_grafiche_store.py          schede screenshot, testata Play, intestazione e ricerca Apple (stile C · Provino)
+│   ├── anteprima_app_store.sh            registra il video sul simulatore (Mac)
+│   ├── converti_anteprima.ps1            .mov → mp4 886x1920 30 fps con audio muto (PC, ffmpeg)
+│   └── scheda_app_store.py               carica scheda, video e prodotto Pro su App Store Connect (Mac)
 ├── assets/
 │   ├── fonts/                            PlusJakartaSans-Variable.ttf, SpaceMono-{Regular,Bold}.ttf, OFL-PlusJakartaSans.txt, OFL-SpaceMono.txt
 │   └── icons/                            generate da genera_icone.py; source/filmtracker_originale.png, source/anteprime/
@@ -200,11 +212,26 @@ apps/film_tracker/
 │   ├── {en,it}.lproj/InfoPlist.strings   testi dei permessi it/en (gruppo di varianti nel progetto)
 │   ├── AppDelegate.swift, SceneDelegate.swift   quelli di flutter create (nessuna modifica)
 ├── flutter_launcher_icons.yaml, flutter_native_splash.yaml, l10n.yaml, pubspec.yaml, analysis_options.yaml
-└── README.md                             ancora quello del template di flutter create (§14)
+└── README.md                             cos'e' l'app, gratis e Pro, comandi, identita'
 ```
 
-**Non esistono** (per non cercarle): `integration_test/`, `store/`, estensioni iOS, codice
-Kotlin oltre `MainActivity.kt`, Podfile (Flutter usa Swift Package Manager).
+**Non esistono** (per non cercarle): test d'integrazione di regressione (`integration_test/` ha
+solo i giri per lo store), estensioni iOS, codice Kotlin oltre `MainActivity.kt`, Podfile (Flutter
+usa Swift Package Manager).
+
+### Lo store (2026-10-08)
+
+App Store: app `6820633385`, inviata alla revisione il 2026-10-08 con
+`filmtracker_pro_lifetime` (4,99 €). Tutto quello che serve per rifare scheda, screenshot, video
+e grafiche sta in `store/scheda-app-store.md`. Tre cose da ricordare:
+
+- ☠ **Nome inglese «Film Tracker – Roll Diary»**: «Film Tracker» in inglese e' di un altro
+  sviluppatore (409 DUPLICATE.DIFFERENT_ACCOUNT, come per Full Freezer). Sotto l'icona resta
+  «Film Tracker».
+- ☠ **Space Mono non ha il glifo «▸»**: nell'app Flutter ripiega su un altro carattere, Pillow no
+  (quadratino). `genera_grafiche_store.py` lo disegna come triangolino (`riga_a_bordo`).
+- ☠ **Niente `Runner.entitlements`** (nessun App Group): `tool/build_ios.sh` firma l'archivio
+  senza diritti se il file manca (prima si fermava con "cannot read entitlement data").
 
 ---
 
@@ -2179,7 +2206,8 @@ dimostrano `film_repository_test`, `photo_import_test`, `qr_links_test` e `film_
 ⚑ `tapSalva` usa `scrollUntilVisible` e poi `ensureVisible`: i moduli sono ListView che costruiscono
 solo le righe visibili, e il pulsante in fondo non esiste finche' non ci si arriva.
 ⚑ **Niente golden**: i caratteri cambiano fra Windows e Mac. L'aspetto lo verificano i giri
-sull'emulatore e sul simulatore. **Niente test d'integrazione** (`integration_test/` non esiste).
+sull'emulatore e sul simulatore. **Niente test d'integrazione di regressione**: `integration_test/`
+ha solo i giri che producono screenshot e video dello store.
 
 ---
 
@@ -2305,16 +2333,14 @@ non nomina mai la causa.
 - **Nessuna icona monocromatica** Android 13 (§2bis).
 - **Nessun test** dell'editor del rullino, della pagina delle stampe, del visualizzatore, delle
   impostazioni (oltre a DataSection), del PDF dal punto di vista grafico; **nessun golden**
-  (scelta), **nessun test d'integrazione** (`integration_test/` non esiste), **nessun test di
-  migrazione** (schema 1).
-- **Nessuna prova su telefono vero**: acquisti, fotocamera, **HEIC dalla galleria Android** (DA
-  PROVARE: il pacchetto `image` potrebbe non decodificarlo e la foto conterebbe come illeggibile),
-  QR letto dalla fotocamera di sistema (provato solo con adb), stampa del PDF.
-- **Nessun App ID o prodotto Pro registrato sugli store**: vanno creati dal proprietario (portale
-  Apple, App Store Connect a 4,99 €, Play Console con base 4,09 EUR). Finche' non ci sono il Pro
-  non e' comprabile.
-- **Nessuna build TestFlight / Play**, nessuna scheda store (`store/` non esiste), nessuno
-  screenshot.
+  (scelta), **nessun test d'integrazione di regressione** (`integration_test/` ha solo i giri
+  per lo store), **nessun test di migrazione** (schema 1).
+- **Provata su iPad dal proprietario** (TestFlight, 2026-10-08: «mi pare che funzioni tutto»).
+  Ancora da provare su Android vero: **HEIC dalla galleria** (il pacchetto `image` potrebbe non
+  decodificarlo e la foto conterebbe come illeggibile) e il QR letto dalla fotocamera di sistema
+  (provato solo con adb).
+- **Google Play**: niente ancora (app, prodotto a 4,09 EUR senza IVA, scheda). Dopo il D-U-N-S,
+  come le altre app.
 
 ### Debito tecnico
 

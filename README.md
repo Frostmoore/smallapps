@@ -28,9 +28,9 @@ il monorepo e' la base per tutte le microapp che verranno.
 | F2 | License Server (Node + Fastify + SQLite), repo separata su Gitea | chiusa, 43 test |
 | **F3** | **TrashCan**, l'app pilota | **chiusa**, 122 test |
 | — | **Vetrina** `smpmicroapps.it` | online, bilingue, con le pagine legali |
-| **F4** | **Full Freezer**, Android e iPhone | **completa nel codice**, 140 test; App Store in revisione, Play in attesa del D-U-N-S |
-| **F5** | **Scorte Calore**, Android e iPhone | **completa nel codice**, 158 test; mancano grafiche definitive, ID e prodotto sugli store |
-| **F6** | **Film Tracker**, Android e iPhone | **completa nel codice**, 184 test; mancano ID, prodotto e scheda sugli store |
+| **F4** | **Full Freezer**, Android e iPhone | **completa**, 140 test; App Store in revisione, Play in attesa del D-U-N-S |
+| **F5** | **Scorte Calore**, Android e iPhone | **completa**, 158 test; App Store in revisione (2026-10-08), Play dopo il D-U-N-S |
+| **F6** | **Film Tracker**, Android e iPhone | **completa**, 185 test; App Store in revisione (2026-10-08), Play dopo il D-U-N-S |
 | F7 | Hardening | da fare |
 | F8 | Deploy e pubblicazione | da fare |
 

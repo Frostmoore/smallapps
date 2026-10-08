@@ -18,7 +18,7 @@ Ultimo aggiornamento: **2026-10-08**
 | **TrashCan** | 1.0.0 (11) | 🟢 **pubblicata** (2026-10-08) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store»): si accendono insieme quando c'e' anche iOS in Italia |
 | **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
-| **Film Tracker** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 **scheda completa e build 1 su TestFlight** (2026-10-08), da inviare | card grigia «In arrivo» |
+| **Film Tracker** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
 
 Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubblicata in parte ·
 🟢 pubblicata · 🔴 respinta
@@ -59,7 +59,7 @@ App Store, quando l'app e' disponibile anche su iOS in Italia (vedi `memory/deci
 | 2026-10-06 | **Approvata**, rilascio automatico: «Pronta per la distribuzione» |
 | 2026-10-06 | In vendita in **148 paesi**; nei **27 paesi UE (Italia compresa)** bloccata con `TRADER_STATUS_NOT_PROVIDED` |
 | 2026-10-07 | Ricontrollato via API: Italia ancora `TRADER_STATUS_NOT_PROVIDED` (verifica DSA di Apple in corso, niente da fare da parte nostra) |
-| 2026-10-08 | Ricontrollato via API: Italia ancora `TRADER_STATUS_NOT_PROVIDED` |
+| 2026-10-08 | Ricontrollato via API (due volte): Italia ancora `TRADER_STATUS_NOT_PROVIDED` |
 
 ⏳ **In attesa di Apple:** Business → Conformità → *Normativa sui servizi digitali* =
 «Verifica in corso» (dati inviati il 2026-10-05, niente da cliccare). Quando diventa «Attivo»
@@ -171,9 +171,10 @@ iPhone. Nessuna build caricata.
   screenshot di revisione → READY_TO_SUBMIT.
 - **Build 1.0.0 (1)** su TestFlight e collegata alla versione; gruppo «Sviluppatore» col
   proprietario, invito mandato.
-- **A mano, prima di inviare**: Intestazione e Risultati della ricerca (Scrivania del Mac,
-  `FilmTracker-AppStore/`), etichetta privacy «Dati non raccolti», classificazione per eta',
-  spuntare l'acquisto in-app nella pagina della versione.
+- Fatti a mano dal proprietario: Intestazione e Risultati della ricerca, etichetta privacy,
+  classificazione per eta', acquisto in-app spuntato. Provata su iPad via TestFlight.
+- **2026-10-08: inviata alla revisione.** Versione 1.0.0 e `filmtracker_pro_lifetime` in
+  WAITING_FOR_REVIEW (verificato via API).
 - Play: dopo il D-U-N-S, come Full Freezer e Scorte Calore.
 
 ---
