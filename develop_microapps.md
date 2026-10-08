@@ -1136,7 +1136,7 @@ volta sola; nella fase di ciascuna app si spuntano.
 - [ ] **F14** Ricordamelo qui — promemoria per luogo (geofencing, permesso in background)
 - [ ] **F15** Quanti sono? — conteggio con la fotocamera (**decisione sull'AI prima di F15.0**)
 - [ ] **F16** Riassumilo — riassunto da Share Sheet (**decisione sull'AI prima di F16.0**)
-- [ ] **F17** Fammi un QR — QR a tutto schermo da Share Sheet
+- [ ] **F17** Fammi un QR — QR a tutto schermo da Share Sheet — ⚑ **LA PRIMA DA FARE** (scelta del proprietario il 2026-10-08, si comincia il 2026-10-09 da F17.0: decisioni e specsheet insieme a lui; costruisce anche la ricezione da Share Sheet per F16/F18/F19)
 - [ ] **F18** Leggimelo — lettura ad alta voce di un articolo condiviso
 - [ ] **F19** Dove porta? — destinazione reale di un link, prima di aprirlo
 - [ ] **Card «In arrivo»** delle dieci app nella vetrina `smpmicroapps.it` (regola: ogni microapp
