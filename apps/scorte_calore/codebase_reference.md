@@ -77,6 +77,7 @@
 | Le stringhe tradotte | **`tool/testi.py` + `tool/testi_*.py`** (sorgente unica) → `lib/l10n/app_en.arb`, `app_it.arb` |
 | L'icona e la splash | `tool/genera_icone.py` + `flutter_launcher_icons.yaml`, `flutter_native_splash.yaml` (§2bis) |
 | L'anteprima del widget iOS sul Mac | `tool/anteprima_widget_ios.swift` (§2ter) |
+| Scheda App Store, screenshot, video, prodotto Pro | `store/scheda-app-store.md` (come si rifa' tutto), `tool/scheda_app_store.py` |
 
 ---
 
@@ -144,12 +145,25 @@ apps/scorte_calore/
 │   ├── data/scorte_repository_test.dart
 │   ├── domain/{consumption,costs,fuel_units,quantity_converter,reorder_plan}_test.dart
 │   ├── features/history/{fake_repo.dart,history_page_test.dart,purchases_page_test.dart}
-│   └── services/{backup_csv,calendar_sync,scorte_scheduler,scorte_widget}_test.dart
+│   ├── services/{backup_csv,calendar_sync,scorte_scheduler,scorte_widget}_test.dart
+│   └── widget/paywall_config_test.dart
+├── integration_test/                     NON test di regressione: giri per gli store (sul Mac)
+│   ├── screenshots_test.dart             stampa SCATTO:<nome>, lo scatto lo fa tool/screenshots_ios.sh
+│   └── anteprima_test.dart               il giro del video, fra REGISTRA e FINE (tool/anteprima_app_store.sh)
+├── store/                                schede e grafiche degli store
+│   ├── scheda-app-store.md               testi it/en contati, cosa va dove (API o a mano)
+│   ├── screenshots/ios/<lingua>/         screenshot veri dal simulatore (anche paywall-revisione.png)
+│   ├── grafiche/                         appstore (6,9"), appstore-6.5, play, apple (intestazione, ricerca), sorgenti (widget)
+│   └── video/anteprima-886x1920-<lingua>.mp4   anteprima App Store (il .mov grezzo e' ignorato da git)
 ├── tool/
 │   ├── testi.py                          sorgente dei testi (TESTI comuni) → ARB
 │   ├── testi_{widget,notifiche,storico,dati,calendario}.py   testi per parte dell'app, caricati da testi.py
 │   ├── genera_icone.py                   icone e splash dall'originale del proprietario
-│   └── anteprima_widget_ios.swift        renderizza il widget iOS in PNG sul Mac
+│   ├── anteprima_widget_ios.swift        renderizza il widget iOS in PNG sul Mac (--vetrina per le grafiche)
+│   ├── genera_grafiche_store.py          schede screenshot, testata Play, intestazione e ricerca Apple
+│   ├── anteprima_app_store.sh            registra il video sul simulatore (Mac)
+│   ├── converti_anteprima.ps1            .mov → mp4 886x1920 30 fps con audio muto (PC, ffmpeg)
+│   └── scheda_app_store.py               carica scheda, video e prodotto Pro su App Store Connect (Mac)
 ├── android/app/src/main/
 │   ├── AndroidManifest.xml               permessi, receiver di widget/notifiche, deep link spento
 │   ├── kotlin/com/smp/scortecalore/
@@ -1969,7 +1983,7 @@ sintomo non nomina mai la causa.
 - **Nessuna pagina per fonte** a cui portino notifiche o widget: aprono la home.
 - **Nessun test della home, dell'editor della fonte, del foglio di aggiornamento,
   della barra del calendario, delle impostazioni**, **nessun app smoke test**, **nessun test
-  d'integrazione** (non esiste la cartella `integration_test/`), **nessun golden** (scelta), **nessun test di
+  d'integrazione** (`integration_test/` contiene solo i giri per screenshot e video), **nessun golden** (scelta), **nessun test di
   migrazione** (schema 1).
 - **Nessuna prova su telefono vero**: acquisti, notifiche su iPhone, calendario su iPhone,
   tocco sul widget iOS.

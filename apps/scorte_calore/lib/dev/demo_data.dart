@@ -39,6 +39,23 @@ Future<bool> seedDemoData(AppDatabase db, SettingsStore settings, {bool english 
     await repo.upsertMeasurement(stufa, Measurement.absolute(date: oggi.addDays(-giorniFa), quantity: sacchi));
   }
 
+  // Gli acquisti di pellet: il pieno di settembre, un'aggiunta in ottobre e lo scorso inverno,
+  // cosi' la pagina dei costi ha una spesa stagionale e il confronto fra inverni.
+  for (final (giorniFa, sacchi, centesimi, fornitore) in const [
+    (330, 70.0, 45500, 'Agrinova'),
+    (210, 40.0, 26800, 'Agrinova'),
+    (29, 50.0, 34500, 'Agrinova'),
+    (4, 15.0, 10650, 'Brico'),
+  ]) {
+    await repo.addPurchase(
+      sourceId: stufa,
+      date: oggi.addDays(-giorniFa),
+      quantity: sacchi,
+      totalCostCents: centesimi,
+      supplier: fornitore,
+    );
+  }
+
   // Il bombolone: letture del manometro, che diventano litri utili all'80%.
   final bombolone = await repo.addSource(
     name: english ? 'LPG tank' : 'Bombolone GPL',

@@ -21,6 +21,37 @@ import WidgetKit
 struct Anteprima {
     @MainActor
     static func main() {
+        // `--vetrina it|en <file>`: il widget medio da solo, grande e su fondo trasparente, per
+        // le grafiche delle schede degli store (tool/genera_grafiche_store.py).
+        if CommandLine.arguments.count > 3, CommandLine.arguments[1] == "--vetrina" {
+            let it = CommandLine.arguments[2] == "it"
+            let righe = [
+                "\(it ? "Stufa soggiorno" : "Living room stove")\u{1F}2026-12-09\u{1F}2026-12-02\u{1F}\(it ? "2 dic" : "Dec 2")",
+                "\(it ? "Bombolone GPL" : "LPG tank")\u{1F}2026-11-26\u{1F}2026-11-19\u{1F}\(it ? "19 nov" : "Nov 19")",
+            ].joined(separator: "\n")
+            let valori: [String: String] = [
+                Chiavi.titolo: it ? "SCORTE" : "HEATING STOCK",
+                Chiavi.oggi: it ? "oggi" : "today",
+                Chiavi.modelloGiorni: it ? "{n} giorni" : "{n} days",
+                Chiavi.modelloRiordino: it ? "Riordina entro il {d}" : "Reorder by {d}",
+                Chiavi.riordinaOra: it ? "Riordina ora" : "Reorder now",
+                Chiavi.servonoMisure: "",
+                Chiavi.righe: righe,
+            ]
+            let voce = Deposito { valori[$0] }.voce(al: Deposito.formatoData.date(from: "2026-10-08")!)
+            let vista = VistaScorte(entry: voce, famiglia: .systemMedium)
+                .frame(width: 338, height: 158)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            let render = ImageRenderer(content: vista)
+            render.scale = 4
+            guard let img = render.nsImage, let tiff = img.tiffRepresentation,
+                  let bmp = NSBitmapImageRep(data: tiff),
+                  let png = bmp.representation(using: .png, properties: [:])
+            else { exit(1) }
+            try? png.write(to: URL(fileURLWithPath: CommandLine.arguments[3]))
+            print("vetrina scritta")
+            return
+        }
         let uscita = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "/tmp/anteprima_sc.png"
         var reale: Deposito?
         if CommandLine.arguments.count > 2,

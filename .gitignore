@@ -75,3 +75,6 @@ apps/*/release_defines.json
 # Il pacchetto firmato: 68 MB che non devono entrare nella storia del repo.
 # Si rigenera con tool/fl.ps1 build appbundle --release (vedi store/scheda-play.md).
 apps/*/store/*.aab
+# Il video grezzo del simulatore (1320x2868, ~5 MB): si rifa' con tool/anteprima_app_store.sh.
+# Si tiene solo l'mp4 convertito, quello caricato su App Store Connect.
+apps/*/store/video/*.mov

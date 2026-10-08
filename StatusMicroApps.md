@@ -17,7 +17,7 @@ Ultimo aggiornamento: **2026-10-08**
 |---|---|---|---|---|
 | **TrashCan** | 1.0.0 (11) | 🟡 in revisione (produzione) | 🟠 pubblicata, **tranne UE** | spenti («Presto su Google Play e App Store») |
 | **Full Freezer** | 1.0.0 (2) | 🔵 test interno, Pro attivo; in attesa del D-U-N-S per l'account da organizzazione | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
-| **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 in sviluppo (codice completo, mai caricata) | card grigia «In arrivo» |
+| **Scorte Calore** | 1.0.0 (1) | 🔵 in sviluppo (codice completo, mai caricata) | 🔵 **scheda completa e build 1 su TestFlight** (2026-10-08), da inviare | card grigia «In arrivo» |
 | **Film Tracker** | — | ⚪ non iniziata | ⚪ non iniziata | card grigia «In arrivo» |
 
 Legenda: ⚪ non iniziata · 🔵 in sviluppo · 🟡 in revisione · 🟠 pubblicata in parte ·
@@ -126,16 +126,25 @@ iPhone, widget compreso. Nessuna build caricata su nessuno store.
 - iOS: `com.smp.scortecalore` + `com.smp.scortecalore.ScorteCaloreWidget`, App Group
   `group.com.smp.scortecalore`.
 
-Prima del primo invio, da fare dal proprietario:
+### App Store (2026-10-08)
 
-1. Apple Developer: i due App ID con l'App Group `group.com.smp.scortecalore` agganciato a
-   **entrambi**, poi i profili «MicroApps AppStore <bundle>» (li usa `tool/build_ios.sh`).
-2. App Store Connect: app nuova e prodotto `scortecalore_pro_lifetime` a 2,99 €.
-3. Play Console: app nuova e prodotto. ☠ La scheda deve giustificare `READ_CALENDAR` e
-   `WRITE_CALENDAR` (funzione Pro facoltativa: la data di riordino nel calendario).
-   ☠ Con l'account personale servono i 12 tester per 14 giorni: conviene aspettare il D-U-N-S
-   come per Full Freezer.
-4. Schede, screenshot e grafiche degli store (non ancora fatte).
+- App `6820405604`, App ID e App Group creati dal proprietario; profili «MicroApps AppStore
+  com.smp.scortecalore» e «…ScorteCaloreWidget» creati via API (gruppo dentro).
+- **Via API** (`tool/scheda_app_store.py`): nomi, sottotitoli, categorie Utility + Stile di vita,
+  privacy, diritti sui contenuti, disponibilita' in 175 paesi, gratuita, testi it/en-GB,
+  5 screenshot 6,5" per lingua, **anteprima video** 6,5" per lingua (stato COMPLETE), note e
+  contatti per la revisione.
+- **Prodotto** `scortecalore_pro_lifetime` creato via API: non consumabile, 2,99 € (base Italia),
+  tutti i paesi, testi it/en-GB, screenshot per la revisione.
+- **Build 1.0.0 (1)** caricata su TestFlight; gruppo interno «Sviluppatore» col proprietario.
+- **A mano, prima di inviare**: Intestazione e Risultati della ricerca (file sulla Scrivania del
+  Mac, `ScorteCalore-AppStore/`), etichetta privacy «Dati non raccolti», classificazione per
+  eta', scegliere la build e spuntare l'acquisto in-app nella pagina della versione.
+
+### Google Play
+
+Da fare dopo il D-U-N-S (come Full Freezer). ☠ La scheda deve giustificare `READ_CALENDAR` e
+`WRITE_CALENDAR`; prezzo da scrivere **senza IVA** (2,45 EUR).
 
 ## Film Tracker
 

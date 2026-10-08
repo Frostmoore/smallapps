@@ -226,8 +226,17 @@ xcrun altool --validate-app -f "$IPA" -t ios \
   --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tail -5
 
 echo "==> carico su App Store Connect"
-xcrun altool --upload-app -f "$IPA" -t ios \
-  --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tail -5
+# ☠ altool ogni tanto si ferma con "The file Defaults.properties couldn't be opened" (visto
+#   con Scorte Calore il 2026-10-08) e al giro dopo carica senza problemi: si riprova.
+for prova in 1 2 3; do
+  ESITO=$(xcrun altool --upload-app -f "$IPA" -t ios \
+    --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tail -5)
+  echo "$ESITO"
+  echo "$ESITO" | grep -q "UPLOAD SUCCEEDED" && break
+  [ "$prova" = 3 ] && { echo "!! caricamento fallito tre volte" >&2; exit 1; }
+  echo "==> riprovo il caricamento ($prova)"
+  sleep 10
+done
 
 echo
 echo "Caricata. Su TestFlight compare fra dieci e trenta minuti, dopo l'elaborazione."
