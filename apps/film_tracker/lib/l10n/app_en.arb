@@ -454,6 +454,24 @@
   "home_atLab": "At the lab",
   "home_archive": "Archive",
   "home_newRoll": "New roll",
+  "home_title": "Rolls",
+  "home_overline": "▸ Film Tracker · {count, plural, =1{1 roll} other{{count} rolls}}",
+  "@home_overline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_daysShort": "{days} d",
+  "@home_daysShort": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "home_contactSheet": "Archive · contact sheet",
   "home_menuCameras": "Cameras",
   "home_menuStocks": "Film stocks",
   "home_menuMore": "More",

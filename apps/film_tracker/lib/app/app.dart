@@ -21,6 +21,7 @@ import '../features/settings/settings_page.dart';
 import '../features/stats/stats_page.dart';
 import '../features/stocks/stocks_page.dart';
 import '../l10n/generated/app_localizations.dart';
+import 'film_palette.dart';
 import 'locale_resolution.dart';
 import 'providers.dart';
 import 'routes.dart';
@@ -110,11 +111,15 @@ class _FilmTrackerAppState extends ConsumerState<FilmTrackerApp> {
       title: config.appName,
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      // `fidelity`: l'ambra resta quella del piano invece del bruno che Material ricaverebbe
-      // dal seme (stessa scelta delle altre app). La palette definitiva arriva con le
-      // proposte grafiche (F6.0 punto 6).
-      theme: MicroTheme.light(seed: config.seedColor, fontFamily: config.fontFamily, variant: DynamicSchemeVariant.fidelity),
-      darkTheme: MicroTheme.dark(seed: config.seedColor, fontFamily: config.fontFamily, variant: DynamicSchemeVariant.fidelity),
+      // "C · Provino" (F6.0 punto 6): il tema Material vestito da pellicola (film_palette.dart).
+      theme: withFilmLook(
+        MicroTheme.light(seed: config.seedColor, fontFamily: config.fontFamily, variant: DynamicSchemeVariant.fidelity),
+        FilmPalette.light,
+      ),
+      darkTheme: withFilmLook(
+        MicroTheme.dark(seed: config.seedColor, fontFamily: config.fontFamily, variant: DynamicSchemeVariant.fidelity),
+        FilmPalette.dark,
+      ),
       themeMode: ref.watch(themeModeProvider),
       supportedLocales: kSupportedLocales,
       localizationsDelegates: const [

@@ -13,6 +13,7 @@ import '../../app/routes.dart';
 import '../../data/database.dart';
 import '../../domain/film_types.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../common/film_strip.dart';
 import '../stocks/custom_stock_sheet.dart';
 
 /// Creazione e modifica di un rullino (F6.6).
@@ -485,7 +486,7 @@ class _StockPickerSheetState extends ConsumerState<_StockPickerSheet> {
 
     Widget header(String text) => Padding(
       padding: const EdgeInsets.fromLTRB(MicroSpacing.l, MicroSpacing.l, MicroSpacing.l, 0),
-      child: MicroSectionHeader(title: text),
+      child: SectionLabel(text),
     );
 
     return DraggableScrollableSheet(

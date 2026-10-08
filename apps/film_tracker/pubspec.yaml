@@ -76,14 +76,19 @@ flutter:
   uses-material-design: true
   generate: true
 
-  # ⚑ Per ora lo stesso font di Full Freezer e Scorte Calore: il piano dice Inter + Fraunces,
-  #   ma i caratteri si scelgono con le proposte grafiche (F6.0 punto 6), dopo l'interfaccia
-  #   essenziale.
-  # Plus Jakarta Sans, font VARIABILE (pesi 200-800 in un file solo), dal repository
-  # ufficiale google/fonts insieme alla sua licenza (assets/fonts/OFL.txt, SIL Open Font
-  # License 1.1, che ne consente l'uso in app commerciali purche' la licenza sia inclusa).
-  # I pesi si ottengono con FontVariation in MicroTheme, come per Outfit in TrashCan.
+  # ⚑ Grafica "C · Provino" (scelta del proprietario, 2026-10-08): corpo in Plus Jakarta Sans,
+  #   scritte a bordo pellicola in Space Mono. Il piano diceva Inter + Fraunces: superato.
+  # Plus Jakarta Sans, font VARIABILE (pesi 200-800 in un file solo), e Space Mono (Regular e
+  # Bold), dal repository ufficiale google/fonts con le loro licenze
+  # (assets/fonts/OFL-PlusJakartaSans.txt, OFL-SpaceMono.txt: SIL Open Font License 1.1, che
+  # ne consente l'uso in app commerciali purche' la licenza sia inclusa).
+  # I pesi di Plus Jakarta si ottengono con FontVariation in MicroTheme, come in TrashCan.
   fonts:
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+    - family: SpaceMono
+      fonts:
+        - asset: assets/fonts/SpaceMono-Regular.ttf
+        - asset: assets/fonts/SpaceMono-Bold.ttf
+          weight: 700

@@ -16,6 +16,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../services/csv_export.dart';
 import '../../services/film_backup_source.dart';
 import '../../services/year_report.dart';
+import '../common/film_strip.dart';
 
 /// Il servizio di backup di micro_core, con le cartelle dell'app e la sua versione.
 final backupServiceProvider = Provider<BackupService>(
@@ -41,7 +42,7 @@ class DataSection extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: MicroSpacing.m),
-          child: MicroSectionHeader(title: l.data_title),
+          child: SectionLabel(l.data_title),
         ),
         ListTile(
           key: const ValueKey('data_stats'),

@@ -11,6 +11,7 @@ import '../../app/providers.dart';
 import '../../data/database.dart';
 import '../../domain/film_stats.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../common/film_strip.dart';
 import '../common/pro_gate.dart';
 import '../settings/data_section.dart';
 
@@ -168,11 +169,11 @@ class _StatsContent extends ConsumerWidget {
         ),
 
         MicroSpacing.gapL,
-        MicroSectionHeader(title: l.stats_perMonth),
+        SectionLabel(l.stats_perMonth),
         MonthlyRollsChart(rollsPerMonth: s.rollsPerMonth),
 
         MicroSpacing.gapL,
-        MicroSectionHeader(title: l.stats_spending),
+        SectionLabel(l.stats_spending),
         if (s.totalCents == 0)
           Text(l.stats_noCosts, style: muted)
         else
@@ -191,7 +192,7 @@ class _StatsContent extends ConsumerWidget {
 
         if (s.averageCentsPerRoll != null) ...[
           MicroSpacing.gapL,
-          MicroSectionHeader(title: l.stats_averages),
+          SectionLabel(l.stats_averages),
           MicroStatTile(
             key: const ValueKey('stats_perRoll'),
             icon: Icons.payments_outlined,
@@ -213,7 +214,7 @@ class _StatsContent extends ConsumerWidget {
         ],
 
         MicroSpacing.gapL,
-        MicroSectionHeader(title: l.stats_mostUsed),
+        SectionLabel(l.stats_mostUsed),
         MicroCard(
           child: Column(
             children: [

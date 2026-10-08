@@ -9,6 +9,7 @@ import '../../app/providers.dart';
 import '../../data/database.dart';
 import '../../domain/film_types.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../common/film_strip.dart';
 import 'custom_stock_sheet.dart';
 
 /// Il catalogo delle pellicole (F6.4): ricerca, gruppi per marca, ISO e processo di ognuna.
@@ -131,7 +132,7 @@ class _StocksPageState extends ConsumerState<StocksPage> {
         out.add(
           Padding(
             padding: const EdgeInsets.fromLTRB(MicroSpacing.l, MicroSpacing.l, MicroSpacing.l, 0),
-            child: MicroSectionHeader(title: s.brand),
+            child: SectionLabel(s.brand),
           ),
         );
       }

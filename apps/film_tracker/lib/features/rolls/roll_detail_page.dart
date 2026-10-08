@@ -12,6 +12,7 @@ import '../../data/database.dart';
 import '../../data/film_repository.dart';
 import '../../domain/roll_status.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../common/film_strip.dart';
 import '../photos/image_store_provider.dart';
 import '../photos/roll_photos_section.dart';
 
@@ -83,7 +84,7 @@ class RollDetailPage extends ConsumerWidget {
           MicroSpacing.gapL,
           _StatusActions(roll: roll),
           MicroSpacing.gapXL,
-          MicroSectionHeader(title: l.roll_timeline),
+          SectionLabel(l.roll_timeline),
           _Timeline(roll: roll, camera: camera, development: dev, prints: prints),
           if (roll.note != null) ...[
             MicroSpacing.gapL,

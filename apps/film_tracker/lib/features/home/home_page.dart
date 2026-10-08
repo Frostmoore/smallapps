@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../../app/film_palette.dart';
 import '../../app/labels.dart';
 import '../../app/providers.dart';
 import '../../app/routes.dart';
@@ -10,14 +11,19 @@ import '../../data/database.dart';
 import '../../data/film_repository.dart';
 import '../../domain/roll_status.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../common/film_strip.dart';
 import '../rolls/roll_cover.dart';
 
-/// La home a tre sezioni (F6.8): In macchina, In laboratorio, Archivio.
+/// La home a tre sezioni (F6.8): In macchina, In laboratorio, Archivio, vestita da
+/// **"C · Provino"** (scelta del proprietario, 2026-10-08; F6.0 punto 6).
 ///
-/// Interfaccia essenziale (F6.0 punto 6): Material 3 pulito, la grafica definitiva arriva con
-/// le proposte. Le tre sezioni stanno in **una sola pagina che scorre** e non in tre schede:
-/// i rullini in macchina e in laboratorio sono pochi (uno, due, tre), e l'archivio sotto,
-/// con le copertine, e' quello che si vuole vedere appena si apre l'app.
+/// - In macchina: ogni rullino e' una striscia di pellicola con le perforazioni e la scritta a
+///   bordo ("ILFORD HP5+ 800 ▸ 12"), i giorni in macchina in arancio monospaziato.
+/// - In laboratorio: righe compatte con i giorni d'attesa.
+/// - Archivio: un foglio provini a tre colonne, ogni fotogramma con il suo numero.
+///
+/// Le tre sezioni stanno in **una sola pagina che scorre** e non in tre schede: i rullini in
+/// macchina e in laboratorio sono pochi, e l'archivio sotto e' quello che si vuole vedere.
 ///
 /// ⚑ Ogni sezione ha il suo stream (`rollItemsProvider(section)`): un rullino che cambia stato
 /// passa da una sezione all'altra da solo, senza che la pagina sappia perche'.
@@ -27,11 +33,13 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
+    final p = FilmPalette.of(context);
     final inCamera = ref.watch(rollItemsProvider(RollSection.inCamera));
     final atLab = ref.watch(rollItemsProvider(RollSection.atLab));
     final archive = ref.watch(rollItemsProvider(RollSection.archive));
 
     final sections = [inCamera, atLab, archive];
+    final total = sections.fold<int>(0, (n, s) => n + (s.value?.length ?? 0));
     final Widget body;
     if (sections.any((s) => s.hasError && !s.hasValue)) {
       body = MicroEmptyState(
@@ -57,53 +65,113 @@ class HomePage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.appTitle),
-        actions: [
-          PopupMenuButton<String>(
-            tooltip: l.home_menuMore,
-            icon: const Icon(Icons.more_vert),
-            onSelected: (route) => context.push(route),
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: Routes.cameras,
-                child: ListTile(
-                  leading: const Icon(Icons.photo_camera_outlined),
-                  title: Text(l.home_menuCameras),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem(
-                value: Routes.stocks,
-                child: ListTile(
-                  leading: const Icon(Icons.camera_roll_outlined),
-                  title: Text(l.home_menuStocks),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              // Pro (F6.10): senza il Pro la pagina mostra il lucchetto (ProGate).
-              PopupMenuItem(
-                value: Routes.stats,
-                child: ListTile(
-                  leading: const Icon(Icons.insights_outlined),
-                  title: Text(l.stats_title),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Header(total: total),
+            Expanded(child: body),
+          ],
+        ),
+      ),
+      // Il pulsante principale largo in fondo, come nel disegno: il gesto piu' frequente.
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+        child: SizedBox(
+          height: 56,
+          child: FilledButton.icon(
+            onPressed: () => context.push(Routes.rollNew),
+            icon: const Icon(Icons.add),
+            label: EdgeText(l.home_newRoll, size: 15, bold: true, color: p.onEdge),
           ),
-          IconButton(
-            tooltip: l.settings_title,
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push(Routes.settings),
+        ),
+      ),
+    );
+  }
+}
+
+/// La testata: la scritta a bordo, il titolo, il menu e le impostazioni.
+class _Header extends StatelessWidget {
+  const _Header({required this.total});
+
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final p = FilmPalette.of(context);
+    Widget quadrato(Widget child) => Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: p.strip,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: p.border),
+      ),
+      child: child,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EdgeText(l.home_overline(total)),
+                const SizedBox(height: 4),
+                Text(
+                  l.home_title,
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: p.ink),
+                ),
+              ],
+            ),
+          ),
+          quadrato(
+            PopupMenuButton<String>(
+              tooltip: l.home_menuMore,
+              icon: Icon(Icons.more_vert, color: p.ink),
+              onSelected: (route) => context.push(route),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: Routes.cameras,
+                  child: ListTile(
+                    leading: const Icon(Icons.photo_camera_outlined),
+                    title: Text(l.home_menuCameras),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                PopupMenuItem(
+                  value: Routes.stocks,
+                  child: ListTile(
+                    leading: const Icon(Icons.camera_roll_outlined),
+                    title: Text(l.home_menuStocks),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                // Pro (F6.10): senza il Pro la pagina mostra il lucchetto (ProGate).
+                PopupMenuItem(
+                  value: Routes.stats,
+                  child: ListTile(
+                    leading: const Icon(Icons.insights_outlined),
+                    title: Text(l.stats_title),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          quadrato(
+            IconButton(
+              tooltip: l.settings_title,
+              icon: Icon(Icons.settings_outlined, color: p.ink),
+              onPressed: () => context.push(Routes.settings),
+            ),
           ),
         ],
-      ),
-      body: body,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(Routes.rollNew),
-        icon: const Icon(Icons.add),
-        label: Text(l.home_newRoll),
       ),
     );
   }
@@ -120,9 +188,9 @@ class _Sections extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L.of(context);
+    final p = FilmPalette.of(context);
     final today = ref.watch(todayProvider);
-    final muted = Theme.of(context).colorScheme.mutedText;
-    final hint = Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted);
+    final hint = Theme.of(context).textTheme.bodyMedium?.copyWith(color: p.inkMuted);
 
     // In laboratorio: chi aspetta da piu' tempo in cima (F6.8). Senza data di consegna in
     // fondo: non si sa da quanto aspetta.
@@ -138,74 +206,51 @@ class _Sections extends ConsumerWidget {
         return db.compareTo(da);
       });
 
-    Widget header(String title, int count) => Padding(
-      padding: const EdgeInsets.fromLTRB(MicroSpacing.l, MicroSpacing.xl, MicroSpacing.l, 0),
-      child: MicroSectionHeader(title: title, count: count == 0 ? null : '$count'),
+    Widget label(String title, int count) => Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      child: SectionLabel(title, count: count),
     );
 
     Widget emptyLine(String text) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: MicroSpacing.l),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Text(text, style: hint),
     );
 
-    return CustomScrollView(
-      slivers: [
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 24),
+      children: [
         // ── In macchina ──
-        SliverToBoxAdapter(child: header(l.home_inCamera, inCamera.length)),
+        label(l.home_inCamera, inCamera.length),
         if (inCamera.isEmpty)
-          SliverToBoxAdapter(child: emptyLine(l.home_inCameraEmpty))
+          emptyLine(l.home_inCameraEmpty)
         else
-          SliverList.list(
-            children: [for (final i in inCamera) _InCameraCard(item: i, today: today)],
-          ),
+          for (final i in inCamera)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: _InCameraStrip(item: i, today: today),
+            ),
 
         // ── In laboratorio ──
-        SliverToBoxAdapter(child: header(l.home_atLab, lab.length)),
+        label(l.home_atLab, lab.length),
         if (lab.isEmpty)
-          SliverToBoxAdapter(child: emptyLine(l.home_atLabEmpty))
+          emptyLine(l.home_atLabEmpty)
         else
-          SliverList.list(
-            children: [
-              for (final i in lab) _AtLabCard(item: i, waitingDays: waitingDays(i, today)),
-            ],
-          ),
+          for (final i in lab)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: _AtLabRow(item: i, waitingDays: waitingDays(i, today)),
+            ),
 
-        // ── Archivio ──
-        SliverToBoxAdapter(child: header(l.home_archive, archive.length)),
+        // ── Archivio: il foglio provini ──
+        label(l.home_contactSheet, archive.length),
         if (archive.isEmpty) ...[
-          SliverToBoxAdapter(child: emptyLine(l.home_archiveEmpty)),
-          const SliverToBoxAdapter(child: MicroSpacing.gapM),
-          // ⚑ Archivio vuoto: due segnaposti con la striscia di pellicola, per far vedere
-          // cosa ci sara' (F6.8), non un buco.
-          SliverPadding(
-            padding: MicroSpacing.pageH,
-            sliver: SliverGrid.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: MicroSpacing.m,
-              crossAxisSpacing: MicroSpacing.m,
-              childAspectRatio: 1.5,
-              children: const [
-                _PlaceholderTile(key: ValueKey('archive-placeholder-0')),
-                _PlaceholderTile(key: ValueKey('archive-placeholder-1')),
-              ],
-            ),
-          ),
-        ] else
-          SliverPadding(
-            padding: MicroSpacing.pageH,
-            sliver: SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 240,
-                mainAxisSpacing: MicroSpacing.m,
-                crossAxisSpacing: MicroSpacing.m,
-                childAspectRatio: 0.82,
-              ),
-              itemCount: archive.length,
-              itemBuilder: (_, i) => _ArchiveCard(item: archive[i]),
-            ),
-          ),
-        // Spazio per il FAB: l'ultima riga non deve finirci sotto.
-        const SliverToBoxAdapter(child: SizedBox(height: 96)),
+          emptyLine(l.home_archiveEmpty),
+          const SizedBox(height: 12),
+        ],
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: _ContactSheet(items: archive),
+        ),
       ],
     );
   }
@@ -222,28 +267,21 @@ int? waitingDays(RollListItem item, CivilDate today) {
   return days < 0 ? 0 : days;
 }
 
-/// Il numero del rullino, "#17", nel colore d'accento: il riferimento con cui l'utente lo
-/// ritrova sul contenitore (QR, F6.12).
-class _SeqBadge extends StatelessWidget {
-  const _SeqBadge({required this.n});
-
-  final int n;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return CircleAvatar(
-      radius: 22,
-      backgroundColor: scheme.primaryContainer,
-      foregroundColor: scheme.onPrimaryContainer,
-      child: Text('#$n', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-    );
-  }
+/// La scritta a bordo di un rullino: "ILFORD HP5+ 800 ▸ 12".
+///
+/// ⚑ L'ISO si aggiunge solo se non e' gia' nel nome ("Kodak Portra 400" restava
+/// "PORTRA 400 400", visto sull'emulatore il 2026-10-08) o se il rullino e' stato tirato o
+/// trattenuto: allora l'ISO di esposizione e' l'informazione che conta.
+@visibleForTesting
+String edgeLabelOf(FilmRoll roll) {
+  final isoNelNome = RegExp(r'(^|\D)' '${roll.nominalIso}' r'(\D|$)').hasMatch(roll.filmName);
+  final iso = roll.isPushPull || !isoNelNome ? ' ${roll.exposedIso}' : '';
+  return '${roll.filmName}$iso ▸ ${roll.sequenceNumber}';
 }
 
-/// Una card della sezione In macchina: pellicola, macchina, giorni dal caricamento.
-class _InCameraCard extends StatelessWidget {
-  const _InCameraCard({required this.item, required this.today});
+/// Un rullino in macchina: una striscia di pellicola.
+class _InCameraStrip extends StatelessWidget {
+  const _InCameraStrip({required this.item, required this.today});
 
   final RollListItem item;
   final CivilDate today;
@@ -251,42 +289,56 @@ class _InCameraCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final p = FilmPalette.of(context);
     final roll = item.roll;
     final loaded = roll.loadedDate;
     final days = loaded?.daysUntil(today).clamp(0, 100000);
-    final when = item.status == RollStatus.exposed
+    final finished = item.status == RollStatus.exposed;
+    final when = finished
         ? l.home_finishedToDeliver
         : (days == null ? l.home_notLoadedYet : l.home_loadedDaysAgo(days));
-    final details = [
-      if (roll.title != null) roll.filmName,
-      ?item.camera?.displayName,
-      if (roll.isPushPull) 'ISO ${roll.exposedIso}',
-    ].join(' · ');
+    final details = [?item.camera?.displayName, when].join(' · ');
 
-    return Card(
-      margin: const EdgeInsets.fromLTRB(MicroSpacing.l, 0, MicroSpacing.l, MicroSpacing.s),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: MicroSpacing.l, vertical: 4),
-        leading: _SeqBadge(n: roll.sequenceNumber),
-        title: Text(roll.title ?? roll.filmName, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: Text(
-          [if (details.isNotEmpty) details, when].join('\n'),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        isThreeLine: details.isNotEmpty,
-        trailing: item.status == RollStatus.exposed
-            ? Icon(Icons.local_shipping_outlined, color: Theme.of(context).colorScheme.primary)
-            : null,
-        onTap: () => context.push(Routes.rollOf(roll.id)),
+    return FilmStrip(
+      edgeText: edgeLabelOf(roll),
+      onTap: () => context.push(Routes.rollOf(roll.id)),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  roll.title ?? roll.filmName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: p.ink),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  details,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, color: p.inkMuted),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // ⚑ Finito: il furgone dice "da portare in laboratorio" meglio di un numero.
+          if (finished)
+            Icon(Icons.local_shipping_outlined, color: p.edge)
+          else if (days != null)
+            EdgeText(l.home_daysShort(days), size: 20, bold: true),
+        ],
       ),
     );
   }
 }
 
-/// Una card della sezione In laboratorio: "Ilford HP5+ — consegnato 5 giorni fa".
-class _AtLabCard extends StatelessWidget {
-  const _AtLabCard({required this.item, required this.waitingDays});
+/// Un rullino in laboratorio: "Ektar 100 · Fotoservice" e i giorni d'attesa.
+class _AtLabRow extends StatelessWidget {
+  const _AtLabRow({required this.item, required this.waitingDays});
 
   final RollListItem item;
   final int? waitingDays;
@@ -294,75 +346,119 @@ class _AtLabCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final p = FilmPalette.of(context);
     final roll = item.roll;
     final days = waitingDays;
-    final delivered = days == null ? l.home_delivered : l.home_deliveredDaysAgo(days);
     final lab = item.development?.laboratory?.trim();
-    final details = [?roll.title, if (lab != null && lab.isNotEmpty) lab].join(' · ');
+    final dettagli = [?roll.title, if (lab != null && lab.isNotEmpty) lab].join(' · ');
+    // Il lettore di schermo legge la frase intera, non "38 GG".
+    final frase = '${roll.filmName} — ${days == null ? l.home_delivered : l.home_deliveredDaysAgo(days)}';
 
-    return Card(
-      margin: const EdgeInsets.fromLTRB(MicroSpacing.l, 0, MicroSpacing.l, MicroSpacing.s),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: MicroSpacing.l, vertical: 4),
-        leading: _SeqBadge(n: roll.sequenceNumber),
-        title: Text('${roll.filmName} — $delivered', maxLines: 2, overflow: TextOverflow.ellipsis),
-        subtitle: details.isEmpty
-            ? null
-            : Text(details, maxLines: 1, overflow: TextOverflow.ellipsis),
-        trailing: const Icon(Icons.hourglass_top_outlined),
-        onTap: () => context.push(Routes.rollOf(roll.id)),
+    return Semantics(
+      label: frase,
+      button: true,
+      excludeSemantics: true,
+      child: Material(
+        color: p.strip,
+        borderRadius: BorderRadius.circular(6),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.push(Routes.rollOf(roll.id)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: roll.filmName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        if (dettagli.isNotEmpty) TextSpan(text: ' · $dettagli', style: TextStyle(color: p.inkMuted)),
+                      ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 15, color: p.ink),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                EdgeText(days == null ? '—' : l.home_daysShort(days), size: 13),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Una card dell'archivio: copertina (o striscia di pellicola), titolo e periodo.
-class _ArchiveCard extends StatelessWidget {
-  const _ArchiveCard({required this.item});
+/// L'archivio come foglio provini: tre colonne, ogni fotogramma con il suo numero.
+///
+/// ⚑ Vuoto: due fotogrammi segnaposto con la striscia di pellicola, per far vedere cosa ci
+/// sara' (F6.8), non un buco.
+class _ContactSheet extends StatelessWidget {
+  const _ContactSheet({required this.items});
+
+  final List<RollListItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = FilmPalette.of(context);
+    final celle = items.isEmpty
+        ? const <Widget>[
+            _PlaceholderFrame(key: ValueKey('archive-placeholder-0')),
+            _PlaceholderFrame(key: ValueKey('archive-placeholder-1')),
+          ]
+        : [for (final i in items) _Frame(item: i)];
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(color: p.strip, borderRadius: BorderRadius.circular(6)),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          const colonne = 3;
+          const gap = 6.0;
+          final w = (c.maxWidth - gap * (colonne - 1)) / colonne;
+          return Wrap(
+            spacing: gap,
+            runSpacing: 10,
+            children: [for (final cella in celle) SizedBox(width: w, child: cella)],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Un fotogramma del provino: la copertina (o la striscia) e "▸ 3 DOLOMITI".
+class _Frame extends StatelessWidget {
+  const _Frame({required this.item});
 
   final RollListItem item;
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final text = Theme.of(context).textTheme;
-    final muted = Theme.of(context).colorScheme.mutedText;
     final roll = item.roll;
-    final period = formatPeriod(l, roll.loadedDate, roll.finishedDate);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
+    final nome = roll.title ?? roll.filmName;
+    final periodo = formatPeriod(l, roll.loadedDate, roll.finishedDate);
+    return Semantics(
+      button: true,
+      label: ['#${roll.sequenceNumber}', nome, ?periodo].join(', '),
+      excludeSemantics: true,
       child: InkWell(
         onTap: () => context.push(Routes.rollOf(roll.id)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AspectRatio(
-              aspectRatio: 3 / 2,
-              child: RollCover(
-                cover: item.cover,
-                edgeLabel: '${roll.filmName} · ${roll.sequenceNumber}',
+              aspectRatio: 4 / 3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: RollCover(cover: item.cover),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(MicroSpacing.m, MicroSpacing.s, MicroSpacing.m, 0),
-              child: Text(
-                roll.title ?? roll.filmName,
-                style: text.titleSmall,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(MicroSpacing.m, 2, MicroSpacing.m, MicroSpacing.s),
-              child: Text(
-                ['#${roll.sequenceNumber}', ?period].join(' · '),
-                style: text.bodySmall?.copyWith(color: muted),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+            const SizedBox(height: 4),
+            EdgeText('▸ ${roll.sequenceNumber} $nome', size: 9),
           ],
         ),
       ),
@@ -370,13 +466,16 @@ class _ArchiveCard extends StatelessWidget {
   }
 }
 
-/// Un segnaposto dell'archivio vuoto: solo la striscia, senza testo.
-class _PlaceholderTile extends StatelessWidget {
-  const _PlaceholderTile({super.key});
+/// Un fotogramma vuoto del provino: solo la striscia, senza testo.
+class _PlaceholderFrame extends StatelessWidget {
+  const _PlaceholderFrame({super.key});
 
   @override
-  Widget build(BuildContext context) => const ClipRRect(
-    borderRadius: BorderRadius.all(MicroRadius.medium),
-    child: Opacity(opacity: 0.7, child: FilmStripPlaceholder()),
+  Widget build(BuildContext context) => const AspectRatio(
+    aspectRatio: 4 / 3,
+    child: ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(2)),
+      child: Opacity(opacity: 0.7, child: FilmStripPlaceholder()),
+    ),
   );
 }
