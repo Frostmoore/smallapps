@@ -35,6 +35,8 @@ class SettingsPage extends ConsumerWidget {
             trailing: pro ? null : const ProBadge(),
             onTap: pro ? null : () => unawaited(showScortePaywall(context, ref)),
           ),
+          // ⚑ Ogni parte dell'app aggiunge la sua sezione con UNA riga qui, scritta in un file
+          // suo (features/settings/*_section.dart): notifiche, calendario, dati, widget.
           const Divider(),
           ListTile(
             leading: const Icon(Icons.restore),

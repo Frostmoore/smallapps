@@ -175,9 +175,28 @@ def segnaposti(testo):
     return nomi
 
 
+def tutti_i_testi():
+    """TESTI piu' quelli dei file tool/testi_<parte>.py (ognuno con un suo dizionario TESTI e,
+    se serve, TIPI). ⚑ Un file per parte dell'app: piu' persone possono aggiungere testi nello
+    stesso momento senza toccare lo stesso file. Una chiave ripetuta in due file e' un errore."""
+    import importlib.util
+    tutti = dict(TESTI)
+    for f in sorted(Path(__file__).resolve().parent.glob('testi_*.py')):
+        spec = importlib.util.spec_from_file_location(f.stem, f)
+        modulo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modulo)
+        for chiave in modulo.TESTI:
+            if chiave in tutti:
+                raise SystemExit(f'chiave {chiave} ripetuta in {f.name}')
+        tutti.update(modulo.TESTI)
+        TIPI.update(getattr(modulo, 'TIPI', {}))
+    return tutti
+
+
 def main():
     en, it = {'@@locale': 'en'}, {'@@locale': 'it'}
-    for chiave, valori in TESTI.items():
+    testi = tutti_i_testi()
+    for chiave, valori in testi.items():
         inglese, italiano = valori[0], valori[1]
         en[chiave] = inglese
         it[chiave] = italiano
@@ -189,7 +208,7 @@ def main():
     QUI.mkdir(parents=True, exist_ok=True)
     for nome, dati in (('app_en.arb', en), ('app_it.arb', it)):
         (QUI / nome).write_text(json.dumps(dati, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
-    print(f'{len(TESTI)} chiavi scritte')
+    print(f'{len(testi)} chiavi scritte')
 
 
 if __name__ == '__main__':
