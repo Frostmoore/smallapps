@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 
 import '../storage/app_paths.dart';
@@ -331,6 +332,14 @@ class BackupService {
       if (!entry.isFile || !entry.name.startsWith('images/')) continue;
       final relative = entry.name.substring('images/'.length);
       final target = paths.resolve(relative);
+      // ☠ Zip slip: un nome di voce come `images/../../shared_prefs/x.xml` (o assoluto)
+      // scriverebbe fuori dalla cartella dell'app. Un backup arriva da fuori (email, cloud,
+      // chat): si scartano le voci che, normalizzate, non restano dentro i documenti
+      // (segnalato con Film Tracker, 2026-10-08).
+      if (!p.isWithin(p.normalize(paths.documents.path), p.normalize(target.path))) {
+        MicroLog.w('voce del backup fuori dalla cartella, ignorata: ${entry.name}');
+        continue;
+      }
       if (!target.parent.existsSync()) await target.parent.create(recursive: true);
       await target.writeAsBytes(entry.readBytes() ?? const <int>[], flush: true);
     }

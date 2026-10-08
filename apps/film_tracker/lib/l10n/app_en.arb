@@ -52,6 +52,170 @@
   },
   "settings_proActive": "Film Tracker Pro is active",
   "settings_proCta": "Discover Film Tracker Pro",
+  "stats_title": "Statistics",
+  "stats_emptyTitle": "No statistics yet",
+  "stats_emptyBody": "Load your first roll: numbers and costs will appear here, year by year.",
+  "stats_rolls": "Rolls",
+  "stats_potentialFrames": "Potential frames",
+  "stats_potentialFramesHint": "the frames the rolls had",
+  "stats_spending": "Spending",
+  "stats_film": "Film",
+  "stats_development": "Developing",
+  "stats_scans": "Scans",
+  "stats_prints": "Prints",
+  "stats_total": "Total",
+  "stats_noCosts": "No costs recorded for this year.",
+  "stats_averages": "Averages",
+  "stats_perRoll": "Average cost per roll",
+  "stats_perRollHint": "{n, plural, =1{on the only roll with costs} other{on the {n} rolls with costs}}",
+  "@stats_perRollHint": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "stats_perFrame": "Cost per frame (estimate)",
+  "stats_perFrameValue": "≈ {amount}",
+  "@stats_perFrameValue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "stats_perFrameHint": "An estimate on the nominal frames: not every frame gets shot, and not every one comes out.",
+  "stats_mostUsed": "Most used",
+  "stats_topLab": "Lab",
+  "stats_topEmulsion": "Film",
+  "stats_topCamera": "Camera",
+  "stats_noneYet": "None yet",
+  "stats_rollsCount": "{n, plural, =1{1 roll} other{{n} rolls}}",
+  "@stats_rollsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "stats_timesCount": "{n, plural, =1{once} other{{n} times}}",
+  "@stats_timesCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "stats_selfDeveloped": "{n, plural, =1{1 roll developed at home} other{{n} rolls developed at home}}",
+  "@stats_selfDeveloped": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "stats_perMonth": "Rolls per month",
+  "data_title": "Your data",
+  "data_statsBody": "Rolls, spending and favourites, year by year.",
+  "report_title": "Your year as a PDF",
+  "report_body": "A summary to print: the totals, then a page for each roll with dates, costs and photos.",
+  "report_chooseYear": "Which year?",
+  "report_noRolls": "No rolls yet: the summary needs at least one.",
+  "report_building": "Preparing the PDF…",
+  "report_failed": "The PDF could not be created. Try again.",
+  "report_ready": "The {year} PDF is ready",
+  "@report_ready": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "report_print": "Print or save",
+  "report_printBody": "Opens the print preview of your phone.",
+  "report_share": "Share",
+  "report_shareBody": "Send the file by email, by chat or to your cloud.",
+  "report_subject": "Film Tracker - {year}",
+  "@report_subject": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "report_coverTitle": "My year on film",
+  "report_generated": "Made with Film Tracker on {date}",
+  "@report_generated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "report_rollsIndex": "The rolls",
+  "report_costs": "Costs",
+  "report_photos": "Photos",
+  "report_noPhotos": "No photos for this roll.",
+  "report_noCosts": "No costs recorded.",
+  "csv_export": "Export to a spreadsheet",
+  "csv_exportBody": "Every roll with its dates and costs, as a CSV file that opens in Excel.",
+  "csv_subject": "Film Tracker - rolls",
+  "csv_number": "Number",
+  "csv_title": "Title",
+  "csv_film": "Film",
+  "csv_format": "Format",
+  "csv_nominalIso": "Nominal ISO",
+  "csv_exposedIso": "Exposed ISO",
+  "csv_camera": "Camera",
+  "csv_status": "Status",
+  "csv_loadedAt": "Loaded",
+  "csv_finishedAt": "Finished",
+  "csv_frames": "Frames",
+  "csv_filmCost": "Film cost (€)",
+  "csv_lab": "Developing lab",
+  "csv_devSubmitted": "Delivered to the lab",
+  "csv_devReturned": "Back from the lab",
+  "csv_process": "Process",
+  "csv_selfDeveloped": "Developed at home",
+  "csv_devCost": "Developing cost (€)",
+  "csv_scanCost": "Scan cost (€)",
+  "csv_printOrders": "Print orders",
+  "csv_printCount": "Prints",
+  "csv_printLabs": "Print labs",
+  "csv_printCost": "Prints cost (€)",
+  "csv_totalCost": "Total cost (€)",
+  "csv_note": "Note",
+  "csv_yes": "Yes",
+  "csv_no": "No",
+  "backup_create": "Back up everything",
+  "backup_createBody": "Rolls, cameras, developing, prints and photos in one file, to keep or move to a new phone.",
+  "backup_creating": "Preparing the backup…",
+  "backup_createFailed": "The backup could not be created. Try again.",
+  "backup_subject": "Film Tracker backup",
+  "backup_restore": "Restore from a backup",
+  "backup_restoreBody": "Bring back rolls and photos from a file made with “Back up everything”.",
+  "backup_restoreTitle": "What to do with this backup?",
+  "backup_restoreSummary": "Rolls: {rolls} · cameras: {cameras} · photos: {images}.",
+  "@backup_restoreSummary": {
+    "placeholders": {
+      "rolls": {
+        "type": "int"
+      },
+      "cameras": {
+        "type": "int"
+      },
+      "images": {
+        "type": "int"
+      }
+    }
+  },
+  "backup_restoring": "Restoring…",
+  "backup_modeReplace": "Replace everything",
+  "backup_modeReplaceBody": "What’s on this phone now is deleted, photos included, and replaced by the backup.",
+  "backup_modeMerge": "Add to what I have",
+  "backup_modeMergeBody": "Rolls already on this phone are skipped; a roll whose number is taken gets the next free one.",
+  "backup_restored": "Backup restored",
+  "backup_failed": "That file isn’t a Film Tracker backup, or it’s damaged.",
   "photo_sectionTitle": "Photos",
   "photo_add": "Add",
   "photo_emptyTitle": "No photos yet",

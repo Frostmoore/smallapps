@@ -10,6 +10,7 @@ import '../../app/paywall_config.dart';
 import '../../app/providers.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../photos/photo_storage_tile.dart';
+import 'data_section.dart';
 
 /// Le impostazioni essenziali: il Pro, il ripristino dell'acquisto, il tema.
 ///
@@ -85,6 +86,8 @@ class SettingsPage extends ConsumerWidget {
             },
           ),
           const Divider(),
+          // Statistiche, PDF dell'anno, CSV, backup e ripristino (F6.10, F6.11).
+          const DataSection(),
           // Lo spazio occupato dalle foto e "libera spazio" (F6.9).
           const PhotoStorageTile(),
           MicroSpacing.gapXL,

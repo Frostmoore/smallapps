@@ -81,6 +81,15 @@ class HomePage extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              // Pro (F6.10): senza il Pro la pagina mostra il lucchetto (ProGate).
+              PopupMenuItem(
+                value: Routes.stats,
+                child: ListTile(
+                  leading: const Icon(Icons.insights_outlined),
+                  title: Text(l.stats_title),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
             ],
           ),
           IconButton(

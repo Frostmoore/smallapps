@@ -18,6 +18,7 @@ import '../features/qr/qr_page.dart';
 import '../features/rolls/roll_detail_page.dart';
 import '../features/rolls/roll_editor_page.dart';
 import '../features/settings/settings_page.dart';
+import '../features/stats/stats_page.dart';
 import '../features/stocks/stocks_page.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'locale_resolution.dart';
@@ -55,6 +56,8 @@ GoRouter buildRouter(WidgetRef ref) => GoRouter(
     GoRoute(path: Routes.cameraNew, builder: (_, __) => const NewCameraGate()),
     GoRoute(path: Routes.cameraEdit, builder: (_, s) => CameraEditorPage(cameraId: _id(s, 'cameraId'))),
     GoRoute(path: Routes.stocks, builder: (_, __) => const StocksPage()),
+    // Protetta sulla pagina con ProGate (F6.10).
+    GoRoute(path: Routes.stats, builder: (_, __) => const StatsPage()),
   ],
 );
 

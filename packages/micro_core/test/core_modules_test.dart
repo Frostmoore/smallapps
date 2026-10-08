@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:micro_core/micro_core.dart';
 
@@ -211,6 +213,25 @@ void main() {
       });
       final decoded = JsonBackupCodec.decode(futuro);
       expect(decoded.errorOrNull?.code, MicroErrorCodes.unsupportedVersion);
+    });
+
+    test('zip slip: una voce che esce dalla cartella non viene scritta', () async {
+      // Un backup vero, poi rimpacchettato a mano con una voce maligna accanto a una buona.
+      final json = await service.createBackup(_FakeSource());
+      final dati = await json.valueOrNull!.readAsString();
+      final archivio = Archive()
+        ..addFile(ArchiveFile.string('data.json', dati))
+        ..addFile(ArchiveFile.bytes('images/images/rolls/buona.jpg', [1, 2, 3]))
+        ..addFile(ArchiveFile.bytes('images/../../fuori.txt', [9, 9, 9]));
+      final zip = File('${temp.path}/maligno.zip')..writeAsBytesSync(ZipEncoder().encode(archivio));
+
+      final restored = await service.restore(zip, _FakeSource(), mode: ImportMode.replaceAll);
+
+      expect(restored.isOk, isTrue);
+      final paths = AppPaths.underRoot(temp);
+      expect(paths.resolve('images/rolls/buona.jpg').existsSync(), isTrue);
+      expect(File('${temp.parent.path}/fuori.txt').existsSync(), isFalse);
+      expect(paths.resolve('../../fuori.txt').existsSync(), isFalse);
     });
 
     test('ripristinare un file inesistente non lancia', () async {

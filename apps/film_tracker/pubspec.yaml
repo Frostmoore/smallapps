@@ -40,6 +40,13 @@ dependencies:
     path: ../../packages/micro_core
   path: ^1.9.1
   path_provider: ^2.1.6
+  # Il PDF di riepilogo annuale (F6.11, Pro): pagine, testo, griglia delle immagini. Dart puro,
+  # nessun codice nativo. Era gia' presente come dipendenza transitiva di micro_core.
+  pdf: ^3.13.1
+  # Stampa e anteprima del PDF annuale con il dialogo di sistema (F6.11). ⚑ Nessun permesso e
+  # nessuna configurazione a mano: su Android porta da solo un FileProvider nel manifest
+  # (fuso dal build), minSdk 21 (l'app e' a 24); su iOS solo il pod.
+  printing: ^5.15.1
   # L'etichetta QR del rullino (F6.12).
   qr_flutter: ^4.1.0
   sqlite3: ^3.5.2

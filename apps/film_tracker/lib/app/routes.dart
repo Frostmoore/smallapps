@@ -39,6 +39,9 @@ abstract final class Routes {
   static String cameraEditOf(int id) => '/cameras/$id';
   static const String stocks = '/stocks';
 
+  // ── Statistiche (F6.10, Pro) ──
+  static const String stats = '/stats';
+
   /// Lo schema del QR del rullino: `filmtracker://roll/<sequenceNumber>` (F6.12).
   static const String scheme = 'filmtracker';
 }

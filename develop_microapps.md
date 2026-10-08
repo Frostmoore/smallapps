@@ -1040,18 +1040,18 @@ tutte fatte e provate sull'emulatore:
 ### F6 — Film Tracker → `v8.0.0`
 
 - [x] **F6.0** Decisioni di partenza (vedi §8 F6.0): Android e iPhone, Pro 4,99 €, foto **gratis**, nessun widget, icona del proprietario, tema scuro, interfaccia essenziale prima e proposte grafiche dopo (2026-10-08)
-- [ ] **F6.1** Bootstrap progetto, tema scuro, l10n, router
-- [ ] **F6.2** Data layer Drift: macchine, rullini, sviluppi, stampe, immagini, catalogo pellicole
-- [ ] **F6.3** Macchina a stati del rullino + test
-- [ ] **F6.4** Catalogo pellicole locale + pellicola personalizzata
-- [ ] **F6.5** Inventario macchine fotografiche
-- [ ] **F6.6** Creazione e modifica rullino; avanzamento di stato
-- [ ] **F6.7** Sviluppo e stampa come eventi separati
-- [ ] **F6.8** Home a tre sezioni: In macchina / In laboratorio / Archivio
-- [ ] **F6.9** Photo overview: import, provini, contact sheet, miniature (Pro)
+- [x] **F6.1** Bootstrap progetto, tema scuro, l10n, router — FATTO il 2026-10-08: `com.smp.filmtracker` Android e iOS (solo iPhone, team, firma e ProGuard da Scorte Calore, senza widget, calendario e notifiche), `licenseAppId 'filmtracker'`, Pro 4,99 €, paywall con test di coerenza, tema scuro di default (PlusJakartaSans finche' non si scelgono i caratteri), icone e splash da `tool/genera_icone.py` (riquadro rifilato per iOS, icona intera nella zona sicura per Android; niente monocromatica: il disegno non si separa dal gradiente chiaro).
+- [x] **F6.2** Data layer Drift: macchine, rullini, sviluppi, stampe, immagini, catalogo pellicole — FATTO il 2026-10-08: `lib/data/{tables,database,film_repository}.dart`, seed di 25 pellicole, UNIQUE (brand, name, format), uno sviluppo per rullino (UNIQUE), stampe multiple, cascate, `sequenceNumber = max + 1`, dati di esempio `FT_DEMO`. ⚑ `laboratory` facoltativo (sviluppo in casa).
+- [x] **F6.3** Macchina a stati del rullino + test — FATTO il 2026-10-08: `lib/domain/roll_status.dart`, matrice 6×6 e `suggestFrom` su 8+ combinazioni testate; niente `labelFor` nel dominio (etichette da `lib/app/labels.dart`).
+- [x] **F6.4** Catalogo pellicole locale + pellicola personalizzata — FATTO il 2026-10-08: `lib/domain/film_catalog.dart`, `features/stocks/` (ricerca, gruppi per marca, personalizzate con doppione riconosciuto e "Usa quella").
+- [x] **F6.5** Inventario macchine fotografiche — FATTO il 2026-10-08: `features/cameras/`, una gratis, la seconda dal paywall (`NewCameraGate` aspetta il conteggio prima di decidere).
+- [x] **F6.6** Creazione e modifica rullino; avanzamento di stato — FATTO il 2026-10-08: `features/rolls/` (editor con le 5 pellicole piu' usate in cima, dettaglio con timeline verticale, azioni per stato, suggerimento di stato, cambio manuale solo con transizioni ammesse).
+- [x] **F6.7** Sviluppo e stampa come eventi separati — FATTO il 2026-10-08: `features/lab/`, lo stato avanza da solo in avanti con uno snack (consegnato → in laboratorio, ritirato → sviluppato/stampato).
+- [x] **F6.8** Home a tre sezioni: In macchina / In laboratorio / Archivio — FATTO il 2026-10-08 (essenziale): archivio a griglia con copertina o striscia di pellicola disegnata; grafica da scegliere con le proposte (F6.0 punto 6).
+- [x] **F6.9** Photo overview: import, provini, contact sheet, miniature (**gratis**, F6.0) — FATTO il 2026-10-08: `features/photos/`, import una foto alla volta in isolate con avanzamento e annulla, galleria, riordino, copertina, visualizzatore con zoom, spazio occupato e "libera spazio". Corretto in `micro_core` `ImageStore.importBytes` (`on Object`: il decoder lancia Error). DA PROVARE su telefono: HEIC dalla galleria Android.
 - [ ] **F6.10** Statistiche e costi (Pro)
 - [ ] **F6.11** Export CSV, PDF di riepilogo, backup (Pro)
-- [ ] **F6.12** QR identificativo del rullino
+- [x] **F6.12** QR identificativo del rullino — FATTO il 2026-10-08: `features/qr/`, etichetta bianca stampabile, link `filmtracker://roll/<n>` con `app_links` (push, non il deep link di Flutter), provato con adb.
 - [ ] **F6.13** Test (unit, DB, widget, golden, integrazione)
 - [ ] **F6.14** Rifinitura visiva, onboarding, empty state, accessibilità
 - [ ] **F6.15** `apps/film_tracker/codebase_reference.md`
@@ -4542,7 +4542,13 @@ Prese con il proprietario prima di F6.1. Dove contraddicono il resto della fase,
    `tool/genera_icone.py` e da li' si prendono i colori del tema. Il seme `#E0A458` del piano
    resta valido finche' l'icona non dice altro.
 6. **Tema scuro di default** (F6.1, invariato) e, come per Scorte Calore, **prima
-   un'interfaccia essenziale, poi 2-3 proposte grafiche** fra cui il proprietario sceglie.
+   un'interfaccia essenziale, poi 2-3 proposte grafiche** fra cui il proprietario sceglie. **Scelta: «C · Provino»** (2026-10-08,
+   https://claude.ai/artifact/14GrAPyvYN2bdcov5PKVoP): fondo quasi nero `#0D0C0B`, superfici
+   `#1A1714`, tutto impaginato come pellicola (perforazioni, scritte a bordo pellicola in
+   arancio `#F0A33B` monospaziato **Space Mono**), archivio come foglio provini a tre
+   colonne con il numero del fotogramma; corpo in Plus Jakarta Sans. Scartate «A · Camera
+   oscura» (Fraunces su nero caldo) e «B · Barattolo» (blu notte dell'icona, etichette color
+   carta).
 7. **Trappole gia' pagate** (F5.0 punto 7, valgono tutte): `licenseAppId` senza trattino
    basso (`filmtracker`), deep link di Flutter spento (qui serve il **nostro** deep link
    `filmtracker://roll/<n>` del QR, F6.12: va gestito da go_router con
