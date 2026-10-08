@@ -6,4 +6,8 @@
     <string name="widget_open_app">Apri Scorte Calore per aggiungere una fonte.</string>
     <string name="widget_sample1">Stufa soggiorno</string>
     <string name="widget_sample2">Bombolone GPL</string>
+    <string name="widget_sample_detail1">Riordina entro il 2 dic</string>
+    <string name="widget_sample_detail2">Riordina entro il 19 nov</string>
+    <string name="widget_sample_days1">62 giorni</string>
+    <string name="widget_sample_days2">49 giorni</string>
 </resources>

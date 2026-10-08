@@ -10,6 +10,10 @@
     <string name="widget_open_app">Open Scorte Calore to add a heat source.</string>
     <string name="widget_sample1">Living room stove</string>
     <string name="widget_sample2">LPG tank</string>
+    <string name="widget_sample_detail1">Reorder by Dec 2</string>
+    <string name="widget_sample_detail2">Reorder by Nov 19</string>
+    <string name="widget_sample_days1">62 days</string>
+    <string name="widget_sample_days2">49 days</string>
 
     <style name="WidgetRow">
         <item name="android:layout_width">match_parent</item>

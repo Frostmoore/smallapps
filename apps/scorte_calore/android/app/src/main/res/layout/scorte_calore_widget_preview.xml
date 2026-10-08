@@ -36,17 +36,17 @@
     <LinearLayout android:id="@+id/widget_row1" style="@style/WidgetRow" android:visibility="visible">
         <LinearLayout style="@style/WidgetTexts">
             <TextView android:id="@+id/widget_name1" style="@style/WidgetName" android:text="@string/widget_sample1" />
-            <TextView android:id="@+id/widget_detail1" style="@style/WidgetDetail" android:text="1 dic" />
+            <TextView android:id="@+id/widget_detail1" style="@style/WidgetDetail" android:text="@string/widget_sample_detail1" />
         </LinearLayout>
-        <TextView android:id="@+id/widget_days1" style="@style/WidgetDays" android:text="62" />
+        <TextView android:id="@+id/widget_days1" style="@style/WidgetDays" android:text="@string/widget_sample_days1" />
     </LinearLayout>
 
     <LinearLayout android:id="@+id/widget_row2" style="@style/WidgetRow" android:visibility="visible">
         <LinearLayout style="@style/WidgetTexts">
             <TextView android:id="@+id/widget_name2" style="@style/WidgetName" android:text="@string/widget_sample2" />
-            <TextView android:id="@+id/widget_detail2" style="@style/WidgetDetail" android:text="18 nov" />
+            <TextView android:id="@+id/widget_detail2" style="@style/WidgetDetail" android:text="@string/widget_sample_detail2" />
         </LinearLayout>
-        <TextView android:id="@+id/widget_days2" style="@style/WidgetDays" android:text="49" />
+        <TextView android:id="@+id/widget_days2" style="@style/WidgetDays" android:text="@string/widget_sample_days2" />
     </LinearLayout>
 
     <LinearLayout android:id="@+id/widget_row3" style="@style/WidgetRow">
