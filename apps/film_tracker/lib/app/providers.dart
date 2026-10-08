@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:micro_core/micro_core.dart';
 
+import '../data/database.dart';
+import '../data/film_repository.dart';
+import '../domain/film_stats.dart';
+import '../domain/roll_status.dart';
 
 /// I provider radice dell'app.
 ///
@@ -49,4 +53,98 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
 
-// Database e repository arrivano con il data layer (F6.2).
+/// Il database, aperto alla prima lettura e chiuso con il `ProviderScope`.
+final databaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase.open();
+  ref.onDispose(db.close);
+  return db;
+});
+
+final repositoryProvider = Provider<FilmRepository>(
+  (ref) => FilmRepository(ref.watch(databaseProvider)),
+);
+
+// ── Stream per la UI ─────────────────────────────────────────────────────────
+
+/// Tutte le macchine (attive e dismesse), nell'ordine dell'utente: l'inventario (F6.5).
+final camerasProvider = StreamProvider<List<Camera>>(
+  (ref) => ref.watch(repositoryProvider).watchCameras(),
+);
+
+/// Solo le macchine attive: la scelta nel form del rullino.
+final activeCamerasProvider = StreamProvider<List<Camera>>(
+  (ref) => ref.watch(repositoryProvider).watchCameras(activeOnly: true),
+);
+
+/// Quante macchine esistono: il conteggio per `FeatureKey.secondaryEntities`.
+final cameraCountProvider = StreamProvider<int>(
+  (ref) => ref.watch(repositoryProvider).watchCameraCount(),
+);
+
+/// `cameraId -> rullini scattati` (le macchine senza rullini non ci sono: `?? 0`).
+final rollCountByCameraProvider = StreamProvider<Map<int, int>>(
+  (ref) => ref.watch(repositoryProvider).watchRollCountByCamera(),
+);
+
+/// Il catalogo delle pellicole, per marca e nome.
+final filmStocksProvider = StreamProvider<List<FilmStock>>(
+  (ref) => ref.watch(repositoryProvider).watchStocks(),
+);
+
+/// Le cinque pellicole piu' usate: la selezione rapida del form del rullino (F6.4).
+final mostUsedStocksProvider = StreamProvider<List<FilmStock>>(
+  (ref) => ref.watch(repositoryProvider).watchMostUsedStocks(),
+);
+
+/// Le card di una sezione della home (F6.8), dal numero piu' alto.
+final rollItemsProvider = StreamProvider.family<List<RollListItem>, RollSection>(
+  (ref, section) => ref.watch(repositoryProvider).watchRollItems(section: section),
+);
+
+/// Tutti i rullini con i loro eventi (lista completa, ricerca).
+final allRollItemsProvider = StreamProvider<List<RollListItem>>(
+  (ref) => ref.watch(repositoryProvider).watchRollItems(),
+);
+
+/// Un rullino per id (dettaglio); null se cancellato.
+final rollProvider = StreamProvider.family<FilmRoll?, int>(
+  (ref, id) => ref.watch(repositoryProvider).watchRoll(id),
+);
+
+/// Lo sviluppo di un rullino, per id del rullino.
+final developmentProvider = StreamProvider.family<Development?, int>(
+  (ref, rollId) => ref.watch(repositoryProvider).watchDevelopment(rollId),
+);
+
+/// Le stampe di un rullino, per id del rullino.
+final printsProvider = StreamProvider.family<List<PrintOrder>, int>(
+  (ref, rollId) => ref.watch(repositoryProvider).watchPrints(rollId),
+);
+
+/// Le immagini di un rullino, per id del rullino.
+final rollImagesProvider = StreamProvider.family<List<RollImage>, int>(
+  (ref, rollId) => ref.watch(repositoryProvider).watchImages(rollId),
+);
+
+/// I laboratori gia' usati, dal piu' frequente: l'autocompletamento (F6.7).
+final laboratoriesProvider = StreamProvider<List<String>>(
+  (ref) => ref.watch(repositoryProvider).watchLaboratories(),
+);
+
+/// Gli ingressi delle statistiche (F6.10).
+final statsRollsProvider = StreamProvider<List<StatsRoll>>(
+  (ref) => ref.watch(repositoryProvider).watchStatsRolls(),
+);
+
+/// Gli anni con almeno un rullino, dal piu' recente.
+final statsYearsProvider = Provider<List<int>>((ref) {
+  final rolls = ref.watch(statsRollsProvider).value ?? const <StatsRoll>[];
+  return const FilmStatsCalculator().years(rolls);
+});
+
+/// Le statistiche di un anno; null finche' i dati non sono arrivati.
+final yearStatsProvider = Provider.family<YearStats?, int>((ref, year) {
+  final rolls = ref.watch(statsRollsProvider).value;
+  if (rolls == null) return null;
+  return const FilmStatsCalculator().forYear(year, rolls);
+});

@@ -4,7 +4,10 @@ import 'package:micro_core/micro_core.dart';
 
 import 'app/app.dart';
 import 'app/app_config.dart';
+import 'app/locale_resolution.dart';
 import 'app/providers.dart';
+import 'data/database.dart';
+import 'dev/demo_data.dart';
 
 /// L'avvio di Film Tracker: il minimo indispensabile (configurazione, cartelle, preferenze).
 ///
@@ -30,7 +33,17 @@ Future<void> main() async {
   final settings = await SettingsStore.create(namespace: config.appId);
   await _recordLaunch(settings);
 
-  // I dati di esempio (FT_DEMO) arrivano con il data layer (F6.2).
+  // Solo in sviluppo, con --dart-define=FT_DEMO=true: riempie un database senza rullini con
+  // dati di esempio, prima di runApp (stesso schema di Scorte Calore).
+  if (demoEnabled) {
+    final db = AppDatabase.open();
+    final lingua = resolveAppLocale(
+      WidgetsBinding.instance.platformDispatcher.locales,
+      kSupportedLocales,
+    );
+    await seedDemoData(db, english: lingua.languageCode != 'it');
+    await db.close();
+  }
 
   runApp(
     ProviderScope(

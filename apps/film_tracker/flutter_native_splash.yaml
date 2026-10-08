@@ -1,0 +1,24 @@
+# La schermata di avvio di Film Tracker.
+#
+# Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
+#
+# Il quadrato dell'icona (splash_logo.png, da tool/genera_icone.py) sul blu notte su cui il
+# proprietario l'ha disegnato (#192634): chi apre l'app vede continuare l'icona. Uguale nei
+# due temi: l'app e' scura di default (F6.1).
+flutter_native_splash:
+  color: "#192634"
+  image: assets/icons/splash_logo.png
+  color_dark: "#192634"
+  image_dark: assets/icons/splash_logo.png
+
+  android: true
+  ios: true
+  web: false
+
+  # ☠ Android 12+ ritaglia l'immagine a cerchio e tiene solo i due terzi centrali:
+  # splash_android12.png ha il quadrato gia' dentro il cerchio sopravvissuto.
+  android_12:
+    color: "#192634"
+    color_dark: "#192634"
+    image: assets/icons/splash_android12.png
+    image_dark: assets/icons/splash_android12.png

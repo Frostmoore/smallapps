@@ -1,0 +1,24 @@
+# Generazione delle icone di Film Tracker.
+#
+# Si rigenerano con:  pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons
+#
+# ☠ Le immagini qui sotto NON si modificano a mano: le produce tool/genera_icone.py
+# dall'originale del proprietario (assets/icons/source/filmtracker_originale.png).
+flutter_launcher_icons:
+  android: true
+  ios: true
+
+  # Il quadrato rifilato dentro il bordo lucido, angoli riempiti: icona legacy Android e iOS.
+  image_path: "assets/icons/filmtracker_fullbleed.png"
+  min_sdk_android: 24
+
+  # ⚑ Tutto nello sfondo: l'icona intera nei 700 px centrali, bordi prolungati. Il primo
+  # piano e' trasparente perche' il disegno non si separa dal gradiente chiaro del quadrato
+  # (vedi l'intestazione di tool/genera_icone.py). Niente monocromatica, per lo stesso motivo.
+  adaptive_icon_background: "assets/icons/adaptive_background.png"
+  adaptive_icon_foreground: "assets/icons/adaptive_foreground.png"
+  adaptive_icon_foreground_inset: 0
+
+  # ☠ iOS: niente canale alfa, o App Store Connect rifiuta la build a caricamento finito.
+  remove_alpha_ios: true
+  background_color_ios: "#192634"
