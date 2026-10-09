@@ -415,7 +415,7 @@ proprietario dopo la prova su iPad.
 | `demoRequested` | `const bool demoRequested = bool.fromEnvironment('QM_DEMO')` | chiesto con `--dart-define=QM_DEMO=true` |
 | `demoEnabled` | `bool get demoEnabled` | `demoRequested && !kReleaseMode`: ☠ mai in release |
 | `kDemoNeonStyle` | `const QrStyle kDemoNeonStyle` | verde `#2E7D32` su bianco, moduli e occhi rotondi, `IconLogo('wifi')` |
-| `seedDemoData` | `Future<int?> seedDemoData(QrDatabase db, {bool english = false})` | solo con `demoEnabled` e database vuoto: 2 preferiti (Wi-Fi di casa con `kDemoNeonStyle`, «Il mio contatto») e 4 recenti (telefono, contatto letto, testo, link `smpmicroapps.it`) con date nel passato (un `QrRepository` con `clock` fisso per riga); restituisce l'id del Wi-Fi (**1** in un database vuoto) o null |
+| `seedDemoData` | `Future<int?> seedDemoData(QrDatabase db, {bool english = false})` | solo con `demoEnabled` e database vuoto: 2 preferiti (Wi-Fi di casa con `kDemoNeonStyle`, «Il mio contatto») e 4 recenti (email precompilata a `info@smpmicroapps.it`, contatto letto, testo, link `smpmicroapps.it`) con date nel passato (un `QrRepository` con `clock` fisso per riga); restituisce l'id del Wi-Fi (**1** in un database vuoto) o null |
 
 Tipo privato `_Demo` (record: contenuto, sorgente, giorni, minuti, titolo del preferito, stile).
 ⚑ **Il Pro non si attiva nella demo**: lo comprano i due giri con il gateway finto (in debug c'e'
@@ -424,13 +424,15 @@ gia'), cosi' lo stesso giro fotografa il paywall per la revisione di Apple (come
 pagina Stile mostrerebbe l'avviso rosso nello screenshot.
 ⚑ **Due preferiti, non tre**: con tre, nello scatto della home i recenti finivano fuori schermo.
 ⚑ Nessun dominio `example.com` visibile: sembrava finto negli scatti.
+⚑ **Niente telefono ne' SMS nei dati** (F17.10: non hanno piu' un modulo): il recente che era un
+telefono ora e' un'email precompilata.
 
 ### I giri sul simulatore (`integration_test/`)
 
 | File | Cosa fa |
 |---|---|
-| `screenshots_test.dart` | cancella preferenze, `qr_me.sqlite` (+ `-wal`, `-shm`) ed `entitlement.json`; avvia l'app; tocca `form_chip_wifi` → paywall → `SCATTO:paywall-revisione` → compra (finto); poi `home`, `qr` (`/qr/1`), `stile` (tocco `action_style`, attesa della verifica «Leggibile»), `modulo` (`/form/wifi?id=1`), `lettura` (`/scan/result` con `https://smpmicroapps.it/contatti`). Costanti `lingua` (`LINGUA`), `linkLetto` |
-| `anteprima_test.dart` | stesso azzeramento, compra il Pro **prima** di `REGISTRA`; giro: home → Wi-Fi a tutto schermo → Stile → modulo Wi-Fi → link letto → «Mostra come QR» → home; `FINE`. ~24 s |
+| `screenshots_test.dart` | cancella preferenze, `qr_me.sqlite` (+ `-wal`, `-shm`) ed `entitlement.json`; avvia l'app; tocca `form_chip_wifi` → paywall → `SCATTO:paywall-revisione` → compra (finto); poi `home`, `qr` (`/qr/1`), `stile` (tocco `action_style`, attesa della verifica «Leggibile»), `etichetta` (da `/qr/1` tocco `action_label`, `enterText` su `label_text` con due righe, tastiera chiusa con `unfocus`, formato rettangolare toccando l'icona `Icons.crop_portrait`), `modulo` (`/form/wifi` **senza id**: le tre strade di `WifiSources`, F17.10), `lettura` (`/scan/result` con `https://smpmicroapps.it/contatti`). Costanti `lingua` (`LINGUA`), `linkLetto` |
+| `anteprima_test.dart` | stesso azzeramento, compra il Pro **prima** di `REGISTRA`; giro: home → Wi-Fi a tutto schermo → Stile → pop → Etichetta (`action_label`) → home → strade del Wi-Fi (`/form/wifi`) → link letto → «Mostra come QR» → home; `FINE`. ~26 s (Apple: 15–30) |
 
 ### Comandi per rifare tutto
 
@@ -451,16 +453,36 @@ ssh mac 'cd ~/microapps && python3 -u apps/qr_me/tool/scheda_app_store.py'
 
 `tool/scheda_app_store.py` (copia di Film Tracker): costanti `APP`, `VERSIONE`, `BUILD`, `LINGUE`,
 `NOMI`, `CATEGORIE` (`UTILITIES`, `PRODUCTIVITY`), `IAP_ID`, `IAP_PREZZO`, `IAP_TESTI`, `IAP_NOTA`,
-`VERSIONE_TRASHCAN` (da li' copia nome e telefono del contatto di revisione); funzioni `api`,
-`controlla`, `testi`, `carica_file`, `tutti_i_territori`, `prodotto_pro`, `main`, piu' rispetto a
+`VERSIONE_TRASHCAN` (da li' copia nome e telefono del contatto di revisione), `BUILD = '2'`; funzioni `api`,
+`controlla`, `testi`, `carica_file`, `tutti_i_territori`, `prodotto_pro`, `main`, `md5(file)`,
+`gia_uguale(remoti, locali)` (nome **e** `sourceFileChecksum`, nell'ordine), `svuota(tipo_risorsa, remoti)`, piu' rispetto a
 Film Tracker `eta(info_id)` (classificazione per eta'), `collega_build(versione_id)` (solo se la build
-e' `VALID`) e `verifica(versione_id)` (stati degli asset, poi **campo per campo** con l'elenco `VUOTI`).
+e' `VALID`; se ne e' collegata un'altra la **sostituisce**) e `verifica(versione_id)` (stati e nomi degli
+asset, poi **campo per campo** con l'elenco `VUOTI`, che comprende «build collegata diversa dalla `BUILD`», e
+l'elenco `DOPPIONI`: nomi ripetuti in un insieme di screenshot o piu' di un video per insieme), e
+«DA FARE A MANO» (testi IAP diversi da `IAP_TESTI`, screenshot di revisione diverso dal file locale).
+`prodotto_pro` riscrive anche la `reviewNote` dell'IAP se diversa da `IAP_NOTA` e **sostituisce** lo
+screenshot di revisione se il checksum di `screenshots/ios/it/paywall-revisione.png` e' cambiato.
+
+`tool/genera_grafiche_store.py`: `SCHEDE` (6 per lingua, in ordine `qr`, `home`, `lettura`, `modulo` «Il
+Wi-Fi senza scrivere niente», `stile`, `etichetta` «Un'etichetta da stampare»), `TESTATA`, `FRASI_APPLE`;
+prima di scrivere **cancella i PNG** di ogni cartella di uscita (i nomi hanno il numero d'ordine: una scheda
+spostata lascerebbe un orfano che `scheda_app_store.py` caricherebbe).
 ⚑ `testi()` legge i blocchi di codice di `store/scheda-app-store.md` **per posizione** (7 blocchi):
 non aggiungerne altri in mezzo.
 
 ### Trappole
 
 - ☠ **Il paywall non va nelle schede** (il prezzo cambia per paese): solo screenshot di revisione dell'IAP.
+- ☠ **Il vecchio controllo «gia' presente per nome» non sostituiva niente** (2026-10-09, F17.10): gli scatti
+  nuovi hanno gli stessi nomi dei vecchi. Ora si confronta il `sourceFileChecksum` e l'insieme si svuota e si
+  ricarica.
+- ☠ **Niente SMS ne' Telefono in scatti, video e testi** (F17.10): i moduli non esistono piu'.
+- ☠ **IAP in `READY_TO_SUBMIT`: screenshot di revisione e testi localizzati NON si cambiano via API**
+  (2026-10-09): DELETE dello screenshot → 409 `MEDIA_ASSET_DELETE_NOT_ALLOWED`, POST di uno nuovo → 409
+  `reviewScreenshot` UNMODIFIABLE, PATCH della localizzazione → 409 UNMODIFIABLE anche con la sola
+  descrizione. Si fanno **a mano** in App Store Connect; `verifica()` li elenca in «DA FARE A MANO».
+  La `reviewNote` del prodotto invece passa (la PATCH puo' rispondere 500 e aver scritto lo stesso: rileggere).
 - ☠ **6,5" obbligatorio**: Apple rifiuta le 6,9" nello spazio 6,5" (lezione di TrashCan); si compongono
   entrambe native. Qui si caricano **tutte e due** (`APP_IPHONE_65` e `APP_IPHONE_67`).
 - ☠ **Il tar dal Mac porta i metadati** (`._*.png` sul PC): `COPYFILE_DISABLE=1 tar --no-xattrs`.

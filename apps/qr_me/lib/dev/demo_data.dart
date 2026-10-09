@@ -37,13 +37,22 @@ const QrStyle kDemoNeonStyle = QrStyle(
 );
 
 /// Un QR d'esempio: contenuto, da dove, giorni fa (e minuti, per l'ordine), preferito con nome.
-typedef _Demo = ({QrContent content, String source, int days, int minutes, String? favorite, QrStyle style});
+typedef _Demo = ({
+  QrContent content,
+  String source,
+  int days,
+  int minutes,
+  String? favorite,
+  QrStyle style,
+});
 
 /// Riempie il database se e' vuoto. Restituisce l'id del Wi-Fi di casa (o null se non ha scritto).
 ///
 /// Due preferiti (il Wi-Fi di casa con lo stile Neon, il proprio contatto) e quattro recenti negli
-/// ultimi giorni: un sito, un testo, un contatto letto, un telefono. ⚑ Due preferiti e non tre:
-/// con tre, nello screenshot della home i recenti finivano sotto il bordo dello schermo.
+/// ultimi giorni: un sito, un testo, un contatto letto, un'email precompilata. ⚑ Due preferiti e
+/// non tre: con tre, nello screenshot della home i recenti finivano sotto il bordo dello schermo.
+/// ⚑ Niente telefono ne' SMS: dopo F17.10 non hanno piu' un modulo, e uno scatto che li mostra
+/// prometterebbe una funzione che non c'e'.
 Future<int?> seedDemoData(QrDatabase db, {bool english = false}) async {
   if (!demoEnabled) return null;
   if ((await db.select(db.qrCodes).get()).isNotEmpty) return null;
@@ -72,7 +81,13 @@ Future<int?> seedDemoData(QrDatabase db, {bool english = false}) async {
       style: QrStyle.plain,
     ),
     (
-      content: const PhoneContent('+39 02 1234 5678'),
+      content: EmailContent(
+        to: 'info@smpmicroapps.it',
+        subject: english ? 'Booking request' : 'Richiesta di prenotazione',
+        body: english
+            ? 'Hello, I would like to book for two people on Saturday.'
+            : 'Buongiorno, vorrei prenotare per due persone sabato.',
+      ),
       source: QrSource.form,
       days: 4,
       minutes: 0,

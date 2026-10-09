@@ -14,7 +14,10 @@ Copia di apps/film_tracker/tool/scheda_app_store.py con i valori di QR Me:
   (`verifica()`), cosi' un giro solo dice cosa manca.
 
 Testi da store/scheda-app-store.md. E' **idempotente**: aggiorna quello che c'e', crea quello
-che manca, non ricarica un file gia' presente con lo stesso nome.
+che manca. Screenshot, anteprime e screenshot di revisione dell'IAP si confrontano per nome **e
+contenuto** (`sourceFileChecksum`): se l'insieme remoto non e' identico ai file locali lo si
+svuota e lo si ricarica in ordine (`gia_uguale`, `svuota`), cosi' un giro **sostituisce** e non
+aggiunge doppioni. La build `BUILD` prende il posto di quella collegata quando e' VALID.
 
 **Non invia in revisione**: lo fa il proprietario dopo la prova su iPad.
 
@@ -37,7 +40,9 @@ QUI = Path(__file__).resolve().parent.parent
 APP = '6821086416'
 VERSIONE = '1.0.0'
 VERSIONE_TRASHCAN = 'c682f9c7-cf2a-4f46-9c1f-871adb0be6b3'
-BUILD = '1'
+# ⚑ La 2 (F17.10: moduli rifatti, etichetta): `collega_build` sostituisce la build gia' collegata
+#   se e' un'altra.
+BUILD = '2'
 LINGUE = {'it': 'it', 'en-GB': 'en'}
 # ☠ «QR Me» in inglese e' gia' di un altro account (409 DUPLICATE.DIFFERENT_ACCOUNT, 2026-10-09,
 #   come per Full Freezer e Film Tracker): in en-GB il ripiego gia' deciso in F17.0 punto 1,
@@ -49,13 +54,35 @@ CATEGORIE = ('UTILITIES', 'PRODUCTIVITY')
 IAP_ID = 'qrme_pro_lifetime'
 IAP_PREZZO = '1.99'
 IAP_TESTI = {
-    'it': ('QR Me Pro', 'Moduli, stile e logo, immagine, cronologia, backup'),
-    'en-GB': ('QR Me Pro', 'Forms, style and logo, image, full history, backup'),
+    'it': ('QR Me Pro', 'Moduli, stile e logo, immagine ed etichetta, backup'),
+    'en-GB': ('QR Me Pro', 'Forms, style and logo, image and label, backup'),
 }
-IAP_NOTA = ('One-time purchase that unlocks: the Wi-Fi, contact, email, SMS and phone forms, QR '
-            'style (colours, shapes, logo), sharing the QR as an image, unlimited favourites and '
-            'history, full backup. To test: tap any Forms chip on the home screen (e.g. Wi-Fi), or '
-            'Settings > Discover QR Me Pro.')
+IAP_NOTA = ('One-time purchase that unlocks: the Wi-Fi, contact and pre-filled email forms, QR '
+            'style (colours, shapes, logo), sharing the QR as an image or as a printable label, '
+            'unlimited favourites and history, full backup. To test: tap any Forms chip on the home '
+            'screen (e.g. Wi-Fi), or Settings > Discover QR Me Pro.')
+
+
+def md5(file):
+    return hashlib.md5(file.read_bytes()).hexdigest()
+
+
+def gia_uguale(remoti, locali):
+    """True se l'insieme remoto ha esattamente i file locali, nello stesso ordine e con lo stesso
+    contenuto (nome e `sourceFileChecksum`). Altrimenti l'insieme va svuotato e ricaricato.
+
+    ⚑ Confronto sul contenuto e non solo sul nome: dopo F17.10 gli scatti si chiamano come prima
+    (`01-qr.png`) ma sono diversi, e il vecchio controllo «gia' presente per nome» li saltava.
+    """
+    return [(r['attributes'].get('fileName'), r['attributes'].get('sourceFileChecksum')) for r in remoti] == \
+        [(f.name, md5(f)) for f in locali]
+
+
+def svuota(tipo_risorsa, remoti):
+    """Cancella gli asset di un insieme (screenshot o anteprime), uno per uno."""
+    for r in remoti:
+        api('DELETE', f"/v1/{tipo_risorsa}/{r['id']}")
+        print('   tolto', r['attributes'].get('fileName'))
 
 
 def api(metodo, percorso, corpo=None, tentativi=4):
@@ -181,9 +208,31 @@ def prodotto_pro():
                 'availableTerritories': {'data': [{'type': 'territories', 'id': t} for t in tutti_i_territori()]}}}}),
             'prodotto disponibile ovunque')
 
-    if api('GET', f'/v2/inAppPurchases/{iap}/appStoreReviewScreenshot').get('data'):
-        print('ok screenshot di revisione gia presente')
+    attuale = api('GET', f'/v2/inAppPurchases/{iap}').get('data', {}).get('attributes', {})
+    if attuale.get('reviewNote') == IAP_NOTA:
+        print('ok nota di revisione del prodotto gia giusta')
     else:
+        controlla(api('PATCH', f'/v2/inAppPurchases/{iap}', {'data': {'type': 'inAppPurchases', 'id': iap,
+            'attributes': {'reviewNote': IAP_NOTA}}}), 'prodotto, nota di revisione')
+
+    # ⚑ Lo screenshot del paywall si sostituisce se e' cambiato (F17.10: riga dell'etichetta).
+    paywall = QUI / 'store' / 'screenshots' / 'ios' / 'it' / 'paywall-revisione.png'
+    sc = api('GET', f'/v2/inAppPurchases/{iap}/appStoreReviewScreenshot').get('data')
+    if sc and sc['attributes'].get('sourceFileChecksum') == md5(paywall):
+        print('ok screenshot di revisione gia uguale')
+    else:
+        # ☠ Con il prodotto READY_TO_SUBMIT Apple NON lascia toccare via API ne' lo screenshot di
+        #   revisione (DELETE 409 MEDIA_ASSET_DELETE_NOT_ALLOWED, POST 409 reviewScreenshot
+        #   UNMODIFIABLE) ne' nome/descrizione localizzati (409 UNMODIFIABLE anche con la sola
+        #   descrizione): si sostituiscono a mano in App Store Connect (2026-10-09). La reviewNote
+        #   invece passa (anche se a volte la PATCH risponde 500: rileggere).
+        if sc:
+            r = api('DELETE', f"/v1/inAppPurchaseAppStoreReviewScreenshots/{sc['id']}")
+            if 'errors' in r:
+                print('!! screenshot di revisione: Apple non lo lascia sostituire via API in stato',
+                      attuale.get('state'), '- va cambiato a mano con', paywall.name)
+                return
+            print('   tolto lo screenshot di revisione vecchio')
         carica_file('/v1/inAppPurchaseAppStoreReviewScreenshots', 'inAppPurchaseAppStoreReviewScreenshots',
                     'inAppPurchaseV2', 'inAppPurchases', iap,
                     QUI / 'store' / 'screenshots' / 'ios' / 'it' / 'paywall-revisione.png')
@@ -267,11 +316,15 @@ def main():
                 if not controlla(r, f'insieme screenshot {tipo} {loc}'):
                     continue
                 insieme = r['data']
-            presenti = {s['attributes']['fileName'] for s in api('GET', f"/v1/appScreenshotSets/{insieme['id']}/appScreenshots")['data']}
-            for f in sorted((QUI / 'store' / 'grafiche' / sorgente / cartella).glob('*.png')):
-                if f.name in presenti:
-                    print('gia presente', loc, tipo, f.name)
-                    continue
+            remoti = api('GET', f"/v1/appScreenshotSets/{insieme['id']}/appScreenshots?limit=50")['data']
+            locali = sorted((QUI / 'store' / 'grafiche' / sorgente / cartella).glob('*.png'))
+            if gia_uguale(remoti, locali):
+                print('screenshot gia uguali', loc, tipo, len(locali))
+                continue
+            # ⚑ Sostituire, non aggiungere: si svuota l'insieme e si ricarica tutto in ordine (la
+            #   posizione in App Store Connect e' l'ordine di caricamento).
+            svuota('appScreenshots', remoti)
+            for f in locali:
                 carica_file('/v1/appScreenshots', 'appScreenshots', 'appScreenshotSet', 'appScreenshotSets', insieme['id'], f)
 
         # Il video: 886x1920, va nello spazio iPhone 6,5".
@@ -288,10 +341,11 @@ def main():
             if not controlla(r, f'insieme anteprime 6,5" {loc}'):
                 continue
             insieme = r['data']
-        presenti = {s['attributes']['fileName'] for s in api('GET', f"/v1/appPreviewSets/{insieme['id']}/appPreviews")['data']}
-        if video.name in presenti:
-            print('gia presente', loc, video.name)
+        remoti = api('GET', f"/v1/appPreviewSets/{insieme['id']}/appPreviews")['data']
+        if gia_uguale(remoti, [video]):
+            print('anteprima gia uguale', loc, video.name)
         else:
+            svuota('appPreviews', remoti)
             carica_file('/v1/appPreviews', 'appPreviews', 'appPreviewSet', 'appPreviewSets', insieme['id'], video,
                         extra={'mimeType': 'video/mp4', 'previewFrameTimeCode': '00:00:01:00'})
 
@@ -372,9 +426,13 @@ def eta(info_id):
 def collega_build(versione_id):
     """Collega la build `VERSIONE (BUILD)` alla versione, solo se e' gia' VALID."""
     gia = api('GET', f'/v1/appStoreVersions/{versione_id}/build').get('data')
-    if gia:
+    if gia and gia['attributes'].get('version') == BUILD:
         print('ok build gia collegata', gia['id'], gia['attributes'].get('version'))
         return
+    if gia:
+        # ⚑ Un'altra build (la 1 dopo F17.10): si sostituisce, ma solo quando la nuova e' VALID;
+        #   fino ad allora resta collegata la vecchia (la versione non resta mai senza build).
+        print('build collegata', gia['attributes'].get('version'), '-> da sostituire con la', BUILD)
     builds = api('GET', f'/v1/builds?filter[app]={APP}&filter[version]={BUILD}'
                         f'&filter[preReleaseVersion.version]={VERSIONE}&limit=5')['data']
     if not builds:
@@ -392,12 +450,14 @@ def collega_build(versione_id):
     if not controlla(r, 'build collegata (risposta)'):
         return
     ora = api('GET', f'/v1/appStoreVersions/{versione_id}/build').get('data')
-    print('ok build collegata' if ora else '!! build NON collegata', b['id'])
+    print('ok build collegata' if ora and ora['id'] == b['id'] else '!! build NON collegata', b['id'])
 
 
 def verifica(versione_id):
     """Lo stato di tutto, letto da Apple: screenshot, anteprime, prodotto, build."""
     print('\n-- verifica --')
+    doppioni = []
+    vecchi = []
     v = api('GET', f'/v1/appStoreVersions/{versione_id}')['data']['attributes']
     print('versione', v['versionString'], v['appStoreState'], 'rilascio', v.get('releaseType'))
     for l in api('GET', f'/v1/appStoreVersions/{versione_id}/appStoreVersionLocalizations')['data']:
@@ -406,13 +466,18 @@ def verifica(versione_id):
         print(a['locale'], 'testi:', len(a.get('description') or ''), 'desc,',
               len(a.get('keywords') or ''), 'kw,', len(a.get('promotionalText') or ''), 'promo')
         for s in api('GET', f'/v1/appStoreVersionLocalizations/{lid}/appScreenshotSets')['data']:
-            stati = [x['attributes']['assetDeliveryState']['state']
-                     for x in api('GET', f"/v1/appScreenshotSets/{s['id']}/appScreenshots")['data']]
-            print('   screenshot', s['attributes']['screenshotDisplayType'], stati)
+            righe = api('GET', f"/v1/appScreenshotSets/{s['id']}/appScreenshots?limit=50")['data']
+            nomi = [x['attributes'].get('fileName') for x in righe]
+            stati = [x['attributes']['assetDeliveryState']['state'] for x in righe]
+            print('   screenshot', s['attributes']['screenshotDisplayType'], len(righe), nomi, stati)
+            if len(set(nomi)) != len(nomi):
+                doppioni.append(f"{a['locale']} {s['attributes']['screenshotDisplayType']}")
         for s in api('GET', f'/v1/appStoreVersionLocalizations/{lid}/appPreviewSets')['data']:
-            stati = [x['attributes']['assetDeliveryState']['state']
-                     for x in api('GET', f"/v1/appPreviewSets/{s['id']}/appPreviews")['data']]
+            righe = api('GET', f"/v1/appPreviewSets/{s['id']}/appPreviews")['data']
+            stati = [(x['attributes'].get('fileName'), x['attributes']['assetDeliveryState']['state']) for x in righe]
             print('   anteprime', s['attributes']['previewType'], stati)
+            if len(righe) != 1:
+                doppioni.append(f"{a['locale']} anteprime {s['attributes']['previewType']} ({len(righe)})")
     for p in api('GET', f'/v1/apps/{APP}/inAppPurchasesV2?filter[productId]={IAP_ID}')['data']:
         print('prodotto', p['id'], p['attributes']['productId'], p['attributes']['state'])
     b = api('GET', f'/v1/appStoreVersions/{versione_id}/build').get('data')
@@ -467,11 +532,20 @@ def verifica(versione_id):
             campo(f'iap.{k}', pa.get(k))
         for l in api('GET', f"/v2/inAppPurchases/{p['id']}/inAppPurchaseLocalizations")['data']:
             campo(f"iap[{l['attributes']['locale']}]", (l['attributes'].get('name'), l['attributes'].get('description')))
+            atteso = IAP_TESTI.get(l['attributes']['locale'])
+            if atteso and atteso != (l['attributes'].get('name'), l['attributes'].get('description')):
+                vecchi.append(f"iap[{l['attributes']['locale']}] testi (atteso {atteso[1]!r}: a mano)")
         campo('iap.prezzo', bool(api('GET', f"/v2/inAppPurchases/{p['id']}/iapPriceSchedule").get('data')))
         campo('iap.disponibilita', bool(api('GET', f"/v2/inAppPurchases/{p['id']}/inAppPurchaseAvailability").get('data')))
         sc = (api('GET', f"/v2/inAppPurchases/{p['id']}/appStoreReviewScreenshot").get('data') or {}).get('attributes') or {}
         campo('iap.screenshot revisione', (sc.get('fileName'), (sc.get('assetDeliveryState') or {}).get('state')))
+        if sc.get('sourceFileChecksum') != md5(QUI / 'store' / 'screenshots' / 'ios' / 'it' / 'paywall-revisione.png'):
+            vecchi.append('iap.screenshot revisione diverso da paywall-revisione.png (a mano)')
+    if not b or b['attributes'].get('version') != BUILD:
+        vuoti.append(f'build collegata diversa dalla {BUILD}')
     print('\nVUOTI:', vuoti or 'nessuno')
+    print('DOPPIONI:', doppioni or 'nessuno')
+    print('DA FARE A MANO (Apple non li lascia cambiare via API):', vecchi or 'nessuno')
 
 
 if __name__ == '__main__':

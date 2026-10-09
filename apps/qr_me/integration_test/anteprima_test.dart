@@ -20,9 +20,10 @@ const String lingua = String.fromEnvironment('LINGUA', defaultValue: 'it');
 ///
 /// `ssh mac 'bash ~/microapps/apps/qr_me/tool/anteprima_app_store.sh <UDID> it'`
 ///
-/// Lo script registra lo schermo fra `REGISTRA` e `FINE`. Il giro: la home, il Wi-Fi di casa a
-/// tutto schermo, il suo stile con la verifica «Leggibile», il modulo Wi-Fi, un link letto e
-/// rimostrato come QR. Niente paywall (il prezzo cambia da paese a paese e Apple non lo vuole
+/// Lo script registra lo schermo fra `REGISTRA` e `FINE` (~26 s, Apple vuole 15–30). Il giro: la
+/// home, il Wi-Fi di casa a tutto schermo, il suo stile con la verifica «Leggibile», l'etichetta
+/// da stampare, le tre strade del Wi-Fi nuovo (F17.10), un link letto e rimostrato come QR.
+/// Niente SMS ne' Telefono (tolti in F17.10). Niente paywall (il prezzo cambia da paese a paese e Apple non lo vuole
 /// nei video): il Pro si compra con il gateway finto **prima** di `REGISTRA`.
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -65,38 +66,45 @@ void main() {
 
     // ignore: avoid_print
     print('REGISTRA');
-    await pausa(3000);
+    await pausa(2600);
 
     // Il Wi-Fi di casa (riga 1) a tutto schermo.
     router().push(Routes.qrOf(1)).ignore();
-    await pausa(3200);
+    await pausa(3000);
 
     // Il suo stile: la verifica di leggibilita' compare da sola.
     await tester.tap(find.byKey(const ValueKey('action_style')));
-    await pausa(4200);
+    await pausa(3800);
     router().pop();
-    await pausa(600);
-    router().pop();
+    await pausa(700);
+
+    // L'etichetta da stampare, dalla stampante della barra (Pro, F17.10 punto 5).
+    await tester.tap(find.byKey(const ValueKey('action_label')));
+    await pausa(3200);
+    router().go(Routes.home);
     await pausa(800);
 
-    // Il modulo Wi-Fi in modifica.
-    router().push(Routes.formOf(QrKind.wifi, id: 1)).ignore();
-    await pausa(3000);
+    // Il Wi-Fi nuovo: le tre strade, niente da scrivere (F17.10 punto 1).
+    router().push(Routes.formOf(QrKind.wifi)).ignore();
+    await pausa(2800);
     router().pop();
-    await pausa(800);
+    await pausa(700);
 
     // Un link letto, poi di nuovo come QR.
     router()
         .push(
           Routes.scanResult,
-          extra: const ScanResultArgs(raw: 'https://smpmicroapps.it/contatti', source: QrSource.scanned),
+          extra: const ScanResultArgs(
+            raw: 'https://smpmicroapps.it/contatti',
+            source: QrSource.scanned,
+          ),
         )
         .ignore();
-    await pausa(3000);
+    await pausa(2600);
     await tester.tap(find.byKey(const ValueKey('result_show')));
-    await pausa(3000);
+    await pausa(2600);
     router().go(Routes.home);
-    await pausa(2000);
+    await pausa(1500);
 
     // ignore: avoid_print
     print('FINE');

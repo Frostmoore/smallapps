@@ -17,7 +17,12 @@ Ogni scheda: titolo grande in Space Grotesk bianco e una riga sotto in Plus Jaka
 neon, sul fondo quasi nero dell'app con un alone verde, e la schermata vera dentro la sagoma di
 un telefono con un filo d'alone. Le prime tre sono quelle che si vedono nei risultati di
 ricerca, quindi da sole devono dire cos'e' l'app: in ordine, il QR a tutto schermo (il gesto
-principale), la home con i preferiti, la lettura.
+principale), la home con i preferiti, la lettura. Poi il Wi-Fi senza scrivere (le tre strade di
+F17.10), lo stile e l'etichetta da stampare. Niente SMS ne' Telefono: tolti in F17.10.
+
+Prima di scrivere si cancellano i PNG vecchi di ogni cartella: i nomi hanno il numero d'ordine
+(`05-modulo.png`), e una scheda spostata o tolta lascerebbe un file orfano che lo script di
+caricamento manderebbe ad Apple.
 
 Perche' composte qui e non con uno strumento grafico: le schermate sono quelle vere, i testi
 stanno in questo file accanto alla traduzione, e rifarle dopo una modifica all'app e' un
@@ -48,15 +53,17 @@ SCHEDE = {
         ('qr', 'Condividi.\nEcco il tuo QR.', '▸ A tutto schermo, luminoso'),
         ('home', 'Il Wi-Fi di casa,\nsempre a portata', '▸ Preferiti e cronologia'),
         ('lettura', 'Legge anche\ni QR, gratis', '▸ Dalla fotocamera o da una foto'),
+        ('modulo', 'Il Wi-Fi senza\nscrivere niente', '▸ Dal suo QR, da una foto o dal telefono'),
         ('stile', 'Il tuo stile,\nsempre leggibile', '▸ Colori, forme e logo con Pro'),
-        ('modulo', 'Wi-Fi, contatti,\nemail e SMS', '▸ Gli ospiti inquadrano ed entrano'),
+        ('etichetta', "Un'etichetta\nda stampare", '▸ Il tuo QR con il testo sotto'),
     ],
     'en': [
         ('qr', 'Share it.\nHere is your QR.', '▸ Full screen and bright'),
         ('home', 'Your home Wi-Fi,\nalways at hand', '▸ Favourites and history'),
         ('lettura', 'It reads QR codes\ntoo, for free', '▸ From the camera or a photo'),
+        ('modulo', 'Wi-Fi without\ntyping a thing', '▸ From its QR, a photo or your phone'),
         ('stile', 'Your style,\nstill scannable', '▸ Colours, shapes and logo with Pro'),
-        ('modulo', 'Wi-Fi, contacts,\nemail and SMS', '▸ Guests scan and they are in'),
+        ('etichetta', 'A label,\nready to print', '▸ Your QR with your text below'),
     ],
 }
 
@@ -261,6 +268,8 @@ def main():
         for cartella, (w, h) in (('appstore', (1320, 2868)), ('appstore-6.5', (1284, 2778)), ('play', (1080, 2160))):
             dest = USCITA / cartella / lingua
             dest.mkdir(parents=True, exist_ok=True)
+            for vecchio in dest.glob('*.png'):
+                vecchio.unlink()
             for i, (nome, titolo, sotto) in enumerate(SCHEDE[lingua], 1):
                 scheda(lingua, nome, titolo, sotto, w, h).save(dest / f'{i:02d}-{nome}.png')
         print(f'{lingua}: testata, intestazione, ricerca e {len(SCHEDE[lingua])} schede per store')

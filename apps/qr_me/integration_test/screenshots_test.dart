@@ -19,7 +19,8 @@ const String lingua = String.fromEnvironment('LINGUA', defaultValue: 'it');
 /// Il link «letto» dello screenshot del risultato: il sito della piattaforma, una pagina vera.
 const String linkLetto = 'https://smpmicroapps.it/contatti';
 
-/// Percorre l'app con i dati di esempio e segnala ogni schermata da fotografare.
+/// Percorre l'app con i dati di esempio e segnala ogni schermata da fotografare: paywall (solo
+/// per la revisione dell'IAP), home, qr, stile, etichetta, modulo (le strade del Wi-Fi), lettura.
 ///
 /// `ssh mac 'bash ~/microapps/tool/screenshots_ios.sh <UDID> it <cartella> qr_me'`
 ///
@@ -95,12 +96,35 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 3));
     await scatto('stile', attesa: const Duration(seconds: 1));
 
-    // ── Il modulo Wi-Fi, aperto in modifica: campi pieni e anteprima ─────────────────
-    await vai(Routes.formOf(QrKind.wifi, id: 1));
+    // ── L'etichetta da stampare (Pro, F17.10 punto 5): dalla stampante della pagina del QR ──
+    //
+    // ⚑ Dal pulsante vero (`action_label`) e non con un `push` diretto: cosi' lo scatto prova
+    // anche che il pulsante c'e' e apre la pagina. Testo su due righe e formato rettangolare:
+    // e' l'uso che vende la funzione (il cartellino del Wi-Fi per gli ospiti).
+    await vai(Routes.qrOf(1));
+    await tester.tap(find.byKey(const ValueKey('action_label')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester.enterText(
+      find.byKey(const ValueKey('label_text')),
+      lingua == 'en'
+          ? 'Guest Wi-Fi\nScan to connect'
+          : 'Wi-Fi per gli ospiti\nInquadra e connettiti',
+    );
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester.tap(find.byIcon(Icons.crop_portrait));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await scatto('etichetta', attesa: const Duration(seconds: 1));
+
+    // ── Il modulo Wi-Fi nuovo: le tre strade, niente da scrivere (F17.10 punto 1) ─────────
+    await vai(Routes.formOf(QrKind.wifi));
     await scatto('modulo');
 
     // ── Il risultato di una lettura: un link, col dominio in evidenza ──────────────
-    await vai(Routes.scanResult, extra: const ScanResultArgs(raw: linkLetto, source: QrSource.scanned));
+    await vai(
+      Routes.scanResult,
+      extra: const ScanResultArgs(raw: linkLetto, source: QrSource.scanned),
+    );
     await scatto('lettura');
   });
 }
