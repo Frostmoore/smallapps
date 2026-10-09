@@ -11,7 +11,7 @@
 > `site/src/apps.php`) **solo** quando qui la riga dice «pubblicata» per quello store **e per
 > l'Italia**.
 
-Ultimo aggiornamento: **2026-10-08** (stati App Store verificati via API la sera del 2026-10-08)
+Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verificati via API la sera del 2026-10-08)
 
 ---
 
@@ -59,11 +59,17 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 | 2026-10-07 | Sito `https://smp-digital.it` verificato per il cambio (record TXT su Aruba + Search Console) |
 | 2026-10-07 | **D-U-N-S richiesto** tramite il modulo di Apple; in attesa dell'email di Dun & Bradstreet |
 | 2026-10-08 | Ancora in attesa del D-U-N-S |
+| 2026-10-09 | **D-U-N-S ricevuto: 302873881** (D&B, caso 11083280, creato il 2026-10-09 alle 10:14 UTC, intestato a «SEE MY PAGE DI RONCONI RICCARDO», Nepi VT) |
+| 2026-10-09 | Primo inserimento nel modulo di Google: «numero non trovato». Causa probabile: numero creato **la mattina stessa**, non ancora arrivato ai sistemi di Google. ☠ I tentativi sono limitati: non riprovare finche' il numero non risulta nelle ricerche pubbliche (vedi sotto) |
 
 **Cosa sblocca, in ordine:**
 
-1. Arriva il numero D-U-N-S per email: aspettare 1-2 giorni lavorativi prima di inserirlo, che
-   si propaghi.
+1. ✅ Numero D-U-N-S arrivato il 2026-10-09 (302873881). **Prima di ritentare su Google**
+   (tentativi limitati) controllare che sia visibile pubblicamente, cosa che non consuma
+   tentativi: lo strumento di ricerca D-U-N-S di Apple (developer.apple.com/enroll/duns-lookup)
+   o la ricerca di D&B. Di solito qualche giorno lavorativo, a volte di piu'. Quando si inserisce,
+   nome e indirizzo dell'organizzazione nel profilo pagamenti devono essere **identici** al
+   record D&B («SEE MY PAGE DI RONCONI RICCARDO», Via degli Orti 426, 01036 Nepi VT).
 2. Play Console → Account sviluppatore → **Cambia tipo di account** → organizzazione, con
    profilo pagamenti da organizzazione e recapiti pubblici di lavoro.
 3. Dopo il cambio **aspettare 72 ore** prima di pubblicare.
