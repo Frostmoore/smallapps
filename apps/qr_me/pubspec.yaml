@@ -67,8 +67,9 @@ dependencies:
     path: ../../packages/micro_share
   path: ^1.9.1
   path_provider: ^2.1.6
-  # Il QR: `QrImageView` per lo schermo e `QrPainter` per il PNG, con gli stessi parametri
-  # (un solo punto li traduce da QrStyle, F17.1.7).
+  # Il QR: `QrPainter` sia per lo schermo sia per il PNG, con gli stessi parametri (un solo
+  # punto li traduce da QrStyle, `QrRenderer`, F17.1.7). `QrImageView` non si usa: il logo
+  # passa come `ui.Image` gia' decodificato, senza fotogrammi vuoti.
   qr_flutter: ^4.1.0
   # Luminosita' DELL'APP al massimo mentre il QR e' mostrato (non quella di sistema): nessun
   # permesso, e il sistema la ripristina da solo se l'app muore.

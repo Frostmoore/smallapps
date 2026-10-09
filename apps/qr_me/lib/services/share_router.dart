@@ -36,6 +36,8 @@ enum ShareOutcome {
 ///
 /// - [SharedText] → `QrDecoder.decodeTyped` (un link senza schema diventa un link) → `/show` con
 ///   `source: shared`. ⚑ `decodeTyped` e non `decode`: chi condivide «esempio.it» intende il sito.
+///   ⚑ Il payload e' `QrEncoder.payloadOfTyped`: il testo condiviso **tal quale** (una vCard con
+///   l'indirizzo resta con l'indirizzo), ricodificato solo per il link senza schema.
 /// - [SharedImage] → il lettore ZXing sul file → `/scan/result` con `source: image`, o
 ///   [ShareOutcome.noQrInImage].
 /// - Piu' elementi: il primo testo, altrimenti la prima immagine.
@@ -82,7 +84,7 @@ class ShareRouter {
             Routes.show,
             extra: QrDisplayArgs(
               content: content,
-              payload: QrEncoder.encode(content),
+              payload: QrEncoder.payloadOfTyped(text, content),
               source: QrSource.shared,
             ),
           ),

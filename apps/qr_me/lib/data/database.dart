@@ -89,7 +89,11 @@ extension QrCodeToDomain on QrCode {
         final map = jsonDecode(f);
         if (map is Map<String, Object?>) return QrContent.fromFields(kindEnum, map);
       } on FormatException {
-        // Campi rotti: si ripiega sul payload, che e' la verita' del QR.
+        // Campi rotti: si ripiega sul payload, che e' la verita' del QR. ⚑ Il try copre **sia**
+        // `jsonDecode` (JSON illeggibile) **sia** `fromFields` (JSON valido con campi mancanti,
+        // non testo o sicurezza sconosciuta: lancia FormatException anche lui). Un JSON che non e'
+        // un oggetto (`[1,2]`, `null`) salta il return e ripiega allo stesso modo.
+        // test/data/qr_code_domain_test.dart lo fissa.
       }
     }
     final decoded = QrDecoder.decode(payload);

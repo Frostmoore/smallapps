@@ -82,10 +82,6 @@ class QrRepository {
   Future<int> countFavorites() =>
       _db.qrCodes.count(where: (t) => t.isFavorite.equals(true)).getSingle();
 
-  /// Il conteggio dei preferiti che segue le modifiche: il limite del piano gratuito.
-  Stream<int> watchFavoriteCount() =>
-      _db.qrCodes.count(where: (t) => t.isFavorite.equals(true)).watchSingle();
-
   // ── Scritture ────────────────────────────────────────────────────────────
 
   /// Registra un QR mostrato e ne restituisce l'id. Se esiste gia' un NON preferito con lo

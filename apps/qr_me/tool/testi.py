@@ -29,7 +29,6 @@ TESTI = {
     'common_edit': ('Edit', 'Modifica'),
     'common_retry': ('Try again', 'Riprova'),
     'common_delete': ('Delete', 'Elimina'),
-    'common_optional': ('Optional', 'Facoltativo'),
     'common_copy': ('Copy', 'Copia'),
     'common_copied': ('Copied', 'Copiato'),
     'common_notFound': ('This QR code doesn’t exist any more.', 'Questo QR non esiste più.'),
@@ -44,10 +43,8 @@ TESTI = {
     'kind_phone': ('Phone', 'Telefono'),
 
     # ── Titoli delle schermate (F17.1.5) ──
-    'show_title': ('QR code', 'QR'),
     'scan_title': ('Read a QR code', 'Leggi un QR'),
     'scanResult_title': ('What the QR code says', 'Cosa dice il QR'),
-    'form_title': ('New QR code', 'Nuovo QR'),
     'style_title': ('Style', 'Stile'),
     'saved_title': ('Favourites', 'Preferiti'),
     'history_title': ('History', 'Cronologia'),

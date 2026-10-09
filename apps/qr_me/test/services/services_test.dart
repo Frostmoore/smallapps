@@ -99,6 +99,29 @@ void main() {
       final a = ContentActions(launcher: (_) async => throw StateError('nessuna app'));
       expect(await a.open(const PhoneContent('123')), isFalse);
     });
+
+    // ☠ Difetto trovato rileggendo l'atlante: `uriFor` stava fuori dal try. Un `%` nudo
+    // `Uri.parse` lo tollera (diventa `%25`, verificato); lancia invece un destinatario letto
+    // che comincia con `//` e ha una «porta» non numerica (`MATMSG:TO://a:b;;`).
+    test('destinatario che Uri.parse rifiuta: false, non FormatException, nessun lancio', () async {
+      expect(
+        () => ContentActions.uriFor(const EmailContent(to: '//posta:sconti')),
+        throwsFormatException,
+      );
+      expect(
+        ContentActions.uriFor(const EmailContent(to: '50%@sconti.it')).toString(),
+        'mailto:50%25@sconti.it',
+      );
+      var calls = 0;
+      final a = ContentActions(
+        launcher: (_) async {
+          calls++;
+          return true;
+        },
+      );
+      expect(await a.open(const EmailContent(to: '//posta:sconti')), isFalse);
+      expect(calls, 0);
+    });
   });
 
   group('ZxingImageReader', () {

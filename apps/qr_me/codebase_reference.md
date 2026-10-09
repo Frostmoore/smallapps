@@ -7,7 +7,8 @@
 >
 > **Aggiornato al**: 2026-10-09 · **Fase**: F17.0–F17.7 (parte Android) concluse, questo atlante e'
 > F17.8 · **Ramo git al momento della scrittura**: `v8.6.0`, commit `7a48532` (F17.7) ·
-> **versionName+Code**: `1.0.0+1` · **Test**: **155 verdi** (152 + 3 di ZXing), `analyze` senza issue (2026-10-09)
+> **versionName+Code**: `1.0.0+1` · **Test**: **182 verdi** (155 + 27 dei difetti corretti dopo la
+> rilettura F17.8), `analyze` senza issue (2026-10-09)
 > **Package Android / bundle iOS**: `com.smp.qrme` (immutabile dopo il primo upload) ·
 > estensione iOS `com.smp.qrme.ShareExtension` · App Group `group.com.smp.qrme`
 > **SKU Pro**: `qrme_pro_lifetime` — **1,99 €** una tantum (Play: base **1,63 EUR senza IVA**)
@@ -38,6 +39,11 @@
 > da Drift (la riga QrCode, il companion QrCodesCompanion) compaiono qui in testo semplice o dentro
 > le firme, mai da soli fra apici inversi: cosi' `tool/verify_atlas.ps1` segnala solo i nomi **di
 > quest'app** che non esistono piu'.
+>
+> **Difetti trovati rileggendo l'atlante (F17.8) e corretti il 2026-10-09**: «Rigenera con stile» che
+> perdeva lo stile, `ContentActions.open` che poteva lanciare, il testo condiviso/scritto ricodificato
+> che perdeva i campi (vCard con ADR), «Apri le impostazioni» assente su Android, commenti superati,
+> API e testi non usati (rotta `/pro`, `favoriteCountProvider`, tre chiavi l10n). Dettaglio in §14.
 >
 > Convenzioni: ⚑ = scelta non ovvia, con il suo perche'. ☠ = trappola gia' pagata.
 > **[SCANNER]** = parte cambiata con il passaggio a ZXing (chiuso il 2026-10-09).
@@ -86,7 +92,7 @@ Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, og
 | Nome e icona dei tipi, contenuto in chiaro, password mascherata, riga meta | `lib/app/labels.dart` |
 | Italiano sui telefoni italiani, inglese altrove | `lib/app/locale_resolution.dart` |
 | **Cosa c'e' in un QR** (tipi, uguaglianza, campi, titolo automatico) | `lib/domain/qr_content.dart` |
-| **Contenuto → stringa del QR** (Wi-Fi, vCard 3.0, mailto, SMSTO, tel) | `lib/domain/qr_encoder.dart` |
+| **Contenuto → stringa del QR** (Wi-Fi, vCard 3.0, mailto, SMSTO, tel); payload di un testo scritto/condiviso (`payloadOfTyped`) | `lib/domain/qr_encoder.dart` |
 | **Stringa letta → contenuto** (anche MECARD, MATMSG, sms:, vCard 4.0) | `lib/domain/qr_decoder.dart` |
 | Quanti byte stanno in un QR, scelta del livello M/H/L | `lib/domain/qr_capacity.dart` |
 | Stile e logo, JSON tollerante, id stabili delle icone | `lib/domain/qr_style.dart` |
@@ -101,6 +107,7 @@ Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, og
 | Luminosita' al massimo e schermo acceso | `lib/services/screen_boost.dart` |
 | Condivisione → rotta giusta, doppioni entro 2 s, avvio dell'ascolto | `lib/services/share_router.dart` |
 | Apri link / chiama / email / SMS (url_launcher) | `lib/services/content_actions.dart` |
+| «Apri le impostazioni» dell'app (fotocamera negata): iOS `app-settings:`, Android canale nostro | `lib/services/app_settings.dart` + MainActivity.kt |
 | La home: scrivi/incolla, leggi, moduli, preferiti, recenti | `lib/features/home/home_page.dart` |
 | **IL QR a tutto schermo** e le sue azioni | `lib/features/display/qr_display_page.dart` |
 | Azioni condivise con il loro controllo Pro (salva, stile, PNG, moduli, copia, apri, cronologia) | `lib/features/common/qr_actions.dart` |
@@ -117,7 +124,7 @@ Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, og
 | Impostazioni (cronologia, Pro, dati, tema, privacy, info) | `lib/features/settings/settings_page.dart` |
 | Backup e ripristino (azioni) | `lib/features/settings/data_section.dart` |
 | Manifest: intent SEND, `allowBackup=false`, deep link spento, `<queries>` | `android/app/src/main/AndroidManifest.xml` |
-| `onNewIntent` → `setIntent` | `android/app/src/main/kotlin/com/smp/qrme/MainActivity.kt` |
+| `onNewIntent` → `setIntent`; canale `com.smp.qrme/app_settings` (impostazioni dell'app) | `android/app/src/main/kotlin/com/smp/qrme/MainActivity.kt` |
 | **`finalizeDsl { compileSdk = 36 }`** per `receive_sharing_intent` | `android/build.gradle.kts` |
 | Firma, minify, desugaring | `android/app/build.gradle.kts` |
 | Esclusione dal backup iCloud di `Documents/` | `ios/Runner/AppDelegate.swift` |
@@ -159,7 +166,7 @@ apps/qr_me/
 │   │   └── qr_backup_source.dart         QrBackupSource (BackupSource di micro_core, con i loghi)
 │   ├── domain/                           Dart puro: niente Flutter, niente Drift, niente stringhe dell'app
 │   │   ├── qr_content.dart               QrKind, WifiSecurity, normalizePhone, QrContent + 7 sottoclassi
-│   │   ├── qr_encoder.dart               QrEncoder (encode, wifiEscape, vcardEscape)
+│   │   ├── qr_encoder.dart               QrEncoder (encode, payloadOfTyped, wifiEscape, vcardEscape)
 │   │   ├── qr_decoder.dart               QrDecoder (decode, decodeTyped)
 │   │   ├── qr_capacity.dart              QrErrorLevel, QrCapacity, QrLevelChoice
 │   │   ├── qr_style.dart                 QrModuleShape, QrEyeShape, kLogoIconIds, QrLogo + 4 sottoclassi, QrStyle
@@ -170,7 +177,8 @@ apps/qr_me/
 │   │   ├── readability_check.dart        QrReaderUnavailable, QrImageReader, ZxingImageReader (normale / strict), Readability, ReadabilityCheck
 │   │   ├── screen_boost.dart             ScreenBoost (luminosita' dell'app + wakelock, errori ingoiati)
 │   │   ├── share_router.dart             ShareOutcome, ShareRouter (doppioni 2 s), ShareIntake (initial → reset → incoming)
-│   │   └── content_actions.dart          ContentActions (uriFor, open)
+│   │   ├── content_actions.dart          ContentActions (uriFor, open)
+│   │   └── app_settings.dart             AppSettings (open: iOS app-settings:, Android MethodChannel verso MainActivity)
 │   ├── features/
 │   │   ├── common/
 │   │   │   ├── neon.dart                 NeonButton, SectionLabel, QrPanel, QrThumb, QrRow, ActionTile
@@ -181,25 +189,26 @@ apps/qr_me/
 │   │   ├── history/history_page.dart     HistoryPage
 │   │   ├── home/home_page.dart           HomePage, kHomeFavorites, kHomeRecents
 │   │   ├── saved/saved_page.dart         SavedPage (menu rinomina/togli/elimina)
-│   │   ├── scan/scan_page.dart           [SCANNER] ScanPage (ReaderWidget di flutter_zxing, torcia, Da immagine, mirino), _ScanError, _Viewfinder
-│   │   ├── scan/scan_result_page.dart    ScanResultPage (tipo, contenuto, azioni)
+│   │   ├── scan/scan_page.dart           [SCANNER] ScanPage (ReaderWidget di flutter_zxing, torcia, Da immagine, mirino), ScanErrorView, _Viewfinder
+│   │   ├── scan/scan_result_page.dart    ScanResultPage (tipo, contenuto, azioni, stile scelto tenuto nello stato)
 │   │   ├── settings/settings_page.dart   SettingsPage
 │   │   ├── settings/data_section.dart    DataSection, createBackup, restoreBackup
 │   │   └── style/
 │   │       ├── style_page.dart           StylePage, kSwatches, kReadabilityDelay
 │   │       └── logo_picker.dart          kLogoIcons, LogoPicker
 │   └── l10n/
-│       ├── app_en.arb, app_it.arb        GENERATI da tool/testi.py (205 chiavi)
+│       ├── app_en.arb, app_it.arb        GENERATI da tool/testi.py (202 chiavi)
 │       ├── untranslated.json             vuoto ({}): nessuna chiave senza traduzione
 │       └── generated/                    GENERATO da gen-l10n (classe L)
-├── test/                                 152 test (§12)
-│   ├── data/      qr_repository_test.dart, qr_backup_test.dart
+├── test/                                 182 test (§12)
+│   ├── data/      qr_repository_test.dart, qr_backup_test.dart, qr_code_domain_test.dart
 │   ├── domain/    qr_encoder_test, qr_decoder_test, qr_capacity_test, qr_style_test, contrast_test
-│   ├── services/  services_test.dart, share_router_test.dart
+│   ├── services/  services_test.dart, share_router_test.dart, app_settings_test.dart
 │   └── widget/    qr_test_harness.dart (impianto), display_page_test, form_page_test, home_page_test,
-│                  style_page_test, paywall_config_test, palette_contrast_test, texts_glyphs_test
+│                  style_page_test, paywall_config_test, palette_contrast_test, texts_glyphs_test,
+│                  scan_result_page_test, scan_error_test
 ├── tool/
-│   ├── testi.py                          sorgente dei testi comuni + generatore degli ARB (57 chiavi)
+│   ├── testi.py                          sorgente dei testi comuni + generatore degli ARB (54 chiavi)
 │   ├── testi_forms.py                    contact_, email_, form_, phone_, sms_, wifi_ (25)
 │   ├── testi_home.py                     common_, display_, home_, save_, share_, wifi_ (37)
 │   ├── testi_lists.py                    backup_, data_, history_, saved_, settings_ (40; TIPI favorites/history int)
@@ -218,7 +227,7 @@ apps/qr_me/
 │       ├── proguard-rules.pro            keep com.dexterous.**, com.tekartik.**
 │       └── src/main/
 │           ├── AndroidManifest.xml       BILLING, CAMERA (+ remove di RECORD_AUDIO e storage), camera non obbligatoria, allowBackup=false, singleTask, SEND text/plain e image/*, deep link spento, <queries>
-│           └── kotlin/com/smp/qrme/MainActivity.kt   onNewIntent → setIntent
+│           └── kotlin/com/smp/qrme/MainActivity.kt   onNewIntent → setIntent; configureFlutterEngine: canale com.smp.qrme/app_settings
 ├── ios/
 │   ├── ExportOptions.plist               app-store-connect, automatic, export
 │   ├── Runner/
@@ -314,7 +323,8 @@ Poi: `pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons` e
   dopo. Si rifa' **a ogni avvio** (ripara un attributo perso dopo un ripristino del dispositivo).
   `Library/Application Support/qr_me/` (entitlement, log) **resta** nel backup: niente contenuti
   dell'utente, e l'entitlement aiuta dopo un cambio di telefono.
-  ☐ **Mai compilato**: Windows non compila Swift; va provato sul Mac (F17.7.6).
+  ✔ **Compilato** sul Mac il 2026-10-09 (build per il simulatore riuscita, con l'estensione). ☐ Che
+  l'attributo resti davvero sui file va visto su un iPad (F17.7.6).
 - `SceneDelegate.swift`: `class SceneDelegate: FlutterSceneDelegate {}` (template).
 - Testi dei permessi: `en.lproj` e `it.lproj/InfoPlist.strings` (camera: «Per leggere i QR con la
   fotocamera.»; foto: «Per scegliere una foto da mettere come logo nel QR, o un'immagine con un QR da
@@ -326,8 +336,10 @@ Poi: `pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons` e
   `PHSupportedMediaTypes` Image, `NSExtensionPrincipalClass = $(PRODUCT_MODULE_NAME).ShareViewController`,
   niente storyboard. **Si modificano nel modello** `packages/micro_share/ios_template/`, non qui (lo
   script li ricopia).
-- Stato: **build iOS, estensione e riapertura dell'app mai provate** (F17.7.6, serve il Mac e un
-  iPad via TestFlight). Ripiego gia' deciso se iOS rompe la riapertura per schema URL: un'estensione
+- Stato (2026-10-09): lo script Ruby e' stato **eseguito sul Mac due volte** (idempotente: la seconda
+  non cambia niente; ☠ da ssh serviva `Encoding.default_external = UTF_8`, gia' nello script) e la
+  **build per il simulatore e' riuscita**, con l'appex che **non incorpora** la cartella Frameworks. ☐ Restano la
+  **riapertura dell'app dall'estensione** e la prova su **iPad via TestFlight** (F17.7.6). Ripiego gia' deciso se iOS rompe la riapertura per schema URL: un'estensione
   che mostra il QR da sola (SwiftUI + `CIQRCodeGenerator`).
 
 ---
@@ -471,6 +483,7 @@ Ogni sottoclasse ridefinisce `operator ==`, `hashCode` (con il `QrKind` nel hash
 | `encode` | `static String encode(QrContent content)` | la stringa da codificare (tabella sotto). ☠ **ArgumentError** per un `UrlContent` con schema diverso da http/https (o senza schema e senza aspetto di dominio) |
 | `wifiEscape` | `static String wifiEscape(String s)` | backslash davanti a `\ ; , : "` (stessa grammatica di MECARD/MATMSG) |
 | `vcardEscape` | `static String vcardEscape(String s)` | `\`→`\\`, `,`→`\,`, `;`→`\;`, CRLF/CR/LF → `\n` letterale |
+| `payloadOfTyped` | `static String payloadOfTyped(String raw, QrContent content)` | il payload di un testo **scritto, incollato o condiviso** e non passato da un modulo (`content` = `QrDecoder.decodeTyped(raw)`): `TextContent` → `raw`; `UrlContent` → `encode(content)` (l'unico caso: «esempio.it» → `https://esempio.it`); ogni altro tipo riconosciuto → `raw.trimLeft()` (gli stessi spazi che il decoder ignora). Usato da `HomePage._show` e `ShareRouter.handle` |
 
 Private: `_url(Uri)`, `_wifi(WifiContent)`, `_vcard(ContactContent)`, `_mailto(EmailContent)`.
 
@@ -493,6 +506,10 @@ riconoscono; il decoder accetta le varianti, l'encoder **non le produce mai**):
 mailto il `+` resta un `+` («Ciao+a+tutti»).
 ☠ **Senza l'escape del Wi-Fi** una password con `;` produce un QR che **si legge** ma connette con la
 password sbagliata, e l'errore sembra della rete (F17.1.11 punto 1).
+☠ **`payloadOfTyped` e non `encode(decodeTyped(raw))`** per cio' che arriva scritto o condiviso: il
+dominio conosce solo una parte dei campi (niente ADR, PHOTO, TITLE di una vCard, niente NICKNAME di una
+MECARD), e ricodificare li **cancellava dal QR** senza dirlo (corretto il 2026-10-09). La ricodifica
+resta solo dove l'utente compila o modifica un modulo (`FormPage`): li' il contenuto e' suo.
 
 ### `qr_decoder.dart` — stringa letta → contenuto
 
@@ -633,7 +650,7 @@ nome o cartella va aggiornato anche `AppDelegate.excludeUserDataFromBackup`.
 | Membro | Firma | Effetto |
 |---|---|---|
 | `kindEnum` | `QrKind get kindEnum` | ☠ **StateError** su chiave sconosciuta (solo con un dato di una versione futura; meglio un errore visibile) |
-| `content` | `QrContent get content` | da `fields_json` se c'e' e si legge (riapre il modulo esattamente); altrimenti `QrDecoder.decode(payload)`. ⚑ Un `kind == text` che il decoder legge come altro **resta `TextContent(payload)`**. `fields_json` rotto (FormatException) → ripiego sul payload, «la verita' del QR». ⚠ un `fields_json` JSON valido ma con campi sbagliati fa lanciare `fromFields` (FormatException non intercettata qui: vedi §14) |
+| `content` | `QrContent get content` | da `fields_json` se c'e' e si legge (riapre il modulo esattamente); altrimenti `QrDecoder.decode(payload)`. ⚑ Un `kind == text` che il decoder legge come altro **resta `TextContent(payload)`**. `fields_json` rotto → ripiego sul payload, «la verita' del QR»: il try copre **sia** `jsonDecode` **sia** `fromFields` (che per campi mancanti, non testo o sicurezza sconosciuta lancia anch'esso FormatException); un JSON che non e' un oggetto (`[1,2]`, `null`) ripiega allo stesso modo. Fissato da `test/data/qr_code_domain_test.dart` |
 | `style` | `QrStyle get style` | null o illeggibile → `QrStyle.plain` |
 | `createdAtUtc` / `lastUsedAtUtc` | `DateTime get createdAtUtc`, `DateTime get lastUsedAtUtc` | da ms UTC |
 
@@ -674,7 +691,6 @@ offre `pruneHistory` e `countFavorites` e non sa chi e' Pro.
 | `byId` | `Future<QrCode?> byId(int id)` | |
 | `watchById` | `Stream<QrCode?> watchById(int id)` | segue le modifiche; null se cancellata |
 | `countFavorites` | `Future<int> countFavorites()` | per `FeatureKey.unlimitedEntities` |
-| `watchFavoriteCount` | `Stream<int> watchFavoriteCount()` | idem, che segue (usato solo da `favoriteCountProvider`, che nessuno usa: §14) |
 | `usedLogoImages` | `Future<Set<String>> usedLogoImages()` | i `PhotoLogo.imageName` di tutte le righe con `style_json` non null: per potatura e backup |
 
 **Scritture**
@@ -760,7 +776,6 @@ schermata bianca all'avvio, e chi arriva da una condivisione vuole il QR subito)
 | `repositoryProvider` | `Provider<QrRepository>` | `QrRepository(db, images: imageStore)` |
 | `historyProvider` | `StreamProvider<List<QrCode>>` | `watchHistory()` |
 | `favoritesProvider` | `StreamProvider<List<QrCode>>` | `watchFavorites()` |
-| `favoriteCountProvider` | `StreamProvider<int>` | `watchFavoriteCount()` — **nessuno lo usa** (§14) |
 | `qrCodeProvider` | `StreamProvider.family<QrCode?, int>` | `watchById(id)` (pagina del QR salvato) |
 | `qrRendererProvider` | `Provider<QrRenderer>` | `const QrRenderer()` |
 | `logoRendererProvider` | `Provider<LogoRenderer>` | `const LogoRenderer()` |
@@ -768,6 +783,7 @@ schermata bianca all'avvio, e chi arriva da una condivisione vuole il QR subito)
 | `readabilityCheckProvider` | `Provider<ReadabilityCheck>` | `ReadabilityCheck(const ZxingImageReader.strict(), renderer: renderer)`. ⚑ **Non** usa `qrImageReaderProvider`: la verifica usa il lettore severo (niente invertiti); i test sostituiscono direttamente questo provider |
 | `screenBoostProvider` | `Provider<ScreenBoost>` | `const ScreenBoost()` |
 | `contentActionsProvider` | `Provider<ContentActions>` | `const ContentActions()` |
+| `appSettingsProvider` | `Provider<AppSettings>` | `const AppSettings()` («Apri le impostazioni» della lettura) |
 | `shareInboxProvider` | `Provider<ShareInbox>` | `RsiShareInbox()` (micro_share); nei test FakeShareInbox |
 | `shareRouterProvider` | `Provider<ShareRouter>` | ⚑ **uno solo per l'app**: il filtro dei doppioni ricorda l'ultima condivisione |
 | `PickImage` | `typedef PickImage = Future<String?> Function()` | |
@@ -888,7 +904,9 @@ sotto il 4,5:1 di WCAG AA per il testo normale (visto sull'emulatore). `#15803D`
 `const List<Locale> kSupportedLocales = [Locale('en'), Locale('it')]` (inglese **primo**: e' il
 ripiego di Flutter). `Locale resolveAppLocale(List<Locale>? deviceLocales, Iterable<Locale>
 supported)` → `it` se **una qualunque** delle lingue del dispositivo e' italiano, altrimenti `en`
-(ADR-011). ⚠ Il commento del file dice il contrario per `[de, it, en]` (§14).
+(ADR-011): `[de, it, en]` da' l'italiano. ⚑ Il commento del file e' stato corretto il 2026-10-09 (diceva
+il contrario); il **codice** era ed e' quello dell'ADR-011, identico nelle altre app, **le cui copie
+hanno ancora il commento sbagliato**.
 
 ---
 
@@ -910,7 +928,6 @@ buildRouter()` (`lib/app/app.dart`, **senza parametri**), `initialLocation: Rout
 | `Routes.saved` | `/saved` | `SavedPage` | | | |
 | `Routes.history` | `/history` | `HistoryPage` | | | |
 | `Routes.settings` | `/settings` | `SettingsPage` | | | |
-| `Routes.pro` | `/pro` | `_PaywallRoutePage` (PaywallPage come pagina) | | | — (nessun codice la apre: si usa `showQrPaywall`, che evidenzia la funzione) |
 
 Helper: `static String qrOf(int id)` → `/qr/<id>`; `static String formOf(QrKind kind, {int? id})` →
 `/form/<kind>[?id=<id>]`. Funzioni di modulo in `app.dart`: `QrKind? formKindOf(String? name)`;
@@ -918,6 +935,10 @@ privata `int _id(GoRouterState s)` (`int.tryParse(...) ?? -1`, ☠ `tryParse` e 
 scritto a mano darebbe un'eccezione nel builder).
 
 `const List<QrKind> kFormKinds = [wifi, contact, email, sms, phone]` (testo e link si scrivono nella home).
+
+⚑ **Nessuna rotta `/pro`** (tolta il 2026-10-09 con `_PaywallRoutePage`): nessun codice la apriva. Il
+paywall si apre sempre con `showQrPaywall` (`PaywallPage.show` di micro_core, un `Navigator.push`), che
+evidenzia la funzione che l'ha innescato. Non cercarla.
 
 Argomenti (`routes.dart`):
 
@@ -1066,7 +1087,7 @@ la sostituiscono con `implements`).
 |---|---|---|
 | `duplicateWindow` | `static const Duration duplicateWindow = Duration(seconds: 2)` | |
 | `handleAll` | `Future<ShareOutcome> handleAll(List<SharedPayload> payloads, GoRouter router)` | **il primo testo**, altrimenti la prima immagine; lista senza nessuno dei due → `nothing` |
-| `handle` | `Future<ShareOutcome> handle(SharedPayload payload, GoRouter router)` | payload **uguale** al precedente entro 2 s → `duplicate`; SharedText → `QrDecoder.decodeTyped` → `push(/show, QrDisplayArgs(payload: QrEncoder.encode(c), source: shared))`; SharedImage → `reader.read(path)` → vuota `noQrInImage`, non disponibile `readerUnavailable`, altrimenti `push(/scan/result, ScanResultArgs(raw: primo, source: image))` |
+| `handle` | `Future<ShareOutcome> handle(SharedPayload payload, GoRouter router)` | payload **uguale** al precedente entro 2 s → `duplicate`; SharedText → `QrDecoder.decodeTyped` → `push(/show, QrDisplayArgs(payload: QrEncoder.payloadOfTyped(text, c), source: shared))` (⚑ il testo **tal quale**: una vCard con l'indirizzo resta con l'indirizzo); SharedImage → `reader.read(path)` → vuota `noQrInImage`, non disponibile `readerUnavailable`, altrimenti `push(/scan/result, ScanResultArgs(raw: primo, source: image))` |
 
 `class ShareIntake` — `ShareIntake({required this.inbox, required this.router, required this.goRouter,
 this.onOutcome})`; campi `final ShareInbox inbox`, `final ShareRouter router`, `final GoRouter
@@ -1092,12 +1113,32 @@ iniettabile: i test verificano **quale** URI si apre).
 | Membro | Firma | Effetto |
 |---|---|---|
 | `uriFor` | `static Uri? uriFor(QrContent content)` | link → l'URI; telefono → `tel:<normalizzato>`; email → `mailto:` con `encodeComponent`; SMS → **`sms:<numero>?body=`**; testo, Wi-Fi, contatto → null (si copiano) |
-| `open` | `Future<bool> open(QrContent content)` | `false` se non c'e' niente da aprire o nessuna app sa farlo (anche se il lanciatore lancia); senza lanciatore `launchUrl(mode: externalApplication)` |
+| `open` | `Future<bool> open(QrContent content)` | **non lancia mai**: `false` se non c'e' niente da aprire, se `uriFor` lancia o se nessuna app sa farlo (anche se il lanciatore lancia); senza lanciatore `launchUrl(mode: externalApplication)` |
 
 ⚑ **`sms:` per aprire, `SMSTO:` nel QR**: SMSTO e' la forma che le fotocamere capiscono, `sms:?body=`
 quella che le app dei messaggi accettano da un link. ⚑ **Sempre app esterna**: QR Me non e' un browser,
 l'utente deve vedere la barra degli indirizzi del suo. ☠ Su Android 11+ senza le `<queries>` del
-manifest il sistema risponde sempre «nessuna app».
+manifest il sistema risponde sempre «nessuna app». ☠ **`uriFor` sta dentro il try di `open`** (dal
+2026-10-09): il destinatario di un'email letta e' testo arbitrario e `Uri.parse` ne rifiuta alcuni con
+FormatException (`//posta:sconti` diventa un'autorita' con porta non numerica); fuori dal try
+l'eccezione arrivava al pulsante. Un `%` nudo invece passa (`Uri.parse` lo scrive `%25`: verificato).
+
+### `app_settings.dart`
+
+`class AppSettings` — `const AppSettings({this._launcher, this._platform})` (`Future<bool> Function(Uri
+uri)?` e `TargetPlatform?`, iniettabili nei test).
+
+| Membro | Firma | Effetto |
+|---|---|---|
+| `channel` | `static const MethodChannel channel = MethodChannel('com.smp.qrme/app_settings')` | il canale verso MainActivity.kt (⚑ nome identico alla costante SETTINGS_CHANNEL del Kotlin) |
+| `open` | `Future<bool> open()` | iOS → `launchUrl(Uri.parse('app-settings:'))`; Android → `channel.invokeMethod<bool>('open')`; altre piattaforme → false. **Non lancia mai** (canale assente, PlatformException → false + `MicroLog.e`) |
+
+Lato Android, `MainActivity.configureFlutterEngine` registra il canale: metodo `open` →
+`startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package",
+packageName, null)))` → `true`, eccezione → `false`, altri metodi → `notImplemented`.
+⚑ **Codice nostro e non un plugin** (`permission_handler`, `app_settings`): un Intent non vale una
+dipendenza in piu' (ne' una riga in piu' nella scheda dello store). Android non ha uno schema URL per
+«le impostazioni di quest'app», quindi `url_launcher` da solo non basta.
 
 ---
 
@@ -1155,7 +1196,7 @@ Costanti: `const int kHomeFavorites = 3`, `const int kHomeRecents = 5`.
 Dall'alto: titolo «QR **Me**» (Me in verde), ingranaggio → `/settings` (`home_settings`); **Scrivi o
 incolla** (`home_text`, 2–5 righe); **Incolla** (`home_paste`: legge gli appunti, vuoti → snack; su iOS
 il sistema mostra il suo avviso, e' normale) e **Mostra QR** (`home_show`, spento con testo vuoto o
-solo spazi) → `QrDecoder.decodeTyped` → `push(/show, source: typed)`; **Leggi un QR** (`home_scan`, riga
+solo spazi) → `QrDecoder.decodeTyped` → `push(/show, payload: QrEncoder.payloadOfTyped(raw, c), source: typed)` (⚑ una vCard incollata si mostra intera); **Leggi un QR** (`home_scan`, riga
 alta 64) → `/scan`; **Moduli**: cinque chip (`form_chip_<kind>`) con `ProBadge` senza Pro →
 `openNewForm`; **Preferiti** (primi 3, «Vedi tutti» → `/saved`); **Recenti** (primi 5, «Vedi tutti»
 `home_seeHistory` → `/history`) e, **senza Pro e con la cronologia accesa**, la riga
@@ -1224,10 +1265,14 @@ Stato di `_ScanPageState`:
 | `_error` | `Object?` | perche' la fotocamera non e' partita; `null` se va o sta partendo |
 | `_torchUsable`, `_torchOn` | `bool` | ⚑ la torcia si scopre solo provandola (emulatore e frontali non l'hanno): al primo errore di `setFlashMode` il pulsante sparisce |
 | `_handling` | `bool` | ☠ il lettore consegna la stessa lettura piu' volte (e una in volo puo' arrivare dopo lo smontaggio): senza, piu' pagine del risultato una sopra l'altra |
+| `_awaitingSettings` | `bool` | «Apri le impostazioni» toccato e accettato dal sistema: al prossimo `onResume` si riprova da solo. ☠ **Solo** dopo le impostazioni: su Android il dialogo del permesso stesso mette in pausa e riprende l'attivita', e «riprova a ogni ripresa» richiederebbe il permesso appena negato in un giro senza fine |
+| `_lifecycle` | `AppLifecycleListener` | `onResume` → se `_awaitingSettings` e c'e' un errore, `_retry()`; chiuso in `dispose` |
 
 | Metodo | Firma | Effetto |
 |---|---|---|
-| `initState` | `void initState()` | lancia `_checkCameras` |
+| `initState` | `void initState()` | crea `_lifecycle`, lancia `_checkCameras` |
+| `dispose` | `void dispose()` | chiude `_lifecycle` |
+| `_openSettings` | `Future<void> _openSettings()` | `_awaitingSettings = await ref.read(appSettingsProvider).open()` |
 | `_checkCameras` | `Future<void> _checkCameras()` | ☠ `availableCameras()` vuota → `_error = StateError('nessuna fotocamera')`: senza fotocamere il `ReaderWidget` non segnala nulla e resterebbe nero per sempre. Se `availableCameras` lancia, solo log (l'errore vero arriva da `onControllerCreated`) |
 | `_onController` | `void _onController(CameraController? controller, Exception? error)` | callback `onControllerCreated`: salva il controller, spegne lo stato torcia; con `error` lo logga e lo mette in `_error` |
 | `_toggleTorch` | `Future<void> _toggleTorch()` | `setFlashMode(FlashMode.torch / FlashMode.off)`; errore → `_torchUsable = false` |
@@ -1235,16 +1280,19 @@ Stato di `_ScanPageState`:
 | `_onScan` | `void _onScan(Code code)` | callback `onScan`: ignorata se `_handling`, fotocamera smontata o testo vuoto; poi `_handling = true`, `HapticFeedback.lightImpact()`, `_showResult(raw, QrSource.scanned)` |
 | `_fromImage` | `Future<void> _fromImage()` | **Da immagine** (`scan_fromImage`): `pickImageProvider` → `qrImageReaderProvider.read` → `QrReaderUnavailable`: snack d'errore `scan_readerUnavailable`; vuota: snack «Nessun QR in questa immagine»; altrimenti `_showResult(values.first, QrSource.image)`. Resta usabile anche senza fotocamera |
 | `_retry` | `void _retry()` | azzera errore, controller e torcia, `_attempt++`, ricontrolla le fotocamere |
-| `build` | | AppBar nera (☠ titolo bianco esplicito `p.title(color: Colors.white)`: il colore del tema vince su `foregroundColor` e nel tema chiaro era nero su nero, F17.7) con la torcia solo se nessun errore, controller pronto, `_torchUsable` e fotocamera posteriore; corpo: `_ScanError` se c'e' un errore, altrimenti il `ReaderWidget` (se `_cameraOn`); sopra, mirino e «Inquadra il QR» **solo senza errore** (⚑ sopra lo stato d'errore gli angoli incorniciavano il messaggio); in basso «Da immagine» sempre |
+| `build` | | AppBar nera (☠ titolo bianco esplicito `p.title(color: Colors.white)`: il colore del tema vince su `foregroundColor` e nel tema chiaro era nero su nero, F17.7) con la torcia solo se nessun errore, controller pronto, `_torchUsable` e fotocamera posteriore; corpo: `ScanErrorView(error:, onRetry: _retry, onOpenSettings: _openSettings)` se c'e' un errore, altrimenti il `ReaderWidget` (se `_cameraOn`); sopra, mirino e «Inquadra il QR» **solo senza errore** (⚑ sopra lo stato d'errore gli angoli incorniciavano il messaggio); in basso «Da immagine» sempre |
 
-- `_ScanError` (`const _ScanError({required Object error, required VoidCallback onRetry})`,
+- `ScanErrorView` (pubblica per i test: `const ScanErrorView({required Object error, required
+  VoidCallback onRetry, required Future<void> Function() onOpenSettings, super.key})`;
   `static bool isDenied(Object error)` = `error is CameraException && error.code.startsWith('CameraAccessDenied')`:
   copre `CameraAccessDenied` di Android CameraX e iOS e `CameraAccessDeniedWithoutPrompt` di iOS;
   ⚑ per prefisso perche' i codici sono stringhe dei plugin, non un enum): permesso negato → «La
-  fotocamera e' spenta per QR Me» con «Apri le impostazioni» (`app-settings:`) **solo su iOS**, su
-  Android «Riprova» (⚑ aprire i permessi dell'app su Android richiederebbe `permission_handler` per un
-  pulsante; e se Android ha fissato il rifiuto, «Riprova» ritorna allo stesso stato: provato); altri
-  errori, nessuna fotocamera → «La fotocamera non e' partita» con «Riprova».
+  fotocamera e' spenta per QR Me» (`scan_error`) con **«Apri le impostazioni» su Android e iOS**
+  (`AppSettings`) e sotto il pulsante di testo **«Riprova»** (`scan_retry`); altri errori, nessuna
+  fotocamera → «La fotocamera non e' partita» con il solo «Riprova». ⚑ Le due azioni insieme perche'
+  senza `permission_handler` non si sa se il rifiuto e' singolo («Riprova» richiede il permesso) o
+  definitivo (solo le impostazioni lo riaccendono). ☠ Prima, su Android, solo «Riprova»: dopo un
+  rifiuto definitivo il sistema non chiede piu' e si tornava allo stesso stato vuoto (provato).
 - `_Viewfinder` (`const _Viewfinder({required Color color})`, `static const double sideFraction = 0.66`):
   quattro angoli dell'accento attorno a un quadrato centrale alzato di 40 px. ⚑ `sideFraction` minore di
   `ScanPage.cropPercent`: la zona in cui ZXing cerca deve contenere il mirino.
@@ -1257,8 +1305,9 @@ QR non e' provata (la scena virtuale non ne mostra): su telefono vero.
 
 `class ScanResultPage extends ConsumerStatefulWidget` — `const ScanResultPage({required ScanResultArgs
 args, super.key})`. Stato: `late final QrContent _content = QrDecoder.decode(args.raw)` (⚑ `decode`, non
-`decodeTyped`), `_id`, `_saved`; `_display` getter → QrDisplayArgs con `payload: raw` (⚑ la stringa
-**letta**, senza ricodificarla: nessuna perdita).
+`decodeTyped`), `_id`, `_saved`, **`QrStyle _style = QrStyle.plain`** (lo stile scelto con «Rigenera
+con stile»); `_display` getter → QrDisplayArgs con `payload: raw` (⚑ la stringa **letta**, senza
+ricodificarla: nessuna perdita), `style: _style`, `qrId: _id`.
 - Dopo il primo frame: `recordIfEnabled(source: scanned | image)`.
 - Intestazione: icona e nome del tipo (`result_kind`). Corpo `_Body`: per un link il **dominio grande
   in verde** (`result_domain`) e l'indirizzo intero sotto; per gli altri `plainText` selezionabile
@@ -1266,11 +1315,17 @@ args, super.key})`. Stato: `late final QrContent _content = QrDecoder.decode(arg
 - Azioni del tipo: link → **Apri** (`result_open`) + Copia link; telefono → Chiama + Copia; email →
   Scrivi + Copia; SMS → Manda + Copia; Wi-Fi protetto → **Copia password**; contatto e testo → Copia.
 - Sempre: **Mostra come QR** (`result_show`, gratis) → `/show`; **Rigenera con stile** (`result_style`,
-  `ProBadge` senza Pro) → `openStyle`; **Salva** (`result_save`) → `saveAsFavorite(existingId: _id)`.
+  `ProBadge` senza Pro) → `Future<void> _restyle()`: `openStyle(context, ref, _display)`; con uno stile
+  applicato `setState(_style = style)` e **`push(/show, _display)`** con lo stile (chi tocca «Rigenera»
+  vuole vedere il risultato); **Salva** (`result_save`) → `saveAsFavorite(args: _display, existingId: _id)`.
+  ⚑ Stesso schema di `_DisplayBodyState._style` nella pagina del QR: lo stile vive nello stato della
+  pagina, e ogni azione successiva («Mostra come QR», «Salva») parte dagli argomenti con lo stile.
+  Con la cronologia accesa `StylePage` lo scrive anche sulla riga (`updateStyle`) e `/show` la tocca.
 ⚑ **Un link letto non si apre mai da solo**: si mostra con il dominio in evidenza (un adesivo sopra il
 QR vero al parcheggio). ⚑ **Connettersi al Wi-Fi da qui non si fa**: su Android 10+ serve un'API di
 suggerimento con conferma, su iOS un'entitlement Hotspot; la fotocamera di sistema lo fa meglio.
-⚠ **Difetto aperto** (§14): lo stile restituito da «Rigenera con stile» viene **ignorato**.
+☠ Fino al 2026-10-09 lo stile restituito era **ignorato** (perso con la cronologia spenta; con la
+cronologia accesa «Mostra come QR» e «Salva» ripartivano dal QR semplice): `scan_result_page_test.dart`.
 
 ### Moduli — `features/forms/`
 
@@ -1521,7 +1576,7 @@ pubblicita'): se ne porta una, non si usa.
 Dalla cartella `apps/qr_me`:
 
 ```
-pwsh ../../tool/fl.ps1 test                                   # i test (155)
+pwsh ../../tool/fl.ps1 test                                   # i test (182)
 pwsh ../../tool/fl.ps1 analyze
 python tool/testi.py; pwsh ../../tool/fl.ps1 gen-l10n         # dopo aver cambiato un testo
 pwsh ../../tool/fl.ps1 pub run build_runner build             # dopo una modifica a lib/data/tables.dart
@@ -1536,21 +1591,25 @@ ruby tool/aggiungi_share_extension_ios.rb apps/qr_me ShareExtension group.com.sm
 
 ## 12. Catalogo dei test
 
-**155 test** in `apps/qr_me/test/` (127 dichiarazioni, alcune in cicli), tutti verdi il 2026-10-09:
-152 al commit `7a48532` piu' i 3 di `ZxingImageReader` in `services_test.dart` aggiunti con la
-sostituzione di ML Kit.
+**182 test** in `apps/qr_me/test/`, tutti verdi il 2026-10-09: 152 al commit `7a48532`, piu' i 3 di
+`ZxingImageReader` (sostituzione di ML Kit) = 155, piu' **27** scritti con la correzione dei difetti
+trovati rileggendo l'atlante (F17.8): 9 `qr_code_domain_test`, 4 `qr_encoder_test`
+(`payloadOfTyped`), 1 `services_test` (`open` che non lancia), 2 `share_router_test` (vCard e MECARD
+tal quali), 5 `app_settings_test`, 3 `scan_result_page_test`, 3 `scan_error_test`.
 
 | File | N. | Cosa dimostra |
 |---|---|---|
-| `test/domain/qr_encoder_test.dart` | 15 | ogni codifica **esattamente** come in tabella |
+| `test/domain/qr_encoder_test.dart` | 19 | ogni codifica **esattamente** come in tabella; `payloadOfTyped` |
 | `test/domain/qr_decoder_test.dart` | 33 | riconoscimento, ripiego, mai un'eccezione, **round-trip su 15 contenuti**, `toFields`/`fromFields` su 7 tipi |
 | `test/domain/qr_capacity_test.dart` | 7 | limiti per livello, UTF-8, scelta del livello |
 | `test/domain/qr_style_test.dart` | 11 | `isPlain`, JSON (5 andata e ritorno), tolleranza, id icone, grafemi |
 | `test/domain/contrast_test.dart` | 5 | WCAG e inversione |
 | `test/data/qr_repository_test.dart` | 17 | le regole del repository su `QrDatabase.memory()` + ImageStore vero in cartella temporanea |
 | `test/data/qr_backup_test.dart` | 4 | backup vero (ZIP di BackupService) fra due «telefoni» |
-| `test/services/services_test.dart` | 10 | QrRenderer e ContentActions; **3 di `ZxingImageReader`** (aggiunti con la sostituzione di ML Kit) |
-| `test/services/share_router_test.dart` | 8 | ShareRouter e ShareIntake con router vero e FakeShareInbox |
+| `test/data/qr_code_domain_test.dart` | 9 | `QrCodeToDomain.content`: campi buoni usati, campi rotti → payload |
+| `test/services/services_test.dart` | 11 | QrRenderer e ContentActions (anche `open` che non lancia); **3 di `ZxingImageReader`** |
+| `test/services/share_router_test.dart` | 10 | ShareRouter e ShareIntake con router vero e FakeShareInbox; testo condiviso tal quale |
+| `test/services/app_settings_test.dart` | 5 | `AppSettings`: canale su Android, `app-settings:` su iOS, mai un'eccezione |
 | `test/widget/display_page_test.dart` | 12 | la pagina del QR |
 | `test/widget/form_page_test.dart` | 4 | i moduli |
 | `test/widget/home_page_test.dart` | 9 | la home |
@@ -1558,15 +1617,24 @@ sostituzione di ML Kit.
 | `test/widget/paywall_config_test.dart` | 6 | coerenza del Pro |
 | `test/widget/palette_contrast_test.dart` | 6 | contrasto AA della palette nei due temi |
 | `test/widget/texts_glyphs_test.dart` | 2 | niente glifi di spunta/avviso negli ARB |
+| `test/widget/scan_result_page_test.dart` | 3 | «Rigenera con stile» tiene lo stile (cronologia spenta e accesa; Salva) |
+| `test/widget/scan_error_test.dart` | 3 | permesso negato: «Apri le impostazioni» + «Riprova»; altri errori solo «Riprova» |
 
-### `qr_encoder_test.dart` (15)
+### `qr_encoder_test.dart` (19)
 testo identico (spazi e a-capo compresi); http/https com'e'; senza schema solo con punto e senza
 spazi (`ciao` → null, `ciao mondo.it` → null, `HTTPS://Esempio.it` → host minuscolo); `ftp:`/`javascript:`
 rifiutati e `encode` di un ftp → ArgumentError; Wi-Fi WPA, WEP nascosta, aperta (`nopass`, niente `P:`
 anche con password), **escape di `\ ; , : "`**; vCard 3.0 completa con CRLF e `N` ricavato
 («Rossi;Mario Bianchi»), righe vuote omesse, escape vCard; mailto con `%20`/`%2B`/`%0A`/UTF-8 e
 parametri vuoti omessi; `SMSTO:+393331234:Ciao: arrivo` e `SMSTO:333:`; `tel:+39021234567`; `autoTitle`
-per ogni tipo (dominio senza www, max 41, mai vuoto).
+per ogni tipo (dominio senza www, max 41, mai vuoto). **`payloadOfTyped`** (4): testo identico con gli
+spazi; `esempio.it` → `https://esempio.it` (l'unica ricodifica); vCard con ADR, MECARD, `sms:` tal quali
+(e la prova che `encode(decodeTyped(vcard))` perde l'ADR); tipi riconosciuti senza gli spazi a sinistra.
+
+### `qr_code_domain_test.dart` (9, `QrCode` costruita a mano, senza database)
+campi buoni → si usano i campi; JSON illeggibile → payload; **JSON valido ma campi sbagliati** (6 casi:
+`{"foo":1}`, `{"ssid":3}`, sicurezza sconosciuta, `[1,2]`, `"testo"`, `null`) → payload, mai
+un'eccezione; contatto con `{"name":null}` → la vCard del payload decodificata.
 
 ### `qr_decoder_test.dart` (33)
 WIFI in qualunque ordine e minuscolo con unescape, `nopass`, WEP, senza T ma con password → wpa; vCard
@@ -1611,17 +1679,20 @@ senza doppioni; «sostituisci tutto» cancella il logo che il backup non riporta
 (tipo, provenienza, payload non testo, titolo vuoto, percorso `../../segreto`) → FormatException e
 database intatto.
 
-### `services_test.dart` (10)
+### `services_test.dart` (11)
 `levelFor` M/H/logo tolto; troppo lungo: `choose` lo dice e `levelFor` lancia; il widget ha la **zona di
 rispetto del colore di sfondo** (ColoredBox) e larga 4 moduli su 29 (versione 1); il PNG ha la firma PNG
 e IHDR 256×256; `uriFor` per tipo (`tel:+393331234`, mailto `%20`/`%2B`, `sms:3331?body=…`, null per
 testo e Wi-Fi); `open` usa il lanciatore e restituisce false senza niente da aprire; un lanciatore che
-lancia → false. **ZXing**: senza la libreria nativa (sotto `flutter test` sul PC) un
+lancia → false; ☠ **un destinatario che `Uri.parse` rifiuta** (`//posta:sconti`): `uriFor` lancia,
+`open` restituisce false e il lanciatore non parte (e un `%` nudo diventa `%25`). **ZXing**: senza la libreria nativa (sotto `flutter test` sul PC) un
 PNG vero da' `QrReaderUnavailable` con entrambi i lettori, non un errore qualunque; un file che non si
 apre come immagine da' lista vuota («nessun QR»); `strict` non prova gli invertiti.
 
-### `share_router_test.dart` (8)
+### `share_router_test.dart` (10)
 testo → `/show` TextContent con `source: shared`; `esempio.it` → UrlContent `https://esempio.it`;
+☠ **vCard con ADR e TITLE condivisa → payload identico all'originale** (CRLF compresi); MECARD →
+resta MECARD;
 immagine con QR → `/scan/result` con `source: image` e il percorso letto; immagine senza QR →
 `noQrInImage` e nessuna pagina; scanner assente → `readerUnavailable`; **doppione entro 2 s ignorato**,
 diverso passa, dopo 3 s passa; piu' elementi: il testo vince e l'immagine non si legge; **ShareIntake**:
@@ -1664,11 +1735,26 @@ foto, statistiche, notifiche, CSV gratis.
 ### `texts_glyphs_test.dart` (2)
 `app_it.arb` e `app_en.arb` senza `✓✔✗✘⚠❌✅` (legge i file dalla cartella dell'app: va lanciato da li').
 
+### `app_settings_test.dart` (5)
+nome del canale = quello di MainActivity.kt; Android: chiama `open` sul canale e ne restituisce la
+risposta; Android senza gestore (MissingPluginException) o con PlatformException → false; iOS:
+`app-settings:` con il lanciatore iniettato; Windows → false.
+
+### `scan_result_page_test.dart` (3, `/style` finto che restituisce uno stile, `/show` che cattura)
+per **cronologia spenta e accesa**: dopo «Applica» si apre `/show` con lo stile scelto, il payload letto
+e `qrId` null/non null; tornati indietro, «Mostra come QR» riparte dallo stile scelto. Cronologia
+spenta: «Salva» dopo lo stile scrive la riga **con lo stile** (`recorded.single.style`). Falliscono
+tutti e 3 sul codice di prima della correzione (verificato).
+
+### `scan_error_test.dart` (3, `ScanErrorView` montata da sola)
+permesso negato: «Apri le impostazioni» e sotto «Riprova», ognuno chiama il suo callback;
+`CameraAccessDeniedWithoutPrompt` e' un permesso negato; nessuna fotocamera → solo «Riprova».
+
 ### Impianto — `test/widget/qr_test_harness.dart`
 
 | Simbolo | Firma | Cosa offre |
 |---|---|---|
-| `FakeQrRepository` | `class FakeQrRepository extends QrRepository` — `FakeQrRepository(super.db, {List<QrCode>? rows})` | righe in memoria, stream broadcast; registra `recorded`, `pruneCalls`, `touched`, `favorited`; id da 100; `dispose()` |
+| `FakeQrRepository` | `class FakeQrRepository extends QrRepository` — `FakeQrRepository(super.db, {List<QrCode>? rows})` | righe in memoria, stream broadcast; registra `recorded` (record `({QrContent content, String payload, String source, QrStyle style})`), `pruneCalls`, `touched`, `favorited`; id da 100; `dispose()` |
 | `qrRow` | `QrCode qrRow(int id, {required QrContent content, String? payload, String source = QrSource.typed, bool favorite = false, String? title, int lastUsedAt = 0})` | una riga di prova |
 | `FakeScreenBoost` | `class FakeScreenBoost implements ScreenBoost` | contatori `enabled`, `disabled`, `bool get on` |
 | `FakeQrReader` | `class FakeQrReader implements QrImageReader` — `FakeQrReader([List<String> values = const [], bool unavailable = false])` | registra `paths`; lancia QrReaderUnavailable se `unavailable` |
@@ -1684,10 +1770,11 @@ non arrivano mai (TrashCan, Film Tracker). Che le scritture vere funzionino lo d
 `qr_repository_test` e `qr_backup_test`. ⚑ **Niente golden** (i font cambiano fra Windows e Mac).
 ⚑ `pumpAndSettle` non aspetta un Timer senza fotogrammi: la pausa di 600 ms va fatta passare a mano.
 
-**Senza test**: `ScanPage`, `ScanResultPage`, `SavedPage`, `HistoryPage`, `SettingsPage`, `DataSection`,
+**Senza test**: `ScanPage` (oltre a `ScanErrorView`; la ripresa dopo le impostazioni), `ScanResultPage` oltre
+allo stile (azioni del tipo), `SavedPage`, `HistoryPage`, `SettingsPage`, `DataSection`,
 `LogoPicker` (oltre al catalogo), `LogoRenderer`, `ReadabilityCheck` vera, la lettura vera di `ZxingImageReader` (serve la libreria nativa: emulatore),
-`ScreenBoost` vero, `QrMeApp`/`buildRouter` (rotte «Non trovato»), `QrCodeToDomain` con `fields_json`
-rotto, migrazioni (schema 1), `integration_test`.
+`ScreenBoost` vero, `QrMeApp`/`buildRouter` (rotte «Non trovato»), il lato Kotlin del canale delle
+impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schema 1), `integration_test`.
 
 ---
 
@@ -1722,6 +1809,11 @@ rotto, migrazioni (schema 1), `integration_test`.
 | L'app nascosta su Play ai dispositivi senza fotocamera | `uses-feature camera.any` richiesta dal plugin | `required="false"` con `tools:replace` |
 | «Non trovato» aprendo dall'estensione | deep link di Flutter acceso | spento in manifest e Info.plist |
 | La condivisione con l'app aperta legge l'intent vecchio | `singleTask`, `getIntent()` vecchio | `MainActivity.onNewIntent` → `setIntent` |
+| «Rigenera con stile» sembra non fare niente | lo stile restituito da `/style` ignorato | `ScanResultPage._style` + `_restyle` → `/show` |
+| Una vCard condivisa perde l'indirizzo nel QR | `encode(decodeTyped(raw))`: il dominio non conosce ADR, PHOTO, TITLE | `QrEncoder.payloadOfTyped` (il testo tal quale) |
+| «Apri» su un'email strana fa esplodere il pulsante | `uriFor` (`Uri.parse`) fuori dal try | `uriFor` dentro il try di `ContentActions.open` |
+| Android: fotocamera negata per sempre, «Riprova» non fa niente | il sistema non mostra piu' il dialogo | «Apri le impostazioni» via `AppSettings` (canale di MainActivity) + riprova al ritorno |
+| Richiesta del permesso in un giro senza fine | riprovare a ogni `onResume`: il dialogo del permesso mette in pausa l'attivita' | `_awaitingSettings`: si riprova solo tornando dalle impostazioni |
 | «Failed to find target with hash string 'android-37'» | `receive_sharing_intent` 1.9.0 dichiara compileSdk 37, AGP 9 non lo trova | `finalizeDsl { compileSdk = 36 }` in `android/build.gradle.kts` (gira **dopo** il build.gradle del plugin) |
 | Lo script Ruby muore con «invalid byte sequence in US-ASCII» | da ssh il Mac non imposta LANG e Ruby legge gli Info.plist accentati come ASCII | `# encoding: utf-8` + `Encoding.default_external/internal = UTF_8` in `tool/aggiungi_share_extension_ios.rb` |
 | L'estensione non trova Flutter.framework / «contains disallowed file 'Frameworks'» | framework incorporati dentro l'appex | l'estensione **non** incorpora framework: `LD_RUNPATH_SEARCH_PATHS` cerca in `@executable_path/../../Frameworks` dell'app (☐ da confermare all'archivio, DT-S2 di micro_share) |
@@ -1788,6 +1880,10 @@ rotto, migrazioni (schema 1), `integration_test`.
 16. **Mai `Platform.isX`**: `defaultTargetPlatform`.
 17. **Una modifica allo schema** incrementa `schemaVersion`, aggiunge il passo in `onUpgrade` e il suo test.
 18. **Il tema scuro e' il default**; la palette passa sempre da `withQrLook`.
+19. **Un testo scritto o condiviso si mostra tal quale** (`QrEncoder.payloadOfTyped`): la ricodifica
+    del dominio solo quando l'utente compila o modifica un modulo.
+20. **Nessuna dipendenza per un pulsante**: le impostazioni dell'app si aprono con il canale nostro
+    (`com.smp.qrme/app_settings`), il cui nome e' scritto uguale in Dart e in Kotlin.
 
 ---
 
@@ -1803,9 +1899,13 @@ rotto, migrazioni (schema 1), `integration_test`.
 - **Nessun `integration_test/`** (dipendenza dichiarata, cartella assente): niente giri per screenshot
   e video dello store, niente test di regressione su dispositivo.
 - **Nessun dato di esempio** (`lib/dev/` non c'e').
-- **API pronte e non usate**: `favoriteCountProvider` (e quindi `watchFavoriteCount` fuori dai test),
-  `Routes.pro` (la rotta esiste, nessun codice la apre), `QrCapacity.fits` (solo test), il parametro
-  `ProGate.allowed`, le chiavi l10n **`common_optional`, `show_title`, `form_title`**.
+- **API pronte e non usate**: `QrCapacity.fits` (solo test), il parametro `ProGate.allowed`.
+- **Tolti il 2026-10-09 perche' nessuno li usava** (non cercarli): la rotta `/pro` (`Routes.pro`,
+  `_PaywallRoutePage`: il paywall passa sempre da `showQrPaywall`), `favoriteCountProvider` e
+  `QrRepository.watchFavoriteCount` (il limite si controlla con `countFavorites` al momento di
+  salvare), le chiavi l10n `common_optional`, `show_title`, `form_title`.
+- **Nessun `permission_handler`**: lo stato preciso del permesso fotocamera (negato una volta o per
+  sempre) non si conosce; per questo «Apri le impostazioni» e «Riprova» compaiono insieme.
 - **Nessuna pulizia dei PNG condivisi** in `exports/` (cartella cache: la svuota il sistema).
 - **Google Play e App Store**: niente ancora (app, prodotto, scheda); License Server senza la riga `qrme`.
 
@@ -1816,7 +1916,7 @@ rotto, migrazioni (schema 1), `integration_test`.
 | **`datatransport` di Play Billing** | la sostituzione di ML Kit e' chiusa (2026-10-09), ma nel manifest e nelle dipendenze restano `com.google.android.datatransport:*`, `firebase-encoders*`, `play-services-base/basement/tasks/location`: li porta `com.android.billingclient:billing:8.0.0` (via `in_app_purchase_android`, cioe' il Pro di `micro_core`). E' il canale d'acquisto di Play, comune a **tutte** le app con il Pro su Android | decisione del proprietario per tutte le microapp (non solo QR Me), prima di Play: se la regola «dati solo sul telefono» copre anche Play Billing |
 | **Testo dell'informativa** (`settings_privacyBody`: «non manda niente fuori dal telefono») | vero per l'app da quando lo scanner e' ZXing (2026-10-09); resta da decidere come trattare Play Billing (riga sopra) | prima di Play; poi Data safety senza dati raccolti (salvo il server licenze) |
 | **`finalizeDsl { compileSdk = 36 }` per `receive_sharing_intent`** | il plugin dichiara 37 | toglierlo quando plugin o SDK si allineano; **da ripetere in F16/F18/F19** (o spostarlo in un punto comune) finche' serve |
-| **iOS mai compilato**: build, esclusione dal backup (Swift scritto da Windows), estensione, riapertura dell'app dall'estensione, lettore su iOS | serve il Mac e un iPad via TestFlight (niente iPhone: si prova su iPad in compatibilita') | F17.7.6, prima di considerare chiusa F17.2b |
+| **iOS provato solo sul simulatore**: lo script Ruby eseguito sul Mac il 2026-10-09 (due volte, idempotente), build per il simulatore riuscita con l'estensione, appex senza la cartella Frameworks; restano esclusione dal backup a runtime, riapertura dell'app dall'estensione, lettore su iOS | serve un iPad via TestFlight (niente iPhone: si prova su iPad in compatibilita') | F17.7.6 (prova su dispositivo, nota aperta: non blocca F17.2b) |
 | **Riapertura dell'app dall'estensione via schema URL** | Apple la tollera senza documentarla | provarla su iPad; ripiego deciso: estensione che mostra il QR da sola (SwiftUI + CIQRCodeGenerator) |
 | **«Frameworks» dentro l'appex** (DT-S2 di micro_share) | si vede solo all'archivio/caricamento | primo TestFlight di QR Me |
 | **Fotocamera reale** | con ZXing provati sull'emulatore anteprima, torcia, permesso negato, «Da immagine», condivisione e verifica; la lettura **dal vivo** di un QR no (la scena virtuale non ne mostra) | su telefono vero (Android) e su iPad (F17.7.6) |
@@ -1827,6 +1927,8 @@ rotto, migrazioni (schema 1), `integration_test`.
 | **Password Wi-Fi in chiaro nel database** | il sandbox dell'app basta per la soglia scelta; cifrare richiederebbe gestione delle chiavi | solo se il proprietario lo chiede |
 | **PNG condivisi mai cancellati** da `exports/` | stanno in cache | se si vedono accumuli |
 | **Test mancanti** (elenco in §12) | interfaccia essenziale gia' provata sull'emulatore | con le prossime modifiche a quelle pagine |
+| **«Apri le impostazioni» su Android mai toccato su un telefono** | il canale e' compilato (`build apk --debug`) e testato lato Dart; l'Intent vero no | primo giro sull'emulatore o sul telefono: negare due volte, toccare, concedere, tornare (deve ripartire da solo) |
+| **Commento di `locale_resolution.dart` sbagliato nelle altre app** | corretto solo in QR Me (questo lavoro tocca solo `apps/qr_me`) | alla prossima modifica di ciascuna app, o una volta per tutte |
 
 ### Differenze consapevoli dal piano (`develop_microapps.md` F17)
 
@@ -1841,37 +1943,26 @@ rotto, migrazioni (schema 1), `integration_test`.
 | `QrDecoder.decode` solo | + `decodeTyped` | un dominio scritto e' un link, uno letto no |
 | `normalizePhone`: spazi, trattini, parentesi | anche i punti | grafia comune che rompe `tel:` |
 | Paywall «quattro righe piu' backup» | sei righe | una riga per chiave limitata |
-| `QrRepository(this._db)` | `+ images`, `+ clock`; `+ watchById`, `watchFavoriteCount`, `updateContent`, `usedLogoImages`, `pruneOrphanLogos` | loghi, test, modifica di un preferito |
+| `QrRepository(this._db)` | `+ images`, `+ clock`; `+ watchById`, `updateContent`, `usedLogoImages`, `pruneOrphanLogos` | loghi, test, modifica di un preferito |
 | Logo in `ImageStore` da `LogoRenderer.render` | import a parte (`importPhoto`) | decodifica una volta sola |
 | Dipendenze entrano con la sottofase che le usa (regola generale) | tutte al bootstrap | specsheet gia' fissata, lavoro in parallelo |
-| «Apri le impostazioni» con permesso negato | solo su iOS; Android «Riprova» | evitare `permission_handler` |
+| «Apri le impostazioni» con permesso negato | su **iOS e Android** (Android con un MethodChannel nostro in MainActivity.kt), piu' «Riprova» | evitare `permission_handler`; senza, Android restava bloccato dopo un rifiuto definitivo |
+| Testo condiviso → `QrEncoder.encode(decodeTyped(text))` | `QrEncoder.payloadOfTyped`: il testo tal quale, ricodificato solo il link senza schema | la ricodifica perdeva i campi che il dominio non conosce (ADR…) |
+| Rotta `/pro` per il paywall (§8.T) | nessuna rotta; solo `showQrPaywall` | nessuno la apriva |
 
-### Difetti e incoerenze notate nel codice (non corretti: da sistemare alla prossima occasione)
+### Difetti e incoerenze trovati rileggendo l'atlante (F17.8) — tutti corretti il 2026-10-09
 
-- **☠ Difetto: «Rigenera con stile» dal risultato della lettura perde lo stile.**
-  `lib/features/scan/scan_result_page.dart`: `onPressed: () => unawaited(openStyle(context, ref,
-  _display))` ignora lo stile restituito, e `_display` non ha campo stile. Con la **cronologia spenta**
-  (riga assente, `qrId` null) lo stile applicato va **perso**; con la cronologia accesa e' scritto sulla
-  riga, ma «Mostra come QR» e «Salva» ripartono dal QR semplice e l'utente non vede il QR rigenerato.
-  Correzione proposta: un campo `QrStyle _style = QrStyle.plain` nello stato, `style: _style` in
-  `_display`, e un metodo `_restyle()` che fa `final style = await openStyle(...); if (style != null &&
-  mounted) { setState(() => _style = style); await context.push(Routes.show, extra: _display); }`, con un
-  test di widget. Non applicata durante F17.8 perche' la parte di lettura e i test erano in modifica in
-  parallelo (passaggio a ZXing).
-- `QrCodeToDomain.content`: un `fields_json` **JSON valido ma con campi sbagliati** fa lanciare
-  FormatException da `fromFields` (intercetta solo l'errore di `jsonDecode`), invece di ripiegare sul
-  payload come dice il commento. Succede solo con dati scritti a mano: il ripristino valida i campi.
-- `ContentActions.open`: `uriFor` e' **fuori** dal try; un indirizzo email decodificato con un `%` nudo
-  puo' far lanciare `Uri.parse` invece di restituire false.
-- **Testo condiviso o scritto che il decoder riconosce** (una vCard con indirizzo, una MECARD, un
-  `sms:`) viene **ricodificato** nella forma canonica (`QrEncoder.encode(decodeTyped(raw))`): i campi che
-  il dominio non conosce (ADR, PHOTO…) **si perdono** nel QR. Per i QR letti no (si usa il raw). Va
-  deciso se mostrare il testo condiviso tal quale.
-- `lib/app/locale_resolution.dart`: il commento dice che `[de, it, en]` non deve dare l'italiano, ma il
-  codice lo da' (basta che l'italiano compaia fra le preferenze); stesso testo copiato dalle altre app.
-- `flutter_native_splash.yaml`: «L'app e' chiara di default (F17.2c)» — superato, oggi e' scura.
-- `pubspec.yaml`: il commento di `qr_flutter` cita `QrImageView` (non usato).
-- `packages/micro_share/codebase_reference.md` dice ancora che lo script Ruby non e' mai stato eseguito
-  su un progetto reale (DT-S1): il target `ShareExtension` e' invece nel `project.pbxproj` di QR Me
-  (commit `30f351a`). Va aggiornato quell'atlante.
-- `develop_microapps.md` F17.2b (§7) dice «lo script Ruby va ancora eseguito sul Mac»: eseguito.
+Nessun difetto noto resta aperto. Per memoria, cosa era e come si e' chiuso (test in §12):
+
+| Difetto | Correzione | Test |
+|---|---|---|
+| ☠ «Rigenera con stile» dal risultato della lettura **ignorava lo stile**: perso con la cronologia spenta, con la cronologia accesa «Mostra come QR» e «Salva» ripartivano dal QR semplice | `ScanResultPage._style` nello stato, `style:` in `_display`, `_restyle()` apre `/show` con lo stile applicato | `scan_result_page_test.dart` (3, falliscono sul codice vecchio) |
+| `QrCodeToDomain.content`: «un `fields_json` JSON valido ma con campi sbagliati fa lanciare» | **falso allarme**: `fromFields` lancia FormatException e lo stesso try la intercetta; ripiegava gia' sul payload. Commento reso esplicito | `qr_code_domain_test.dart` (9, guardia) |
+| `ContentActions.open`: `uriFor` fuori dal try | spostato dentro: `open` non lancia mai. ⚑ Il caso del `%` nudo indicato nella rilettura **non** lancia (`Uri.parse` lo scrive `%25`); lancia invece un destinatario come `//posta:sconti` | `services_test.dart` (+1, fallisce sul codice vecchio) |
+| Testo condiviso/scritto **ricodificato**: una vCard con ADR, una MECARD perdevano i campi ignoti | `QrEncoder.payloadOfTyped` in `HomePage._show` e `ShareRouter.handle` | `qr_encoder_test.dart` (+4), `share_router_test.dart` (+2) |
+| Android: dopo un rifiuto definitivo del permesso fotocamera «Riprova» tornava allo stesso stato | `AppSettings` + canale in MainActivity.kt, «Apri le impostazioni» su entrambe le piattaforme, riprova al ritorno | `app_settings_test.dart` (5), `scan_error_test.dart` (3) |
+| `lib/app/locale_resolution.dart`: il commento diceva il contrario del codice | corretto il **commento**; il codice e' quello dell'ADR-011, identico nelle altre app (che hanno ancora il commento vecchio: debito) | — |
+| `flutter_native_splash.yaml`: «L'app e' chiara di default» | commento aggiornato (scura di default; il fondo chiaro dello splash resta, voluto) | — |
+| `pubspec.yaml`: il commento di `qr_flutter` citava `QrImageView` | ora dice `QrPainter` per schermo e PNG | — |
+| Non usati: rotta `/pro`, `favoriteCountProvider` (+ `watchFavoriteCount`), chiavi `common_optional`, `show_title`, `form_title` | tolti (ARB rigenerati: 202 chiavi) | — |
+| `packages/micro_share/codebase_reference.md` (DT-S1) e `develop_microapps.md` F17.2b dicevano lo script Ruby mai eseguito | aggiornati: eseguito sul Mac il 2026-10-09, due volte, build simulatore riuscita | — |

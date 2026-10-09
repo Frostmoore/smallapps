@@ -19,9 +19,7 @@ import '../features/settings/settings_page.dart';
 import '../features/style/style_page.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../services/share_router.dart';
-import 'entitlement.dart';
 import 'locale_resolution.dart';
-import 'paywall_config.dart';
 import 'providers.dart';
 import 'qr_palette.dart';
 import 'routes.dart';
@@ -83,7 +81,6 @@ GoRouter buildRouter() => GoRouter(
     GoRoute(path: Routes.saved, builder: (_, __) => const SavedPage()),
     GoRoute(path: Routes.history, builder: (_, __) => const HistoryPage()),
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
-    GoRoute(path: Routes.pro, builder: (_, __) => const _PaywallRoutePage()),
   ],
   errorBuilder: (_, __) => const _NotFoundPage(),
 );
@@ -222,19 +219,4 @@ class _NotFoundPage extends StatelessWidget {
       ),
     ),
   );
-}
-
-/// `/pro`: il paywall come pagina (§8.T). Dal codice si preferisce `showQrPaywall`, che
-/// evidenzia la funzione che l'ha innescato.
-class _PaywallRoutePage extends ConsumerWidget {
-  const _PaywallRoutePage();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(entitlementProvider);
-    return PaywallPage(
-      config: buildQrPaywall(L.of(context)),
-      service: ref.read(entitlementProvider.notifier).service,
-    );
-  }
 }

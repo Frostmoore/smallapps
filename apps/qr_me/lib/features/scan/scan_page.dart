@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:camera/camera.dart' show CameraException, FlashMode, availableCameras;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/providers.dart';
 import '../../app/qr_palette.dart';
@@ -69,10 +67,36 @@ class _ScanPageState extends ConsumerState<ScanPage> {
   /// risultato una sopra l'altra.
   bool _handling = false;
 
+  /// «Apri le impostazioni» toccato: al ritorno nell'app si riprova da solo.
+  ///
+  /// ☠ Solo dopo le impostazioni, non a ogni ritorno in primo piano: su Android il dialogo del
+  /// permesso stesso mette l'attivita' in pausa e la riprende, e un «riprova a ogni ripresa»
+  /// richiederebbe il permesso appena negato, in un giro senza fine.
+  bool _awaitingSettings = false;
+  late final AppLifecycleListener _lifecycle;
+
   @override
   void initState() {
     super.initState();
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        if (!_awaitingSettings || !mounted) return;
+        _awaitingSettings = false;
+        if (_error != null) _retry();
+      },
+    );
     unawaited(_checkCameras());
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  /// Apre le impostazioni di QR Me (iOS `app-settings:`, Android il canale di `MainActivity`).
+  Future<void> _openSettings() async {
+    _awaitingSettings = await ref.read(appSettingsProvider).open();
   }
 
   /// ☠ Senza nessuna fotocamera il `ReaderWidget` non segnala niente e resta nero per sempre:
@@ -199,7 +223,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
         fit: StackFit.expand,
         children: [
           if (error != null)
-            _ScanError(error: error, onRetry: _retry)
+            ScanErrorView(error: error, onRetry: _retry, onOpenSettings: _openSettings)
           else if (_cameraOn)
             ReaderWidget(
               key: ValueKey(_attempt),
@@ -262,12 +286,26 @@ class _ScanPageState extends ConsumerState<ScanPage> {
   }
 }
 
-/// La fotocamera non parte: permesso negato o nessuna fotocamera.
-class _ScanError extends StatelessWidget {
-  const _ScanError({required this.error, required this.onRetry});
+/// La fotocamera non parte: permesso negato o nessuna fotocamera. Pubblica per i test
+/// (test/widget/scan_error_test.dart): la pagina intera vuole una fotocamera vera.
+///
+/// ⚑ Permesso negato, **su Android e su iOS**: azione principale «Apri le impostazioni»
+/// ([onOpenSettings], `AppSettings`), e sotto «Riprova». Su Android dopo un rifiuto singolo
+/// «Riprova» richiede di nuovo il permesso; dopo un rifiuto definitivo il sistema non lo
+/// richiede piu' e solo le impostazioni lo riaccendono. Non si sa quale dei due sia (servirebbe
+/// `permission_handler`): si offrono entrambe.
+/// Nessuna fotocamera o altro errore: solo «Riprova».
+class ScanErrorView extends StatelessWidget {
+  const ScanErrorView({
+    required this.error,
+    required this.onRetry,
+    required this.onOpenSettings,
+    super.key,
+  });
 
   final Object error;
   final VoidCallback onRetry;
+  final Future<void> Function() onOpenSettings;
 
   /// Permesso negato: `CameraAccessDenied` su Android (CameraX) e iOS, piu' la variante di iOS
   /// `CameraAccessDeniedWithoutPrompt` (negato in passato: il sistema non lo richiede piu').
@@ -279,18 +317,30 @@ class _ScanError extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final denied = isDenied(error);
-    // ⚑ «Apri le impostazioni» solo su iOS (`app-settings:`): su Android aprire la pagina dei
-    // permessi dell'app richiede un plugin in piu' (permission_handler) per un solo pulsante.
-    // Li' «Riprova» richiede di nuovo il permesso, se il sistema lo consente ancora.
-    final ios = defaultTargetPlatform == TargetPlatform.iOS;
     return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
-      child: MicroEmptyState(
-        icon: Icons.no_photography_outlined,
-        title: denied ? l.scan_deniedTitle : l.scan_errorTitle,
-        message: denied ? l.scan_deniedBody : l.scan_errorBody,
-        actionLabel: denied && ios ? l.scan_openSettings : l.common_retry,
-        onAction: denied && ios ? () => unawaited(launchUrl(Uri.parse('app-settings:'))) : onRetry,
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MicroEmptyState(
+                key: const ValueKey('scan_error'),
+                icon: Icons.no_photography_outlined,
+                title: denied ? l.scan_deniedTitle : l.scan_errorTitle,
+                message: denied ? l.scan_deniedBody : l.scan_errorBody,
+                actionLabel: denied ? l.scan_openSettings : l.common_retry,
+                onAction: denied ? () => unawaited(onOpenSettings()) : onRetry,
+              ),
+              if (denied)
+                TextButton(
+                  key: const ValueKey('scan_retry'),
+                  onPressed: onRetry,
+                  child: Text(l.common_retry),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -53,6 +53,32 @@ void main() {
     expect(args.payload, 'https://esempio.it');
   });
 
+  // ☠ Difetto trovato rileggendo l'atlante: il testo condiviso era ricodificato dal dominio, e
+  // i campi che il dominio non conosce (l'indirizzo ADR, il TITLE) sparivano dal QR.
+  testWidgets('vCard con indirizzo condivisa → payload identico all\'originale', (tester) async {
+    await mount(tester);
+    const vcard =
+        'BEGIN:VCARD\r\nVERSION:3.0\r\nN:Rossi;Mario;;;\r\nFN:Mario Rossi\r\n'
+        'TEL:+39333123456\r\nADR:;;Via Roma 1;Milano;;20100;Italia\r\nTITLE:Idraulico\r\n'
+        'END:VCARD';
+    await ShareRouter(reader: FakeQrReader()).handle(const SharedText(vcard), router);
+    await tester.pumpAndSettle();
+    final args = shown.single! as QrDisplayArgs;
+    expect(args.content, isA<ContactContent>());
+    expect(args.payload, vcard);
+    expect(args.payload, contains('ADR:'));
+  });
+
+  testWidgets('MECARD condivisa → resta MECARD, non diventa vCard', (tester) async {
+    await mount(tester);
+    const mecard = 'MECARD:N:Rossi,Mario;TEL:333;NICKNAME:Super;;';
+    await ShareRouter(reader: FakeQrReader()).handle(const SharedText(mecard), router);
+    await tester.pumpAndSettle();
+    final args = shown.single! as QrDisplayArgs;
+    expect(args.content, isA<ContactContent>());
+    expect(args.payload, mecard);
+  });
+
   testWidgets('immagine con un QR → /scan/result con source image', (tester) async {
     await mount(tester);
     final reader = FakeQrReader(['WIFI:T:WPA;S:Casa;P:x;;']);

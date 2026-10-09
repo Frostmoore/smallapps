@@ -272,7 +272,7 @@ proprietario su iPad (TestFlight: «mi pare che funzioni tutto»).
 | Piattaforme | Android e solo iPhone |
 | Grafica | «A · Neon» (tema scuro, verde `#3BD13B`) |
 
-Codice completo il 2026-10-09 (F17.0–F17.7): 152 test, provato sull'emulatore Android
+Codice completo il 2026-10-09 (F17.0–F17.9): 182 test, lettura con ZXing, provato sull'emulatore Android
 (condivisione di testo e di immagini con un QR vero, moduli, stile con verifica di leggibilita',
 backup) e sul simulatore iPhone. Card «In arrivo» pubblicata nel sito il 2026-10-09.
 

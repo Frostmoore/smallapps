@@ -35,9 +35,9 @@ abstract final class Routes {
   static const String history = '/history';
   static const String settings = '/settings';
 
-  /// Il paywall come pagina (§8.T). Dal codice si preferisce `showQrPaywall`, che evidenzia la
-  /// funzione che l'ha innescato.
-  static const String pro = '/pro';
+  // ⚑ Nessuna rotta `/pro`: il paywall si apre sempre con `showQrPaywall` (un
+  // `Navigator.push` di `PaywallPage.show`, micro_core), che evidenzia la funzione che l'ha
+  // innescato. La rotta c'era e nessuno la apriva: tolta il 2026-10-09.
 }
 
 /// I tipi che hanno un modulo (`/form/:kind`): i moduli speciali di F17.0 punto 3. Testo e link
@@ -65,7 +65,8 @@ final class QrDisplayArgs {
 
   final QrContent content;
 
-  /// La stringa esatta da codificare (`QrEncoder.encode(content)`, o quella letta).
+  /// La stringa esatta da codificare: `QrEncoder.encode(content)` per un modulo,
+  /// `QrEncoder.payloadOfTyped` per un testo scritto o condiviso, quella letta per un QR letto.
   final String payload;
 
   /// Una delle chiavi di `QrSource`.

@@ -11,6 +11,7 @@ import '../../app/qr_palette.dart';
 import '../../app/routes.dart';
 import '../../domain/qr_content.dart';
 import '../../domain/qr_decoder.dart';
+import '../../domain/qr_style.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../common/neon.dart';
 import '../common/qr_actions.dart';
@@ -37,6 +38,12 @@ class _ScanResultPageState extends ConsumerState<ScanResultPage> {
   int? _id;
   bool _saved = false;
 
+  /// Lo stile scelto con «Rigenera con stile». ☠ Senza questo campo lo stile restituito da
+  /// `/style` andava perso: con la cronologia spenta del tutto (nessuna riga su cui scriverlo),
+  /// con la cronologia accesa a meta' («Mostra come QR» e «Salva» ripartivano dal QR semplice).
+  /// Stesso schema di `_DisplayBodyState._style` in qr_display_page.dart.
+  QrStyle _style = QrStyle.plain;
+
   @override
   void initState() {
     super.initState();
@@ -56,8 +63,20 @@ class _ScanResultPageState extends ConsumerState<ScanResultPage> {
     content: _content,
     payload: widget.args.raw,
     source: widget.args.source,
+    style: _style,
     qrId: _id,
   );
+
+  /// «Rigenera con stile»: apre `/style` (Pro) e, applicato lo stile, **mostra subito** il QR
+  /// rigenerato. ⚑ Chi ha toccato «Rigenera» vuole vedere il risultato, non tornare al testo
+  /// letto; la pagina del QR riceve lo stile negli argomenti e, se la riga esiste, la «tocca»
+  /// soltanto (lo stile ce l'ha gia' scritto `StylePage`).
+  Future<void> _restyle() async {
+    final style = await openStyle(context, ref, _display);
+    if (style == null || !mounted) return;
+    setState(() => _style = style);
+    await context.push(Routes.show, extra: _display);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +122,7 @@ class _ScanResultPageState extends ConsumerState<ScanResultPage> {
           MicroSpacing.gapS,
           OutlinedButton.icon(
             key: const ValueKey('result_style'),
-            onPressed: () => unawaited(openStyle(context, ref, _display)),
+            onPressed: () => unawaited(_restyle()),
             icon: const Icon(Icons.palette_outlined),
             label: Row(
               mainAxisSize: MainAxisSize.min,

@@ -5,7 +5,9 @@
 # Il disegno dell'icona (splash_logo.png, da tool/genera_icone.py) sullo stesso fondo
 # chiarissimo dell'icona (#F3F7F3): chi apre l'app vede continuare l'icona.
 # ⚑ Uguale nei due temi: i moduli del disegno sono quasi neri e su un fondo scuro
-# sparirebbero. L'app e' chiara di default (F17.2c).
+# sparirebbero. L'app e' SCURA di default («A · Neon», `ThemeModeNotifier` in
+# lib/app/providers.dart): il fondo chiaro qui e' voluto e resta, si passa dal chiaro
+# dell'icona allo scuro dell'app. (Il commento vecchio, «chiara di default», era di F17.2c.)
 flutter_native_splash:
   color: "#F3F7F3"
   image: assets/icon/splash_logo.png

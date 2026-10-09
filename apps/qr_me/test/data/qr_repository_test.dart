@@ -128,7 +128,6 @@ void main() {
     await repo.saveAsFavorite(a, title: '  zeta ');
     await repo.saveAsFavorite(b, title: 'Alfa');
     expect(await repo.countFavorites(), 2);
-    expect(await repo.watchFavoriteCount().first, 2);
     expect((await repo.watchFavorites().first).map((r) => r.title), ['Alfa', 'zeta']);
     await repo.rename(b, 'beta');
     expect((await repo.watchFavorites().first).map((r) => r.title), ['beta', 'zeta']);

@@ -36,7 +36,7 @@ class FakeQrRepository extends QrRepository {
   final _changes = StreamController<void>.broadcast();
   var _nextId = 100;
 
-  final List<({QrContent content, String payload, String source})> recorded = [];
+  final List<({QrContent content, String payload, String source, QrStyle style})> recorded = [];
   final List<int?> pruneCalls = [];
   final List<int> touched = [];
   final List<(int, String)> favorited = [];
@@ -59,9 +59,6 @@ class FakeQrRepository extends QrRepository {
   Stream<List<QrCode>> watchFavorites() => _watch(() => rows.where((r) => r.isFavorite).toList());
 
   @override
-  Stream<int> watchFavoriteCount() => _watch(() => rows.where((r) => r.isFavorite).length);
-
-  @override
   Stream<QrCode?> watchById(int id) => _watch(() => rows.where((r) => r.id == id).firstOrNull);
 
   @override
@@ -77,7 +74,7 @@ class FakeQrRepository extends QrRepository {
     required String source,
     QrStyle style = QrStyle.plain,
   }) async {
-    recorded.add((content: content, payload: payload, source: source));
+    recorded.add((content: content, payload: payload, source: source, style: style));
     final id = _nextId++;
     rows.add(qrRow(id, content: content, payload: payload, source: source));
     _changed();

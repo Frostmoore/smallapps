@@ -5,7 +5,8 @@
 > **Obiettivo**: capire il codice, trovare ciò che serve e modificarlo **senza aprire i
 > file**. Se per sapere che firma ha un metodo bisogna leggere il sorgente, ha fallito.
 >
-> **Aggiornato al**: 2026-10-09 · **Sottofase F17.2b** · **Toolchain**: Flutter del progetto
+> **Aggiornato al**: 2026-10-09 (F17.2b; rivisto con F17.8: script Ruby eseguito sul Mac, trappola
+> `compileSdk 37`) · **Toolchain**: Flutter del progetto
 > (`.flutter/`, via `pwsh tool/fl.ps1`), Dart ^3.13
 > **Test**: 20 verdi · **Analisi statica**: nessuna issue
 > **Plugin sotto**: `receive_sharing_intent` **1.9.0** (vincolo `^1.9.0`)
@@ -216,6 +217,14 @@ ruby tool/aggiungi_share_extension_ios.rb apps/qr_me ShareExtension group.com.sm
 
 Dalla radice del monorepo, **sul Mac**, dopo `flutter pub get` dell'app. Idempotente. Passi:
 
+✔ **Eseguito su un progetto vero**: `apps/qr_me`, sul Mac, il 2026-10-09, **due volte** (la seconda
+non cambia niente: l'idempotenza e' provata). ☠ Lanciato da ssh, Ruby leggeva i file in US-ASCII (il Mac
+non imposta `LANG` nelle sessioni ssh) e moriva sugli Info.plist con commenti accentati: lo script
+ora ha `# encoding: utf-8` e `Encoding.default_external = Encoding::UTF_8` (e `default_internal`) in
+testa. Dopo lo script la **build per il simulatore e' riuscita** e l'appex **non incorpora** la
+cartella Frameworks (DT-S2 resta da confermare all'archivio). ☐ Da provare: la riapertura dell'app
+dall'estensione **su iPad via TestFlight**.
+
 | # | Cosa | Dettaglio |
 |---|---|---|
 | 1 | target `:app_extension` | `IPHONEOS_DEPLOYMENT_TARGET`, `TARGETED_DEVICE_FAMILY`, `DEVELOPMENT_TEAM` = valori **effettivi** del Runner (target, altrimenti progetto); bundle `<bundle Runner>.<nome>`; `CODE_SIGN_STYLE = Automatic`; `SKIP_INSTALL = YES`; runpath con `@executable_path/../../Frameworks`; Runner dipende dall'estensione |
@@ -242,6 +251,24 @@ Nel `AndroidManifest.xml` dell'app, sulla `MainActivity`:
 - due `intent-filter` `android.intent.action.SEND` + `category.DEFAULT`, uno con
   `<data android:mimeType="text/plain"/>` e uno con `<data android:mimeType="image/*"/>`;
 - **niente** `READ_EXTERNAL_STORAGE` (§8).
+
+Nel **`android/build.gradle.kts`** dell'app (radice Android, non `app/`), **obbligatorio** per ogni app
+che dipende da `micro_share` finche' il plugin dichiara `compileSdk 37` (§8 trappola 13):
+
+```kotlin
+subprojects {
+    if (name == "receive_sharing_intent") {
+        plugins.withId("com.android.library") {
+            extensions.configure<com.android.build.api.variant.LibraryAndroidComponentsExtension>("androidComponents") {
+                finalizeDsl { it.compileSdk = 36 }
+            }
+        }
+    }
+}
+```
+
+Copia di riferimento: `apps/qr_me/android/build.gradle.kts` (con il commento del perche'). F16, F18 e
+F19 devono avere lo stesso blocco.
 
 ---
 
@@ -277,6 +304,8 @@ Nel `AndroidManifest.xml` dell'app, sulla `MainActivity`:
 | 10 | `go_router` mostra «Non trovato» all'arrivo di una condivisione su iOS | il deep link di Flutter acceso passa anche `ShareMedia-…:share` al router | `FlutterDeepLinkingEnabled = false` nell'app; lo script avvisa se manca |
 | 11 | `RsiShareInbox` creata prima di `ReceiveSharingIntent.setMockValues` userebbe il plugin vero | `setMockValues` sostituisce l'istanza statica | `_rsi` è un getter letto a ogni uso, non un campo fissato nel costruttore |
 | 12 | Proprietà del team vuota sull'estensione | `DEVELOPMENT_TEAM` e `IPHONEOS_DEPLOYMENT_TARGET` delle app Flutter stanno a livello di **progetto**, non del target Runner; leggerli dal solo target dà `nil`/vuoto | lo script legge il valore effettivo (target, poi progetto) e non scrive un team vuoto |
+| 13 | Build Android: «Failed to find target with hash string 'android-37'» | `receive_sharing_intent` **1.9.0** dichiara `compileSdk 37` nel suo build.gradle; con AGP 9 diventa la piattaforma `android-37`, ma l'SDK installa la 37 come `android-37.0` e non la trova (scoperto con QR Me, F17.4, 2026-10-09). Il plugin non usa nessuna API della 37 | blocco `finalizeDsl { it.compileSdk = 36 }` nel `android/build.gradle.kts` **di ogni app** (§7): `finalizeDsl` gira **dopo** il build.gradle del plugin, quindi vince. Da togliere quando plugin o SDK si allineano; non si puo' mettere nel package (e' configurazione Gradle del progetto dell'app) |
+| 14 | Lo script Ruby muore con «invalid byte sequence in US-ASCII» | lanciato da ssh, il Mac non imposta `LANG` e Ruby legge gli Info.plist (commenti accentati) come ASCII | `# encoding: utf-8` + `Encoding.default_external/default_internal = Encoding::UTF_8` in testa allo script (pagata il 2026-10-09 su QR Me) |
 
 ---
 
@@ -300,12 +329,12 @@ l'estensione iOS, lo script Ruby.
 
 | Non esiste | Dove/quando |
 |---|---|
-| Un'app che usi il package | `apps/qr_me` da F17.2c; `ShareRouter` (doppioni entro 2 s, instradamento) vive nell'app, F17.4 |
+| Un'app oltre a QR Me che usi il package | F16, F18, F19 (ognuna con il blocco `finalizeDsl` di §7 e lo script su iOS). QR Me lo usa da F17.2c; `ShareRouter` (doppioni entro 2 s, instradamento) vive nell'app |
 | Provider Riverpod per `ShareInbox` | deliberatamente assente, come in `micro_core`: ogni app cabla il suo |
 | Ricezione di più immagini (`SEND_MULTIPLE`), video, file generici | non servono a F16–F19 come decise finora; `payloadsFromMedia` scarta video e file |
 | Il campo `message` di iOS (testo scritto nel foglio di composizione) | con `shouldAutoRedirect() == true` il foglio non c'è, quindi è sempre `null` |
 | Cancellazione dei file temporanei delle immagini condivise | il plugin dice di cancellarli dopo l'uso (iOS); lo fa l'app quando ha finito, F17.4 |
-| Prova dello script Ruby su un progetto vero | da fare sul Mac in F17.2c (bootstrap di `apps/qr_me`); vedi §11 |
+| Prova della riapertura dell'app dall'estensione su un dispositivo | iPad via TestFlight (F17.7.6); lo script e la build per il simulatore sono gia' provati (§6) |
 | Ripiego iOS «estensione che mostra il QR da sola» (SwiftUI + `CIQRCodeGenerator`) | solo se la riapertura via schema fallisce su iPad |
 
 ---
@@ -314,6 +343,6 @@ l'estensione iOS, lo script Ruby.
 
 | # | Debito | Perché rimandato | Quando |
 |---|---|---|---|
-| DT-S1 | Lo script Ruby non è ancora stato eseguito su un progetto reale: solo `ruby -c` (Syntax OK, Ruby 2.6 del Mac) e verifica degli attributi di `xcodeproj` 1.28.1 sul Mac (`XCLocalSwiftPackageReference#relative_path`, `PBXBuildFile#product_ref`, `XCSwiftPackageProductDependency#product_name`) | serve `apps/qr_me`, che nasce in F17.2c | F17.2c, poi `flutter build ios` e archivio |
-| DT-S2 | Il pacchetto Swift del plugin dipende da `FlutterFramework`: l'estensione si porta dietro il collegamento a `Flutter.framework`. Possibile errore di caricamento «contains disallowed file 'Frameworks'» (citato nel README del plugin) se Xcode incorpora il framework anche dentro l'appex | si vede solo all'archivio/caricamento su App Store Connect | primo TestFlight di QR Me |
+| DT-S1 | ~~Lo script Ruby mai eseguito su un progetto reale~~ **Chiuso il 2026-10-09**: eseguito sul Mac su `apps/qr_me` due volte (idempotente; serviva `Encoding.default_external = UTF_8` perche' da ssh Ruby leggeva in US-ASCII, gia' corretto nello script, trappola 14); build per il simulatore riuscita, l'appex non incorpora Frameworks. **Resta aperta solo una nota**: la riapertura dell'app dall'estensione su iPad via TestFlight | il dispositivo: niente iPhone, si prova su iPad | primo TestFlight di QR Me (F17.7.6) |
+| DT-S2 | Il pacchetto Swift del plugin dipende da `FlutterFramework`: l'estensione si porta dietro il collegamento a `Flutter.framework`. Possibile errore di caricamento «contains disallowed file 'Frameworks'» (citato nel README del plugin) se Xcode incorpora il framework anche dentro l'appex. Nella build per il simulatore di QR Me (2026-10-09) l'appex **non** ha la cartella Frameworks: buon segno, non ancora la prova | si vede solo all'archivio/caricamento su App Store Connect | primo TestFlight di QR Me |
 | DT-S3 | Su Android, un **file** `.txt` condiviso da un gestore file arriva come `text` con `path` = percorso del file, e diventerebbe un `SharedText` col percorso | caso raro; l'app ha solo il filtro `text/plain` e i file manager lo usano poco | se si presenta: distinguere con `mimeType` + `path` assoluto esistente |

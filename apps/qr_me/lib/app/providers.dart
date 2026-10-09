@@ -9,6 +9,7 @@ import 'package:micro_share/micro_share.dart';
 import '../data/database.dart';
 import '../data/qr_repository.dart';
 import '../domain/qr_style.dart';
+import '../services/app_settings.dart';
 import '../services/content_actions.dart';
 import '../services/logo_renderer.dart';
 import '../services/qr_renderer.dart';
@@ -111,11 +112,6 @@ final favoritesProvider = StreamProvider<List<QrCode>>(
   (ref) => ref.watch(repositoryProvider).watchFavorites(),
 );
 
-/// Quanti preferiti: il conteggio per `FeatureKey.unlimitedEntities`.
-final favoriteCountProvider = StreamProvider<int>(
-  (ref) => ref.watch(repositoryProvider).watchFavoriteCount(),
-);
-
 /// Una riga per id (la pagina del QR salvato); null se cancellata.
 final qrCodeProvider = StreamProvider.family<QrCode?, int>(
   (ref, id) => ref.watch(repositoryProvider).watchById(id),
@@ -143,6 +139,9 @@ final readabilityCheckProvider = Provider<ReadabilityCheck>(
 final screenBoostProvider = Provider<ScreenBoost>((ref) => const ScreenBoost());
 
 final contentActionsProvider = Provider<ContentActions>((ref) => const ContentActions());
+
+/// «Apri le impostazioni» con la fotocamera negata (iOS `app-settings:`, Android canale nostro).
+final appSettingsProvider = Provider<AppSettings>((ref) => const AppSettings());
 
 /// La cassetta delle condivisioni (F17.1.8). Nei test: `FakeShareInbox`.
 final shareInboxProvider = Provider<ShareInbox>((ref) => RsiShareInbox());

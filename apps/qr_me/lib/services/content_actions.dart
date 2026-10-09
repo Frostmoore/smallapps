@@ -44,18 +44,29 @@ class ContentActions {
     return parts.isEmpty ? '' : '?${parts.join('&')}';
   }
 
-  /// Apre [content]; `false` se non c'e' niente da aprire o nessuna app lo sa fare.
+  /// Apre [content]; `false` se non c'e' niente da aprire, l'URI non si costruisce o nessuna app
+  /// lo sa fare. Non lancia mai.
+  ///
+  /// ☠ [uriFor] sta **dentro** il try: il destinatario di un'email letta da un QR e' testo
+  /// arbitrario, e `Uri.parse` ne rifiuta alcuni con FormatException (`//posta:sconti` diventa
+  /// un'autorita' con porta non numerica). Fuori dal try l'eccezione arrivava al pulsante invece
+  /// dello snack «nessuna app». Un `%` nudo invece passa (`Uri.parse` lo scrive `%25`).
   Future<bool> open(QrContent content) async {
-    final uri = uriFor(content);
-    if (uri == null) return false;
+    Uri? uri;
     try {
+      uri = uriFor(content);
+      if (uri == null) return false;
       final launcher = _launcher;
       if (launcher != null) return await launcher(uri);
       // ⚑ Sempre in un'app esterna: un link letto da un QR non si apre dentro QR Me (non e' un
       // browser, e l'utente deve vedere la barra degli indirizzi del suo).
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } on Object catch (error, stack) {
-      MicroLog.e('apertura di ${uri.scheme}: non riuscita', error: error, stackTrace: stack);
+      MicroLog.e(
+        'apertura di ${uri?.scheme ?? content.kind.name}: non riuscita',
+        error: error,
+        stackTrace: stack,
+      );
       return false;
     }
   }

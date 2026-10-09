@@ -25,6 +25,25 @@ abstract final class QrEncoder {
     PhoneContent(:final number) => 'tel:${normalizePhone(number)}',
   };
 
+  /// Il payload di un testo **scritto, incollato o condiviso** e non passato da un modulo:
+  /// [raw] e' cio' che e' arrivato, [content] il suo `QrDecoder.decodeTyped(raw)`.
+  ///
+  /// - [TextContent] → [raw] (e' gia' la stessa cosa di `encode`).
+  /// - [UrlContent] → `encode(content)`: e' il caso «esempio.it» → `https://esempio.it`, il
+  ///   solo in cui ricodificare **aggiunge** l'intenzione dell'utente (un link vero per la
+  ///   fotocamera), e un link non ha campi da perdere.
+  /// - Ogni altro tipo riconosciuto (vCard, MECARD, `WIFI:`, `MATMSG:`, `sms:`, `tel:`) → [raw]
+  ///   senza gli spazi a sinistra (gli stessi che il decoder ignora per riconoscere il prefisso).
+  ///
+  /// ☠ Prima si mostrava sempre `encode(decodeTyped(raw))`: i campi che il dominio non conosce
+  /// (ADR, PHOTO, TITLE di una vCard; il NICKNAME di una MECARD) **sparivano dal QR** senza dirlo.
+  /// La ricodifica serve solo quando l'utente compila o modifica un modulo (`FormPage`).
+  static String payloadOfTyped(String raw, QrContent content) => switch (content) {
+    TextContent() => raw,
+    UrlContent() => encode(content),
+    _ => raw.trimLeft(),
+  };
+
   static String _url(Uri uri) {
     final scheme = uri.scheme.toLowerCase();
     if (scheme == 'http' || scheme == 'https') return uri.toString();

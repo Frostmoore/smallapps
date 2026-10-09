@@ -65,6 +65,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   /// «Mostra QR»: un link scritto senza schema diventa un link (`decodeTyped`), il resto testo.
+  /// ⚑ Payload da `QrEncoder.payloadOfTyped`: una vCard incollata si mostra intera, non ricodificata.
   void _show() {
     final raw = _text.text;
     if (raw.trim().isEmpty) return;
@@ -75,7 +76,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         Routes.show,
         extra: QrDisplayArgs(
           content: content,
-          payload: QrEncoder.encode(content),
+          payload: QrEncoder.payloadOfTyped(raw, content),
           source: QrSource.typed,
         ),
       ),

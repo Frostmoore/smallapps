@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qr_me/domain/qr_content.dart';
+import 'package:qr_me/domain/qr_decoder.dart';
 import 'package:qr_me/domain/qr_encoder.dart';
 
 /// F17.1.3: ogni codifica esattamente come nella tabella. Sono le stringhe che le fotocamere di
@@ -123,5 +124,29 @@ void main() {
     expect(const PhoneContent('333').autoTitle, '333');
     expect(TextContent('x' * 100).autoTitle.length, 41);
     expect(const TextContent('   ').autoTitle, isNotEmpty);
+  });
+
+  group('payloadOfTyped (testo scritto o condiviso, non da modulo)', () {
+    String typed(String raw) => QrEncoder.payloadOfTyped(raw, QrDecoder.decodeTyped(raw));
+
+    test('testo: identico, spazi compresi', () {
+      expect(typed('  ciao  '), '  ciao  ');
+    });
+
+    test('link senza schema: ricodificato con https (l\'unica ricodifica)', () {
+      expect(typed('esempio.it'), 'https://esempio.it');
+    });
+
+    test('vCard con ADR, MECARD, sms: tal quali (i campi ignoti non si perdono)', () {
+      const vcard = 'BEGIN:VCARD\nVERSION:3.0\nFN:Mario\nADR:;;Via Roma 1;Milano;;;\nEND:VCARD';
+      expect(typed(vcard), vcard);
+      expect(QrEncoder.encode(QrDecoder.decodeTyped(vcard)), isNot(contains('ADR')));
+      expect(typed('MECARD:N:Rossi;NICKNAME:Super;;'), 'MECARD:N:Rossi;NICKNAME:Super;;');
+      expect(typed('sms:+39333?body=Ciao'), 'sms:+39333?body=Ciao');
+    });
+
+    test('tipi riconosciuti: via solo gli spazi a sinistra', () {
+      expect(typed('  tel:+39333'), 'tel:+39333');
+    });
   });
 }
