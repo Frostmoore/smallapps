@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Info.plist dell'estensione di condivisione delle MicroApps.
+  Copiato in apps/<app>/ios/ShareExtension/ da tool/aggiungi_share_extension_ios.rb;
+  l'originale vive in packages/micro_share/ios_template/.
+
+  - AppGroupId: letto da RSIShareViewController per sapere dove salvare cio' che e' stato
+    condiviso. $(CUSTOM_GROUP_ID) e' un build setting messo dallo script su ENTRAMBI i
+    target (Runner ed estensione).
+  - CFBundleShortVersionString / CFBundleVersion: dal pubspec dell'app, attraverso
+    Flutter/Generated.xcconfig, che lo script collega anche all'estensione. Vuoti, iOS
+    rifiuta il pacchetto ("Invalid placeholder attributes").
+  - Niente NSExtensionMainStoryboard: il controller si crea da NSExtensionPrincipalClass,
+    e RSIShareViewController (plugin 1.9) e' un UIViewController semplice che non ha
+    bisogno di storyboard.
+  - Regole di attivazione: testo, un link, un'immagine. Niente video ne' file generici:
+    le MicroApps non li trattano (payloadsFromMedia li scarta comunque).
+-->
+<plist version="1.0">
+<dict>
+	<key>AppGroupId</key>
+	<string>$(CUSTOM_GROUP_ID)</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionAttributes</key>
+		<dict>
+			<key>NSExtensionActivationRule</key>
+			<dict>
+				<key>NSExtensionActivationSupportsText</key>
+				<true/>
+				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
+				<integer>1</integer>
+				<key>NSExtensionActivationSupportsImageWithMaxCount</key>
+				<integer>1</integer>
+			</dict>
+			<key>PHSupportedMediaTypes</key>
+			<array>
+				<string>Image</string>
+			</array>
+		</dict>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.share-services</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>$(PRODUCT_MODULE_NAME).ShareViewController</string>
+	</dict>
+</dict>
+</plist>

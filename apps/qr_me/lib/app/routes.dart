@@ -25,7 +25,8 @@ abstract final class Routes {
 
   /// Un modulo speciale (Pro, `customCategories`): `/form/wifi`, `/form/contact?id=3`.
   static const String form = '/form/:kind';
-  static String formOf(QrKind kind, {int? id}) => '/form/${kind.name}${id == null ? '' : '?id=$id'}';
+  static String formOf(QrKind kind, {int? id}) =>
+      '/form/${kind.name}${id == null ? '' : '?id=$id'}';
 
   /// Lo stile (Pro, `themeCustomization`): `extra: StyleArgs`.
   static const String style = '/style';
@@ -41,7 +42,13 @@ abstract final class Routes {
 
 /// I tipi che hanno un modulo (`/form/:kind`): i moduli speciali di F17.0 punto 3. Testo e link
 /// si scrivono nel campo della home.
-const List<QrKind> kFormKinds = [QrKind.wifi, QrKind.contact, QrKind.email, QrKind.sms, QrKind.phone];
+const List<QrKind> kFormKinds = [
+  QrKind.wifi,
+  QrKind.contact,
+  QrKind.email,
+  QrKind.sms,
+  QrKind.phone,
+];
 
 /// Cio' che serve a `/show`: un QR da mostrare senza che sia (necessariamente) salvato.
 ///

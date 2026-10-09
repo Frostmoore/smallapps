@@ -16,8 +16,9 @@ environment:
 # ⚑ Qui, a differenza di Film Tracker, le dipendenze native entrano tutte con il bootstrap:
 # la specsheet (F17.1.2) le ha gia' fissate e F17.4 le scrivono in parallelo piu' passi. Il
 # build dell'APK di debug del bootstrap e' la prova che compilano tutte insieme.
-# ☠ `micro_share` (F17.2b, la ricezione da Share Sheet) NON e' ancora qui: si aggiunge quando
-# il package e' pronto. L'app non usa mai `receive_sharing_intent` direttamente.
+# ⚑ L'app non usa mai `receive_sharing_intent` direttamente: passa da `micro_share`.
+# ☠ Il plugin dichiara compileSdk 37 e con AGP 9 il build Android falliva: vedi il blocco
+# `receive_sharing_intent` in android/build.gradle.kts (F17.4).
 dependencies:
   # I grafemi del logo di testo (1-3 "caratteri" come li vede una persona: una bandiera o una
   # famiglia di emoji contano uno). Dart puro, gia' presente tramite Flutter: qui e' diretta perche'
@@ -96,8 +97,13 @@ flutter:
   # repository ufficiale google/fonts con la sua licenza (assets/fonts/OFL-PlusJakartaSans.txt:
   # SIL Open Font License 1.1, che ne consente l'uso in app commerciali purche' la licenza sia
   # inclusa). I pesi si ottengono con FontVariation in MicroTheme.
-  # ⚑ Provvisorio: la grafica vera la decidono le proposte di F17.6.
+  # Space Grotesk (titoli, 700) arriva con la grafica «A · Neon» scelta dal proprietario
+  # (F17.6, 2026-10-09): anch'essa VARIABILE, dal repository google/fonts, con la sua licenza
+  # (assets/fonts/OFL-SpaceGrotesk.txt, SIL OFL 1.1).
   fonts:
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Variable.ttf

@@ -3,8 +3,9 @@
 Condividi qualunque cosa e diventa un QR a tutto schermo, luminoso; e sa anche leggerli.
 Android e iPhone. Specsheet: `develop_microapps.md`, sezione «F17 — QR Me».
 
-Stato: bootstrap (F17.2c) e dominio/dati con i test (F17.3). Le schermate (F17.4) sono ancora
-segnaposto; la ricezione da Share Sheet arriva con `packages/micro_share` (F17.2b).
+Stato: bootstrap (F17.2c), dominio/dati (F17.3), interfaccia essenziale con la grafica «A · Neon»
+(F17.4 + F17.6, colori in `lib/app/qr_palette.dart`) e limiti Pro (F17.5). La condivisione verso
+l'app passa da `packages/micro_share` (`ShareIntake` in `lib/services/share_router.dart`).
 
 Comandi (dalla cartella dell'app, sempre con la toolchain del progetto):
 

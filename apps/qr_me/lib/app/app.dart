@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,38 +8,53 @@ import 'package:micro_core/micro_core.dart';
 
 import '../domain/qr_content.dart';
 import '../features/common/pro_gate.dart';
+import '../features/display/qr_display_page.dart';
+import '../features/forms/form_page.dart';
+import '../features/history/history_page.dart';
+import '../features/home/home_page.dart';
+import '../features/saved/saved_page.dart';
+import '../features/scan/scan_page.dart';
+import '../features/scan/scan_result_page.dart';
+import '../features/settings/settings_page.dart';
+import '../features/style/style_page.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../services/share_router.dart';
 import 'entitlement.dart';
 import 'locale_resolution.dart';
 import 'paywall_config.dart';
 import 'providers.dart';
+import 'qr_palette.dart';
 import 'routes.dart';
 
 /// Il router dell'app, con tutte le rotte di develop_microapps.md F17.1.5.
 ///
-/// ⚑ Le pagine vere arrivano con F17.4: fino ad allora ogni rotta mostra [_TodoPage] con il
-/// suo titolo, cosi' i percorsi, gli argomenti e le protezioni Pro sono gia' quelli definitivi
-/// e chi scrive una pagina sostituisce una riga.
-///
 /// ⚑ `ProGate` **sulla rotta** per moduli e stile (F17.0 punto 11): un `push` diretto (un link
-/// scritto domani, un pulsante dimenticato) non deve aprire una pagina Pro gratis.
+/// scritto domani, un pulsante dimenticato) non deve aprire una pagina Pro gratis. I pulsanti
+/// controllano comunque il Pro prima di aprire (`lib/features/common/qr_actions.dart`), per
+/// mostrare subito il paywall invece del lucchetto.
 GoRouter buildRouter() => GoRouter(
   initialLocation: Routes.home,
   routes: [
-    GoRoute(path: Routes.home, builder: (_, __) => const _TodoPage(_Title.home)),
+    GoRoute(path: Routes.home, builder: (_, __) => const HomePage()),
     GoRoute(
       path: Routes.show,
       // Senza argomenti (un percorso scritto a mano) non c'e' niente da mostrare.
-      builder: (_, s) => s.extra is QrDisplayArgs ? const _TodoPage(_Title.show) : const _NotFoundPage(),
+      builder: (_, s) => switch (s.extra) {
+        final QrDisplayArgs args => QrDisplayPage.args(args),
+        _ => const _NotFoundPage(),
+      },
     ),
     GoRoute(
       path: Routes.qr,
-      builder: (_, s) => _id(s) < 0 ? const _NotFoundPage() : const _TodoPage(_Title.show),
+      builder: (_, s) => _id(s) < 0 ? const _NotFoundPage() : QrDisplayPage.saved(_id(s)),
     ),
-    GoRoute(path: Routes.scan, builder: (_, __) => const _TodoPage(_Title.scan)),
+    GoRoute(path: Routes.scan, builder: (_, __) => const ScanPage()),
     GoRoute(
       path: Routes.scanResult,
-      builder: (_, s) => s.extra is ScanResultArgs ? const _TodoPage(_Title.scanResult) : const _NotFoundPage(),
+      builder: (_, s) => switch (s.extra) {
+        final ScanResultArgs args => ScanResultPage(args: args),
+        _ => const _NotFoundPage(),
+      },
     ),
     GoRoute(
       path: Routes.form,
@@ -47,18 +64,25 @@ GoRouter buildRouter() => GoRouter(
         // `?id=` illeggibile: pagina "non trovato", non un modulo nuovo che sembri una modifica.
         final rawId = s.uri.queryParameters['id'];
         if (rawId != null && int.tryParse(rawId) == null) return const _NotFoundPage();
-        return const ProGate(feature: FeatureKey.customCategories, child: _TodoPage(_Title.form));
+        return ProGate(
+          feature: FeatureKey.customCategories,
+          child: FormPage(kind: kind, id: rawId == null ? null : int.parse(rawId)),
+        );
       },
     ),
     GoRoute(
       path: Routes.style,
-      builder: (_, s) => s.extra is StyleArgs
-          ? const ProGate(feature: FeatureKey.themeCustomization, child: _TodoPage(_Title.style))
-          : const _NotFoundPage(),
+      builder: (_, s) => switch (s.extra) {
+        final StyleArgs args => ProGate(
+          feature: FeatureKey.themeCustomization,
+          child: StylePage(args: args),
+        ),
+        _ => const _NotFoundPage(),
+      },
     ),
-    GoRoute(path: Routes.saved, builder: (_, __) => const _TodoPage(_Title.saved)),
-    GoRoute(path: Routes.history, builder: (_, __) => const _TodoPage(_Title.history)),
-    GoRoute(path: Routes.settings, builder: (_, __) => const _TodoPage(_Title.settings)),
+    GoRoute(path: Routes.saved, builder: (_, __) => const SavedPage()),
+    GoRoute(path: Routes.history, builder: (_, __) => const HistoryPage()),
+    GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
     GoRoute(path: Routes.pro, builder: (_, __) => const _PaywallRoutePage()),
   ],
   errorBuilder: (_, __) => const _NotFoundPage(),
@@ -85,8 +109,41 @@ class QrMeApp extends ConsumerStatefulWidget {
 class _QrMeAppState extends ConsumerState<QrMeApp> {
   late final GoRouter _router = buildRouter();
 
+  /// Per i messaggi della condivisione (immagine senza QR): arrivano fuori da ogni pagina.
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+  ShareIntake? _intake;
+
+  @override
+  void initState() {
+    super.initState();
+    // ⚑ Dopo il primo frame: il router deve esistere ed essere montato prima di un `push`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final intake = ShareIntake(
+        inbox: ref.read(shareInboxProvider),
+        router: ref.read(shareRouterProvider),
+        goRouter: _router,
+        onOutcome: _onShareOutcome,
+      );
+      _intake = intake;
+      unawaited(intake.start());
+    });
+  }
+
+  void _onShareOutcome(ShareOutcome outcome) {
+    final context = _messenger.currentContext;
+    if (context == null) return;
+    final l = L.of(context);
+    final message = switch (outcome) {
+      ShareOutcome.noQrInImage => l.share_noQrInImage,
+      ShareOutcome.readerUnavailable => l.scan_readerUnavailable,
+      _ => null,
+    };
+    if (message != null) _messenger.currentState?.showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   void dispose() {
+    unawaited(_intake?.dispose());
     _router.dispose();
     super.dispose();
   }
@@ -98,9 +155,27 @@ class _QrMeAppState extends ConsumerState<QrMeApp> {
       title: config.appName,
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      // ⚑ Material puro dal seme verde, provvisorio: la grafica la decidono le proposte di F17.6.
-      theme: MicroTheme.light(seed: config.seedColor, fontFamily: config.fontFamily),
-      darkTheme: MicroTheme.dark(seed: config.seedColor, fontFamily: config.fontFamily),
+      scaffoldMessengerKey: _messenger,
+      // La grafica «A · Neon» (F17.6, scelta del proprietario il 2026-10-09): scura di default,
+      // con la sua versione chiara. Corpo Plus Jakarta Sans, titoli Space Grotesk.
+      theme: withQrLook(
+        MicroTheme.light(
+          seed: config.seedColor,
+          fontFamily: config.fontFamily,
+          displayFontFamily: kTitleFont,
+          variant: DynamicSchemeVariant.fidelity,
+        ),
+        QrPalette.light,
+      ),
+      darkTheme: withQrLook(
+        MicroTheme.dark(
+          seed: config.seedColor,
+          fontFamily: config.fontFamily,
+          displayFontFamily: kTitleFont,
+          variant: DynamicSchemeVariant.fidelity,
+        ),
+        QrPalette.dark,
+      ),
       themeMode: ref.watch(themeModeProvider),
       supportedLocales: kSupportedLocales,
       localizationsDelegates: const [
@@ -110,35 +185,6 @@ class _QrMeAppState extends ConsumerState<QrMeApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       localeListResolutionCallback: resolveAppLocale,
-    );
-  }
-}
-
-enum _Title { home, show, scan, scanResult, form, style, saved, history, settings }
-
-/// Segnaposto di una pagina che arriva con F17.4: il titolo e «In arrivo».
-class _TodoPage extends StatelessWidget {
-  const _TodoPage(this.title);
-
-  final _Title title;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L.of(context);
-    final text = switch (title) {
-      _Title.home => l.appTitle,
-      _Title.show => l.show_title,
-      _Title.scan => l.scan_title,
-      _Title.scanResult => l.scanResult_title,
-      _Title.form => l.form_title,
-      _Title.style => l.style_title,
-      _Title.saved => l.saved_title,
-      _Title.history => l.history_title,
-      _Title.settings => l.settings_title,
-    };
-    return Scaffold(
-      appBar: AppBar(title: Text(text)),
-      body: Center(child: Text(l.common_comingSoon)),
     );
   }
 }

@@ -10,7 +10,6 @@
   "common_copy": "Copy",
   "common_copied": "Copied",
   "common_notFound": "This QR code doesn’t exist any more.",
-  "common_comingSoon": "Coming soon.",
   "kind_text": "Text",
   "kind_url": "Link",
   "kind_wifi": "Wi-Fi",
@@ -71,5 +70,205 @@
     }
   },
   "settings_proActive": "QR Me Pro is active",
-  "settings_proCta": "Discover QR Me Pro"
+  "settings_proCta": "Discover QR Me Pro",
+  "form_editTitle": "Edit {kind}",
+  "@form_editTitle": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "form_fillIn": "Fill in the form: the QR code appears here.",
+  "form_required": "Required",
+  "form_invalidEmail": "This doesn’t look like an email address",
+  "form_invalidPhone": "Digits only, with + in front if needed",
+  "form_tooLong": "Too long for a QR code: shorten the note or the text.",
+  "wifi_ssid": "Network name (SSID)",
+  "wifi_passwordLabel": "Password",
+  "wifi_wpa": "WPA",
+  "wifi_wep": "WEP",
+  "wifi_open": "None",
+  "wifi_hidden": "Hidden network",
+  "wifi_hiddenBody": "Only if the network doesn’t show up in the list",
+  "contact_name": "Name and surname",
+  "contact_phone": "Phone",
+  "contact_email": "Email",
+  "contact_organization": "Company",
+  "contact_url": "Website",
+  "contact_note": "Note",
+  "email_to": "To",
+  "email_subject": "Subject",
+  "email_body": "Message",
+  "sms_number": "Number",
+  "sms_body": "Message",
+  "phone_number": "Number",
+  "common_close": "Close",
+  "common_more": "More",
+  "common_loadFailed": "Couldn’t load this list. Try reopening the app.",
+  "home_writeLabel": "Write or paste",
+  "home_writeHint": "A link, a message, anything…",
+  "home_paste": "Paste",
+  "home_show": "Show QR code",
+  "home_clipboardEmpty": "There’s no text to paste.",
+  "home_scan": "Read a QR code",
+  "home_scanBody": "With the camera or from a picture",
+  "home_formsLabel": "Forms",
+  "home_favoritesLabel": "Favourites",
+  "home_recentLabel": "Recent",
+  "home_seeAll": "See all",
+  "home_freeHistory": "The free history keeps the last 5 QR codes.",
+  "home_freeHistoryCta": "Keep them all with Pro",
+  "home_emptyTitle": "Share anything to QR Me",
+  "home_emptyBody": "Share a link or some text from any app and pick QR Me: the QR code is already there, big and bright.",
+  "display_semantics": "QR code: {title}",
+  "@display_semantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "display_missingBody": "It may have been deleted from favourites or history.",
+  "display_tooLongTitle": "Too long for a QR code",
+  "display_tooLongBody": "{n} characters: a QR code holds about 2,900 at most. Try sharing a link instead.",
+  "@display_tooLongBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "display_logoDropped": "Text too long for the logo: the QR code is shown without it.",
+  "display_dense": "Very dense QR code: hold the phone close.",
+  "display_showPassword": "Show password",
+  "display_hidePassword": "Hide password",
+  "display_style": "Style",
+  "display_image": "Image",
+  "display_saved": "Saved",
+  "display_alreadySaved": "Already in your favourites.",
+  "display_shareFailed": "Couldn’t create the image. Try again.",
+  "save_title": "Save to favourites",
+  "save_name": "Name",
+  "save_done": "Saved to favourites",
+  "wifi_network": "Network: {ssid}",
+  "@wifi_network": {
+    "placeholders": {
+      "ssid": {
+        "type": "String"
+      }
+    }
+  },
+  "wifi_password": "Password: {password}",
+  "@wifi_password": {
+    "placeholders": {
+      "password": {
+        "type": "String"
+      }
+    }
+  },
+  "share_noQrInImage": "No QR code in this picture.",
+  "saved_emptyTitle": "No favourites yet",
+  "saved_emptyBody": "Open a QR code and tap “Save”: your home Wi-Fi, always at hand.",
+  "saved_freeLimit": "The free plan keeps 1 favourite. Unlimited with Pro.",
+  "saved_rename": "Rename",
+  "saved_unfavorite": "Remove from favourites",
+  "saved_deleteTitle": "Delete this QR code?",
+  "saved_deleteBody": "“{title}” will be deleted for good.",
+  "@saved_deleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "history_emptyTitle": "No history",
+  "history_emptyBody": "The QR codes you show or read appear here.",
+  "history_off": "History is off: new QR codes aren’t saved.",
+  "history_freeNote": "The free history keeps the last 5. With Pro, all of them from now on.",
+  "history_clear": "Clear history",
+  "history_clearTitle": "Clear history?",
+  "history_clearBody": "Every QR code in the history will be deleted. Favourites stay.",
+  "history_cleared": "History cleared",
+  "settings_historyOn": "Keep a history",
+  "settings_historyBody": "Off, nothing you show or read is saved: useful for passwords and private text.",
+  "settings_proLabel": "Pro",
+  "settings_appLabel": "App",
+  "settings_privacy": "Privacy",
+  "settings_privacyBody": "QR Me has no account and sends nothing from your phone: QR codes, history, favourites and logos stay on this device. On Android, buying Pro asks Google Play and our licence server to confirm the purchase. Phone backups don’t include QR Me’s data: a backup is only the file you create yourself.",
+  "settings_about": "About",
+  "settings_aboutBody": "Share anything and it becomes a full-screen QR code; it reads them too.",
+  "data_title": "Your data",
+  "backup_create": "Create backup",
+  "backup_createBody": "Favourites, history and logos in one file",
+  "backup_creating": "Creating the backup…",
+  "backup_createFailed": "Couldn’t create the backup. Try again.",
+  "backup_subject": "QR Me backup",
+  "backup_restore": "Restore a backup",
+  "backup_restoreBody": "From a file created by QR Me, free",
+  "backup_restoreTitle": "Restore this backup?",
+  "backup_restoreSummary": "{favorites, plural, =1{1 favourite} other{{favorites} favourites}} and {history, plural, =1{1 QR code} other{{history} QR codes}} in the history.",
+  "@backup_restoreSummary": {
+    "placeholders": {
+      "favorites": {
+        "type": "int"
+      },
+      "history": {
+        "type": "int"
+      }
+    }
+  },
+  "backup_modeReplace": "Replace everything",
+  "backup_modeReplaceBody": "What’s on this phone now is deleted",
+  "backup_modeMerge": "Add what’s missing",
+  "backup_modeMergeBody": "Keeps what’s already here",
+  "backup_restoring": "Restoring…",
+  "backup_restored": "Backup restored",
+  "backup_failed": "This file isn’t a QR Me backup, or it’s damaged.",
+  "scan_hint": "Frame the QR code inside the corners",
+  "scan_fromImage": "From a picture",
+  "scan_torch": "Torch",
+  "scan_deniedTitle": "The camera is off for QR Me",
+  "scan_deniedBody": "Allow the camera for QR Me in the phone’s settings. Meanwhile you can read a QR code from a picture.",
+  "scan_errorTitle": "The camera didn’t start",
+  "scan_errorBody": "Try again, or read the QR code from a picture.",
+  "scan_openSettings": "Open settings",
+  "scan_readerUnavailable": "Pictures can’t be read on this device.",
+  "result_goesTo": "Goes to",
+  "result_open": "Open",
+  "result_copyLink": "Copy link",
+  "result_call": "Call",
+  "result_email": "Write email",
+  "result_sms": "Send SMS",
+  "result_copyPassword": "Copy password",
+  "result_showAsQr": "Show as QR code",
+  "result_restyle": "Restyle",
+  "result_noApp": "No app on this phone can open it.",
+  "style_foreground": "QR colour",
+  "style_background": "Background",
+  "style_hex": "Hex colour (#RRGGBB)",
+  "style_modules": "Dots",
+  "style_eyes": "Corners",
+  "style_square": "Square",
+  "style_round": "Round",
+  "style_logo": "Logo",
+  "style_lowContrast": "Colours too similar: many cameras won’t read it.",
+  "style_inverted": "Light QR on dark: some cameras can’t read it.",
+  "style_checking": "Checking…",
+  "style_readable": "Readable",
+  "style_unreadable": "I can’t read it",
+  "style_unknown": "Not checked on this device",
+  "style_reset": "Back to black and white",
+  "style_apply": "Apply",
+  "style_note": "The check reads the QR code back with the same scanner as the camera.",
+  "logo_none": "None",
+  "logo_photo": "Photo",
+  "logo_icon": "Icon",
+  "logo_text": "Text",
+  "logo_photoPick": "Choose a photo",
+  "logo_photoChange": "Change photo",
+  "logo_photoFailed": "Couldn’t use this photo. Try another one.",
+  "logo_round": "Round crop",
+  "logo_textLabel": "Emoji or short text",
+  "logo_textHelp": "Up to 3 characters"
 }

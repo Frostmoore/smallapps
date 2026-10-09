@@ -33,7 +33,6 @@ TESTI = {
     'common_copy': ('Copy', 'Copia'),
     'common_copied': ('Copied', 'Copiato'),
     'common_notFound': ('This QR code doesn’t exist any more.', 'Questo QR non esiste più.'),
-    'common_comingSoon': ('Coming soon.', 'In arrivo.'),
 
     # ── I tipi di contenuto (lib/app/labels.dart) ──
     'kind_text': ('Text', 'Testo'),

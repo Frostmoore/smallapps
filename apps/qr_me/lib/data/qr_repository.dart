@@ -116,10 +116,7 @@ class QrRepository {
           kind: content.kind.name,
           payload: payload,
           // Testo e link si riaprono dal payload: niente campi (F17.1.4).
-          fieldsJson: Value(switch (content) {
-            TextContent() || UrlContent() => null,
-            _ => jsonEncode(content.toFields()),
-          }),
+          fieldsJson: Value(_fieldsJson(content)),
           title: _title(content.autoTitle),
           source: source,
           styleJson: Value(styleJson),
@@ -159,6 +156,21 @@ class QrRepository {
     });
     await _deleteOrphanLogos([before, ...removed]);
   }
+
+  /// Cambia il contenuto (la «Modifica» di un preferito dal suo modulo, F17.4). Il titolo resta
+  /// quello dato dall'utente; `last_used_at` torna adesso.
+  ///
+  /// ⚑ Il payload lo passa il chiamante (`QrEncoder.encode(content)`), come in [recordShown]: il
+  /// repository non codifica, salva la stringa esatta che e' nel QR.
+  Future<void> updateContent(int id, {required QrContent content, required String payload}) =>
+      (_db.update(_db.qrCodes)..where((t) => t.id.equals(id))).write(
+        QrCodesCompanion(
+          kind: Value(content.kind.name),
+          payload: Value(payload),
+          fieldsJson: Value(_fieldsJson(content)),
+          lastUsedAt: Value(_now()),
+        ),
+      );
 
   Future<void> rename(int id, String title) =>
       (_db.update(_db.qrCodes)..where((t) => t.id.equals(id))).write(QrCodesCompanion(title: Value(_title(title))));
@@ -201,6 +213,12 @@ class QrRepository {
   }
 
   // ── Interni ──────────────────────────────────────────────────────────────
+
+  /// Testo e link si riaprono dal payload: niente campi (F17.1.4).
+  static String? _fieldsJson(QrContent content) => switch (content) {
+    TextContent() || UrlContent() => null,
+    _ => jsonEncode(content.toFields()),
+  };
 
   static String? _styleJson(QrStyle style) => style.isPlain ? null : jsonEncode(style.toJson());
 

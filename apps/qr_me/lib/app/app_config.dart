@@ -10,10 +10,11 @@ const String licenseAppId = 'qrme';
 
 /// La configurazione di QR Me. La forma vive in `micro_core`, qui solo i valori.
 ///
-/// Verde `#3BD13B`: il verde acceso dell'icona del proprietario (F17.0 punto 9), seme
-/// provvisorio finche' le proposte grafiche (F17.6) non dicono altro. **Tema chiaro di
-/// default**: un QR e' nero su bianco, e l'app che lo mostra a tutto schermo nasce chiara.
-/// Plus Jakarta Sans come Film Tracker, provvisorio anche lui.
+/// Verde `#3BD13B`: il verde acceso dell'icona del proprietario (F17.0 punto 9), confermato come
+/// accento «neon» dalla grafica «A · Neon» scelta il 2026-10-09 (F17.6; colori in
+/// `lib/app/qr_palette.dart`). **Tema scuro di default** (scelta del proprietario con la
+/// grafica): il QR resta comunque nero su un pannello bianco. Corpo in Plus Jakarta Sans,
+/// titoli in Space Grotesk.
 MicroAppConfig buildQrConfig() => MicroAppConfig.fromEnvironment(
   appId: 'qr_me',
   appName: 'QR Me',
@@ -21,5 +22,5 @@ MicroAppConfig buildQrConfig() => MicroAppConfig.fromEnvironment(
   proSku: 'qrme_pro_lifetime',
   seedColor: const Color(0xFF3BD13B),
   fontFamily: 'PlusJakartaSans',
-  defaultBrightness: Brightness.light,
+  defaultBrightness: Brightness.dark,
 );

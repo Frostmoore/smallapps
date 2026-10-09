@@ -72,9 +72,10 @@ PaywallConfig buildQrPaywall(L l) => PaywallConfig(
 
 /// Apre il paywall, con la funzione che l'ha innescato evidenziata. `true` se si esce con il
 /// Pro attivo.
-Future<bool> showQrPaywall(BuildContext context, WidgetRef ref, {FeatureKey? highlight}) => PaywallPage.show(
-  context,
-  config: buildQrPaywall(L.of(context)),
-  service: ref.read(entitlementProvider.notifier).service,
-  highlight: highlight,
-);
+Future<bool> showQrPaywall(BuildContext context, WidgetRef ref, {FeatureKey? highlight}) =>
+    PaywallPage.show(
+      context,
+      config: buildQrPaywall(L.of(context)),
+      service: ref.read(entitlementProvider.notifier).service,
+      highlight: highlight,
+    );

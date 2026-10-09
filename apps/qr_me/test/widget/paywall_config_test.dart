@@ -55,7 +55,12 @@ void main() {
     });
 
     test('nient\'altro e\' a pagamento', () {
-      for (final k in const [FeatureKey.photos, FeatureKey.statistics, FeatureKey.notifications, FeatureKey.csvExport]) {
+      for (final k in const [
+        FeatureKey.photos,
+        FeatureKey.statistics,
+        FeatureKey.notifications,
+        FeatureKey.csvExport,
+      ]) {
         expect(gratis.allows(k), isTrue, reason: '$k');
       }
     });

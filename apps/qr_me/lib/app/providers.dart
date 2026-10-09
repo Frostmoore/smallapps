@@ -1,9 +1,21 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:micro_core/micro_core.dart';
+import 'package:micro_share/micro_share.dart';
 
 import '../data/database.dart';
 import '../data/qr_repository.dart';
+import '../domain/qr_style.dart';
+import '../services/content_actions.dart';
+import '../services/logo_renderer.dart';
+import '../services/qr_renderer.dart';
+import '../services/readability_check.dart';
+import '../services/screen_boost.dart';
+import '../services/share_router.dart';
+import 'entitlement.dart' show appVersion;
 
 /// I provider radice dell'app (§8.T).
 ///
@@ -37,11 +49,11 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   ThemeMode build() {
     final saved = ref.watch(settingsProvider).getString(SettingKeys.themeMode);
     return switch (saved) {
-      'dark' => ThemeMode.dark,
+      'light' => ThemeMode.light,
       'system' => ThemeMode.system,
-      // ⚑ Chiaro di default (F17.2c): un QR e' nero su bianco, e l'app che lo mostra nasce
-      // chiara. La pagina del QR resta leggibile anche in scuro (riquadro col suo sfondo).
-      _ => ThemeMode.light,
+      // ⚑ Scuro di default: la grafica «A · Neon» scelta dal proprietario (F17.6, 2026-10-09)
+      // e' disegnata sul nero. Il QR resta leggibile: sta sempre su un pannello chiaro.
+      _ => ThemeMode.dark,
     };
   }
 
@@ -67,7 +79,9 @@ class HistoryEnabledNotifier extends Notifier<bool> {
   }
 }
 
-final historyEnabledProvider = NotifierProvider<HistoryEnabledNotifier, bool>(HistoryEnabledNotifier.new);
+final historyEnabledProvider = NotifierProvider<HistoryEnabledNotifier, bool>(
+  HistoryEnabledNotifier.new,
+);
 
 /// Il database, aperto alla prima lettura e chiuso con il `ProviderScope`.
 final databaseProvider = Provider<QrDatabase>((ref) {
@@ -77,7 +91,9 @@ final databaseProvider = Provider<QrDatabase>((ref) {
 });
 
 /// Le immagini dell'app: i loghi foto (bucket `QrLogoFiles.bucket`).
-final imageStoreProvider = Provider<ImageStore>((ref) => ImageStore(paths: ref.watch(appPathsProvider)));
+final imageStoreProvider = Provider<ImageStore>(
+  (ref) => ImageStore(paths: ref.watch(appPathsProvider)),
+);
 
 final repositoryProvider = Provider<QrRepository>(
   (ref) => QrRepository(ref.watch(databaseProvider), images: ref.watch(imageStoreProvider)),
@@ -86,15 +102,93 @@ final repositoryProvider = Provider<QrRepository>(
 // ── Stream per la UI ─────────────────────────────────────────────────────────
 
 /// La cronologia, dal piu' recente.
-final historyProvider = StreamProvider<List<QrCode>>((ref) => ref.watch(repositoryProvider).watchHistory());
+final historyProvider = StreamProvider<List<QrCode>>(
+  (ref) => ref.watch(repositoryProvider).watchHistory(),
+);
 
 /// I preferiti, per titolo.
-final favoritesProvider = StreamProvider<List<QrCode>>((ref) => ref.watch(repositoryProvider).watchFavorites());
+final favoritesProvider = StreamProvider<List<QrCode>>(
+  (ref) => ref.watch(repositoryProvider).watchFavorites(),
+);
 
 /// Quanti preferiti: il conteggio per `FeatureKey.unlimitedEntities`.
-final favoriteCountProvider = StreamProvider<int>((ref) => ref.watch(repositoryProvider).watchFavoriteCount());
+final favoriteCountProvider = StreamProvider<int>(
+  (ref) => ref.watch(repositoryProvider).watchFavoriteCount(),
+);
 
 /// Una riga per id (la pagina del QR salvato); null se cancellata.
 final qrCodeProvider = StreamProvider.family<QrCode?, int>(
   (ref, id) => ref.watch(repositoryProvider).watchById(id),
 );
+
+// ── Servizi (lib/services/, F17.1.7) ─────────────────────────────────────────
+//
+// ⚑ Tutti dietro un provider: i test di widget li sostituiscono con doppi finti (scanner,
+// luminosita', url_launcher, galleria), perche' sotto `flutter test` non c'e' nessun plugin.
+
+final qrRendererProvider = Provider<QrRenderer>((ref) => const QrRenderer());
+
+final logoRendererProvider = Provider<LogoRenderer>((ref) => const LogoRenderer());
+
+/// Lo scanner su un file immagine (`analyzeImage`): «Da immagine», condivisione, verifica.
+final qrImageReaderProvider = Provider<QrImageReader>((ref) => const MobileScannerImageReader());
+
+final readabilityCheckProvider = Provider<ReadabilityCheck>(
+  (ref) =>
+      ReadabilityCheck(ref.watch(qrImageReaderProvider), renderer: ref.watch(qrRendererProvider)),
+);
+
+final screenBoostProvider = Provider<ScreenBoost>((ref) => const ScreenBoost());
+
+final contentActionsProvider = Provider<ContentActions>((ref) => const ContentActions());
+
+/// La cassetta delle condivisioni (F17.1.8). Nei test: `FakeShareInbox`.
+final shareInboxProvider = Provider<ShareInbox>((ref) => RsiShareInbox());
+
+/// ⚑ Uno solo per tutta l'app: il filtro dei doppioni (F17.1.11 punto 5) ricorda l'ultima
+/// condivisione, e due istanze non si vedrebbero a vicenda.
+final shareRouterProvider = Provider<ShareRouter>(
+  (ref) => ShareRouter(reader: ref.watch(qrImageReaderProvider)),
+);
+
+/// Sceglie un'immagine dalla galleria e ne restituisce il percorso (null se l'utente annulla).
+/// ⚑ Il selettore di sistema: nessun permesso su Android 13+ e su iOS (F17.1.2).
+typedef PickImage = Future<String?> Function();
+
+final pickImageProvider = Provider<PickImage>(
+  (ref) =>
+      () async => (await ImagePicker().pickImage(source: ImageSource.gallery))?.path,
+);
+
+/// Il servizio di backup di micro_core, con le cartelle dell'app e la sua versione.
+final backupServiceProvider = Provider<BackupService>(
+  (ref) => BackupService(paths: ref.watch(appPathsProvider), appVersion: appVersion),
+);
+
+/// La chiave dell'immagine di un logo: il logo e i colori del suo piatto e del suo disegno.
+typedef LogoKey = ({QrLogo logo, int background, int foreground});
+
+/// Il lato in pixel a cui si disegna il logo: abbastanza per il PNG da 1024 (22% = 225 px).
+const int kLogoPixels = 256;
+
+/// L'immagine del logo, pronta per `QrRenderer` (null senza logo o con un logo illeggibile).
+///
+/// ⚑ Un provider e non un calcolo nel build: il disegno e' asincrono (TextPainter in un
+/// PictureRecorder, decodifica della foto), e la stessa immagine serve all'anteprima, alla
+/// pagina del QR e al PNG senza ridisegnarla.
+final logoImageProvider = FutureProvider.autoDispose.family<ui.Image?, LogoKey>((ref, key) async {
+  if (key.logo is NoLogo) return null;
+  return ref
+      .watch(logoRendererProvider)
+      .render(
+        key.logo,
+        backgroundArgb: key.background,
+        foregroundArgb: key.foreground,
+        sizePx: kLogoPixels,
+        images: ref.watch(imageStoreProvider),
+      );
+});
+
+/// La chiave del logo per [style].
+LogoKey logoKeyOf(QrStyle style) =>
+    (logo: style.logo, background: style.background, foreground: style.foreground);

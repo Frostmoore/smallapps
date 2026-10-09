@@ -1,4 +1,11 @@
 # encoding: utf-8
+
+# ☠ Da ssh il Mac non imposta LANG: Ruby legge i file come US-ASCII e il primo carattere
+#   accentato di un Info.plist (i testi dei permessi) fa fallire `match?` con "invalid byte
+#   sequence in US-ASCII" a meta' script (scoperto il 2026-10-09 sulla prima esecuzione).
+#   Tutti i file che tocchiamo sono UTF-8: lo si dice una volta qui per tutto lo script.
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
 # Aggiunge al progetto Xcode di un'app il target dell'estensione di condivisione
 # (Share Extension) che riceve testo, link e immagini dallo Share Sheet di iOS.
 #

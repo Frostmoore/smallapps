@@ -43,9 +43,17 @@ class ProGate extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.lock_outline, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.lock_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               MicroSpacing.gapM,
-              Text(l.pro_locked, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                l.pro_locked,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               MicroSpacing.gapL,
               FilledButton(
                 style: FilledButton.styleFrom(minimumSize: const Size(64, 52)),

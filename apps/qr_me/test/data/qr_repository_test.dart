@@ -218,4 +218,17 @@ void main() {
     await repo.rename(id, 'y' * 100);
     expect((await repo.byId(id))!.title, hasLength(80));
   });
+
+  test("updateContent: cambia contenuto e campi, il nome dato dall'utente resta", () async {
+    const prima = WifiContent(ssid: 'Casa', password: 'vecchia');
+    final id = await mostra(prima);
+    await repo.saveAsFavorite(id, title: 'Wi-Fi di casa');
+    const dopo = WifiContent(ssid: 'Casa', password: 'nuova;1');
+    await repo.updateContent(id, content: dopo, payload: QrEncoder.encode(dopo));
+    final row = (await repo.byId(id))!;
+    expect(row.title, 'Wi-Fi di casa');
+    expect(row.payload, QrEncoder.encode(dopo));
+    expect(row.content, dopo);
+    expect(row.isFavorite, isTrue);
+  });
 }

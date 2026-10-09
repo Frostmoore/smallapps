@@ -1143,9 +1143,9 @@ volta sola; nella fase di ciascuna app si spuntano.
   - [~] **F17.2b** `packages/micro_share/` + `tool/aggiungi_share_extension_ios.rb` — package FATTO il 2026-10-09 (20 test, atlante proprio, aggiunto a `tool/_common.ps1`); lo script Ruby va ancora eseguito sul Mac su `apps/qr_me` e la riapertura dell'app provata su iPad (serve l'App Group dal proprietario). ☠ Il pacchetto Swift del plugin sta in `.packages/receive_sharing_intent-<versione>`: lo script legge la versione dal `pubspec.lock` e va rilanciato a ogni aggiornamento del plugin
   - [x] **F17.2c** Bootstrap `apps/qr_me`, icona e splash — FATTO il 2026-10-09: `com.smp.qrme` Android e iOS (solo iPhone), manifest con ACTION_SEND testo e immagini, `allowBackup=false`, niente READ_EXTERNAL_STORAGE, icone dall'originale del proprietario (iOS su #F3F7F3, adattiva e monocromatica Android), APK debug compilato
   - [x] **F17.3** Dominio e dati, con test — FATTO il 2026-10-09: `lib/domain/*`, `lib/data/*`, 95 test. Decisioni minori: `QrDecoder.decodeTyped` per il testo scritto (`esempio.it` → link), `decode` per il letto (resta testo); paywall con 6 righe (una per chiave). Debito: esclusione del database dal backup iCloud (serve codice nativo, F17.7)
-  - [ ] **F17.4** Interfaccia essenziale, provata con condivisioni vere
-  - [ ] **F17.5** Pro: limiti, paywall, test di coerenza
-  - [ ] **F17.6** Proposte grafiche, scelta del proprietario
+  - [x] **F17.4** Interfaccia essenziale, provata con condivisioni vere — FATTO il 2026-10-09: servizi (`QrRenderer` unico traduttore stile→qr_flutter, `LogoRenderer`, `ReadabilityCheck` con ML Kit che funziona anche sull'emulatore, `ScreenBoost`, `ShareRouter`/`ShareIntake`, `ContentActions`), tutte le pagine, grafica Neon (`lib/app/qr_palette.dart`, `features/common/neon.dart`, Space Grotesk), 142 test; provate sull'emulatore la condivisione di testo (app aperta e chiusa), moduli, stile, PNG, paywall. ☠ `receive_sharing_intent` 1.9.0 dichiara `compileSdk 37` che AGP 9 non trova: `finalizeDsl { compileSdk = 36 }` in `android/build.gradle.kts` dell'app (da ripetere in ogni app con `micro_share`). Non provati: immagine condivisa con un QR vero, fotocamera reale, backup
+  - [x] **F17.5** Pro: limiti, paywall, test di coerenza — FATTO il 2026-10-09: chiavi verificate punto per punto, il gesto che apre il paywall prosegue dopo l'acquisto
+  - [x] **F17.6** Proposte grafiche, scelta del proprietario — scelta «A · Neon» il 2026-10-09 (F17.0 punto 10), applicata insieme a F17.4
   - [ ] **F17.7** Test, rifinitura, iOS sul simulatore, decisione su ML Kit
   - [ ] **F17.8** Atlanti di `apps/qr_me` e `packages/micro_share`
   - [ ] **F17.9** Rituale di fine fase, card «In arrivo», branch `v9.0.0`
@@ -5361,6 +5361,12 @@ Prese con il proprietario prima di F17.1. Dove contraddicono le idee di §8 «F1
    `tool/genera_icone.py` e da li' si prendono i colori. Seme provvisorio `#3BD13B` (il verde dell'icona, arrivata il 2026-10-09 in Download come file «QR Me» senza estensione, PNG 1254x1254 trasparente) finche'
    l'icona non dice altro.
 10. **Prima un'interfaccia essenziale, poi 2–3 proposte grafiche** (F17.6), come per F5 e F6.
+    **Scelta: «A · Neon»** (proprietario, 2026-10-09, https://claude.ai/artifact/PnrsKsGFRmFsppGHBxBrHk):
+    **tema scuro di default**, fondo `#0E1110`, superfici `#151A16` con bordo `#2A332C`, testo
+    `#EAF2EA`/`#8FA394`, accento verde neon `#3BD13B` (testo su accento `#06210B`) con alone, titoli
+    in Space Grotesk e corpo in Plus Jakarta Sans, QR sempre su pannello **bianco** con alone verde.
+    Scartate «B · Carta» (chiara, card arrotondate) e «C · Mirino» (angoli del mirino, monospaziato).
+    Applicata gia' durante F17.4 (`lib/app/qr_palette.dart`), quindi F17.6 si chiude con F17.4.
 11. **Trappole gia' pagate che valgono anche qui** (F5.0 punto 7 e F6.0 punto 7): `licenseAppId`
     senza trattino basso, deep link di Flutter spento, `ProGate` sulle pagine Pro, virgolette
     tipografiche nei testi, profili iOS via API, invito TestFlight mandato a parte
