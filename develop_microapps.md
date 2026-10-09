@@ -192,7 +192,7 @@ specsheet completa in §8**, come per F3–F6.
 | F14 | **Ricordamelo qui** | Promemoria quando si arriva o si esce da un luogo | `com.smp.ricordamelo` | **Geofencing**: posizione **in background**, permesso sensibile su Play (dichiarazione e video) e su iOS; limiti dei sistemi sul numero di aree |
 | F15 | **Quanti sono?** | Contare oggetti ripetuti con la fotocamera | `com.smp.quantisono` | **Visione on-device** (sperimentale per il proprietario stesso); §1.4 esclude l'AI dall'MVP: serve una decisione |
 | F16 | **Riassumilo** | Riassunto breve di un link o testo condiviso (Share Sheet) | `com.smp.riassumilo` | **Modello di linguaggio** on-device o remoto: costi, privacy, qualita'; §1.4 esclude l'AI dall'MVP: serve una decisione. Estensione di condivisione iOS |
-| F17 | **Fammi un QR** | QR a tutto schermo da qualunque cosa condivisa | `com.smp.fammiunqr` | Ricezione da Share Sheet (intent `SEND` su Android, **Share Extension** su iOS); `qr_flutter` gia' usato in Film Tracker |
+| F17 | **QR Me** (ex «Fammi un QR», rinominata il 2026-10-09) | QR a tutto schermo da qualunque cosa condivisa, e lettura dei QR | `com.smp.qrme` (definitivo, F17.0) | Ricezione da Share Sheet (intent `SEND` su Android, **Share Extension** su iOS) in `packages/micro_share/`; scanner `mobile_scanner`; stile con colori e logo |
 | F18 | **Leggimelo** | Un articolo condiviso letto ad alta voce | `com.smp.leggimelo` | Estrazione del testo principale da una pagina (rete) + sintesi vocale del sistema; Share Extension |
 | F19 | **Dove porta?** | Dove porta davvero un link abbreviato o sospetto, prima di aprirlo | `com.smp.doveporta` | Segue i redirect via rete **senza aprire la pagina**; segnali sospetti (punycode, domini strani); cambia l'informativa privacy ("l'app non parla con nessun server" non vale piu') |
 
@@ -1136,7 +1136,19 @@ volta sola; nella fase di ciascuna app si spuntano.
 - [ ] **F14** Ricordamelo qui — promemoria per luogo (geofencing, permesso in background)
 - [ ] **F15** Quanti sono? — conteggio con la fotocamera (**decisione sull'AI prima di F15.0**)
 - [ ] **F16** Riassumilo — riassunto da Share Sheet (**decisione sull'AI prima di F16.0**)
-- [ ] **F17** Fammi un QR — QR a tutto schermo da Share Sheet — ⚑ **LA PRIMA DA FARE** (scelta del proprietario il 2026-10-08, si comincia il 2026-10-09 da F17.0: decisioni e specsheet insieme a lui; costruisce anche la ricezione da Share Sheet per F16/F18/F19)
+- [~] **F17** QR Me (ex «Fammi un QR») — ⚑ **LA PRIMA DA FARE**, in corso dal 2026-10-09 → `v9.0.0`
+  - [x] **F17.0** Decisioni di partenza con il proprietario — FATTO il 2026-10-09 (§8 F17.0): nome «QR Me» in it ed en, `com.smp.qrme`, Android e iPhone, moduli Wi-Fi/contatto/email/SMS/telefono, **lettura dei QR gratis**, stile con colori e logo (foto, icone, emoji/testo), base generosa con Pro **1,99 €**, cronologia 5 gratis e spegnibile, 1 preferito gratis, nessun widget, icona dal proprietario
+  - [x] **F17.1** Specsheet — FATTO il 2026-10-09 (§8 F17.1): file, dipendenze, dominio con codifiche esatte, tabella, rotte, schermate, servizi, `micro_share`, Pro, permessi, trappole, test
+  - [ ] **F17.2a** `FeatureKey.imageExport` in `micro_core` + una riga nelle quattro app
+  - [ ] **F17.2b** `packages/micro_share/` + `tool/aggiungi_share_extension_ios.rb` (serve l'App Group dal proprietario per la prova su iPad)
+  - [ ] **F17.2c** Bootstrap `apps/qr_me`, icona e splash (serve l'icona in Download)
+  - [ ] **F17.3** Dominio e dati, con test
+  - [ ] **F17.4** Interfaccia essenziale, provata con condivisioni vere
+  - [ ] **F17.5** Pro: limiti, paywall, test di coerenza
+  - [ ] **F17.6** Proposte grafiche, scelta del proprietario
+  - [ ] **F17.7** Test, rifinitura, iOS sul simulatore, decisione su ML Kit
+  - [ ] **F17.8** Atlanti di `apps/qr_me` e `packages/micro_share`
+  - [ ] **F17.9** Rituale di fine fase, card «In arrivo», branch `v9.0.0`
 - [ ] **F18** Leggimelo — lettura ad alta voce di un articolo condiviso
 - [ ] **F19** Dove porta? — destinazione reale di un link, prima di aprirlo
 - [ ] **Card «In arrivo»** delle dieci app nella vetrina `smpmicroapps.it` (regola: ogni microapp
@@ -5246,15 +5258,14 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   potrebbe fare da proxy).
 - Prima Share Extension della piattaforma insieme a F17/F18/F19 (§1.6).
 
-### F17 — Fammi un QR
+### F17 — Fammi un QR → diventata **QR Me**
 
 > Si condivide un link, un testo, un indirizzo o un altro contenuto e l'app genera immediatamente
 > un QR code a tutto schermo. Utile per trasferire velocemente informazioni tra dispositivi o
 > mostrarle a un'altra persona senza copiare e incollare.
 
-- La piu' semplice: `qr_flutter` (gia' in Film Tracker), luminosita' al massimo mentre il QR e'
-  mostrato, ricezione da Share Sheet. Buona candidata per **costruire l'infrastruttura di
-  condivisione** che poi servira' a F16, F18, F19.
+- **Decisa e specificata il 2026-10-09**: vedi la sezione **«F17 — QR Me»** qui sotto (F17.0
+  decisioni, F17.1 specsheet). Questa scheda resta come traccia dell'idea originale.
 
 ### F18 — Leggimelo
 
@@ -5277,6 +5288,618 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   IP al posto del dominio, tanti salti.
 - ☠ La richiesta parte dal telefono: chi ha creato il link vede l'IP. Va detto nell'app e
   nell'informativa.
+
+---
+
+## F17 — QR Me (ex «Fammi un QR»)
+
+**Obiettivo della fase**: l'app che trasforma in un QR a tutto schermo qualunque cosa le si
+condivida, e che sa anche leggerli. Il gesto principale e' **Condividi → QR Me → il QR e' gia'
+li', grande e luminoso**: zero tocchi in piu'. Tutto il resto (moduli, stile, preferiti) gira
+intorno a quel gesto senza rallentarlo.
+
+E' anche la fase che costruisce **una volta** la ricezione da Share Sheet per tutta la
+piattaforma (`packages/micro_share/`, F17.2b): F16, F18 e F19 la useranno senza rifarla.
+
+### F17.0 — Decisioni di partenza (2026-10-09)
+
+Prese con il proprietario prima di F17.1. Dove contraddicono le idee di §8 «F10–F19», vincono queste.
+
+1. **Nome: «QR Me», uguale in italiano e in inglese** (proprietario: «Va bene QR Me anche in
+   italiano»). Sostituisce «Fammi un QR». Ne discendono:
+   - cartella `apps/qr_me/`, `appId: 'qr_me'`, **`licenseAppId: 'qrme'`** (senza trattino basso,
+     F5.0 punto 7);
+   - bundle / applicationId **`com.smp.qrme`** (non piu' `com.smp.fammiunqr`), estensione iOS
+     `com.smp.qrme.ShareExtension`, App Group `group.com.smp.qrme`;
+   - SKU **`qrme_pro_lifetime`** (immutabile dopo la pubblicazione).
+   - ☠ «QR Me» sugli store e' quasi certamente gia' usato da altri: il nome della **scheda** si
+     prova alla creazione (App Store risponde 409 `DUPLICATE.DIFFERENT_ACCOUNT`, come per Full
+     Freezer e Film Tracker). Ripiego gia' deciso: **«QR Me – Share & Scan»** (inglese) e
+     **«QR Me – Condividi e leggi»** (italiano). Sotto l'icona resta sempre «QR Me»
+     (`CFBundleDisplayName`, `android:label`).
+2. **Android e iPhone dal primo commit**, come Film Tracker: `flutter create
+   --platforms=android,ios`, `TARGETED_DEVICE_FAMILY = 1`. **Serve un App Group** (per
+   l'estensione di condivisione, F17.2b): il proprietario registra nel portale Apple gli App ID
+   `com.smp.qrme` e `com.smp.qrme.ShareExtension`, entrambi con la capability App Groups, e il
+   gruppo `group.com.smp.qrme` (come fece per Scorte Calore). I profili si creano poi via API.
+3. **Contenuti**: testo e link (dalla condivisione, scritti o incollati) **piu' i moduli
+   speciali** scelti dal proprietario: **Wi-Fi**, **contatto (vCard)**, **email**, **SMS**,
+   **telefono**.
+4. **Legge anche i QR** con la fotocamera (proprietario: «Deve anche leggere, e rigenerarlo con
+   le variazioni che possono essere fatte dalla nostra app»): dalla fotocamera **e da
+   un'immagine** (galleria o immagine condivisa, es. uno screenshot con un QR). Un QR letto si
+   puo' mostrare di nuovo, salvare e **rigenerare con lo stile** (colori, logo).
+5. **Stile del QR: colori e logo centrale** (proprietario). Logo da **tre fonti**, tutte scelte
+   dal proprietario: **foto dalla galleria**, **icone pronte**, **emoji o testo corto** (1–3
+   caratteri).
+6. **Gratis e Pro: «base generosa»** (proprietario), Pro **1,99 €** una tantum:
+
+   | Funzione | Gratis | Pro | `FeatureKey` |
+   |---|---|---|---|
+   | Condivisione → QR a tutto schermo, luminosita' al massimo | ✔ | ✔ | — |
+   | Testo e link scritti o incollati | ✔ | ✔ | — |
+   | **Lettura** dalla fotocamera e da immagine | ✔ | ✔ | — (decisione del proprietario: gratis) |
+   | Cronologia automatica | ultimi **5** | illimitata | `fullHistory` → `count(freeMax: 5)` |
+   | QR salvati con nome (preferiti) | **1** | illimitati | `unlimitedEntities` → `count(freeMax: 1)` |
+   | Moduli speciali (Wi-Fi, contatto, email, SMS, telefono) | — | ✔ | `customCategories` → `locked()` |
+   | Colori, forma dei moduli e degli occhi, logo | — | ✔ | `themeCustomization` → `locked()` |
+   | Esportare/condividere il QR come immagine | — | ✔ | **`imageExport`** (nuova, F17.2a) → `locked()` |
+   | Backup completo | — | ✔ | `backupRestore` → `locked()` (il **ripristino** resta gratis, come nelle altre app) |
+
+   ⚑ **Perche' 1 preferito gratis e non zero**: «QR salvati senza limite» era la promessa Pro
+   approvata; uno gratis fa capire a cosa servono (il Wi-Fi di casa sempre a portata) e rende il
+   limite comprensibile invece che misterioso. Se il proprietario preferisce zero, si cambia una
+   riga in `feature_limits.dart` e il test di coerenza del paywall.
+   ⚑ **Un QR letto con un modulo speciale** (es. un Wi-Fi inquadrato) si **mostra** e si
+   **ri-mostra** gratis, anche dalla cronologia: e' un contenuto, non un modulo. Il Pro serve per
+   **compilarne o modificarne uno** dal modulo, e per restilizzarlo.
+7. **Cronologia accesa di default, spegnibile** (proprietario): interruttore nelle impostazioni
+   piu' «Cancella la cronologia». ⚑ Dentro ci finiscono password del Wi-Fi e testi privati: chi
+   condivide cose riservate deve poterla evitare.
+8. **Nessun widget** (proprietario). Niente `home_widget`.
+9. **Icona dal proprietario** (in Download, come Film Tracker): si ripulisce con
+   `tool/genera_icone.py` e da li' si prendono i colori. Seme provvisorio `#3BD13B` (il verde dell'icona, arrivata il 2026-10-09 in Download come file «QR Me» senza estensione, PNG 1254x1254 trasparente) finche'
+   l'icona non dice altro.
+10. **Prima un'interfaccia essenziale, poi 2–3 proposte grafiche** (F17.6), come per F5 e F6.
+11. **Trappole gia' pagate che valgono anche qui** (F5.0 punto 7 e F6.0 punto 7): `licenseAppId`
+    senza trattino basso, deep link di Flutter spento, `ProGate` sulle pagine Pro, virgolette
+    tipografiche nei testi, profili iOS via API, invito TestFlight mandato a parte
+    (`POST /v1/betaTesterInvitations`), `Runner.entitlements` presente (qui **serve**, c'e' l'App
+    Group).
+
+### F17.1 — Specsheet
+
+#### F17.1.1 — Albero dei file da creare
+
+```
+packages/micro_core/lib/src/gate/feature_key.dart      + FeatureKey.imageExport (F17.2a)
+packages/micro_share/                                  NUOVO package (F17.2b)
+├─ pubspec.yaml                                        dipende da receive_sharing_intent ^1.9.0
+├─ lib/micro_share.dart                                barrel
+├─ lib/src/shared_payload.dart                         sealed SharedPayload (Dart puro)
+├─ lib/src/share_inbox.dart                            interfaccia ShareInbox + FakeShareInbox
+├─ lib/src/rsi_share_inbox.dart                        implementazione su receive_sharing_intent
+├─ ios_template/ShareViewController.swift              il controller dell'estensione (copiato dallo script)
+├─ ios_template/Info.plist                             con le regole di attivazione
+├─ test/shared_payload_test.dart
+└─ codebase_reference.md
+tool/aggiungi_share_extension_ios.rb                   come aggiungi_widget_ios.rb, idempotente
+apps/qr_me/
+├─ lib/main.dart
+├─ lib/app/{app,app_config,entitlement,feature_limits,paywall_config,providers,routes,labels,locale_resolution}.dart
+├─ lib/domain/
+│  ├─ qr_content.dart          sealed QrContent + le 7 sottoclassi
+│  ├─ qr_encoder.dart          QrContent → stringa da codificare
+│  ├─ qr_decoder.dart          stringa letta → QrContent
+│  ├─ qr_capacity.dart         quanto ci sta in un QR per livello di correzione
+│  ├─ qr_style.dart            QrStyle, QrLogo, forme, JSON
+│  └─ contrast.dart            contrasto e verso dei colori
+├─ lib/data/
+│  ├─ tables.dart              QrCodes
+│  ├─ database.dart            QrDatabase, schemaVersion 1
+│  ├─ qr_repository.dart       QrRepository (cronologia, preferiti, potatura)
+│  └─ qr_backup_source.dart    BackupSource con i loghi in ImageStore
+├─ lib/services/
+│  ├─ qr_renderer.dart         QrRenderer: widget e PNG con lo stesso stile
+│  ├─ logo_renderer.dart       icona / emoji / foto → immagine del logo
+│  ├─ readability_check.dart   rilegge il PNG generato con lo scanner
+│  ├─ screen_boost.dart        luminosita' al massimo + schermo acceso, con ripristino
+│  ├─ share_router.dart        SharedPayload → rotta giusta
+│  └─ content_actions.dart     apri link, chiama, scrivi, copia (url_launcher)
+├─ lib/features/
+│  ├─ home/home_page.dart              campo di testo, Leggi, Moduli, Preferiti, Cronologia
+│  ├─ display/qr_display_page.dart     IL QR a tutto schermo
+│  ├─ scan/scan_page.dart              fotocamera + «da immagine»
+│  ├─ scan/scan_result_page.dart       cosa c'era nel QR letto, con le azioni
+│  ├─ forms/form_page.dart             un'unica pagina, un modulo per QrKind
+│  ├─ forms/{wifi,contact,email,sms,phone}_form.dart
+│  ├─ style/style_page.dart            colori, forme, logo, anteprima, verifica di leggibilita'
+│  ├─ style/logo_picker.dart           galleria / icone / emoji-testo
+│  ├─ saved/saved_page.dart            preferiti
+│  ├─ history/history_page.dart        cronologia completa (Pro oltre i 5)
+│  └─ settings/{settings_page,data_section}.dart
+├─ ios/ShareExtension/                 creata da tool/aggiungi_share_extension_ios.rb
+├─ tool/{testi.py,testi_*.py,genera_icone.py}
+└─ test/ …                             (F17.1.12)
+```
+
+#### F17.1.2 — Dipendenze
+
+| Pacchetto | Versione | Perche' |
+|---|---|---|
+| `qr_flutter` | `^4.1.0` | gia' in Film Tracker; `QrImageView` e `QrPainter` (per il PNG) |
+| `mobile_scanner` | `^7.4.2` | lettura da fotocamera e da immagine (`analyzeImage`). iOS: AVFoundation + Vision; Android: ML Kit **incluso** (default, +3–10 MB). ☠ vedi F17.1.11 punto 3 |
+| `micro_share` | `path: ../../packages/micro_share` | ricezione da Share Sheet (F17.2b) |
+| `screen_brightness` | `^2.1.11` | luminosita' **dell'app** al massimo mentre il QR e' mostrato; nessun permesso |
+| `wakelock_plus` | ultima stabile | lo schermo non si spegne mentre qualcuno inquadra |
+| `image_picker` | `^1.2.4` | foto per il logo e immagine da cui leggere un QR (photo picker di sistema: niente permesso su Android 13+ e su iOS) |
+| `url_launcher` | ultima stabile | «Apri link», «Chiama», «Scrivi email», «Manda SMS» dal QR letto |
+| `share_plus` | come `micro_core` (`^13.3.0`) | condividere il PNG (`SharePlus.instance.share(ShareParams(files: [...]))`, la stessa forma usata in `micro_core/lib/src/backup/backup.dart`) |
+| `drift`, `flutter_riverpod`, `go_router`, `intl`, `path`, `path_provider` | come Film Tracker | §8.T |
+
+**Non** si usano: `receive_sharing_intent` direttamente dall'app (passa da `micro_share`),
+`home_widget`, `image_cropper` (il ritaglio del logo e' quadrato centrato o rotondo, fatto con il
+pacchetto `image` gia' noto da Film Tracker: una dipendenza nativa in meno).
+
+#### F17.1.3 — Dominio (Dart puro, `lib/domain/`, zero Flutter)
+
+```dart
+// lib/domain/qr_content.dart
+enum QrKind { text, url, wifi, contact, email, sms, phone }
+
+enum WifiSecurity { wpa, wep, none }   // WPA copre WPA/WPA2/WPA3 nella stringa WIFI:
+
+sealed class QrContent {
+  const QrContent();
+  QrKind get kind;
+  /// Titolo automatico per la cronologia: il dominio di un link, il nome della rete, il nome del contatto…
+  String get autoTitle;
+  Map<String, Object?> toFields();                 // per la colonna fields_json
+  static QrContent fromFields(QrKind kind, Map<String, Object?> fields);
+}
+final class TextContent    extends QrContent { const TextContent(this.text); final String text; }
+final class UrlContent     extends QrContent { const UrlContent(this.uri); final Uri uri; }
+final class WifiContent    extends QrContent { const WifiContent({required this.ssid, this.password = '', this.security = WifiSecurity.wpa, this.hidden = false}); … }
+final class ContactContent extends QrContent { const ContactContent({required this.name, this.phone, this.email, this.organization, this.url, this.note}); … }
+final class EmailContent   extends QrContent { const EmailContent({required this.to, this.subject = '', this.body = ''}); … }
+final class SmsContent     extends QrContent { const SmsContent({required this.number, this.body = ''}); … }
+final class PhoneContent   extends QrContent { const PhoneContent(this.number); final String number; }
+```
+
+```dart
+// lib/domain/qr_encoder.dart
+abstract final class QrEncoder {
+  static String encode(QrContent content);
+}
+```
+
+Le codifiche, **esattamente** queste (sono quelle che le fotocamere di sistema di Android e iOS
+riconoscono; altre varianti esistono ma alcune fotocamere non le capiscono):
+
+| Tipo | Stringa | Regole |
+|---|---|---|
+| testo | il testo com'e' | nessuna trasformazione, nemmeno il trim (un testo condiviso si mostra identico) |
+| link | `uri.toString()` | si accetta solo `http`/`https`; un link senza schema scritto a mano (`esempio.it`) diventa `https://esempio.it` **solo** se contiene un punto e nessuno spazio |
+| Wi-Fi | `WIFI:T:WPA;S:<ssid>;P:<password>;H:true;;` | `T:WEP` / `T:nopass` (e allora niente `P:`); `H:true` solo se nascosta. **Escape con backslash di `\ ; , : "`** in SSID e password. ☠ Senza escape una password con `;` produce un QR che si legge ma connette con la password sbagliata, e l'errore sembra della rete |
+| contatto | vCard **3.0**: `BEGIN:VCARD\r\nVERSION:3.0\r\nN:<cognome>;<nome>;;;\r\nFN:<nome completo>\r\nTEL:<tel>\r\nEMAIL:<email>\r\nORG:<org>\r\nURL:<url>\r\nNOTE:<nota>\r\nEND:VCARD` | righe vuote omesse; escape vCard di `\ , ;` e a-capo → `\n`; `N` si ricava da `FN` (ultima parola = cognome). ⚑ 3.0 e non 4.0: la fotocamera di iOS e Android la importano entrambe; MECARD e' piu' corta ma iOS la tratta come testo |
+| email | `mailto:<to>?subject=<s>&body=<b>` | `Uri.encodeComponent` su oggetto e corpo; parametri vuoti omessi |
+| SMS | `SMSTO:<numero>:<testo>` | ⚑ `SMSTO:` e non `sms:`: e' quella che entrambe le fotocamere di sistema aprono con il testo precompilato |
+| telefono | `tel:<numero>` | il numero si normalizza togliendo spazi, trattini e parentesi; il `+` iniziale resta |
+
+```dart
+// lib/domain/qr_decoder.dart
+abstract final class QrDecoder {
+  /// Riconosce il tipo da una stringa letta. Non lancia mai: cio' che non riconosce e' TextContent.
+  static QrContent decode(String raw);
+}
+```
+
+Riconosce (maiuscole/minuscole indifferenti nel prefisso): `WIFI:` (con unescape), `BEGIN:VCARD`
+(3.0 e 4.0; si leggono `FN`, `N`, `TEL`, `EMAIL`, `ORG`, `URL`, `NOTE`, il resto si ignora),
+`MECARD:` (→ ContactContent), `mailto:` e `MATMSG:` (→ EmailContent), `SMSTO:` e `sms:`
+(→ SmsContent), `tel:` (→ PhoneContent), `http://` / `https://` senza spazi (→ UrlContent).
+**Proprieta' da testare**: per ogni `QrContent` valido, `decode(encode(c)) == c` (round-trip).
+
+```dart
+// lib/domain/qr_capacity.dart
+enum QrErrorLevel { low, medium, quartile, high }
+abstract final class QrCapacity {
+  /// Byte massimi in modalita' byte (UTF-8) alla versione 40: L 2953, M 2331, Q 1663, H 1273.
+  static int maxBytes(QrErrorLevel level);
+  static bool fits(String payload, QrErrorLevel level);   // utf8.encode(payload).length <= maxBytes
+}
+```
+
+⚑ **Livello di correzione**: **M** senza logo, **H** con logo (il logo copre fino al ~22% dei
+moduli e H ne recupera il 30%). Se il contenuto non sta in H, il logo **si disattiva** con un
+avviso («Testo troppo lungo per il logo»); se non sta nemmeno in M, si prova L; se non sta in L, il
+QR non si genera e si dice perche' («Troppo lungo per un QR: N caratteri, massimo circa 2.900»). Un
+QR enorme si genera ma si legge male: oltre **1.000 byte** si mostra un avviso morbido «QR molto
+fitto: avvicina il telefono».
+
+```dart
+// lib/domain/qr_style.dart
+enum QrModuleShape { square, circle }
+enum QrEyeShape { square, circle }
+
+sealed class QrLogo { const QrLogo(); }
+final class NoLogo    extends QrLogo { const NoLogo(); }
+final class PhotoLogo extends QrLogo { const PhotoLogo({required this.imageName, this.round = false}); final String imageName; final bool round; } // nome in ImageStore
+final class IconLogo  extends QrLogo { const IconLogo(this.iconId); final String iconId; }   // id stabile del catalogo icone, NON il codePoint
+final class TextLogo  extends QrLogo { const TextLogo(this.text); final String text; }      // 1..3 grafemi (characters), emoji comprese
+
+final class QrStyle {
+  const QrStyle({this.foreground = 0xFF000000, this.background = 0xFFFFFFFF,
+      this.moduleShape = QrModuleShape.square, this.eyeShape = QrEyeShape.square,
+      this.logo = const NoLogo()});
+  static const QrStyle plain = QrStyle();
+  bool get isPlain;                       // == plain: nessun Pro coinvolto
+  QrStyle copyWith({...});
+  Map<String, Object?> toJson();
+  static QrStyle fromJson(Map<String, Object?> json);   // tollerante: chiavi sconosciute ignorate, mancanti = default
+}
+```
+
+⚑ `IconLogo` salva un **id testuale** (`'wifi'`, `'phone'`, `'heart'`…) e non il `codePoint`
+dell'icona Material: i codePoint cambiano fra versioni dei font di Flutter e un preferito salvato
+mostrerebbe un'altra icona dopo un aggiornamento. Catalogo in `lib/features/style/logo_picker.dart`:
+`const Map<String, IconData> kLogoIcons` con circa 24 voci (wifi, phone, email, sms, home, work,
+heart, star, shop, restaurant, coffee, music, camera, link, person, group, event, location, car,
+pets, school, info, gift, payment).
+
+```dart
+// lib/domain/contrast.dart
+abstract final class Contrast {
+  static double ratio(int argbA, int argbB);           // formula WCAG sulla luminanza relativa
+  static bool inverted(int foreground, int background); // primo piano piu' chiaro dello sfondo
+}
+```
+
+Regole nello stile: rapporto **< 3** → avviso rosso «Colori troppo simili, molte fotocamere non lo
+leggeranno»; **invertito** → avviso giallo «QR chiaro su scuro: alcune fotocamere non lo leggono»
+(si puo' salvare lo stesso). La verifica vera e' comunque `ReadabilityCheck` (F17.1.7).
+
+#### F17.1.4 — Dati (Drift, `lib/data/`)
+
+**`qr_codes`** — una tabella sola: cronologia e preferiti sono lo stesso oggetto con un flag.
+
+| Colonna | Tipo | Vincoli | Note |
+|---|---|---|---|
+| `id` | INTEGER | PK autoincrement | |
+| `kind` | TEXT | NOT NULL, uno dei `QrKind.name` | |
+| `payload` | TEXT | NOT NULL, 1..4000 | la stringa **esatta** codificata nel QR |
+| `fields_json` | TEXT | nullable | `QrContent.toFields()` per riaprire il modulo; null per testo e link |
+| `title` | TEXT | NOT NULL, 1..80 | `autoTitle` o il nome dato dall'utente |
+| `source` | TEXT | NOT NULL: `shared` \| `typed` \| `form` \| `scanned` \| `image` | da dove e' arrivato |
+| `style_json` | TEXT | nullable | null = `QrStyle.plain` |
+| `is_favorite` | BOOLEAN | NOT NULL default false | preferito = salvato con nome, escluso dalla potatura |
+| `created_at` | INTEGER | NOT NULL | epoch ms UTC |
+| `last_used_at` | INTEGER | NOT NULL | aggiornato a ogni visualizzazione |
+
+Indici: `(is_favorite, last_used_at DESC)`. Niente UNIQUE su `payload`: due preferiti con lo
+stesso contenuto e stili diversi sono legittimi.
+
+```dart
+// lib/data/qr_repository.dart
+class QrRepository {
+  QrRepository(this._db);
+  Stream<List<QrCode>> watchHistory();                       // non preferiti, last_used_at DESC
+  Stream<List<QrCode>> watchFavorites();                     // preferiti, title ASC
+  Future<QrCode?> byId(int id);
+  /// Registra un QR mostrato. Se esiste gia' un NON preferito con lo stesso payload e lo stesso
+  /// style_json, aggiorna solo last_used_at (niente doppioni in cronologia).
+  Future<int> recordShown({required QrContent content, required String payload,
+      required String source, QrStyle style = QrStyle.plain});
+  Future<void> touch(int id);                                // last_used_at = now
+  Future<void> saveAsFavorite(int id, {required String title});
+  Future<void> unfavorite(int id);
+  Future<void> updateStyle(int id, QrStyle style);
+  Future<void> rename(int id, String title);
+  Future<void> delete(int id);                               // cancella anche il logo in ImageStore se nessun altro lo usa
+  Future<void> clearHistory();                               // solo i non preferiti
+  /// Tiene solo gli ultimi [keep] non preferiti. null = nessun limite (Pro).
+  Future<int> pruneHistory({required int? keep});
+  Future<int> countFavorites();
+}
+```
+
+⚑ **Cronologia gratis = 5 righe vere, non 5 righe mostrate.** `pruneHistory(keep: 5)` si chiama
+dopo ogni `recordShown` nel piano gratuito: le righe in eccesso **si cancellano**. Nasconderle e
+rivelarle al Pro sarebbe trattenere dati privati (password Wi-Fi) che l'utente crede spariti. Il
+Pro tiene tutto da quando e' comprato in poi; la cronologia vecchia gia' potata non torna (lo dice
+il paywall: «Cronologia senza limite da adesso in poi»).
+⚑ **Con la cronologia spenta** `recordShown` **non scrive**: il QR si mostra da un oggetto in
+memoria (`QrDisplayArgs`, F17.1.6). Si salva solo se l'utente tocca «Salva nei preferiti».
+⚑ **Nessun QR in chiaro fuori dall'app**: `android:allowBackup="false"` nel manifest e i file nella
+cartella documenti dell'app (su iOS esclusi dal backup iCloud con `NSURLIsExcludedFromBackupKey`
+sulla cartella del database). Le password Wi-Fi non devono finire in un backup automatico che
+l'utente non ha scelto. Il backup lo fa solo l'utente, col Pro, in un file che vede.
+
+#### F17.1.5 — Rotte (`lib/app/routes.dart`)
+
+| Rotta | Pagina | Note |
+|---|---|---|
+| `/` | `HomePage` | |
+| `/show` | `QrDisplayPage` | argomenti in `extra: QrDisplayArgs` (contenuto non salvato) |
+| `/qr/:id` | `QrDisplayPage` | da cronologia o preferiti |
+| `/scan` | `ScanPage` | |
+| `/scan/result` | `ScanResultPage` | `extra: ScanResultArgs(raw, source)` |
+| `/form/:kind` | `FormPage` | `ProGate(FeatureKey.customCategories)`; `?id=` per modificare |
+| `/style` | `StylePage` | `ProGate(FeatureKey.themeCustomization)`; `extra: StyleArgs` |
+| `/saved` | `SavedPage` | |
+| `/history` | `HistoryPage` | |
+| `/settings` | `SettingsPage` | |
+| `/pro` | paywall | §8.T |
+
+`_id()` come in Film Tracker: un `:id` non numerico porta a una pagina «Non trovato», non a
+un'eccezione.
+
+#### F17.1.6 — Le schermate
+
+**`HomePage`** — dall'alto:
+1. Campo multilinea «Scrivi o incolla» + bottone **Incolla** (legge gli appunti; su iOS il sistema
+   mostra il suo avviso di incolla: e' normale) + bottone primario **Mostra QR** (attivo con testo
+   non vuoto). Testo → `QrDecoder.decode` (un link scritto diventa UrlContent) → `/show`.
+2. **Leggi un QR** (grande, icona fotocamera) → `/scan`.
+3. **Moduli**: cinque chip Wi-Fi, Contatto, Email, SMS, Telefono, con `ProBadge` se non Pro;
+   toccati senza Pro aprono il paywall (`ProGate`).
+4. **Preferiti** (righe con miniatura del QR, titolo), «Vedi tutti» → `/saved`.
+5. **Recenti**: gli ultimi 5; sotto, nel piano gratuito, la riga «La cronologia gratuita tiene
+   gli ultimi 5 QR» con link al Pro. «Vedi tutta» → `/history`.
+Stato vuoto: illustrazione e una riga «Condividi un link o un testo da qualunque app e scegli QR Me».
+⚑ Questa riga e' **la spiegazione dell'app**: chi la apre dall'icona deve capire che il modo
+giusto di usarla e' dalla condivisione.
+
+**`QrDisplayPage`** — IL motivo dell'app:
+- QR il piu' grande possibile: lato = `min(larghezza, altezza disponibile) - 2*16`, centrato, con la
+  **zona di rispetto bianca** (4 moduli) sempre presente anche con sfondo colorato (si disegna un
+  bordo del colore di sfondo dello stile, mai trasparente).
+- All'apertura `ScreenBoost.enable()`: luminosita' dell'app a 1.0 e wakelock; `disable()` in
+  `dispose` **e** quando l'app va in pausa (`AppLifecycleListener.onHide`) e si riattiva al ritorno.
+  ☠ Se si ripristinasse solo in `dispose`, uscendo con il tasto Home il telefono resterebbe a
+  luminosita' piena finche' non si riapre l'app.
+- Sotto il QR: titolo e contenuto in chiaro (max 3 righe, tocca per espandere). Per il Wi-Fi la
+  password e' **nascosta** (••••) con l'occhio per mostrarla: il QR si mostra a un ospite, la
+  password scritta sotto non deve leggerla chi passa.
+- Barra azioni: **Salva** (preferito; oltre il limite → paywall), **Stile** (`/style`, Pro),
+  **Condividi immagine** (Pro, `imageExport`), **Copia testo**, e se e' un preferito **Modifica**
+  (moduli speciali, Pro).
+- Tema: in tema scuro la pagina resta scura, ma il **riquadro del QR ha sempre il suo sfondo**
+  (bianco, o il colore di sfondo dello stile) con la zona di rispetto: abbaglia meno di una pagina
+  tutta bianca e la fotocamera trova comunque il bordo chiaro di cui ha bisogno.
+
+**`ScanPage`**: `MobileScanner` a tutto schermo con mirino disegnato, `formats: [BarcodeFormat.qrCode]`
+(⚑ solo QR: i codici a barre dei prodotti non sono il mestiere dell'app e farebbero scattare letture
+accidentali), torcia, **Da immagine** (image_picker → `controller.analyzeImage(path)`).
+Alla prima lettura valida: vibrazione leggera, si ferma lo scanner, `/scan/result`.
+Permesso negato → `MicroEmptyState` con «Apri le impostazioni» (e il bottone Da immagine resta
+usabile: non serve la fotocamera).
+
+**`ScanResultPage`**: tipo riconosciuto (icona + etichetta), contenuto leggibile, azioni secondo il
+tipo: link → **Apri** (url_launcher, `LaunchMode.externalApplication`) e Copia; telefono → Chiama;
+email → Scrivi; SMS → Manda; Wi-Fi → rete e password con **Copia password** (⚑ connettersi
+programmaticamente non si fa: su Android 10+ serve un'API di suggerimento con conferma di sistema e
+su iOS un'entitlement Hotspot; la fotocamera di sistema lo fa gia' meglio); contatto → campi con
+Copia. Sempre: **Mostra come QR** (`/show`, gratis), **Rigenera con stile** (`/style`, Pro),
+**Salva**. La lettura entra in cronologia con `source: scanned`/`image` (se la cronologia e' accesa).
+⚑ Un link letto **non si apre mai da solo**: si mostra prima, con il dominio in evidenza. Un QR
+puo' portare ovunque.
+
+**`FormPage`** (Pro): un modulo per tipo, validazione in linea, anteprima del QR dal vivo in alto.
+Wi-Fi: SSID (obbligatorio), password (obbligatoria se non «nessuna»), sicurezza (WPA / WEP /
+nessuna), nascosta. Contatto: nome (obbligatorio), telefono, email, azienda, sito, nota. Email: a
+(obbligatorio, formato email), oggetto, testo. SMS: numero (obbligatorio), testo. Telefono: numero.
+«Mostra QR» salva in cronologia con `source: form` e apre `/qr/:id`.
+
+**`StylePage`** (Pro): anteprima grande in alto (`QrRenderer.widget`), sotto: colore primo piano e
+sfondo (12 colori preimpostati + campo esadecimale), forma moduli, forma occhi, **Logo**
+(`LogoPicker`: Nessuno / Foto / Icona / Testo), avvisi di contrasto (`Contrast`), e la riga di
+**verifica** («✓ Leggibile» / «⚠ Non riesco a leggerlo»), ricalcolata 600 ms dopo l'ultima modifica.
+«Applica» salva lo stile sul QR (se e' in cronologia o preferito) o torna a `/show` con lo stile.
+
+**`SettingsPage`**: Cronologia (interruttore, «Cancella la cronologia» con conferma), Pro, Dati
+(backup Pro, ripristino gratis; `data_section.dart` come Film Tracker), tema, informazioni,
+informativa privacy.
+
+#### F17.1.7 — Servizi (`lib/services/`)
+
+```dart
+class QrRenderer {
+  const QrRenderer();
+  Widget widget({required String payload, required QrStyle style, required double size, ImageProvider? logo});
+  /// PNG quadrato di [pixels] lato, zona di rispetto inclusa, per condivisione e verifica.
+  Future<Uint8List> png({required String payload, required QrStyle style, int pixels = 1024, ui.Image? logo});
+  QrErrorLevel levelFor(String payload, QrStyle style);   // F17.1.3: M o H, ripiego L
+}
+```
+Usa `QrImageView` per il widget e `QrPainter(...).toImageData(pixels, format: ui.ImageByteFormat.png)`
+per il PNG, **con gli stessi parametri** (eyeStyle, dataModuleStyle, embeddedImage,
+embeddedImageStyle con lato = 22% del QR). ⚑ Un solo punto che traduce `QrStyle` nei parametri di
+qr_flutter: se widget e PNG li traducessero separatamente, l'immagine condivisa prima o poi
+differirebbe da quella vista.
+
+```dart
+class LogoRenderer {
+  /// Il logo come immagine quadrata con un "piatto" del colore di sfondo e margine del 12%:
+  /// senza piatto i moduli sotto il logo si vedono a pezzi e la fotocamera si confonde.
+  Future<ui.Image> render(QrLogo logo, {required int backgroundArgb, required int sizePx, required ImageStore images});
+}
+```
+`TextLogo` e `IconLogo` si disegnano con `PictureRecorder` + `TextPainter` (le icone sono testo nel
+font MaterialIcons); `PhotoLogo` si legge da `ImageStore`, ritagliata quadrata al centro (o
+rotonda) quando la si importa, una volta sola, a 512 px.
+
+```dart
+class ReadabilityCheck {
+  ReadabilityCheck(this._scanner);
+  /// Genera il PNG, lo scrive in un file temporaneo, lo rilegge con MobileScannerController.analyzeImage
+  /// e confronta il rawValue con il payload. true solo se coincide esattamente.
+  Future<bool> isReadable({required String payload, required QrStyle style});
+}
+```
+⚑ E' la difesa vera contro i QR «carini ma illeggibili»: le regole di contrasto sono euristiche,
+questo e' il test. ☠ Su emulatore/simulatore `analyzeImage` puo' non essere disponibile: in quel
+caso il risultato e' «non verificato» (grigio), **non** «illeggibile».
+
+```dart
+class ScreenBoost {
+  Future<void> enable();   // ScreenBrightness.instance.setApplicationScreenBrightness(1.0) + WakelockPlus.enable()
+  Future<void> disable();  // ScreenBrightness.instance.resetApplicationScreenBrightness() + WakelockPlus.disable()
+}
+```
+Errori dei plugin **ingoiati e loggati** (`MicroLog`): un telefono che non permette di cambiare la
+luminosita' deve comunque mostrare il QR.
+
+```dart
+class ShareRouter {
+  /// SharedText → QrDecoder.decode → /show (source: shared). SharedImage → analyzeImage → /scan/result
+  /// (o messaggio «Nessun QR in questa immagine»). Piu' elementi: si prende il primo testo, poi la prima immagine.
+  Future<void> handle(SharedPayload payload, GoRouter router);
+}
+class ContentActions {
+  Future<bool> open(QrContent content);   // url_launcher; false se nessuna app sa aprirlo → snack
+}
+```
+
+#### F17.1.8 — Condivisione verso l'app (F17.2b, `packages/micro_share/`)
+
+```dart
+// packages/micro_share/lib/src/shared_payload.dart
+sealed class SharedPayload { const SharedPayload(); }
+final class SharedText  extends SharedPayload { const SharedText(this.text); final String text; }   // testo E link (un URL arriva come testo)
+final class SharedImage extends SharedPayload { const SharedImage(this.path); final String path; } // file locale gia' copiato
+
+// packages/micro_share/lib/src/share_inbox.dart
+abstract interface class ShareInbox {
+  /// Cio' che ha aperto l'app (app chiusa). Va letto una volta all'avvio; poi reset().
+  Future<List<SharedPayload>> initial();
+  /// Cio' che arriva mentre l'app e' aperta.
+  Stream<List<SharedPayload>> get incoming;
+  Future<void> reset();
+}
+class FakeShareInbox implements ShareInbox { … }          // per i test delle app
+
+// packages/micro_share/lib/src/rsi_share_inbox.dart
+class RsiShareInbox implements ShareInbox { … }          // ReceiveSharingIntent.instance.getInitialMedia()/getMediaStream()/reset()
+```
+
+⚑ **Perche' un package separato e non `micro_core`**: `receive_sharing_intent` e' un plugin
+nativo con configurazione iOS (estensione, App Group). Messo in `micro_core` finirebbe in **tutte**
+le app, comprese TrashCan & co. gia' pubblicate, che non lo configurano. Le app che ricevono
+condivisioni (F16, F17, F18, F19) dipendono da `micro_share`, le altre no.
+⚑ **Perche' un'interfaccia**: le pagine si testano con `FakeShareInbox`, senza piattaforma.
+
+**Android** (`apps/qr_me/android/app/src/main/AndroidManifest.xml`, sulla `MainActivity`):
+`android:launchMode="singleTask"` e due intent-filter `ACTION_SEND` per `text/plain` e `image/*`.
+☠ **Niente `READ_EXTERNAL_STORAGE`** anche se il README del plugin lo elenca: le immagini condivise
+arrivano come `content://` con permesso temporaneo concesso dal mittente; il permesso di storage su
+Play richiede una giustificazione e non serve. Da **verificare** in F17.2b con una condivisione
+vera da Galleria e da Chrome; solo se fallisce si rivede.
+
+**iOS**: target **ShareExtension** creato da `tool/aggiungi_share_extension_ios.rb apps/qr_me
+ShareExtension group.com.smp.qrme` (idempotente, sul modello di `aggiungi_widget_ios.rb`: stesso
+`IPHONEOS_DEPLOYMENT_TARGET` del Runner, «Embed Foundation Extensions» **prima** di «Thin Binary»,
+entitlements con l'App Group, `CUSTOM_GROUP_ID` nei build settings di entrambi i target).
+`ShareViewController: RSIShareViewController` con `shouldAutoRedirect() -> true` (apre subito
+l'app, nessuna schermata intermedia). Info.plist dell'estensione: `NSExtensionActivationRule` con
+`NSExtensionActivationSupportsText`, `NSExtensionActivationSupportsWebURLWithMaxCount = 1`,
+`NSExtensionActivationSupportsImageWithMaxCount = 1`; `AppGroupId = $(CUSTOM_GROUP_ID)`. Runner:
+`AppGroupId` e lo schema `ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)` in `CFBundleURLTypes`.
+☠ L'estensione apre l'app host con uno schema URL: e' lo stesso meccanismo di tutte le app
+«condividi verso», ma Apple lo tollera senza documentarlo. **Va provato su iPad vero via TestFlight
+prima di considerare F17.2b chiusa**; se una versione di iOS lo rompe, il ripiego (deciso ora) e'
+un'estensione che **mostra il QR da sola** in SwiftUI con `CIQRCodeGenerator`, senza aprire l'app.
+
+#### F17.1.9 — Pro (`lib/app/feature_limits.dart`, `paywall_config.dart`)
+
+```dart
+const Map<FeatureKey, FeatureLimit> qrFeatureLimits = {
+  FeatureKey.fullHistory: FeatureLimit.count(freeMax: 5),
+  FeatureKey.unlimitedEntities: FeatureLimit.count(freeMax: 1),
+  FeatureKey.customCategories: FeatureLimit.locked(),
+  FeatureKey.themeCustomization: FeatureLimit.locked(),
+  FeatureKey.imageExport: FeatureLimit.locked(),
+  FeatureKey.backupRestore: FeatureLimit.locked(),
+  // tutte le altre chiavi: FeatureLimit.open() — esplicite, il test di coerenza le vuole tutte
+};
+```
+Prezzi: App Store **1,99 €** (base Italia); Play **1,63 EUR** di base senza IVA (1,99 / 1,22).
+Paywall: quattro righe — «Stile: colori e logo nel QR», «Wi-Fi, contatti, email, SMS e telefono»,
+«Preferiti e cronologia senza limite», «Condividi il QR come immagine» — piu' «Backup».
+**F17.2a** aggiunge `FeatureKey.imageExport` a `micro_core` («Esportare un contenuto generato
+come immagine») e una riga `FeatureKey.imageExport: FeatureLimit.open()` nelle mappe di TrashCan,
+Full Freezer, Scorte Calore e Film Tracker: i loro `paywall_config_test` vogliono **tutte** le
+chiavi mappate (`expect(<mappa>.keys.toSet(), FeatureKey.values.toSet())`) e senza quella riga
+diventano rossi. Nessun cambiamento di comportamento per loro.
+
+#### F17.1.10 — Permessi e privacy
+
+| Piattaforma | Permesso | Quando |
+|---|---|---|
+| Android | `CAMERA` (dichiarato da mobile_scanner) | alla prima apertura di `/scan` |
+| iOS | `NSCameraUsageDescription` («Per leggere i QR con la fotocamera.» / «To read QR codes with the camera.») | idem |
+| iOS | `NSPhotoLibraryUsageDescription` (richiesto da image_picker anche col picker di sistema) | idem per il logo e «Da immagine» |
+| Android | `<queries>` per `https`, `tel`, `mailto`, `smsto` (url_launcher su Android 11+) | — |
+
+Informativa: nessun dato esce dal telefono (come le altre app; su Android solo il server licenze
+per il Pro). ☠ **ML Kit** (Android): Google dichiara che le API di ML Kit possono inviare metriche
+d'uso anonime. Va verificato in F17.2 su quali dati e come si spengono; se non si spengono, va
+detto nell'informativa e nella Data safety di Play, oppure si passa a uno scanner ZXing puro
+(`flutter_zxing`). La scelta si scrive in `memory/decisioni.md` **prima** di pubblicare.
+
+#### F17.1.11 — Trappole note in anticipo
+
+1. **Escape del Wi-Fi** (F17.1.3): test con SSID e password contenenti `; , : " \`.
+2. **Luminosita'** ripristinata anche in pausa (F17.1.6).
+3. **ML Kit** e privacy (F17.1.10).
+4. **Logo che copre troppo**: lato fisso al 22% e livello H; la `ReadabilityCheck` e' la prova.
+5. **Doppia apertura da condivisione**: con l'app aperta, `incoming` e `initial` possono consegnare
+   lo stesso elemento: `reset()` subito dopo aver letto `initial()`, e `ShareRouter` ignora un
+   payload identico arrivato entro 2 secondi.
+6. **Deep link di Flutter spento** (`FlutterDeepLinkingEnabled = false` su iOS,
+   `flutter_deeplinking_enabled = false` su Android): lo schema `ShareMedia-…` lo gestisce il plugin,
+   non go_router. Se go_router lo ricevesse cercherebbe una rotta e mostrerebbe «Non trovato».
+7. **Testi lunghi condivisi** (un articolo intero): si controlla `QrCapacity` **prima** di
+   disegnare; messaggio chiaro invece di un'eccezione di qr_flutter (`InputTooLongException`).
+
+#### F17.1.12 — Test da scrivere
+
+| File | Cosa dimostra |
+|---|---|
+| `test/domain/qr_encoder_test.dart` | ogni codifica esattamente come in tabella, escape Wi-Fi e vCard, link senza schema |
+| `test/domain/qr_decoder_test.dart` | riconoscimento di tutti i prefissi, MECARD/MATMSG/sms:, testo come ripiego, **round-trip** su ogni tipo |
+| `test/domain/qr_capacity_test.dart` | limiti per livello, UTF-8 multibyte (emoji contano 4 byte) |
+| `test/domain/qr_style_test.dart` | JSON tollerante, `isPlain`, id delle icone stabili |
+| `test/domain/contrast_test.dart` | nero/bianco 21, grigi simili < 3, inversione |
+| `test/data/qr_repository_test.dart` | niente doppioni in cronologia, potatura a 5 che non tocca i preferiti, cronologia spenta = nessuna scrittura, cancellazione logo orfano |
+| `test/data/qr_backup_test.dart` | round-trip del backup con un logo foto |
+| `test/services/share_router_test.dart` | testo → `/show`, link → UrlContent, immagine senza QR → messaggio, doppione entro 2 s ignorato (con `FakeShareInbox`) |
+| `test/widget/paywall_config_test.dart` | tutte le chiavi mappate, limiti come in F17.0 punto 6 |
+| `test/widget/display_page_test.dart` | password Wi-Fi nascosta, azioni Pro con lucchetto, `ScreenBoost` chiamato e ripristinato in pausa (finto) |
+| `test/widget/home_page_test.dart` | incolla → mostra, riga dei 5 recenti, chip dei moduli con badge Pro |
+| `packages/micro_share/test/shared_payload_test.dart` | conversione da `SharedMediaFile` (testo, url, immagine, misti) |
+
+### F17.2 — Ordine di lavoro (le sottofasi standard Fx.2–Fx.9 applicate)
+
+- **F17.2a** `FeatureKey.imageExport` in `micro_core` + una riga nelle quattro app; test di tutte verdi.
+- **F17.2b** `packages/micro_share/` + `tool/aggiungi_share_extension_ios.rb`.
+- **F17.2c** Bootstrap `apps/qr_me` (§8.T), icona e splash dall'originale del proprietario.
+- **F17.3** Dominio e dati con i test (F17.1.3, F17.1.4).
+- **F17.4** Interfaccia essenziale: home, display, scanner, risultato, moduli, stile, impostazioni;
+  provata sull'emulatore con condivisione vera (Chrome → QR Me, Galleria → QR Me).
+- **F17.5** Pro: limiti, paywall, test di coerenza.
+- **F17.6** Proposte grafiche (artifact con 2–3 direzioni), scelta del proprietario.
+- **F17.7** Test, rifinitura, iOS sul simulatore, verifica ML Kit (F17.1.10).
+- **F17.8** `apps/qr_me/codebase_reference.md` + `packages/micro_share/codebase_reference.md`, `verify_atlas`.
+- **F17.9** Rituale di fine fase, card «In arrivo» in vetrina (la pubblicazione la decide il
+  proprietario), branch **`v9.0.0`**.
+
+**Azioni del proprietario** (non si possono fare da qui):
+- [ ] icona in Download;
+- [ ] portale Apple: App ID `com.smp.qrme` e `com.smp.qrme.ShareExtension` con App Groups, gruppo
+  `group.com.smp.qrme` (serve da F17.2b per provare su iPad);
+- [ ] App Store Connect: l'app «QR Me» (o il ripiego di F17.0 punto 1) quando si arriva allo store;
+- [ ] License Server: riga `qrme` nella tabella `apps` e il suo segreto in `APP_SECRETS` (prima di Play).
 
 ---
 

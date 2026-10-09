@@ -37,7 +37,7 @@ vetrina da aggiungere.
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
 | Riassumilo | F16 | ⚪ non iniziata | ⚪ non iniziata |
-| Fammi un QR | F17 | ⚪ non iniziata | ⚪ non iniziata |
+| QR Me (ex Fammi un QR) | F17 | 🟡 in sviluppo dal 2026-10-09 (decisioni e specsheet fatte) | 🟡 in sviluppo |
 | Leggimelo | F18 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove porta? | F19 | ⚪ non iniziata | ⚪ non iniziata |
 
