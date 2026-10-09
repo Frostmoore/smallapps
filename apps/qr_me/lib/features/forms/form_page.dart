@@ -17,10 +17,10 @@ import '../../l10n/generated/app_localizations.dart';
 import '../common/neon.dart';
 import '../common/qr_actions.dart';
 import 'contact_form.dart';
+import 'contact_sources.dart';
 import 'email_form.dart';
-import 'phone_form.dart';
-import 'sms_form.dart';
 import 'wifi_form.dart';
+import 'wifi_sources.dart';
 
 /// I moduli speciali (Pro, `customCategories`; il `ProGate` e' sulla rotta): **una pagina
 /// sola**, un modulo per tipo, anteprima del QR dal vivo in alto (develop_microapps.md F17.1.6).
@@ -30,6 +30,13 @@ import 'wifi_form.dart';
 ///
 /// ⚑ «Mostra QR» registra in cronologia con `source: form` e apre `/qr/:id`; **con la
 /// cronologia spenta** apre `/show` dalla memoria, senza scrivere (F17.0 punto 7).
+///
+/// ⚑ **Dopo la prova su iPad (F17.10, supera F17.1.6 per i moduli nuovi)**: Wi-Fi e Contatto
+/// nuovi non partono dal modulo vuoto ma dalle loro **strade** ([WifiSources], [ContactSources]);
+/// il modulo compare solo dopo («La rete a cui sei connesso», un contatto scelto dalla rubrica)
+/// gia' compilato, o con «Inserisci a mano». Un QR di rete letto e la scheda «Io» vanno dritti al
+/// QR, senza modulo. L'Email precompilata resta un modulo (non c'e' niente da cui leggerla).
+/// La modifica di un preferito ([id]) apre sempre il modulo, come prima.
 class FormPage extends ConsumerStatefulWidget {
   const FormPage({required this.kind, this.id, super.key});
 
@@ -40,11 +47,44 @@ class FormPage extends ConsumerStatefulWidget {
   ConsumerState<FormPage> createState() => _FormPageState();
 }
 
+/// A che punto e' un modulo nuovo di Wi-Fi o Contatto (F17.10).
+enum _Stage {
+  /// Le strade ([WifiSources], [ContactSources]), senza modulo.
+  sources,
+
+  /// Il modulo gia' compilato da una strada (nome della rete letto, contatto della rubrica).
+  seeded,
+
+  /// Il modulo vuoto, «Inserisci a mano» (e sempre per Email e per la modifica).
+  manual,
+}
+
 class _FormPageState extends ConsumerState<FormPage> {
   QrContent? _content;
   QrCode? _row;
   bool _loading = false;
   bool _busy = false;
+
+  /// Wi-Fi e Contatto nuovi: hanno le strade (e quindi «Altri modi» sopra il modulo).
+  bool get _hasSources =>
+      widget.id == null && (widget.kind == QrKind.wifi || widget.kind == QrKind.contact);
+
+  /// Solo Wi-Fi e Contatto nuovi partono dalle strade; il resto (Email, modifica) dal modulo.
+  late _Stage _stage = _hasSources ? _Stage.sources : _Stage.manual;
+
+  /// Il contenuto con cui parte il modulo dopo una strada (o null: vuoto).
+  QrContent? _seed;
+
+  /// ⚑ Cambia a ogni strada: i moduli leggono i valori iniziali solo quando nascono, e una chiave
+  /// nuova li fa rinascere con quelli nuovi.
+  int _generation = 0;
+
+  void _open(_Stage stage, [QrContent? seed]) => setState(() {
+    _stage = stage;
+    _seed = seed;
+    _content = null;
+    _generation++;
+  });
 
   @override
   void initState() {
@@ -65,8 +105,10 @@ class _FormPageState extends ConsumerState<FormPage> {
     }
   }
 
-  Future<void> _submit() async {
-    final content = _content;
+  /// «Mostra QR» (o «Salva» in modifica). [direct]: un contenuto gia' completo che non passa dal
+  /// modulo (una rete letta da un QR, la scheda «Io»).
+  Future<void> _submit([QrContent? direct]) async {
+    final content = direct ?? _content;
     if (content == null || _busy) return;
     setState(() => _busy = true);
     final payload = QrEncoder.encode(content);
@@ -113,22 +155,54 @@ class _FormPageState extends ConsumerState<FormPage> {
         ),
       );
     }
-    final initial = _row?.content;
+    final title = Text(
+      widget.id == null ? kindName(l, widget.kind) : l.form_editTitle(kindName(l, widget.kind)),
+    );
+
+    if (_stage == _Stage.sources) {
+      return Scaffold(
+        appBar: AppBar(title: title),
+        body: ListView(
+          padding: MicroSpacing.page,
+          children: [
+            if (widget.kind == QrKind.wifi)
+              WifiSources(
+                onRead: (wifi) => unawaited(_submit(wifi)),
+                onConnected: (ssid) => _open(_Stage.seeded, WifiContent(ssid: ssid)),
+                onManual: () => _open(_Stage.manual),
+              )
+            else
+              ContactSources(
+                onPicked: (c) => _open(_Stage.seeded, c),
+                onMe: (c) => unawaited(_submit(c)),
+                onManual: () => _open(_Stage.manual),
+              ),
+          ],
+        ),
+      );
+    }
+
+    final initial = _row?.content ?? _seed;
     // ⚑ Una riga di un altro tipo (un `?id=` che punta a un testo) non si apre col modulo
     // sbagliato: si parte vuoti.
     final start = initial?.kind == widget.kind ? initial : null;
     void onChanged(QrContent? c) => setState(() => _content = c);
     final form = switch (widget.kind) {
       QrKind.wifi => WifiForm(
-        key: const ValueKey('form_wifi'),
+        key: ValueKey('form_wifi_$_generation'),
         initial: start as WifiContent?,
+        pasteHelp: _stage == _Stage.seeded,
         onChanged: onChanged,
       ),
-      QrKind.contact => ContactForm(initial: start as ContactContent?, onChanged: onChanged),
+      QrKind.contact => ContactForm(
+        key: ValueKey('form_contact_$_generation'),
+        initial: start as ContactContent?,
+        onChanged: onChanged,
+      ),
       QrKind.email => EmailForm(initial: start as EmailContent?, onChanged: onChanged),
-      QrKind.sms => SmsForm(initial: start as SmsContent?, onChanged: onChanged),
-      QrKind.phone => PhoneForm(initial: start as PhoneContent?, onChanged: onChanged),
-      QrKind.text || QrKind.url => const SizedBox.shrink(),
+      // ⚑ SMS e Telefono non hanno piu' un modulo (F17.10 punto 4): la rotta li rifiuta prima di
+      // arrivare qui (`formKindOf`). Testo e link non l'hanno mai avuto.
+      QrKind.sms || QrKind.phone || QrKind.text || QrKind.url => const SizedBox.shrink(),
     };
     final content = _content;
     final payload = content == null ? null : QrEncoder.encode(content);
@@ -137,14 +211,20 @@ class _FormPageState extends ConsumerState<FormPage> {
         ref.watch(qrRendererProvider).choose(payload, _row?.style ?? QrStyle.plain).tooLong;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.id == null ? kindName(l, widget.kind) : l.form_editTitle(kindName(l, widget.kind)),
-        ),
-      ),
+      appBar: AppBar(title: title),
       body: ListView(
         padding: MicroSpacing.page,
         children: [
+          if (_hasSources)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const ValueKey('form_otherWays'),
+                onPressed: () => _open(_Stage.sources),
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: Text(l.form_otherWays),
+              ),
+            ),
           Center(
             child: _Preview(payload: tooLong ? null : payload, row: _row),
           ),

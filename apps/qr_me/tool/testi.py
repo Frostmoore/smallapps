@@ -38,7 +38,9 @@ TESTI = {
     'kind_url': ('Link', 'Link'),
     'kind_wifi': ('Wi-Fi', 'Wi-Fi'),
     'kind_contact': ('Contact', 'Contatto'),
-    'kind_email': ('Email', 'Email'),
+    # ⚑ «Email precompilata» e non «Email» (F17.10 punto 3): il modulo crea un QR che apre
+    # un'email gia' scritta, non un modo di condividere il proprio indirizzo.
+    'kind_email': ('Pre-filled email', 'Email precompilata'),
     'kind_sms': ('SMS', 'SMS'),
     'kind_phone': ('Phone', 'Telefono'),
 
@@ -66,18 +68,21 @@ TESTI = {
     'paywall_benefitStyleTitle': ('Colours and a logo in the QR code', 'Stile: colori e logo nel QR'),
     'paywall_benefitStyleBody': ('Your colours, round dots and eyes, and a photo, an icon or an emoji in the middle.',
                                  'I tuoi colori, puntini ed occhi rotondi, e una foto, un’icona o un’emoji al centro.'),
-    'paywall_benefitFormsTitle': ('Wi-Fi, contacts, email, SMS and phone', 'Wi-Fi, contatti, email, SMS e telefono'),
-    'paywall_benefitFormsBody': ('Fill in a form: guests join your Wi-Fi or save your contact just by pointing their camera.',
-                                 'Compili un modulo: gli ospiti entrano nel tuo Wi-Fi o salvano il tuo contatto solo inquadrando.'),
+    # ⚑ Da F17.10: niente piu' SMS e telefono, e niente «compili un modulo» (il Wi-Fi si legge dal
+    # suo QR o dal telefono, il contatto dalla rubrica).
+    'paywall_benefitFormsTitle': ('Wi-Fi, contacts and pre-filled emails', 'Wi-Fi, contatti ed email precompilate'),
+    'paywall_benefitFormsBody': ('Your Wi-Fi from its QR code or from the phone, a contact from your address book: guests join or save you just by pointing their camera.',
+                                 'Il Wi-Fi dal suo QR o dal telefono, un contatto dalla rubrica: gli ospiti entrano o ti salvano solo inquadrando.'),
     'paywall_benefitFavoritesTitle': ('Unlimited favourites', 'Preferiti senza limite'),
     'paywall_benefitFavoritesBody': ('Keep every QR code you use often, each with its own name.',
                                      'Tieni ogni QR che usi spesso, ognuno con il suo nome.'),
     'paywall_benefitHistoryTitle': ('Unlimited history', 'Cronologia senza limite'),
     'paywall_benefitHistoryBody': ('Every QR code you show or read, from now on. The free history keeps the last 5.',
                                    'Ogni QR che mostri o leggi, da adesso in poi. Quella gratuita tiene gli ultimi 5.'),
-    'paywall_benefitImageTitle': ('Share the QR code as a picture', 'Condividi il QR come immagine'),
-    'paywall_benefitImageBody': ('A sharp image to send in a chat, print or put on a poster.',
-                                 'Un’immagine nitida da mandare in chat, stampare o mettere su un cartello.'),
+    # ⚑ Stessa chiave `imageExport` per immagine ed etichetta (F17.10 punto 5): una riga sola.
+    'paywall_benefitImageTitle': ('Share the QR code as a picture or as a printable label', 'Condividi il QR come immagine o come etichetta da stampare'),
+    'paywall_benefitImageBody': ('A sharp image to send in a chat, or a label with your text underneath, ready for the printer.',
+                                 'Un’immagine nitida da mandare in chat, o un’etichetta con il tuo testo sotto, pronta per la stampante.'),
     'paywall_benefitBackupTitle': ('Backup and new phone', 'Backup e telefono nuovo'),
     'paywall_benefitBackupBody': ('Favourites, history and logos in one file, to keep or move to a new phone.',
                                   'Preferiti, cronologia e loghi in un file, da tenere o portare su un telefono nuovo.'),

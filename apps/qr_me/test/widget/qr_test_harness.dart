@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
+import 'package:pdf/pdf.dart';
 import 'package:qr_me/app/entitlement.dart';
 import 'package:qr_me/app/feature_limits.dart';
 import 'package:qr_me/app/providers.dart';
@@ -19,8 +21,12 @@ import 'package:qr_me/data/qr_repository.dart';
 import 'package:qr_me/domain/qr_content.dart';
 import 'package:qr_me/domain/qr_style.dart';
 import 'package:qr_me/l10n/generated/app_localizations.dart';
+import 'package:qr_me/services/contact_picker.dart';
+import 'package:qr_me/services/label_output.dart';
 import 'package:qr_me/services/readability_check.dart';
 import 'package:qr_me/services/screen_boost.dart';
+import 'package:qr_me/services/wifi_name_reader.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// I doppi finti e il montaggio delle pagine di QR Me per i test di widget.
 ///
@@ -169,6 +175,61 @@ class FakeReadabilityCheck extends ReadabilityCheck {
   }
 }
 
+/// Il nome della rete finto (F17.10): risponde [result] e conta le richieste di permesso.
+class FakeWifiNameReader implements WifiNameReader {
+  FakeWifiNameReader(this.result, {this.needs = true});
+
+  WifiNameLookup result;
+
+  /// Se serve ancora il permesso (e quindi la spiegazione prima).
+  bool needs;
+  int lookups = 0;
+
+  @override
+  Future<bool> needsPermission() async => needs;
+
+  @override
+  Future<WifiNameLookup> lookup() async {
+    lookups++;
+    return result;
+  }
+}
+
+/// Il selettore dei contatti finto: restituisce [contact] (null = annullato) o lancia.
+class FakeContactPicker implements ContactPicker {
+  FakeContactPicker(this.contact, {this.fails = false});
+
+  ContactContent? contact;
+  bool fails;
+  int picks = 0;
+
+  @override
+  Future<ContactContent?> pick() async {
+    picks++;
+    if (fails) throw StateError('finto');
+    return contact;
+  }
+}
+
+/// Stampa e condivisione finte dell'etichetta: registrano cosa e' uscito.
+class FakeLabelOutput implements LabelOutput {
+  final List<({Uint8List png, String title})> shared = [];
+  final List<({String name, Future<Uint8List> Function(PdfPageFormat) buildPdf})> printed = [];
+
+  @override
+  Future<bool> printPdf({
+    required Future<Uint8List> Function(PdfPageFormat page) buildPdf,
+    required String name,
+  }) async {
+    printed.add((name: name, buildPdf: buildPdf));
+    return true;
+  }
+
+  @override
+  Future<void> sharePng({required Uint8List png, required String title}) async =>
+      shared.add((png: png, title: title));
+}
+
 class FakeEntitlementNotifier extends EntitlementNotifier {
   FakeEntitlementNotifier(this._fake);
 
@@ -196,13 +257,25 @@ class FixedHistoryNotifier extends HistoryEnabledNotifier {
 
 /// Cio' che i test leggono dopo il montaggio.
 class QrHarness {
-  QrHarness({required this.repo, required this.boost, required this.reader, required this.router});
+  QrHarness({
+    required this.repo,
+    required this.boost,
+    required this.reader,
+    required this.router,
+    required this.settings,
+  });
 
   final FakeQrRepository repo;
   final FakeScreenBoost boost;
   final FakeQrReader reader;
   final GoRouter? router;
+
+  /// Le preferenze vere di micro_core sopra `SharedPreferences` finte (la scheda «Io», F17.10).
+  final SettingsStore settings;
 }
+
+/// Il namespace delle preferenze nei test (in produzione e' `appId`).
+const String kTestSettingsNamespace = 'qrme_test';
 
 /// Monta [page] (o le [routes]) in italiano, tema scuro «A · Neon», con i doppi finti.
 Future<QrHarness> pumpQr(
@@ -215,6 +288,7 @@ Future<QrHarness> pumpQr(
   List<QrCode>? rows,
   FakeQrReader? reader,
   ReadabilityCheck? readability,
+  Map<String, String> settingsValues = const {},
   List<Override> extra = const [],
 }) async {
   assert((page == null) != (routes == null), 'o una pagina o le rotte');
@@ -223,6 +297,15 @@ Future<QrHarness> pumpQr(
   final repo = FakeQrRepository(db, rows: rows);
   final boost = FakeScreenBoost();
   final fakeReader = reader ?? FakeQrReader();
+  // ⚑ Preferenze vere (SettingsStore) su SharedPreferences finte: [settingsValues] con le chiavi
+  // senza namespace, come le scrive l'app (`QrSettingKeys`).
+  SharedPreferences.setMockInitialValues({
+    for (final e in settingsValues.entries) '$kTestSettingsNamespace.${e.key}': e.value,
+  });
+  final settings = SettingsStore.withPreferences(
+    await SharedPreferences.getInstance(),
+    namespace: kTestSettingsNamespace,
+  );
   const sku = 'qrme_pro_lifetime';
   final service = EntitlementService(
     appId: 'qrme',
@@ -258,6 +341,7 @@ Future<QrHarness> pumpQr(
     ProviderScope(
       overrides: [
         repositoryProvider.overrideWithValue(repo),
+        settingsProvider.overrideWithValue(settings),
         appPathsProvider.overrideWithValue(AppPaths.underRoot(tmp)),
         featureGateProvider.overrideWithValue(FeatureGate(limits: qrFeatureLimits, isPro: pro)),
         isProProvider.overrideWithValue(pro),
@@ -288,7 +372,13 @@ Future<QrHarness> pumpQr(
     ),
   );
   await tester.pumpAndSettle();
-  return QrHarness(repo: repo, boost: boost, reader: fakeReader, router: router);
+  return QrHarness(
+    repo: repo,
+    boost: boost,
+    reader: fakeReader,
+    router: router,
+    settings: settings,
+  );
 }
 
 /// Una rotta che registra l'`extra` ricevuto e mostra un testo riconoscibile.

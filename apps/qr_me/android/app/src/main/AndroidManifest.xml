@@ -22,6 +22,18 @@
          fusione, build/app/outputs/logs/manifest-merger-*-report.txt) anche dopo averla tolta:
          va rimossa esplicitamente, o ricompare nell'APK (visto il 2026-10-09). -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- F17.10, «La rete a cui sei connesso» del modulo Wi-Fi: da Android 10 il nome della rete
+         (WifiManager.connectionInfo, network_info_plus) arriva solo con la posizione PRECISA
+         concessa e la localizzazione accesa; senza, il sistema risponde "<unknown ssid>".
+         ⚑ COARSE accanto a FINE: da Android 12 un'app che chiede la precisa deve chiedere anche
+         l'approssimativa (permission_handler le chiede insieme), e l'utente sceglie nel dialogo.
+         Si chiede solo al tocco del bottone, dopo una spiegazione. QR Me non usa ne' salva la
+         posizione. ACCESS_WIFI_STATE e ACCESS_NETWORK_STATE li dichiara network_info_plus. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- ⚑ Il GPS non e' obbligatorio: la posizione serve solo al nome della rete, e Play non
+         deve nascondere l'app ai dispositivi senza GPS (lo deduce dal permesso FINE). -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
     <!-- ⚑ La fotocamera non e' obbligatoria: senza, l'app crea QR e li legge da un'immagine. Il
          plugin la dichiara richiesta (default di uses-feature), e Play nasconderebbe l'app ai
          dispositivi senza fotocamera. -->

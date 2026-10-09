@@ -1157,6 +1157,15 @@ volta sola; nella fase di ciascuna app si spuntano.
   - [x] **F17.8** Atlanti di `apps/qr_me` e `packages/micro_share` — FATTO il 2026-10-09: `apps/qr_me/codebase_reference.md` (~1800 righe alla rilettura, ~1970 con le correzioni sotto); `verify_atlas` **0 mancanti** per `apps/qr_me` e `packages/micro_core`; firme confrontate a macchina (380 frammenti estratti dall'atlante, 277 identici al codice, il resto chiamate o frammenti descrittivi verificati a mano). **Difetti trovati rileggendo e corretti** (27 test nuovi, 182 verdi, `analyze` pulito, `build apk --debug` ok): (1) «Rigenera con stile» dal risultato della lettura ignorava lo stile — ora `ScanResultPage._style` e `/show` con lo stile applicato; (2) `QrCodeToDomain.content` con campi sbagliati — **falso allarme** (gia' ripiegava), commento esplicito e 9 test di guardia; (3) `ContentActions.open` con `uriFor` fuori dal try — spostato dentro, non lancia mai; (4) testo condiviso/scritto ricodificato perdeva i campi (vCard con ADR, MECARD) — `QrEncoder.payloadOfTyped`, il testo tal quale; (5) commenti superati in `locale_resolution.dart` (codice giusto, commento rovesciato; le altre app hanno ancora il commento vecchio), `flutter_native_splash.yaml`, `pubspec.yaml`; (6) tolti i non usati: rotta `/pro`, `favoriteCountProvider` (+ `watchFavoriteCount`), chiavi `common_optional`, `show_title`, `form_title`; (7) Android: «Apri le impostazioni» con il permesso fotocamera negato via `MethodChannel` nostro in `MainActivity.kt` (nessuna dipendenza nuova), piu' «Riprova». Aggiornati anche l'atlante di `micro_share` (DT-S1 chiuso, trappole `compileSdk 37` e US-ASCII) e F17.2b qui
   - [x] **F17.9** Rituale di fine fase, card «In arrivo», branch `v9.0.0` — FATTO il 2026-10-09: card «In arrivo» pubblicata su smpmicroapps.it col via del proprietario (siti critici a 200 prima e dopo), piano, atlanti (QR Me, micro_share, micro_core, sito), StatusMicroApps, README e decisioni aggiornati, documenti nel Projects Tracker (progetto 17), branch `v9.0.0`
 
+  - [~] **F17.10** Revisione del proprietario dopo la prova su iPad (§8 F17.10): Wi-Fi da QR letto o dalla rete connessa, Contatto dalla rubrica o «Io», «Email precompilata» con testo grande, via SMS e Telefono, Pro «Genera etichetta»; poi store rifatto con la build 1.0.0 (2)
+    - [x] **F17.10.1** Wi-Fi senza compilare a mano — FATTO il 2026-10-09: `/form/wifi` nuovo parte da `WifiSources` (`lib/features/forms/wifi_sources.dart`) con tre strade e «Inserisci a mano» in fondo, piccolo. (1) «Inquadra il QR della rete» → `/scan/wifi` = `ScanPage(wifiOnly: true)`, che torna (`pop`) con il `WifiContent` letto e a un QR non di rete dice «Questo QR non è di una rete Wi-Fi» e continua a inquadrare; (2) «Da un'immagine» → `pickImageProvider` + `QrImageReader`, la rete fra piu' QR con `QrDecoder.firstWifi`; senza rete: messaggio, nessun salvataggio; (3) «La rete a cui sei connesso» → `WifiNameReader` (`lib/services/wifi_name_reader.dart`: `network_info_plus` + `permission_handler`), spiegazione **prima** del dialogo del sistema, permesso solo al tocco; nome letto → `WifiForm(pasteHelp: true)` con «Incolla la password» grande e le istruzioni iPhone/Android; nome non letto (negato, negato per sempre con «Apri le impostazioni», localizzazione spenta, non disponibile/simulatore) → riquadro con il perche' e «Inserisci a mano». QR letto → salvato e mostrato subito (`/qr/:id`), poi Stile come sempre. Android: `ACCESS_FINE_LOCATION` + `ACCESS_COARSE_LOCATION` + `uses-feature gps required=false`; iOS: `NSLocationWhenInUseUsageDescription` in Info.plist e InfoPlist.strings it/en. ☐ **iOS**: entitlement `com.apple.developer.networking.wifi-info` (capability «Access Wi-Fi Information» sull'App ID, profilo rigenerato) — lo aggiunge il proprietario/orchestratore; senza, su iPhone il nome non si legge e compare il riquadro «non riesco a leggere»
+    - [x] **F17.10.2** Contatto dalla rubrica o «Io» — FATTO il 2026-10-09: `ContactSources` (`lib/features/forms/contact_sources.dart`): «Scegli dalla rubrica» con `ContactPicker` (`flutter_native_contact_picker` 0.0.12, selettore di sistema, **nessun permesso contatti**; da' nome e telefono, l'email si aggiunge nel modulo che si apre gia' compilato); «Io» → scheda salvata una volta nelle preferenze (`myContactProvider`, chiave `QrSettingKeys.myContact`) e riusata: QR subito; la prima volta apre `/me` (`MyContactPage`, Pro `customCategories`: scelta dalla rubrica o compilata, «Salva», «Elimina»), modificabile dalla matita nel modulo e dalle Impostazioni (riga «La mia scheda» nella sezione Moduli). Provato sull'emulatore con un contatto vero nella rubrica (il selettore e' FLAG_SECURE: screenshot neri, navigato con `uiautomator dump`)
+    - [x] **F17.10.3** «Email precompilata» — FATTO: `kind_email` = «Email precompilata» / «Pre-filled email» (chip, titolo, righe), testo con `minLines: kEmailBodyMinLines` (6), `maxLines: null`, etichetta in alto (`alignLabelWithHint`)
+    - [x] **F17.10.4** Via i moduli SMS e Telefono — FATTO: `kFormKinds = [wifi, contact, email]`, `sms_form.dart`/`phone_form.dart` cancellati, chiavi `sms_number`/`sms_body`/`phone_number` tolte; `formKindOf('sms'|'phone')` → null («Non trovato»); lettura invariata (decoder, «Manda SMS»/«Chiama»), i preferiti SMS/Telefono gia' salvati si mostrano senza «Modifica»
+    - [x] **F17.10.5** Pro «Genera etichetta» — FATTO: azione «Etichetta» (`action_label`, icona stampante, lucchetto senza Pro) nella barra della pagina del QR (non nella griglia: una sesta azione stringeva le etichette sotto i 60 dp e una seconda riga rubava altezza al QR); `/label` = `LabelPage` dietro `ProGate(imageExport)`, `openLabel` controlla il Pro prima; `LabelPainter`/`LabelRenderer` (`lib/services/label_renderer.dart`): un solo disegno per anteprima, PNG (1200 px di larghezza) e PDF (etichetta alla misura vera, 70×70 mm quadrata o 60×90 mm rettangolare, in alto al centro del foglio scelto, filo grigio per ritagliare); testo di partenza = titolo del QR, 1-2 righe che si rimpiccioliscono, colore del QR; «Stampa» con `printing` (dialogo di sistema), «Condividi immagine» con `share_plus` (`LabelOutput`). `QrRenderer.paintSquare` nuovo (anche `png` passa da li'). Paywall: «Condividi il QR come immagine o come etichetta da stampare» / «Share the QR code as a picture or as a printable label»; riga dei moduli aggiornata («Wi-Fi, contatti ed email precompilate»)
+    - [x] **F17.10.6** Testi e verifiche — FATTO: testi in `tool/testi.py` e `tool/testi_forms.py` → ARB (246 chiavi) → `gen-l10n`; nessun glifo ✓⚠✗. **228 test verdi** (+45: `wifi_sources_test.dart` 14, `contact_sources_test.dart` 10, `label_test.dart` 12, `form_page_test.dart` +5, `home_page_test.dart` +1, `display_page_test.dart` +3), `analyze` pulito, `build apk --debug` ok. Pacchetti controllati nel sorgente in pub cache (nessun SDK di analytics/telemetria/Firebase/ML Kit, nessuna rete): `network_info_plus` 8.2.1, `permission_handler` 12.0.1 (☠ **non** la 13: porta `permission_handler_android` 14 che vuole compileSdk 37 e il build falliva in `checkDebugAarMetadata`), `flutter_native_contact_picker` 0.0.12, `printing` 5.15.1, `pdf` 3.13.1. Manifest fuso: nuovi solo i permessi di posizione, `ACCESS_WIFI_STATE` e il `PrintFileProvider`; `datatransport` c'era gia' (Play Billing, F17.7.7). Provato sull'emulatore (Medium_Phone_API_35): spiegazione → permesso «mentre usi l'app» → **SSID «AndroidWifi» letto**, password incollata, QR; «Da un'immagine» con uno screenshot di un QR Wi-Fi (→ QR) e con un QR non di rete (→ messaggio); `/scan/wifi` con «Da immagine» (→ torna e mostra); contatto dalla rubrica (→ modulo compilato); «Io» compilata e salvata (→ QR, scheda nelle preferenze, riga nelle Impostazioni); Email precompilata con testo lungo; etichetta quadrata e rettangolare con testo su due righe, con stile e logo; «Stampa» (anteprima di stampa A4 con l'etichetta in alto) e «Condividi immagine» (foglio di sistema); testo al 130% e tema chiaro e scuro. ☐ Fotocamera dal vivo su un QR vero e tutto il giro su iPhone/iPad (permesso posizione, entitlement, selettore `CNContactPickerViewController`, `UIPrintInteractionController`)
+    - [ ] **F17.10.7** Store rifatto con la build 1.0.0 (2) (screenshot, grafiche e video senza SMS e Telefono) — altro passo
+
 **Ripresa F17 (stato al 2026-10-09, sera).** Il codice di QR Me e' completo: 182 test, analisi pulita, provato sull'emulatore Android (condivisione di testo e di immagini con QR veri, «Da immagine», moduli, stile con verifica di leggibilita', PNG, backup e ripristino, testo al 130%, tema chiaro) e sul simulatore iPhone (build con l'estensione di condivisione e ZXing, esclusione dal backup iCloud verificata). Lettura dei QR con **ZXing** su entrambe le piattaforme: ML Kit tolto per la regola «dati solo sul telefono». Restano:
   1. **Proprietario:** App ID `com.smp.qrme.ShareExtension` con App Groups → `group.com.smp.qrme` (fatti gia' `com.smp.qrme` e il gruppo). Poi profili via API e build su TestFlight.
   2. **Su iPad via TestFlight:** la condivisione da Safari deve riaprire l'app (se iOS lo impedisce: ripiego di F17.1.8, QR mostrato dall'estensione); lettura dal vivo con la fotocamera; eventuale avviso ITMS-90683 sul microfono al primo caricamento.
@@ -5339,7 +5348,9 @@ Prese con il proprietario prima di F17.1. Dove contraddicono le idee di §8 «F1
    gruppo `group.com.smp.qrme` (come fece per Scorte Calore). I profili si creano poi via API.
 3. **Contenuti**: testo e link (dalla condivisione, scritti o incollati) **piu' i moduli
    speciali** scelti dal proprietario: **Wi-Fi**, **contatto (vCard)**, **email**, **SMS**,
-   **telefono**.
+   **telefono**. ⚠ **Superato da F17.10** (2026-10-09): moduli SMS e Telefono tolti (la lettura
+   resta), «Email» diventa «Email precompilata», Wi-Fi e Contatto non si compilano a mano come
+   strada principale (Wi-Fi da QR o dalla rete connessa, Contatto dalla rubrica o «Io»).
 4. **Legge anche i QR** con la fotocamera (proprietario: «Deve anche leggere, e rigenerarlo con
    le variazioni che possono essere fatte dalla nostra app»): dalla fotocamera **e da
    un'immagine** (galleria o immagine condivisa, es. uno screenshot con un QR). Un QR letto si
@@ -5648,6 +5659,9 @@ l'utente non ha scelto. Il backup lo fa solo l'utente, col Pro, in un file che v
 | `/scan/result` | `ScanResultPage` | `extra: ScanResultArgs(raw, source)` |
 | `/form/:kind` | `FormPage` | `ProGate(FeatureKey.customCategories)`; `?id=` per modificare |
 | `/style` | `StylePage` | `ProGate(FeatureKey.themeCustomization)`; `extra: StyleArgs` |
+| `/scan/wifi` | `ScanPage(wifiOnly: true)` | F17.10: torna (`pop`) con il `WifiContent` letto |
+| `/label` | `LabelPage` | F17.10: `ProGate(FeatureKey.imageExport)`; `extra: LabelArgs` |
+| `/me` | `MyContactPage` | F17.10: `ProGate(FeatureKey.customCategories)`; la scheda «Io» |
 | `/saved` | `SavedPage` | |
 | `/history` | `HistoryPage` | |
 | `/settings` | `SettingsPage` | |
@@ -5726,6 +5740,11 @@ Wi-Fi: SSID (obbligatorio), password (obbligatoria se non «nessuna»), sicurezz
 nessuna), nascosta. Contatto: nome (obbligatorio), telefono, email, azienda, sito, nota. Email: a
 (obbligatorio, formato email), oggetto, testo. SMS: numero (obbligatorio), testo. Telefono: numero.
 «Mostra QR» salva in cronologia con `source: form` e apre `/qr/:id`.
+⚠ **Superato da F17.10** (2026-10-09): niente piu' moduli SMS e Telefono (`kFormKinds` = Wi-Fi,
+Contatto, Email; `/form/sms` e `/form/phone` → «Non trovato»); Wi-Fi e Contatto **nuovi** partono
+dalle strade (`WifiSources`, `ContactSources`) e il modulo compare solo dopo, gia' compilato, o con
+«Inserisci a mano»; il testo dell'Email precompilata e' un campo di almeno 6 righe che cresce. La
+modifica di un preferito (`?id=`) apre il modulo come prima.
 
 **`StylePage`** (Pro): anteprima grande in alto (`QrRenderer.widget`), sotto: colore primo piano e
 sfondo (12 colori preimpostati + campo esadecimale), forma moduli, forma occhi, **Logo**
@@ -5994,6 +6013,68 @@ Uno dei requisiti delle microapps e' i dati solo sul telefono». ML Kit e' stato
   `group.com.smp.qrme` (serve da F17.2b per provare su iPad);
 - [ ] App Store Connect: l'app «QR Me» (o il ripiego di F17.0 punto 1) quando si arriva allo store;
 - [ ] License Server: riga `qrme` nella tabella `apps` e il suo segreto in `APP_SECRETS` (prima di Play).
+
+### F17.10 — Revisione del proprietario dopo la prova su iPad (2026-10-09)
+
+Il proprietario ha provato la build 1.0.0 (1) via TestFlight. **La condivisione verso QR Me funziona**
+(«mi genera il qr quasi istantaneamente»): il dubbio di F17.1.8 sull'estensione e' chiuso, il ripiego
+non serve. I **moduli** invece non vanno: «Non mi deve far inserire dati a mano, così è ridicolo».
+Decisioni (vincono su F17.0 punto 3 e su F17.1.6 `FormPage`):
+
+1. **Wi-Fi: niente compilazione a mano come strada principale.** Due strade, entrambe richieste:
+   - **«Inquadra il QR della rete»** (fotocamera) e **«Da un'immagine»** (es. lo screenshot del QR
+     che Android mostra in Impostazioni › Wi-Fi › Condividi, o l'etichetta del router): si legge il
+     QR, si riconosce `WifiContent`, e si **salva un QR con gli stessi dati** su cui si possono
+     mettere logo e colori (Stile). Se il QR letto non e' un Wi-Fi: messaggio chiaro, nessun salvataggio.
+   - **«La rete a cui sei connesso»**: il nome della rete (SSID) si legge dal telefono. ☠ **La
+     password nessuna app la puo' leggere**, ne' su Android ne' su iOS: e' un limite dei sistemi, non
+     una scelta. Quindi: SSID e sicurezza compilati da soli, la password si **incolla** (bottone
+     «Incolla» grande: su iPhone Impostazioni › Wi-Fi › (i) › Password la copia; su Android
+     Impostazioni › Wi-Fi › Condividi la mostra). La compilazione completamente a mano resta solo
+     come ultima riga piccola («Inserisci a mano»).
+   - Leggere l'SSID richiede: **Android** il permesso di **posizione precisa** (`ACCESS_FINE_LOCATION`,
+     chiesto solo quando si tocca il bottone, con spiegazione: «Android chiede la posizione per dire
+     a un'app il nome della rete Wi-Fi; QR Me non usa e non salva la posizione») e la localizzazione
+     accesa; **iOS** l'entitlement `com.apple.developer.networking.wifi-info` (capability «Access
+     Wi-Fi Information» sull'App ID `com.smp.qrme`, abilitabile via API, poi profilo rigenerato) e
+     l'autorizzazione alla posizione «mentre usi l'app» (`NSLocationWhenInUseUsageDescription`).
+     Pacchetti: `network_info_plus` (SSID) e `permission_handler` (richiesta del permesso), dopo il
+     controllo «nessun SDK che manda dati» (regola dati solo sul telefono).
+2. **Contatto: dalla rubrica o «Io».**
+   - **«Scegli dalla rubrica»**: il **selettore di sistema** (iOS `CNContactPickerViewController`,
+     Android `ACTION_PICK` su `ContactsContract`), che **non richiede il permesso dei contatti**: l'app
+     riceve solo il contatto scelto. Pacchetto con selettore nativo senza permesso (es.
+     `flutter_native_contact_picker`), da verificare (nessuna telemetria, campi restituiti: nome,
+     telefono, email).
+   - **«Io»**: la propria scheda, salvata **una volta** nell'app (la si sceglie dalla rubrica la
+     prima volta, o la si compila) e poi riusata. ☠ Ne' iOS ne' Android danno a un'app la «mia
+     scheda» senza permessi speciali (iOS non la espone affatto; Android chiede `READ_PROFILE`).
+   - Poi, come sempre, logo e colori (Stile).
+3. **Email → «Email precompilata».** Il modulo serve a creare un QR che apre un'email gia' scritta
+   (destinatario, oggetto, testo), non a condividere il proprio indirizzo: titolo e chip si chiamano
+   **«Email precompilata» / «Pre-filled email»**, il **testo e' un campo grande multilinea** (almeno 6
+   righe visibili, che cresce).
+4. **SMS: tolto.** **Telefono: tolto** (ridondante con Contatto). ⚑ Si tolgono i **moduli**, non la
+   lettura: un QR `SMSTO:`/`tel:` letto con la fotocamera si riconosce ancora e la pagina del
+   risultato offre ancora «Manda SMS» / «Chiama» (dominio e decoder invariati, `QrKind.sms` e
+   `QrKind.phone` restano per i QR letti e per la cronologia esistente).
+5. **Nuova funzione Pro: «Genera etichetta».** Dalla pagina del QR: un'etichetta con il QR e del
+   **testo sotto** (di default il titolo del QR, modificabile, una o due righe), anteprima, formati
+   (es. quadrata e rettangolare), **stampa** (pacchetto `printing`, gia' usato da Film Tracker, con
+   il dialogo di sistema) e **condividi come immagine** (PNG). Lo stile del QR (colori, logo) viene
+   usato anche nell'etichetta. Chiave Pro: `imageExport` (stessa famiglia di «Condividi immagine»);
+   la riga del paywall diventa «Condividi il QR come immagine o come etichetta da stampare».
+6. **Gia' fatti dal proprietario in App Store Connect:** classificazione per eta' ed etichetta privacy.
+
+**Gia' fatto lato iOS (2026-10-09):** capability `ACCESS_WIFI_INFORMATION` abilitata via API
+sull'App ID `com.smp.qrme` (bundleId `Z538F48ZUS`), `com.apple.developer.networking.wifi-info` in
+`ios/Runner/Runner.entitlements`, profilo dell'app rigenerato (uuid `7310650a-…`, gruppo + wifi-info).
+☠ **`GET /v1/profiles?filter[name]=…` confronta per PREFISSO**: cercando «MicroApps AppStore
+com.smp.qrme» per cancellarlo e' stato cancellato anche «… com.smp.qrme.ShareExtension» (ricreato
+subito, uuid `d8bc04db-…`). Prima di un DELETE filtrare a mano sul nome **esatto**.
+
+Effetti collaterali: screenshot, grafiche e video dello store vanno rifatti (mostrano SMS e Telefono)
+e ricaricati con una build nuova 1.0.0 (2).
 
 ---
 

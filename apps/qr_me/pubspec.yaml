@@ -40,6 +40,11 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  # «Scegli dalla rubrica» del modulo Contatto (F17.10 punto 2): il selettore di sistema (Android
+  # ACTION_PICK, iOS CNContactPickerViewController), SENZA permesso dei contatti. Controllato il
+  # 2026-10-09 nel sorgente in pub cache: nessuna dipendenza, nessuna rete, manifest vuoto. ☠ Da'
+  # solo nome e telefoni (lib/services/contact_picker.dart).
+  flutter_native_contact_picker: ^0.0.12
   flutter_riverpod: ^3.4.3
   # La lettura dei QR, dalla fotocamera (`ReaderWidget`) e da un file (`zx.readBarcodesImagePathString`),
   # anche per la verifica di leggibilita' dello stile (F17.1.7). ZXing C++ via FFI, compilato
@@ -65,8 +70,25 @@ dependencies:
   # le app che non ricevono condivisioni non devono avere.
   micro_share:
     path: ../../packages/micro_share
+  # Il nome della rete Wi-Fi connessa (F17.10 punto 1): Android WifiManager, iOS NEHotspotNetwork.
+  # Controllato il 2026-10-09: nessun SDK di terzi, nessuna rete (lib/services/wifi_name_reader.dart).
+  network_info_plus: ^8.2.1
   path: ^1.9.1
   path_provider: ^2.1.6
+  # Il PDF dell'etichetta da stampare (F17.10 punto 5): Dart puro, lo stesso vincolo di Film Tracker.
+  pdf: ^3.13.1
+  # Il permesso di posizione per leggere il nome della rete (F17.10 punto 1), chiesto solo al tocco.
+  # ⚑ Su iOS (Swift Package Manager) compila solo i permessi con la loro chiave in Info.plist.
+  # Controllato il 2026-10-09: nessun SDK di terzi, nessuna rete.
+  # ☠ 12 e non 13: la 13 porta permission_handler_android 14, che vuole compileSdk 37 (usa la
+  # costante ACCESS_LOCAL_NETWORK di Android 17) e con AGP 9.1 / SDK 36 il build fallisce in
+  # checkDebugAarMetadata (provato il 2026-10-09). La 12 usa permission_handler_android 13
+  # (compileSdk 35). Si alza quando l'app passa a compileSdk 37.
+  permission_handler: ^12.0.1
+  # La stampa dell'etichetta con il dialogo di sistema (F17.10 punto 5), come Film Tracker.
+  # Ricontrollato il 2026-10-09: nessun SDK di terzi; `networkImage` va in rete solo se chiamata,
+  # e QR Me non la chiama.
+  printing: ^5.15.1
   # Il QR: `QrPainter` sia per lo schermo sia per il PNG, con gli stessi parametri (un solo
   # punto li traduce da QrStyle, `QrRenderer`, F17.1.7). `QrImageView` non si usa: il logo
   # passa come `ui.Image` gia' decodificato, senza fotogrammi vuoti.

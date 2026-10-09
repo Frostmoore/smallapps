@@ -275,3 +275,100 @@ class ActionTile extends StatelessWidget {
     );
   }
 }
+
+/// Una strada per riempire un modulo (F17.10: «Inquadra il QR della rete», «Scegli dalla
+/// rubrica», «Io»...): riga grande come «Leggi un QR» della home, superficie con bordo, raggio 20,
+/// l'icona nel quadratino verde, titolo e una riga di spiegazione.
+///
+/// ⚑ Alta almeno 64 ma non fissa: con il testo al 130% la spiegazione va a capo e la riga cresce,
+/// invece di tagliarla.
+class SourceCard extends StatelessWidget {
+  const SourceCard({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.onTap,
+    this.trailing,
+    this.busy = false,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final VoidCallback? onTap;
+
+  /// Al posto della freccia (es. la matita della scheda «Io»).
+  final Widget? trailing;
+
+  /// Un'attesa in corso (il nome della rete che si sta leggendo): un cerchio al posto della freccia.
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = QrPalette.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: MicroSpacing.s),
+      child: Material(
+        color: p.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: p.border),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: busy ? null : onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 64),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: MicroSpacing.m, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: p.accent.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: p.accent, size: 22),
+                  ),
+                  MicroSpacing.hGapM,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            fontVariations: const [FontVariation('wght', 700)],
+                            color: p.ink,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          body,
+                          style: TextStyle(fontSize: 12.5, color: p.inkMuted, height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                  MicroSpacing.hGapS,
+                  if (busy)
+                    const SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    )
+                  else
+                    trailing ?? Icon(Icons.chevron_right, color: p.inkMuted),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

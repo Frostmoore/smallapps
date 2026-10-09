@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -8,14 +9,19 @@ import 'package:micro_share/micro_share.dart';
 
 import '../data/database.dart';
 import '../data/qr_repository.dart';
+import '../domain/qr_content.dart';
 import '../domain/qr_style.dart';
 import '../services/app_settings.dart';
+import '../services/contact_picker.dart';
 import '../services/content_actions.dart';
+import '../services/label_output.dart';
+import '../services/label_renderer.dart';
 import '../services/logo_renderer.dart';
 import '../services/qr_renderer.dart';
 import '../services/readability_check.dart';
 import '../services/screen_boost.dart';
 import '../services/share_router.dart';
+import '../services/wifi_name_reader.dart';
 import 'entitlement.dart' show appVersion;
 
 /// I provider radice dell'app (§8.T).
@@ -42,6 +48,10 @@ final settingsProvider = Provider<SettingsStore>(
 abstract final class QrSettingKeys {
   /// Cronologia accesa (default) o spenta (F17.0 punto 7).
   static const String historyEnabled = 'history_enabled';
+
+  /// La scheda «Io» del modulo Contatto (F17.10 punto 2): i campi di `ContactContent.toFields()`
+  /// in JSON. Assente finche' non la si salva.
+  static const String myContact = 'my_contact';
 }
 
 /// Il tema scelto dall'utente, persistito.
@@ -82,6 +92,46 @@ class HistoryEnabledNotifier extends Notifier<bool> {
 
 final historyEnabledProvider = NotifierProvider<HistoryEnabledNotifier, bool>(
   HistoryEnabledNotifier.new,
+);
+
+/// La scheda «Io» del modulo Contatto (F17.10 punto 2), salvata una volta nelle preferenze
+/// dell'app e poi riusata; null finche' non c'e'.
+///
+/// ☠ Ne' iOS ne' Android danno a un'app «la mia scheda» senza permessi speciali (iOS non la
+/// espone affatto, Android vuole `READ_PROFILE`): per questo la si sceglie dalla rubrica la prima
+/// volta, o la si compila, e la si tiene qui. ⚑ Nelle preferenze e non nel database: e' una sola,
+/// non e' un QR, e non deve finire in cronologia.
+/// ⚑ Una scheda illeggibile (preferenze rovinate) vale come assente: la si rifa', non si blocca
+/// il modulo.
+class MyContactNotifier extends Notifier<ContactContent?> {
+  @override
+  ContactContent? build() {
+    final raw = ref.watch(settingsProvider).getString(QrSettingKeys.myContact);
+    if (raw == null) return null;
+    try {
+      final c = QrContent.fromFields(QrKind.contact, jsonDecode(raw) as Map<String, Object?>);
+      return c is ContactContent ? c : null;
+    } on Object catch (error, stack) {
+      MicroLog.e('scheda «Io» illeggibile', error: error, stackTrace: stack);
+      return null;
+    }
+  }
+
+  Future<void> save(ContactContent contact) async {
+    state = contact;
+    await ref
+        .read(settingsProvider)
+        .setString(QrSettingKeys.myContact, jsonEncode(contact.toFields()));
+  }
+
+  Future<void> clear() async {
+    state = null;
+    await ref.read(settingsProvider).remove(QrSettingKeys.myContact);
+  }
+}
+
+final myContactProvider = NotifierProvider<MyContactNotifier, ContactContent?>(
+  MyContactNotifier.new,
 );
 
 /// Il database, aperto alla prima lettura e chiuso con il `ProviderScope`.
@@ -133,7 +183,8 @@ final qrImageReaderProvider = Provider<QrImageReader>((ref) => const ZxingImageR
 /// non [qrImageReaderProvider]: vedi il perche' sul costruttore. I test sostituiscono
 /// direttamente questo provider.
 final readabilityCheckProvider = Provider<ReadabilityCheck>(
-  (ref) => ReadabilityCheck(const ZxingImageReader.strict(), renderer: ref.watch(qrRendererProvider)),
+  (ref) =>
+      ReadabilityCheck(const ZxingImageReader.strict(), renderer: ref.watch(qrRendererProvider)),
 );
 
 final screenBoostProvider = Provider<ScreenBoost>((ref) => const ScreenBoost());
@@ -150,6 +201,22 @@ final shareInboxProvider = Provider<ShareInbox>((ref) => RsiShareInbox());
 /// condivisione, e due istanze non si vedrebbero a vicenda.
 final shareRouterProvider = Provider<ShareRouter>(
   (ref) => ShareRouter(reader: ref.watch(qrImageReaderProvider)),
+);
+
+/// Il nome della rete Wi-Fi connessa (F17.10 punto 1). Nei test: un doppio finto.
+final wifiNameReaderProvider = Provider<WifiNameReader>((ref) => const PluginWifiNameReader());
+
+/// «Scegli dalla rubrica», il selettore di sistema senza permesso (F17.10 punto 2).
+final contactPickerProvider = Provider<ContactPicker>((ref) => const NativeContactPicker());
+
+/// Il disegno dell'etichetta (F17.10 punto 5), con lo stesso `QrRenderer` dell'app.
+final labelRendererProvider = Provider<LabelRenderer>(
+  (ref) => LabelRenderer(renderer: ref.watch(qrRendererProvider)),
+);
+
+/// Stampa e condivisione dell'etichetta. Nei test: un doppio finto che registra.
+final labelOutputProvider = Provider<LabelOutput>(
+  (ref) => SystemLabelOutput(paths: ref.watch(appPathsProvider)),
 );
 
 /// Sceglie un'immagine dalla galleria e ne restituisce il percorso (null se l'utente annulla).

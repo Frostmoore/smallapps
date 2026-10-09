@@ -5,3 +5,4 @@
 "CFBundleDisplayName" = "QR Me";
 "NSCameraUsageDescription" = "Per leggere i QR con la fotocamera.";
 "NSPhotoLibraryUsageDescription" = "Per scegliere una foto da mettere come logo nel QR, o un’immagine con un QR da leggere.";
+"NSLocationWhenInUseUsageDescription" = "Serve solo a leggere il nome della rete Wi-Fi a cui sei connesso. QR Me non usa né salva la posizione.";

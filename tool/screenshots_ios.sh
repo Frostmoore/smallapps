@@ -4,8 +4,9 @@
 #
 #   ssh mac 'bash ~/microapps/tool/screenshots_ios.sh <UDID> <it|en> <cartella> [app]'
 #
-# [app] e' la cartella in apps/ (predefinita: trashcan). Per full_freezer, scorte_calore e
-# film_tracker si aggiungono da soli FF_DEMO / SC_DEMO / FT_DEMO=true, cioe' i dati di esempio.
+# [app] e' la cartella in apps/ (predefinita: trashcan). Per full_freezer, scorte_calore,
+# film_tracker e qr_me si aggiungono da soli FF_DEMO / SC_DEMO / FT_DEMO / QM_DEMO=true, cioe' i
+# dati di esempio.
 #
 # Gira `integration_test/screenshots_test.dart` e fotografa lo schermo ogni volta che il
 # test scrive `SCATTO:<nome>`. Vedi l'intestazione del test per il perche' lo scatto lo
@@ -25,6 +26,7 @@ EXTRA=()
 [ "$APP" = "full_freezer" ] && EXTRA=(--dart-define=FF_DEMO=true)
 [ "$APP" = "scorte_calore" ] && EXTRA=(--dart-define=SC_DEMO=true)
 [ "$APP" = "film_tracker" ] && EXTRA=(--dart-define=FT_DEMO=true)
+[ "$APP" = "qr_me" ] && EXTRA=(--dart-define=QM_DEMO=true)
 
 export PATH="$HOME/microapps-toolchain/flutter/bin:/opt/homebrew/bin:$PATH"
 export LANG=en_US.UTF-8

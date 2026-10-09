@@ -38,6 +38,13 @@
 		     logo e per "Da immagine". -->
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>To choose a picture for the QR code’s logo, or an image with a QR code to read.</string>
+		<!-- F17.10: «La rete a cui sei connesso» del modulo Wi-Fi. iOS da' il nome della rete
+		     (NEHotspotNetwork, network_info_plus) solo con la posizione «mentre usi l'app» e
+		     l'entitlement wifi-info. ⚑ Con Swift Package Manager permission_handler_apple compila
+		     il codice della posizione solo se trova questa chiave (dopo averla aggiunta: svuotare
+		     DerivedData una volta). Il permesso si chiede solo al tocco del bottone. -->
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Only to read the name of the Wi-Fi network you’re connected to. QR Me doesn’t use or save your location.</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>

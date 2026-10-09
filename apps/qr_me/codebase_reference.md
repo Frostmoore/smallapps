@@ -80,7 +80,11 @@ Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, og
 
 | Cerchi… | Vai in… |
 |---|---|
-| L'avvio (config, cartelle, log, preferenze, conteggio avvii) | `lib/main.dart` |
+| L'avvio (config, cartelle, log, preferenze, conteggio avvii, dati di esempio con `QM_DEMO`) | `lib/main.dart` |
+| I dati di esempio per screenshot e video (`QM_DEMO`), lo stile Neon d'esempio | `lib/dev/demo_data.dart` |
+| Scheda App Store: testi, file, come rifare tutto | `store/scheda-app-store.md` e §2quater |
+| Screenshot e video dello store (giri sul simulatore) | `integration_test/screenshots_test.dart`, `integration_test/anteprima_test.dart` |
+| Grafiche degli store, caricamento su App Store Connect | `tool/genera_grafiche_store.py`, `tool/scheda_app_store.py` |
 | Router, tema, ascolto delle condivisioni, pulizia dei loghi orfani, messaggi della condivisione | `lib/app/app.dart` |
 | I percorsi, gli argomenti delle pagine (`QrDisplayArgs`, `ScanResultArgs`, `StyleArgs`), i tipi con modulo | `lib/app/routes.dart` |
 | Id app, SKU, seme, font, `licenseAppId` | `lib/app/app_config.dart` |
@@ -146,7 +150,9 @@ Solo codice e configurazione scritti o toccati da noi (esclusi `lib/l10n/generat
 ```
 apps/qr_me/
 ├── lib/
-│   ├── main.dart                         avvio: config, assertUsableInRelease, AppPaths, MicroLog, SettingsStore, avvii. Niente database.
+│   ├── main.dart                         avvio: config, assertUsableInRelease, AppPaths, MicroLog, SettingsStore, avvii. Niente database (salvo QM_DEMO).
+│   ├── dev/
+│   │   └── demo_data.dart                demoRequested, demoEnabled, kDemoNeonStyle, seedDemoData (solo con --dart-define=QM_DEMO=true, mai in release)
 │   ├── app/
 │   │   ├── app.dart                      buildRouter(), formKindOf, QrMeApp (router, tema Neon, ShareIntake, pruneOrphanLogos dopo 3 s)
 │   │   ├── app_config.dart               licenseAppId, buildQrConfig(): qr_me, «QR Me», qrme_pro_lifetime, #3BD13B, PlusJakartaSans, scuro
@@ -214,7 +220,19 @@ apps/qr_me/
 │   ├── testi_lists.py                    backup_, data_, history_, saved_, settings_ (40; TIPI favorites/history int)
 │   ├── testi_scan.py                     result_, scan_ (19)
 │   ├── testi_style.py                    logo_, style_ (27)
-│   └── genera_icone.py                   icone e splash dall'originale (numpy, PIL, scipy)
+│   ├── genera_icone.py                   icone e splash dall'originale (numpy, PIL, scipy)
+│   ├── genera_grafiche_store.py          schede store Neon, testata Play, intestazione e ricerca Apple (Pillow)
+│   ├── scheda_app_store.py               caricamento su App Store Connect via API (sul Mac), idempotente
+│   ├── anteprima_app_store.sh            registra il video grezzo sul simulatore (Mac)
+│   └── converti_anteprima.ps1            .mov → mp4 886x1920 30 fps con audio muto (PC, ffmpeg)
+├── integration_test/
+│   ├── screenshots_test.dart             il giro degli screenshot (stampa SCATTO:<nome>)
+│   └── anteprima_test.dart               il giro del video (stampa REGISTRA e FINE)
+├── store/
+│   ├── scheda-app-store.md               testi it/en-GB contati, file, IAP, note di revisione
+│   ├── screenshots/ios/{it,en}/          home, qr, stile, modulo, lettura, paywall-revisione (1320x2868)
+│   ├── grafiche/                         appstore/ (6,9"), appstore-6.5/, play/, apple/, testata-1024x500-*.png
+│   └── video/                            anteprima_qm_*.mov (grezzi) e anteprima-886x1920-*.mp4
 ├── assets/
 │   ├── fonts/                            PlusJakartaSans-Variable.ttf, SpaceGrotesk-Variable.ttf, OFL-PlusJakartaSans.txt, OFL-SpaceGrotesk.txt
 │   └── icon/                             originale.png (del proprietario) + i PNG prodotti da genera_icone.py; anteprime/ (prove, non usate)
@@ -249,8 +267,7 @@ apps/qr_me/
 └── README.md
 ```
 
-**Non esistono**: `integration_test/` (la dipendenza di sviluppo c'e', la cartella no: niente giri
-per screenshot o video dello store), `lib/dev/` (nessun dato di esempio), `test/` per pagine di
+**Non esistono**: `test/` per pagine di
 scansione, risultato, preferiti, cronologia, impostazioni.
 
 ---
@@ -341,6 +358,86 @@ Poi: `pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons` e
   **build per il simulatore e' riuscita**, con l'appex che **non incorpora** la cartella Frameworks. ☐ Restano la
   **riapertura dell'app dall'estensione** e la prova su **iPad via TestFlight** (F17.7.6). Ripiego gia' deciso se iOS rompe la riapertura per schema URL: un'estensione
   che mostra il QR da sola (SwiftUI + `CIQRCodeGenerator`).
+
+---
+
+## 2quater. Lo store (2026-10-09)
+
+App Store: app **`6821086416`** («QR Me», bundle `com.smp.qrme`, creata dal proprietario), prodotto
+**`qrme_pro_lifetime`** non consumabile a **1,99 €** (base Italia, tutti i paesi). Testi, conteggi,
+file e note di revisione: `store/scheda-app-store.md`. **Non inviata in revisione**: la invia il
+proprietario dopo la prova su iPad.
+
+### `lib/dev/demo_data.dart`
+
+| Simbolo | Firma | Effetto |
+|---|---|---|
+| `demoRequested` | `const bool demoRequested = bool.fromEnvironment('QM_DEMO')` | chiesto con `--dart-define=QM_DEMO=true` |
+| `demoEnabled` | `bool get demoEnabled` | `demoRequested && !kReleaseMode`: ☠ mai in release |
+| `kDemoNeonStyle` | `const QrStyle kDemoNeonStyle` | verde `#2E7D32` su bianco, moduli e occhi rotondi, `IconLogo('wifi')` |
+| `seedDemoData` | `Future<int?> seedDemoData(QrDatabase db, {bool english = false})` | solo con `demoEnabled` e database vuoto: 2 preferiti (Wi-Fi di casa con `kDemoNeonStyle`, «Il mio contatto») e 4 recenti (telefono, contatto letto, testo, link `smpmicroapps.it`) con date nel passato (un `QrRepository` con `clock` fisso per riga); restituisce l'id del Wi-Fi (**1** in un database vuoto) o null |
+
+Tipo privato `_Demo` (record: contenuto, sorgente, giorni, minuti, titolo del preferito, stile).
+⚑ **Il Pro non si attiva nella demo**: lo comprano i due giri con il gateway finto (in debug c'e'
+gia'), cosi' lo stesso giro fotografa il paywall per la revisione di Apple (come Film Tracker).
+⚑ **Verde `#2E7D32` e non `#3BD13B`**: il verde dell'interfaccia su bianco ha contrasto < 3 e la
+pagina Stile mostrerebbe l'avviso rosso nello screenshot.
+⚑ **Due preferiti, non tre**: con tre, nello scatto della home i recenti finivano fuori schermo.
+⚑ Nessun dominio `example.com` visibile: sembrava finto negli scatti.
+
+### I giri sul simulatore (`integration_test/`)
+
+| File | Cosa fa |
+|---|---|
+| `screenshots_test.dart` | cancella preferenze, `qr_me.sqlite` (+ `-wal`, `-shm`) ed `entitlement.json`; avvia l'app; tocca `form_chip_wifi` → paywall → `SCATTO:paywall-revisione` → compra (finto); poi `home`, `qr` (`/qr/1`), `stile` (tocco `action_style`, attesa della verifica «Leggibile»), `modulo` (`/form/wifi?id=1`), `lettura` (`/scan/result` con `https://smpmicroapps.it/contatti`). Costanti `lingua` (`LINGUA`), `linkLetto` |
+| `anteprima_test.dart` | stesso azzeramento, compra il Pro **prima** di `REGISTRA`; giro: home → Wi-Fi a tutto schermo → Stile → modulo Wi-Fi → link letto → «Mostra come QR» → home; `FINE`. ~24 s |
+
+### Comandi per rifare tutto
+
+```
+# 1. screenshot (Mac, simulatore iPhone 18 Pro Max 6,9")
+ssh mac 'bash ~/microapps/tool/screenshots_ios.sh 2E0C5359-ACED-45E8-8DD3-0ECB0C0BAF85 it ~/qrme_scatti_it qr_me'
+#    (idem en) poi copia dei PNG in store/screenshots/ios/<lingua>/ (tar con COPYFILE_DISABLE=1 --no-xattrs)
+# 2. grafiche (PC, da apps/qr_me)
+python tool/genera_grafiche_store.py
+# 3. video (Mac, poi PC)
+ssh mac 'bash ~/microapps/apps/qr_me/tool/anteprima_app_store.sh 2E0C5359-ACED-45E8-8DD3-0ECB0C0BAF85 it'
+#    copia di ~/anteprima_qm_<lingua>.mov in store/video/, poi:
+pwsh tool/converti_anteprima.ps1
+# 4. caricamento (Mac): testi, categorie, eta', prezzo, disponibilita', screenshot 6,5" e 6,9", video,
+#    revisione, prodotto Pro, build (~20 minuti: rete Mac-Apple lenta); alla fine stampa la verifica
+ssh mac 'cd ~/microapps && python3 -u apps/qr_me/tool/scheda_app_store.py'
+```
+
+`tool/scheda_app_store.py` (copia di Film Tracker): costanti `APP`, `VERSIONE`, `BUILD`, `LINGUE`,
+`NOMI`, `CATEGORIE` (`UTILITIES`, `PRODUCTIVITY`), `IAP_ID`, `IAP_PREZZO`, `IAP_TESTI`, `IAP_NOTA`,
+`VERSIONE_TRASHCAN` (da li' copia nome e telefono del contatto di revisione); funzioni `api`,
+`controlla`, `testi`, `carica_file`, `tutti_i_territori`, `prodotto_pro`, `main`, piu' rispetto a
+Film Tracker `eta(info_id)` (classificazione per eta'), `collega_build(versione_id)` (solo se la build
+e' `VALID`) e `verifica(versione_id)` (stati degli asset, poi **campo per campo** con l'elenco `VUOTI`).
+⚑ `testi()` legge i blocchi di codice di `store/scheda-app-store.md` **per posizione** (7 blocchi):
+non aggiungerne altri in mezzo.
+
+### Trappole
+
+- ☠ **Il paywall non va nelle schede** (il prezzo cambia per paese): solo screenshot di revisione dell'IAP.
+- ☠ **6,5" obbligatorio**: Apple rifiuta le 6,9" nello spazio 6,5" (lezione di TrashCan); si compongono
+  entrambe native. Qui si caricano **tutte e due** (`APP_IPHONE_65` e `APP_IPHONE_67`).
+- ☠ **Il tar dal Mac porta i metadati** (`._*.png` sul PC): `COPYFILE_DISABLE=1 tar --no-xattrs`.
+- ☠ **Un altro agente puo' risincronizzare `lib/` sul Mac** (`rm -rf lib && tar`): prima di un giro
+  rimandare `lib/dev/` e `lib/main.dart`.
+- ☠ **Nome inglese «QR Me – Share & Scan»**: «QR Me» in en-GB e' di un altro account (409
+  DUPLICATE.DIFFERENT_ACCOUNT, 2026-10-09; senza nome valido Apple rifiuta anche la localizzazione
+  della versione). Ripiego deciso in F17.0 punto 1. In italiano «QR Me» passa; sotto l'icona resta «QR Me».
+- ☠ **La build si collega con una PATCH della versione** (`relationships.build`), non con
+  `/relationships/build`: quella risponde 204 senza corpo e `asc_api.py` non la leggeva (primo giro
+  fallito il 2026-10-09). `collega_build` poi verifica rileggendo.
+- ☠ **Classificazione per eta' via API** (`eta()`): tutti i campi a NONE/false **tranne**
+  `gracRatingClassificationNumber` (409 KOREA_AGE_RATING_OVERRIDE_INVALID se scritto senza override coreano).
+- ☠ **Prezzo dell'app**: il listino si legge da `/v1/appPriceSchedules/{id}/manualPrices`; il percorso
+  annidato sotto `/v1/apps/` risponde errore e il listino si ricreava a ogni giro.
+- ⚑ Restano a mano in App Store Connect: etichetta privacy (**Nessun dato raccolto**), controllo a occhio
+  della classificazione per eta', intestazione e risultati di ricerca (`grafiche/apple/`), spunta dell'IAP nella versione.
 
 ---
 
@@ -1450,8 +1547,9 @@ riepilogo prima della conferma e' l'unico modo di accorgersi del file sbagliato.
 `Future<void> main()`: `buildQrConfig()` → **`assertUsableInRelease()`** (☠ una release con BILLING=fake
 sbloccherebbe il Pro a chiunque) → `AppPaths.forApp` + `ensureAll` → `MicroLog.init(logs/qr_me.log)` →
 `FlutterError.onError` nel log → `SettingsStore.create(namespace: 'qr_me')` → `_recordLaunch` (conta
-avvii e primo avvio: servono alla richiesta di recensione) → `runApp(ProviderScope(overrides: config,
-paths, settings, child: QrMeApp()))`. **Niente database qui** (pigro, §6).
+avvii e primo avvio: servono alla richiesta di recensione) → **solo se `demoEnabled`**: apre `QrDatabase.open()`, `seedDemoData(db, english:)` secondo
+`resolveAppLocale`, lo chiude → `runApp(ProviderScope(overrides: config,
+paths, settings, child: QrMeApp()))`. **Niente database qui** fuori dalla demo (pigro, §6).
 
 ---
 
@@ -1563,7 +1661,7 @@ il 2026-10-09: non rimetterlo), **`camera ^0.12.1`** (diretta perche' la pagina 
 `flutter_riverpod ^3.4.3`, `go_router ^18.0.2`, `intl ^0.20.3`, `meta`, `path`, `path_provider`,
 `cupertino_icons`. Dev: `drift_dev`, `build_runner`, `analyzer: ">=14.0.0 <14.4.0"` (☠ 14.5 rompe
 Drift), `flutter_launcher_icons`, `flutter_native_splash`, `shared_preferences` (mock di SettingsStore),
-`integration_test` (dichiarata, non usata), `flutter_lints`.
+`integration_test` (usata solo dai giri per lo store, `integration_test/`), `flutter_lints`.
 ⚑ **Qui le dipendenze native entrano tutte con il bootstrap** (diversamente da Film Tracker): la
 specsheet le aveva fissate e F17.4 lavorava a piu' passi in parallelo; l'APK di debug del bootstrap era
 la prova che compilavano insieme. ⚑ L'app **non** usa `receive_sharing_intent` direttamente.
@@ -1584,6 +1682,7 @@ pwsh ../../tool/fl.ps1 build apk                              # APK
 python tool/genera_icone.py                                   # poi flutter_launcher_icons e flutter_native_splash:create
 adb shell am start -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT "https://esempio.it" com.smp.qrme   # condivisione finta
 pwsh ../../tool/verify_atlas.ps1 -Project apps/qr_me          # dalla radice: atlante contro codice
+pwsh ../../tool/fl.ps1 run --dart-define=QM_DEMO=true         # l'app con i dati di esempio (solo debug)
 ruby tool/aggiungi_share_extension_ios.rb apps/qr_me ShareExtension group.com.smp.qrme   # dalla radice, sul Mac, dopo pub get
 ```
 
@@ -1896,9 +1995,8 @@ impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schem
 - **Nessuno schema URL dell'app** e nessun deep link: si entra dall'icona o dalla condivisione.
 - **Nessuna connessione al Wi-Fi** dall'app (si copia la password), nessun salvataggio diretto in rubrica.
 - **Nessun codice a barre**: solo QR.
-- **Nessun `integration_test/`** (dipendenza dichiarata, cartella assente): niente giri per screenshot
-  e video dello store, niente test di regressione su dispositivo.
-- **Nessun dato di esempio** (`lib/dev/` non c'e').
+- **`integration_test/` contiene solo i giri per lo store** (screenshot e video): non sono test di
+  regressione e non girano con `flutter test` sul PC (servono il simulatore e `QM_DEMO`).
 - **API pronte e non usate**: `QrCapacity.fits` (solo test), il parametro `ProGate.allowed`.
 - **Tolti il 2026-10-09 perche' nessuno li usava** (non cercarli): la rotta `/pro` (`Routes.pro`,
   `_PaywallRoutePage`: il paywall passa sempre da `showQrPaywall`), `favoriteCountProvider` e

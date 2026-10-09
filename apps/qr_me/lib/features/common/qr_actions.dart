@@ -257,3 +257,36 @@ Future<void> openContent(BuildContext context, WidgetRef ref, QrContent content)
 /// Il paywall generico (dalla riga della cronologia gratuita).
 void openPro(BuildContext context, WidgetRef ref, FeatureKey key) =>
     unawaited(showQrPaywall(context, ref, highlight: key));
+
+/// «Genera etichetta» (Pro, `imageExport`; F17.10 punto 5): apre `/label` con il QR e il suo
+/// titolo come testo di partenza. ⚑ Stessa chiave di «Condividi immagine»: e' la stessa famiglia.
+Future<void> openLabel(
+  BuildContext context,
+  WidgetRef ref, {
+  required QrDisplayArgs args,
+  required String title,
+}) async {
+  if (!ref.read(featureGateProvider).allows(FeatureKey.imageExport)) {
+    // ⚑ Comprato il Pro dal paywall, si prosegue: chi ha toccato il pulsante vuole la funzione.
+    if (!await showQrPaywall(context, ref, highlight: FeatureKey.imageExport) || !context.mounted) {
+      return;
+    }
+  }
+  await context.push(
+    Routes.label,
+    extra: LabelArgs(display: args, title: title),
+  );
+}
+
+/// La scheda «Io» del modulo Contatto (Pro, `customCategories`; F17.10 punto 2), dalle
+/// impostazioni. Dal modulo ci si arriva gia' col Pro (il modulo e' Pro).
+Future<void> openMyContact(BuildContext context, WidgetRef ref) async {
+  if (!ref.read(featureGateProvider).allows(FeatureKey.customCategories)) {
+    // ⚑ Comprato il Pro dal paywall, si prosegue: chi ha toccato il pulsante vuole la funzione.
+    if (!await showQrPaywall(context, ref, highlight: FeatureKey.customCategories) ||
+        !context.mounted) {
+      return;
+    }
+  }
+  await context.push(Routes.myContact);
+}

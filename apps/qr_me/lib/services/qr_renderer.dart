@@ -87,21 +87,15 @@ class QrRenderer {
     int pixels = 1024,
     ui.Image? logo,
   }) async {
-    final layout = _layout(payload, style, logo);
-    final side = pixels.toDouble();
-    final quiet = side * quietModules / (layout.qr.moduleCount + 2 * quietModules);
-    final codeSide = side - 2 * quiet;
-
     final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder)
-      ..drawRect(Rect.fromLTWH(0, 0, side, side), Paint()..color = Color(style.background));
-    canvas.translate(quiet, quiet);
-    painter(
-      qr: layout.qr,
+    paintSquare(
+      Canvas(recorder),
+      Offset.zero,
+      payload: payload,
       style: style,
-      logo: layout.logo,
-      codeSide: codeSide,
-    ).paint(canvas, Size.square(codeSide));
+      side: pixels.toDouble(),
+      logo: logo,
+    );
     final picture = recorder.endRecording();
     final image = await picture.toImage(pixels, pixels);
     try {
@@ -112,6 +106,37 @@ class QrRenderer {
       image.dispose();
       picture.dispose();
     }
+  }
+
+  /// Disegna il QR su [canvas] in un quadrato di lato [side] con l'angolo in alto a sinistra in
+  /// [topLeft]: sfondo, zona di rispetto e codice, come [png] e come [widget].
+  ///
+  /// ⚑ Pubblico per l'etichetta da stampare (`LabelPainter`, F17.10 punto 5): l'etichetta mette
+  /// il QR in un riquadro della sua tela, e deve disegnarlo **identico** al PNG e allo schermo.
+  /// [png] passa da qui: un solo disegno, tre usi.
+  void paintSquare(
+    Canvas canvas,
+    Offset topLeft, {
+    required String payload,
+    required QrStyle style,
+    required double side,
+    ui.Image? logo,
+  }) {
+    final layout = _layout(payload, style, logo);
+    final quiet = side * quietModules / (layout.qr.moduleCount + 2 * quietModules);
+    final codeSide = side - 2 * quiet;
+    canvas
+      ..save()
+      ..translate(topLeft.dx, topLeft.dy)
+      ..drawRect(Rect.fromLTWH(0, 0, side, side), Paint()..color = Color(style.background))
+      ..translate(quiet, quiet);
+    painter(
+      qr: layout.qr,
+      style: style,
+      logo: layout.logo,
+      codeSide: codeSide,
+    ).paint(canvas, Size.square(codeSide));
+    canvas.restore();
   }
 
   /// **Il** punto che traduce [style] nei parametri di qr_flutter. Pubblico perche' i test

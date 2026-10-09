@@ -154,4 +154,35 @@ void main() {
     expect(find.text('Troppo lungo per un QR'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  group('SMS e Telefono senza modulo (F17.10 punto 4)', () {
+    for (final (content, payload) in [
+      (const SmsContent(number: '+393331234567', body: 'Ciao'), 'SMSTO:+393331234567:Ciao'),
+      (const PhoneContent('+393331234567'), 'tel:+393331234567'),
+    ]) {
+      testWidgets('un preferito ${content.kind.name} gia\' salvato si mostra, senza «Modifica»', (
+        tester,
+      ) async {
+        await pumpQr(
+          tester,
+          page: const QrDisplayPage.saved(7),
+          pro: true,
+          rows: [qrRow(7, content: content, payload: payload, favorite: true, title: 'Vecchio')],
+        );
+        expect(find.byKey(const ValueKey('qr_panel')), findsOneWidget);
+        expect(find.text('Vecchio'), findsOneWidget);
+        expect(find.byKey(const ValueKey('action_edit')), findsNothing);
+      });
+    }
+
+    testWidgets('un preferito Wi-Fi invece ha ancora «Modifica»', (tester) async {
+      await pumpQr(
+        tester,
+        page: const QrDisplayPage.saved(8),
+        pro: true,
+        rows: [qrRow(8, content: wifi, payload: wifiArgs.payload, favorite: true)],
+      );
+      expect(find.byKey(const ValueKey('action_edit')), findsOneWidget);
+    });
+  });
 }

@@ -1,5 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:micro_core/micro_core.dart';
+
+import '../../app/qr_palette.dart';
 import '../../domain/qr_content.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'form_fields.dart';
@@ -9,8 +15,17 @@ import 'form_fields.dart';
 ///
 /// ⚑ La password si scrive nascosta con l'occhio, come la mostra la pagina del QR: chi compila
 /// il modulo spesso lo fa con un ospite accanto.
+///
+/// ⚑ Con [pasteHelp] (la strada «La rete a cui sei connesso», F17.10 punto 1) il nome arriva gia'
+/// letto dal telefono e la password **si incolla**: un bottone «Incolla la password» grande e
+/// due righe su dove copiarla (iPhone: Impostazioni › Wi-Fi › (i) › Password; Android:
+/// Impostazioni › Wi-Fi › Condividi). ☠ Nessuna app puo' leggere la password: incollarla e'
+/// l'unica strada che non obbliga a scriverla.
 class WifiForm extends QrFormWidget<WifiContent> {
-  const WifiForm({required super.onChanged, super.initial, super.key});
+  const WifiForm({required super.onChanged, super.initial, this.pasteHelp = false, super.key});
+
+  /// Il bottone «Incolla la password» e le istruzioni per copiarla.
+  final bool pasteHelp;
 
   @override
   State<WifiForm> createState() => _WifiFormState();
@@ -59,9 +74,31 @@ class _WifiFormState extends State<WifiForm> {
     );
   }
 
+  /// «Incolla la password»: dagli appunti, senza ritocchi tranne gli a capo in coda (che una
+  /// copia da un'altra app puo' aggiungere e che nessuna password contiene).
+  Future<void> _paste() async {
+    final l = L.of(context);
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.replaceAll(RegExp(r'[\r\n]+$'), '');
+    if (!mounted) return;
+    if (text == null || text.isEmpty) {
+      MicroSnack.show(context, l.home_clipboardEmpty);
+      return;
+    }
+    setState(() {
+      if (_security == WifiSecurity.none) _security = WifiSecurity.wpa;
+    });
+    _password
+      ..text = text
+      ..selection = TextSelection.collapsed(offset: text.length);
+    _emit();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final p = QrPalette.of(context);
+    final ios = defaultTargetPlatform == TargetPlatform.iOS;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -88,6 +125,25 @@ class _WifiFormState extends State<WifiForm> {
             },
           ),
         ),
+        if (widget.pasteHelp && _security != WifiSecurity.none) ...[
+          SizedBox(
+            height: 52,
+            child: OutlinedButton.icon(
+              key: const ValueKey('wifi_paste'),
+              onPressed: () => unawaited(_paste()),
+              icon: const Icon(Icons.content_paste),
+              label: Text(l.wifiSource_pastePassword),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, MicroSpacing.s, 4, MicroSpacing.m),
+            child: Text(
+              ios ? l.wifiSource_whereIos : l.wifiSource_whereAndroid,
+              key: const ValueKey('wifi_pasteHelp'),
+              style: TextStyle(fontSize: 13, color: p.inkMuted, height: 1.35),
+            ),
+          ),
+        ],
         if (_security != WifiSecurity.none)
           QrTextField(
             key: const ValueKey('wifi_password'),

@@ -23,6 +23,11 @@ abstract final class Routes {
   /// `extra: ScanResultArgs`.
   static const String scanResult = '/scan/result';
 
+  /// La lettura **solo Wi-Fi** del modulo Wi-Fi (F17.10 punto 1): la stessa `ScanPage` in modalita'
+  /// `wifiOnly`, che non apre il risultato ma **torna** (`pop`) con il `WifiContent` letto. Un QR
+  /// che non e' di una rete lo dice e continua a inquadrare.
+  static const String scanWifi = '/scan/wifi';
+
   /// Un modulo speciale (Pro, `customCategories`): `/form/wifi`, `/form/contact?id=3`.
   static const String form = '/form/:kind';
   static String formOf(QrKind kind, {int? id}) =>
@@ -30,6 +35,13 @@ abstract final class Routes {
 
   /// Lo stile (Pro, `themeCustomization`): `extra: StyleArgs`.
   static const String style = '/style';
+
+  /// L'etichetta da stampare (Pro, `imageExport`; F17.10 punto 5): `extra: LabelArgs`.
+  static const String label = '/label';
+
+  /// La scheda «Io» del modulo Contatto (Pro, `customCategories`; F17.10 punto 2), dalle
+  /// impostazioni o dal modulo.
+  static const String myContact = '/me';
 
   static const String saved = '/saved';
   static const String history = '/history';
@@ -40,15 +52,14 @@ abstract final class Routes {
   // innescato. La rotta c'era e nessuno la apriva: tolta il 2026-10-09.
 }
 
-/// I tipi che hanno un modulo (`/form/:kind`): i moduli speciali di F17.0 punto 3. Testo e link
-/// si scrivono nel campo della home.
-const List<QrKind> kFormKinds = [
-  QrKind.wifi,
-  QrKind.contact,
-  QrKind.email,
-  QrKind.sms,
-  QrKind.phone,
-];
+/// I tipi che hanno un modulo (`/form/:kind`). Testo e link si scrivono nel campo della home.
+///
+/// ⚑ **SMS e Telefono tolti** (F17.10 punto 4, revisione del proprietario: Telefono e' ridondante
+/// con Contatto, SMS non serve). Si tolgono i **moduli**, non la lettura: `QrKind.sms` e
+/// `QrKind.phone` restano nel dominio, un QR `SMSTO:`/`tel:` letto si riconosce e offre ancora
+/// «Manda SMS»/«Chiama», e i QR gia' salvati di quei tipi si mostrano (senza «Modifica», che
+/// guarda questa lista). `/form/sms` e `/form/phone` ora dicono «Non trovato».
+const List<QrKind> kFormKinds = [QrKind.wifi, QrKind.contact, QrKind.email];
 
 /// Cio' che serve a `/show`: un QR da mostrare senza che sia (necessariamente) salvato.
 ///
@@ -91,4 +102,14 @@ final class StyleArgs {
 
   /// L'id se il QR e' salvato: «Applica» scrive lo stile sulla riga invece di tornare a `/show`.
   int? get qrId => display.qrId;
+}
+
+/// Cio' che serve a `/label`: il QR (con il suo stile) e il testo di partenza sotto il QR.
+final class LabelArgs {
+  const LabelArgs({required this.display, required this.title});
+
+  final QrDisplayArgs display;
+
+  /// Il testo iniziale dell'etichetta: il titolo del QR (F17.10 punto 5), modificabile.
+  final String title;
 }

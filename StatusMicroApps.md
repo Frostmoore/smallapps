@@ -37,7 +37,7 @@ vetrina da aggiungere.
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
 | Riassumilo | F16 | ⚪ non iniziata | ⚪ non iniziata |
-| **QR Me** (ex Fammi un QR) | F17 | ⚪ codice Android completo (2026-10-09); app non creata su Play Console, bloccata dall'account (D-U-N-S) | ⚪ codice iOS completo, gira sul simulatore; servono App ID e App Group dal proprietario per TestFlight |
+| **QR Me** (ex Fammi un QR) | F17 | ⚪ codice Android completo (2026-10-09); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟠 scheda completa e build 1.0.0 (1) su TestFlight; in arrivo la 1.0.0 (2) con i moduli rifatti (F17.10) |
 | Leggimelo | F18 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove porta? | F19 | ⚪ non iniziata | ⚪ non iniziata |
 
@@ -292,19 +292,29 @@ backup) e sul simulatore iPhone. Card «In arrivo» pubblicata nel sito il 2026-
 - [ ] Data safety (nessun dato raccolto, salvo il server licenze per il Pro) e dichiarazione della fotocamera
 - [ ] Provare su un Android vero: fotocamera reale, condivisione da Chrome e da Galleria
 
-### App Store — ⚪ non ancora creata
+### App Store — 🟠 scheda completa, in attesa della build 1.0.0 (2) con i moduli nuovi
 
 | Data | Evento |
 |---|---|
 | 2026-10-09 | Estensione di condivisione aggiunta al progetto con `tool/aggiungi_share_extension_ios.rb` (eseguito sul Mac, idempotente); build per il simulatore riuscita; l'estensione non incorpora framework |
 | 2026-10-09 | App provata sul simulatore iPhone (grafica Neon); esclusione di database e dati dal backup iCloud verificata |
+| 2026-10-09 | App ID `com.smp.qrme` e `com.smp.qrme.ShareExtension` con App Groups → `group.com.smp.qrme` creati dal proprietario; app App Store Connect **`6821086416`** «QR Me» (il nome era libero) |
+| 2026-10-09 | Profili «MicroApps AppStore com.smp.qrme» e «… .ShareExtension» creati via API (certificato DU9DGW7NAH), entrambi col gruppo |
+| 2026-10-09 | Build **1.0.0 (1)** caricata (VALID alle 20:45), gruppo TestFlight «Sviluppatore» creato via API col proprietario, **invito mandato** |
+| 2026-10-09 | **Scheda completa via API** (`apps/qr_me/tool/scheda_app_store.py`), verificata campo per campo: nomi it «QR Me», **en-GB «QR Me – Share & Scan»** («QR Me» in inglese e' di un altro account, 409), sottotitoli, categorie Utilita' + Produttivita', gratuita in 175 paesi, testi it/en-GB, 5 screenshot 6,9" e 6,5" per lingua, video per lingua, contatti e note di revisione, build 1.0.0 (1) collegata; versione PREPARE_FOR_SUBMISSION |
+| 2026-10-09 | Prodotto **`qrme_pro_lifetime`** (id 6821117058) 1,99 € base Italia, testi, screenshot di revisione → READY_TO_SUBMIT |
+| 2026-10-09 | Fatti a mano dal proprietario: classificazione per eta', etichetta privacy. Intestazione e risultati della ricerca messi sulla Scrivania del Mac |
+| 2026-10-09 | Provata su iPad (TestFlight): **la condivisione verso QR Me funziona** («quasi istantaneamente»). Il proprietario chiede di rifare i moduli (F17.10): Wi-Fi da QR letto o dalla rete connessa, Contatto dalla rubrica o «Io», email precompilata, via SMS e Telefono, Pro «Genera etichetta». Capability «Access Wi-Fi Information» abilitata via API, profili rigenerati |
 
 **Prossimi passi App Store:**
 - [x] **Proprietario:** App ID `com.smp.qrme` e gruppo `group.com.smp.qrme` creati (2026-10-09)
 - [ ] **Proprietario:** App ID `com.smp.qrme.ShareExtension` con App Groups → `group.com.smp.qrme`
-- [ ] Profili via API per app ed estensione, build su TestFlight
+- [x] Profili via API per app ed estensione, build 1.0.0 (1) su TestFlight, invito al proprietario
+- [x] Scheda completa via API e build collegata alla versione
+- [ ] F17.10 (moduli nuovi, etichetta) → build 1.0.0 (2), screenshot/grafiche/video rifatti e ricaricati
 - [ ] **Provare su iPad**: condividere da Safari verso QR Me (l'estensione deve riaprire l'app); se iOS lo impedisce, ripiego deciso in F17.1.8 (QR mostrato dall'estensione stessa)
-- [ ] App su App Store Connect (nome «QR Me», o il ripiego), prodotto `qrme_pro_lifetime` a 1,99 €, scheda, screenshot, revisione
+- [x] Prodotto `qrme_pro_lifetime` a 1,99 €; eta' ed etichetta privacy (proprietario)
+- [ ] A mano: intestazione e risultati di ricerca (da rifare dopo F17.10), spunta dell'acquisto in-app nella versione, invio in revisione (proprietario)
 
 ---
 

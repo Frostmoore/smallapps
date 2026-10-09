@@ -112,7 +112,24 @@ void main() {
     expect(find.byKey(const ValueKey('home_freeHistory')), findsNothing);
   });
 
-  testWidgets('i cinque moduli hanno il badge PRO senza il Pro', (tester) async {
+  testWidgets('moduli: Wi-Fi, Contatto, Email precompilata; niente SMS e Telefono (F17.10)', (
+    tester,
+  ) async {
+    await pumpQr(tester, routes: routes());
+    expect(find.byKey(const ValueKey('form_chip_wifi')), findsOneWidget);
+    expect(find.byKey(const ValueKey('form_chip_contact')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('form_chip_email')),
+        matching: find.text('Email precompilata'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('form_chip_sms')), findsNothing);
+    expect(find.byKey(const ValueKey('form_chip_phone')), findsNothing);
+  });
+
+  testWidgets('i moduli hanno il badge PRO senza il Pro', (tester) async {
     await pumpQr(tester, routes: routes());
     for (final k in kFormKinds) {
       final chip = find.byKey(ValueKey('form_chip_${k.name}'));

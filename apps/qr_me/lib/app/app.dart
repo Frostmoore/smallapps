@@ -10,8 +10,10 @@ import '../domain/qr_content.dart';
 import '../features/common/pro_gate.dart';
 import '../features/display/qr_display_page.dart';
 import '../features/forms/form_page.dart';
+import '../features/forms/my_contact_page.dart';
 import '../features/history/history_page.dart';
 import '../features/home/home_page.dart';
+import '../features/label/label_page.dart';
 import '../features/saved/saved_page.dart';
 import '../features/scan/scan_page.dart';
 import '../features/scan/scan_result_page.dart';
@@ -47,6 +49,9 @@ GoRouter buildRouter() => GoRouter(
       builder: (_, s) => _id(s) < 0 ? const _NotFoundPage() : QrDisplayPage.saved(_id(s)),
     ),
     GoRoute(path: Routes.scan, builder: (_, __) => const ScanPage()),
+    // ⚑ Senza ProGate: legge e restituisce una rete, non crea niente. Il modulo che la apre e'
+    // gia' dietro il suo (F17.10 punto 1).
+    GoRoute(path: Routes.scanWifi, builder: (_, __) => const ScanPage(wifiOnly: true)),
     GoRoute(
       path: Routes.scanResult,
       builder: (_, s) => switch (s.extra) {
@@ -78,6 +83,21 @@ GoRouter buildRouter() => GoRouter(
         _ => const _NotFoundPage(),
       },
     ),
+    GoRoute(
+      path: Routes.label,
+      builder: (_, s) => switch (s.extra) {
+        final LabelArgs args => ProGate(
+          feature: FeatureKey.imageExport,
+          child: LabelPage(args: args),
+        ),
+        _ => const _NotFoundPage(),
+      },
+    ),
+    GoRoute(
+      path: Routes.myContact,
+      builder: (_, __) =>
+          const ProGate(feature: FeatureKey.customCategories, child: MyContactPage()),
+    ),
     GoRoute(path: Routes.saved, builder: (_, __) => const SavedPage()),
     GoRoute(path: Routes.history, builder: (_, __) => const HistoryPage()),
     GoRoute(path: Routes.settings, builder: (_, __) => const SettingsPage()),
@@ -89,7 +109,8 @@ GoRouter buildRouter() => GoRouter(
 /// numerico darebbe un'eccezione nel builder; con -1 la pagina dice "non trovato".
 int _id(GoRouterState s) => int.tryParse(s.pathParameters['id'] ?? '') ?? -1;
 
-/// Il tipo di un modulo da `/form/:kind`; null se sconosciuto o senza modulo (testo, link).
+/// Il tipo di un modulo da `/form/:kind`; null se sconosciuto o senza modulo (testo, link, e da
+/// F17.10 SMS e telefono: `/form/sms` e `/form/phone` dicono «Non trovato»).
 QrKind? formKindOf(String? name) {
   final kind = QrKind.values.asNameMap()[name];
   return kFormKinds.contains(kind) ? kind : null;

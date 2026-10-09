@@ -12,6 +12,7 @@ import '../../app/providers.dart';
 import '../../app/qr_palette.dart';
 import '../../app/routes.dart';
 import '../../data/database.dart' show QrSource;
+import '../../domain/qr_decoder.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../services/readability_check.dart';
 
@@ -28,8 +29,16 @@ import '../../services/readability_check.dart';
 /// dell'app e farebbero scattare letture accidentali inquadrando una scatola.
 ///
 /// ⚑ Permesso negato → stato vuoto, ma «Da immagine» resta usabile: non serve la fotocamera.
+///
+/// ⚑ Con [wifiOnly] (rotta `/scan/wifi`, F17.10 punto 1) la stessa pagina serve al modulo Wi-Fi:
+/// non apre il risultato ma **torna** con il `WifiContent` letto (`context.pop`). Un QR che non e'
+/// di una rete lo dice e si continua a inquadrare. Riusata e non copiata: fotocamera, permesso,
+/// torcia e «Da immagine» devono comportarsi uguale nei due posti.
 class ScanPage extends ConsumerStatefulWidget {
-  const ScanPage({super.key});
+  const ScanPage({this.wifiOnly = false, super.key});
+
+  /// Solo reti Wi-Fi: si torna con il contenuto invece di aprire `/scan/result`.
+  final bool wifiOnly;
 
   /// La parte dell'inquadratura in cui ZXing cerca, come frazione del lato corto del fotogramma.
   /// ⚑ Piu' larga del mirino disegnato (`_Viewfinder.sideFraction`): con l'anteprima a
@@ -144,7 +153,10 @@ class _ScanPageState extends ConsumerState<ScanPage> {
       _camera = null;
       _torchOn = false;
     });
-    await context.push(Routes.scanResult, extra: ScanResultArgs(raw: raw, source: source));
+    await context.push(
+      Routes.scanResult,
+      extra: ScanResultArgs(raw: raw, source: source),
+    );
     // Tornati dal risultato si legge di nuovo.
     if (!mounted) return;
     setState(() => _cameraOn = true);
@@ -157,7 +169,28 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     if (raw == null || raw.isEmpty) return;
     _handling = true;
     unawaited(HapticFeedback.lightImpact());
-    unawaited(_showResult(raw, QrSource.scanned));
+    if (widget.wifiOnly) {
+      _deliverWifi([raw]);
+    } else {
+      unawaited(_showResult(raw, QrSource.scanned));
+    }
+  }
+
+  /// Modalita' Wi-Fi: una rete torna al modulo; altro lo si dice e si continua a inquadrare.
+  void _deliverWifi(List<String> raws) {
+    final wifi = QrDecoder.firstWifi(raws);
+    if (wifi != null) {
+      context.pop(wifi);
+      return;
+    }
+    MicroSnack.show(context, L.of(context).wifiSource_notWifi);
+    // ⚑ Una pausa prima di rileggere: lo stesso QR sbagliato resta inquadrato e, senza, ripeterebbe
+    // il messaggio a ogni fotogramma.
+    unawaited(
+      Future<void>.delayed(const Duration(seconds: 2), () {
+        if (mounted) _handling = false;
+      }),
+    );
   }
 
   /// «Da immagine»: il selettore di sistema, poi ZXing sul file.
@@ -179,6 +212,10 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     }
     if (_handling) return;
     _handling = true;
+    if (widget.wifiOnly) {
+      _deliverWifi(values);
+      return;
+    }
     await _showResult(values.first, QrSource.image);
   }
 
@@ -201,7 +238,7 @@ class _ScanPageState extends ConsumerState<ScanPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(l.scan_title),
+        title: Text(widget.wifiOnly ? l.wifiSource_scan : l.scan_title),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         // ☠ Il titolo del tema ha un colore suo (`p.ink`) che vince su `foregroundColor`: nel

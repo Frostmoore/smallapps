@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../domain/qr_content.dart';
 import '../../l10n/generated/app_localizations.dart';
 
-/// I pezzi comuni dei cinque moduli speciali (F17.1.6): validazione e campo di testo.
+/// I pezzi comuni dei moduli speciali (F17.1.6; Wi-Fi, Contatto, Email precompilata dopo F17.10):
+/// validazione e campo di testo.
 ///
 /// ⚑ Ogni validatore e' una funzione pura che restituisce il messaggio d'errore o null: lo usa
 /// il campo (errore in linea) **e** il modulo per decidere se il contenuto e' valido (anteprima e
@@ -36,6 +37,7 @@ class QrTextField extends StatelessWidget {
     this.validator,
     this.keyboardType,
     this.maxLines = 1,
+    this.minLines = 1,
     this.obscure = false,
     this.suffix,
     this.capitalization = TextCapitalization.none,
@@ -46,7 +48,12 @@ class QrTextField extends StatelessWidget {
   final String label;
   final String? Function(String value)? validator;
   final TextInputType? keyboardType;
-  final int maxLines;
+
+  /// Le righe massime; null: il campo cresce quanto il testo (il testo dell'email precompilata).
+  final int? maxLines;
+
+  /// Le righe sempre visibili, anche a campo vuoto.
+  final int minLines;
   final bool obscure;
   final Widget? suffix;
   final TextCapitalization capitalization;
@@ -58,19 +65,25 @@ class QrTextField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: obscure ? 1 : maxLines,
-      minLines: 1,
+      minLines: obscure ? 1 : minLines,
       obscureText: obscure,
       autocorrect: !obscure,
       enableSuggestions: !obscure,
       textCapitalization: capitalization,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: validator == null ? null : (v) => validator!(v ?? ''),
-      decoration: InputDecoration(labelText: label, suffixIcon: suffix),
+      // ⚑ In un campo di piu' righe l'etichetta sta in alto, non a meta' altezza: a meta' di un
+      // riquadro alto 6 righe sembrava un testo gia' scritto (visto sull'emulatore, F17.10).
+      decoration: InputDecoration(
+        labelText: label,
+        suffixIcon: suffix,
+        alignLabelWithHint: minLines > 1,
+      ),
     ),
   );
 }
 
-/// L'interfaccia comune dei cinque moduli: un contenuto iniziale (modifica di un preferito) e la
+/// L'interfaccia comune dei moduli: un contenuto iniziale (modifica di un preferito) e la
 /// notifica di ogni cambiamento con il contenuto valido, o null se il modulo non lo e' ancora.
 abstract class QrFormWidget<T extends QrContent> extends StatefulWidget {
   const QrFormWidget({required this.onChanged, this.initial, super.key});

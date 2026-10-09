@@ -10,6 +10,7 @@ import '../../app/paywall_config.dart';
 import '../../app/providers.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../common/neon.dart';
+import '../common/qr_actions.dart';
 import 'data_section.dart';
 
 /// Le impostazioni (develop_microapps.md F17.1.6): cronologia, Pro, dati, tema, informazioni,
@@ -87,6 +88,19 @@ class SettingsPage extends ConsumerWidget {
                 err: (error) => MicroSnack.error(context, error.message),
               );
             },
+          ),
+          // La scheda «Io» del modulo Contatto (F17.10 punto 2): modificabile anche da qui.
+          SectionLabel(l.home_formsLabel),
+          ListTile(
+            key: const ValueKey('settings_myContact'),
+            leading: const Icon(Icons.badge_outlined),
+            title: Text(l.myContact_title),
+            subtitle: Text(switch (ref.watch(myContactProvider)) {
+              final me? => me.name,
+              null => l.myContact_none,
+            }),
+            trailing: pro ? null : const ProBadge(),
+            onTap: () => unawaited(openMyContact(context, ref)),
           ),
           const DataSection(),
           SectionLabel(l.settings_appLabel),

@@ -35,6 +35,20 @@ abstract final class QrDecoder {
     return c;
   }
 
+  /// La prima rete Wi-Fi fra le stringhe lette ([raws]: un'inquadratura, o i QR di
+  /// un'immagine), o null se nessuna e' un `WIFI:` valido.
+  ///
+  /// ⚑ Per il modulo Wi-Fi (F17.10 punto 1): «Inquadra il QR della rete» e «Da un'immagine»
+  /// accettano **solo** una rete. Un'immagine puo' contenere piu' QR (l'etichetta di un router
+  /// ha spesso anche quello dell'app del gestore): si prende la rete, ovunque sia.
+  static WifiContent? firstWifi(Iterable<String> raws) {
+    for (final raw in raws) {
+      final c = decode(raw);
+      if (c is WifiContent) return c;
+    }
+    return null;
+  }
+
   static QrContent? _decode(String raw) {
     // ⚑ Solo a sinistra: a destra c'e' il testo di un SMS o di una nota, e tagliarlo romperebbe
     // il round-trip («Ciao » tornerebbe «Ciao»). Il link si controlla a parte, tutto rifilato.

@@ -4,8 +4,15 @@ import '../../domain/qr_content.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'form_fields.dart';
 
-/// Il modulo email: destinatario (obbligatorio, formato email), oggetto, testo (F17.1.6).
-/// Diventa un `mailto:` con oggetto e testo precompilati.
+/// Le righe sempre visibili del testo dell'email precompilata (F17.10 punto 3: «almeno 6»).
+const int kEmailBodyMinLines = 6;
+
+/// Il modulo «Email precompilata»: destinatario (obbligatorio, formato email), oggetto, testo
+/// (F17.1.6). Diventa un `mailto:` con oggetto e testo precompilati.
+///
+/// ⚑ Serve a creare un QR che **apre un'email gia' scritta**, non a condividere il proprio
+/// indirizzo (F17.10 punto 3): per questo il testo e' un campo grande, almeno 6 righe visibili,
+/// che cresce con quello che si scrive.
 class EmailForm extends QrFormWidget<EmailContent> {
   const EmailForm({required super.onChanged, super.initial, super.key});
 
@@ -57,14 +64,18 @@ class _EmailFormState extends State<EmailForm> {
           validator: (v) => emailText(l, v),
         ),
         QrTextField(
+          key: const ValueKey('email_subject'),
           controller: _subject,
           label: l.email_subject,
           capitalization: TextCapitalization.sentences,
         ),
         QrTextField(
+          key: const ValueKey('email_body'),
           controller: _body,
           label: l.email_body,
-          maxLines: 5,
+          keyboardType: TextInputType.multiline,
+          minLines: kEmailBodyMinLines,
+          maxLines: null,
           capitalization: TextCapitalization.sentences,
         ),
       ],

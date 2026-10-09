@@ -170,8 +170,24 @@ class _DisplayBodyState extends ConsumerState<_DisplayBody> {
     }
 
     final logo = ref.watch(logoImageProvider(logoKeyOf(args.style))).value;
+    final labelLocked = !ref.watch(featureGateProvider).allows(FeatureKey.imageExport);
     return Scaffold(
-      appBar: AppBar(title: Text(kindName(l, args.content.kind))),
+      appBar: AppBar(
+        title: Text(kindName(l, args.content.kind)),
+        // ⚑ «Genera etichetta» (Pro, F17.10 punto 5) nella barra e non nella griglia: la griglia ha
+        // gia' 4-5 azioni, una sesta le stringe sotto i 60 dp e taglia le etichette (al 130% di
+        // testo diventano illeggibili), e una seconda riga ruberebbe altezza al QR, che e' il
+        // motivo dell'app. Con testo e icona, non solo icona: si deve capire senza tenerla premuta.
+        actions: [
+          TextButton.icon(
+            key: const ValueKey('action_label'),
+            onPressed: () => unawaited(openLabel(context, ref, args: args, title: title)),
+            icon: Icon(labelLocked ? Icons.lock_outline : Icons.print_outlined, size: 18),
+            label: Text(l.display_label),
+          ),
+          MicroSpacing.hGapS,
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
