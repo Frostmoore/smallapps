@@ -130,12 +130,14 @@ final qrRendererProvider = Provider<QrRenderer>((ref) => const QrRenderer());
 
 final logoRendererProvider = Provider<LogoRenderer>((ref) => const LogoRenderer());
 
-/// Lo scanner su un file immagine (`analyzeImage`): «Da immagine», condivisione, verifica.
-final qrImageReaderProvider = Provider<QrImageReader>((ref) => const MobileScannerImageReader());
+/// Il lettore di QR su un file immagine (ZXing): «Da immagine» e condivisione di un'immagine.
+final qrImageReaderProvider = Provider<QrImageReader>((ref) => const ZxingImageReader());
 
+/// ⚑ La verifica usa il lettore **severo** (`ZxingImageReader.strict`, niente QR invertiti) e
+/// non [qrImageReaderProvider]: vedi il perche' sul costruttore. I test sostituiscono
+/// direttamente questo provider.
 final readabilityCheckProvider = Provider<ReadabilityCheck>(
-  (ref) =>
-      ReadabilityCheck(ref.watch(qrImageReaderProvider), renderer: ref.watch(qrRendererProvider)),
+  (ref) => ReadabilityCheck(const ZxingImageReader.strict(), renderer: ref.watch(qrRendererProvider)),
 );
 
 final screenBoostProvider = Provider<ScreenBoost>((ref) => const ScreenBoost());

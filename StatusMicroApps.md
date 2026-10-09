@@ -37,7 +37,7 @@ vetrina da aggiungere.
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
 | Riassumilo | F16 | ⚪ non iniziata | ⚪ non iniziata |
-| QR Me (ex Fammi un QR) | F17 | 🟡 in sviluppo dal 2026-10-09 (decisioni e specsheet fatte) | 🟡 in sviluppo |
+| **QR Me** (ex Fammi un QR) | F17 | ⚪ codice Android completo (2026-10-09); app non creata su Play Console, bloccata dall'account (D-U-N-S) | ⚪ codice iOS completo, gira sul simulatore; servono App ID e App Group dal proprietario per TestFlight |
 | Leggimelo | F18 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove porta? | F19 | ⚪ non iniziata | ⚪ non iniziata |
 
@@ -260,6 +260,51 @@ proprietario su iPad (TestFlight: «mi pare che funzioni tutto»).
 | 2026-10-08 | Build **1.0.0 (1)** su TestFlight e collegata alla versione; gruppo «Sviluppatore» col proprietario, invito mandato |
 | 2026-10-08 | Fatti a mano dal proprietario: Intestazione e Risultati della ricerca, etichetta privacy, classificazione per eta', acquisto in-app spuntato; provata su iPad |
 | 2026-10-08 | **Inviata alla revisione**: versione 1.0.0 e Pro in WAITING_FOR_REVIEW (verificato via API) |
+
+## QR Me
+
+| Dato | Valore |
+|---|---|
+| Pacchetto / bundle | `com.smp.qrme` · estensione di condivisione iOS `com.smp.qrme.ShareExtension` |
+| App Group iOS | `group.com.smp.qrme` (app ed estensione: serve alla condivisione verso l'app) |
+| Prodotto Pro | `qrme_pro_lifetime`, non consumabile, **1,99 €** (Play: base **1,63 EUR** senza IVA) |
+| Nome | «QR Me» in italiano e in inglese (ripiego se gia' preso: «QR Me – Share & Scan» / «QR Me – Condividi e leggi») |
+| Piattaforme | Android e solo iPhone |
+| Grafica | «A · Neon» (tema scuro, verde `#3BD13B`) |
+
+Codice completo il 2026-10-09 (F17.0–F17.7): 152 test, provato sull'emulatore Android
+(condivisione di testo e di immagini con un QR vero, moduli, stile con verifica di leggibilita',
+backup) e sul simulatore iPhone. Card «In arrivo» pubblicata nel sito il 2026-10-09.
+
+### Google Play — ⚪ non ancora creata, bloccata dall'account
+
+| Data | Evento |
+|---|---|
+| 2026-10-09 | Codice Android completo; **app non ancora creata su Play Console**, nessun AAB caricato |
+| 2026-10-09 | Fermo come le altre app nuove: account personale (12 tester per 14 giorni), si aspetta il D-U-N-S |
+| 2026-10-09 | **ML Kit tolto** (decisione del proprietario: dati solo sul telefono): la lettura passa a ZXing dentro l'app, su Android e iOS |
+
+**Prossimi passi Play** (dopo il cambio di account):
+- [ ] License Server: riga `qrme` nella tabella `apps` e il suo segreto in `APP_SECRETS`
+- [ ] Creare l'app su Play Console (`com.smp.qrme`), AAB di release firmato in test interno
+- [ ] Prodotto `qrme_pro_lifetime` a **1,63 EUR senza IVA** (→ 1,99 €)
+- [ ] Scheda it/en, screenshot e grafiche (da fare: `store/` non esiste ancora)
+- [ ] Data safety (nessun dato raccolto, salvo il server licenze per il Pro) e dichiarazione della fotocamera
+- [ ] Provare su un Android vero: fotocamera reale, condivisione da Chrome e da Galleria
+
+### App Store — ⚪ non ancora creata
+
+| Data | Evento |
+|---|---|
+| 2026-10-09 | Estensione di condivisione aggiunta al progetto con `tool/aggiungi_share_extension_ios.rb` (eseguito sul Mac, idempotente); build per il simulatore riuscita; l'estensione non incorpora framework |
+| 2026-10-09 | App provata sul simulatore iPhone (grafica Neon); esclusione di database e dati dal backup iCloud verificata |
+
+**Prossimi passi App Store:**
+- [x] **Proprietario:** App ID `com.smp.qrme` e gruppo `group.com.smp.qrme` creati (2026-10-09)
+- [ ] **Proprietario:** App ID `com.smp.qrme.ShareExtension` con App Groups → `group.com.smp.qrme`
+- [ ] Profili via API per app ed estensione, build su TestFlight
+- [ ] **Provare su iPad**: condividere da Safari verso QR Me (l'estensione deve riaprire l'app); se iOS lo impedisce, ripiego deciso in F17.1.8 (QR mostrato dall'estensione stessa)
+- [ ] App su App Store Connect (nome «QR Me», o il ripiego), prodotto `qrme_pro_lifetime` a 1,99 €, scheda, screenshot, revisione
 
 ---
 

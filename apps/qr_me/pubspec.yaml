@@ -20,6 +20,13 @@ environment:
 # ☠ Il plugin dichiara compileSdk 37 e con AGP 9 il build Android falliva: vedi il blocco
 # `receive_sharing_intent` in android/build.gradle.kts (F17.4).
 dependencies:
+  # La fotocamera sotto il ReaderWidget di flutter_zxing (CameraX su Android, AVFoundation su
+  # iOS). Gia' presente tramite flutter_zxing: qui e' diretta perche' scan_page.dart usa
+  # `FlashMode` e `CameraException`, che flutter_zxing non riesporta. ⚑ Lo stesso vincolo che
+  # risolve flutter_zxing (">=0.11.0 <0.13.0"): non allargarlo da qui.
+  # ☠ camera_android_camerax dichiara anche RECORD_AUDIO e WRITE_EXTERNAL_STORAGE: li toglie
+  # il nostro AndroidManifest.xml (tools:node="remove"), non registriamo audio ne' video.
+  camera: ^0.12.1
   # I grafemi del logo di testo (1-3 "caratteri" come li vede una persona: una bandiera o una
   # famiglia di emoji contano uno). Dart puro, gia' presente tramite Flutter: qui e' diretta perche'
   # la usa lib/domain/qr_style.dart (TextLogo).
@@ -34,6 +41,15 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^3.4.3
+  # La lettura dei QR, dalla fotocamera (`ReaderWidget`) e da un file (`zx.readBarcodesImagePathString`),
+  # anche per la verifica di leggibilita' dello stile (F17.1.7). ZXing C++ via FFI, compilato
+  # dentro l'app su entrambe le piattaforme: nessuna rete, nessun servizio Google o Apple.
+  # ⚑ Ha sostituito mobile_scanner il 2026-10-09 per decisione del proprietario («niente dati a
+  # Google, assolutamente»): su Android mobile_scanner usa ML Kit, che manda a Google metriche
+  # d'uso e un id d'installazione e non si spegne. Non rimetterlo (develop_microapps.md F17.1.2).
+  # ☠ Non chiamare mai `zx.readBarcodeImageUrl`/`readBarcodesImageUrl`: sono l'unico punto del
+  # pacchetto che va in rete.
+  flutter_zxing: ^3.1.0
   go_router: ^18.0.2
   # Il ritaglio quadrato/rotondo del logo foto, una volta sola all'import (F17.1.7). ⚑ Al posto
   # di image_cropper: una dipendenza nativa in meno. Era gia' nell'app tramite micro_core.
@@ -49,10 +65,6 @@ dependencies:
   # le app che non ricevono condivisioni non devono avere.
   micro_share:
     path: ../../packages/micro_share
-  # La lettura dalla fotocamera e da un'immagine (`analyzeImage`), anche per la verifica di
-  # leggibilita' dello stile (F17.1.7). iOS: AVFoundation + Vision; Android: ML Kit incluso
-  # (+3-10 MB). ☠ ML Kit e privacy: da verificare in F17.7 (F17.1.10) prima di pubblicare.
-  mobile_scanner: ^7.4.2
   path: ^1.9.1
   path_provider: ^2.1.6
   # Il QR: `QrImageView` per lo schermo e `QrPainter` per il PNG, con gli stessi parametri

@@ -192,7 +192,7 @@ specsheet completa in §8**, come per F3–F6.
 | F14 | **Ricordamelo qui** | Promemoria quando si arriva o si esce da un luogo | `com.smp.ricordamelo` | **Geofencing**: posizione **in background**, permesso sensibile su Play (dichiarazione e video) e su iOS; limiti dei sistemi sul numero di aree |
 | F15 | **Quanti sono?** | Contare oggetti ripetuti con la fotocamera | `com.smp.quantisono` | **Visione on-device** (sperimentale per il proprietario stesso); §1.4 esclude l'AI dall'MVP: serve una decisione |
 | F16 | **Riassumilo** | Riassunto breve di un link o testo condiviso (Share Sheet) | `com.smp.riassumilo` | **Modello di linguaggio** on-device o remoto: costi, privacy, qualita'; §1.4 esclude l'AI dall'MVP: serve una decisione. Estensione di condivisione iOS |
-| F17 | **QR Me** (ex «Fammi un QR», rinominata il 2026-10-09) | QR a tutto schermo da qualunque cosa condivisa, e lettura dei QR | `com.smp.qrme` (definitivo, F17.0) | Ricezione da Share Sheet (intent `SEND` su Android, **Share Extension** su iOS) in `packages/micro_share/`; scanner `mobile_scanner`; stile con colori e logo |
+| F17 | **QR Me** (ex «Fammi un QR», rinominata il 2026-10-09) | QR a tutto schermo da qualunque cosa condivisa, e lettura dei QR | `com.smp.qrme` (definitivo, F17.0) | Ricezione da Share Sheet (intent `SEND` su Android, **Share Extension** su iOS) in `packages/micro_share/`; scanner `flutter_zxing` (ZXing via FFI, dal 2026-10-09 al posto di `mobile_scanner`/ML Kit); stile con colori e logo |
 | F18 | **Leggimelo** | Un articolo condiviso letto ad alta voce | `com.smp.leggimelo` | Estrazione del testo principale da una pagina (rete) + sintesi vocale del sistema; Share Extension |
 | F19 | **Dove porta?** | Dove porta davvero un link abbreviato o sospetto, prima di aprirlo | `com.smp.doveporta` | Segue i redirect via rete **senza aprire la pagina**; segnali sospetti (punycode, domini strani); cambia l'informativa privacy ("l'app non parla con nessun server" non vale piu') |
 
@@ -1143,16 +1143,17 @@ volta sola; nella fase di ciascuna app si spuntano.
   - [~] **F17.2b** `packages/micro_share/` + `tool/aggiungi_share_extension_ios.rb` — package FATTO il 2026-10-09 (20 test, atlante proprio, aggiunto a `tool/_common.ps1`); lo script Ruby va ancora eseguito sul Mac su `apps/qr_me` e la riapertura dell'app provata su iPad (serve l'App Group dal proprietario). ☠ Il pacchetto Swift del plugin sta in `.packages/receive_sharing_intent-<versione>`: lo script legge la versione dal `pubspec.lock` e va rilanciato a ogni aggiornamento del plugin
   - [x] **F17.2c** Bootstrap `apps/qr_me`, icona e splash — FATTO il 2026-10-09: `com.smp.qrme` Android e iOS (solo iPhone), manifest con ACTION_SEND testo e immagini, `allowBackup=false`, niente READ_EXTERNAL_STORAGE, icone dall'originale del proprietario (iOS su #F3F7F3, adattiva e monocromatica Android), APK debug compilato
   - [x] **F17.3** Dominio e dati, con test — FATTO il 2026-10-09: `lib/domain/*`, `lib/data/*`, 95 test. Decisioni minori: `QrDecoder.decodeTyped` per il testo scritto (`esempio.it` → link), `decode` per il letto (resta testo); paywall con 6 righe (una per chiave). Debito: esclusione del database dal backup iCloud (serve codice nativo, F17.7)
-  - [x] **F17.4** Interfaccia essenziale, provata con condivisioni vere — FATTO il 2026-10-09: servizi (`QrRenderer` unico traduttore stile→qr_flutter, `LogoRenderer`, `ReadabilityCheck` con ML Kit che funziona anche sull'emulatore, `ScreenBoost`, `ShareRouter`/`ShareIntake`, `ContentActions`), tutte le pagine, grafica Neon (`lib/app/qr_palette.dart`, `features/common/neon.dart`, Space Grotesk), 142 test; provate sull'emulatore la condivisione di testo (app aperta e chiusa), moduli, stile, PNG, paywall. ☠ `receive_sharing_intent` 1.9.0 dichiara `compileSdk 37` che AGP 9 non trova: `finalizeDsl { compileSdk = 36 }` in `android/build.gradle.kts` dell'app (da ripetere in ogni app con `micro_share`). Non provati: immagine condivisa con un QR vero, fotocamera reale, backup
+  - [x] **F17.4** Interfaccia essenziale, provata con condivisioni vere — FATTO il 2026-10-09: servizi (`QrRenderer` unico traduttore stile→qr_flutter, `LogoRenderer`, `ReadabilityCheck` con ML Kit che funziona anche sull'emulatore (dal 2026-10-09 ZXing, F17.7.7), `ScreenBoost`, `ShareRouter`/`ShareIntake`, `ContentActions`), tutte le pagine, grafica Neon (`lib/app/qr_palette.dart`, `features/common/neon.dart`, Space Grotesk), 142 test; provate sull'emulatore la condivisione di testo (app aperta e chiusa), moduli, stile, PNG, paywall. ☠ `receive_sharing_intent` 1.9.0 dichiara `compileSdk 37` che AGP 9 non trova: `finalizeDsl { compileSdk = 36 }` in `android/build.gradle.kts` dell'app (da ripetere in ogni app con `micro_share`). Non provati: immagine condivisa con un QR vero, fotocamera reale, backup
   - [x] **F17.5** Pro: limiti, paywall, test di coerenza — FATTO il 2026-10-09: chiavi verificate punto per punto, il gesto che apre il paywall prosegue dopo l'acquisto
   - [x] **F17.6** Proposte grafiche, scelta del proprietario — scelta «A · Neon» il 2026-10-09 (F17.0 punto 10), applicata insieme a F17.4
-  - [~] **F17.7** Test, rifinitura, iOS sul simulatore, decisione su ML Kit — parte Android FATTA il 2026-10-09 (152 test):
+  - [~] **F17.7** Test, rifinitura, iOS sul simulatore, decisione su ML Kit — parte Android FATTA il 2026-10-09 (155 test). **ML Kit sostituito da ZXing il 2026-10-09, decisione del proprietario** («niente dati a Google, assolutamente»; F17.7.7):
     - [x] **F17.7.1** Doppio segno nella riga di verifica: nei testi (ARB e `tool/testi_*.py`) non c'era nessun ✓/⚠/✗, il segno e' gia' solo l'icona (verificato sull'emulatore); aggiunta la guardia `test/widget/texts_glyphs_test.dart`
     - [x] **F17.7.2** Loghi foto orfani: `QrRepository.pruneOrphanLogos({Duration grace})` (salta i file degli ultimi 15 minuti, tiene immagini **e** miniature in uso), chiamata 3 s dopo il primo frame in `QrMeApp`; provata sul dispositivo (2 file vecchi tolti, quello nuovo lasciato) e con 2 test
     - [x] **F17.7.3** Backup iCloud: `isExcludedFromBackup` su `Documents/` (database `qr_me.sqlite` e `qr_me/images`) a ogni avvio in `ios/Runner/AppDelegate.swift`. ☐ **Da compilare e provare sul Mac** (non compilabile da Windows)
-    - [x] **F17.7.4** ML Kit: verificato (bundled `barcode-scanning:17.3.0`, invia metriche d'uso non spegnibili; iOS usa Vision, nulla esce). **Decisione APERTA del proprietario**: tenerlo dichiarandolo (raccomandato) o passare a ZXing — `memory/decisioni.md` «QR Me: ML Kit», F17.1.10
+    - [x] **F17.7.4** ML Kit: verificato (bundled `barcode-scanning:17.3.0`, invia metriche d'uso non spegnibili; iOS usa Vision, nulla esce). Decisione del proprietario il 2026-10-09: **via ML Kit, si passa a ZXing** (F17.7.7) — `memory/decisioni.md` «QR Me: ML Kit», F17.1.10
     - [x] **F17.7.5** Rifinitura sull'emulatore: testo al 130% (corretto «Nessun/o» spezzato nei segmenti del logo), tema chiaro (accento #16A34A → #15803D per il contrasto AA, titolo della pagina di lettura invisibile corretto; test `palette_contrast_test.dart`), condivisione di un PNG con un QR vero da Google Foto ad app chiusa e aperta, «Da immagine» col selettore di sistema, backup → cancella cronologia → ripristino
-    - [ ] **F17.7.6** iOS sul simulatore/iPad (sul Mac): build, esclusione dal backup, estensione di condivisione, Vision
+    - [ ] **F17.7.6** iOS sul simulatore/iPad (sul Mac): build, esclusione dal backup, estensione di condivisione, lettura con ZXing (fotocamera vera e «Da immagine»), e controllo che App Store Connect non chieda `NSMicrophoneUsageDescription` (vedi F17.1.10)
+    - [x] **F17.7.7** ML Kit sostituito da ZXing il 2026-10-09, decisione del proprietario — FATTO il 2026-10-09: `mobile_scanner` tolto, `flutter_zxing` 3.1.0 (+ `camera` 0.12.1 diretta) su Android **e** iOS; `ScanPage` su `ReaderWidget` (F17.1.6), `ZxingImageReader` e `ZxingImageReader.strict` (F17.1.7), manifest ripulito (F17.1.10). Verificato: nessuna dipendenza `com.google.mlkit` risolta, nessun servizio ML Kit nel manifest fuso. ⚠ `datatransport`/`firebase-encoders`/`play-services-*` restano, ma li porta **Play Billing** (`com.android.billingclient:billing:8.0.0` via `in_app_purchase_android`), non lo scanner: riguarda tutte le app con il Pro su Android (F17.1.10). Provati sull'emulatore: pagina di lettura (anteprima, mirino, torcia, ritorno dal risultato che riaccende la fotocamera), permesso negato → stato vuoto, «Da immagine» con un PNG vero → «Link smpmicroapps.it», condivisione da Google Foto → risultato, Stile col Pro finto → «Leggibile» (bianco su bianco → «Non riesco a leggerlo»; chiaro su scuro → non leggibile per scelta, `strict`). ☐ Lettura dal vivo con la fotocamera **non** provata (la scena virtuale dell'emulatore non mostra un QR): da fare su un telefono vero
   - [ ] **F17.8** Atlanti di `apps/qr_me` e `packages/micro_share`
   - [ ] **F17.9** Rituale di fine fase, card «In arrivo», branch `v9.0.0`
 - [ ] **F18** Leggimelo — lettura ad alta voce di un articolo condiviso
@@ -5440,7 +5441,8 @@ apps/qr_me/
 | Pacchetto | Versione | Perche' |
 |---|---|---|
 | `qr_flutter` | `^4.1.0` | gia' in Film Tracker; `QrImageView` e `QrPainter` (per il PNG) |
-| `mobile_scanner` | `^7.4.2` | lettura da fotocamera e da immagine (`analyzeImage`). iOS: AVFoundation + Vision; Android: ML Kit **incluso** (default, +3–10 MB). ☠ vedi F17.1.11 punto 3 |
+| `flutter_zxing` | `^3.1.0` (risolta 3.1.0) | lettura da fotocamera (`ReaderWidget`) e da file (`zx.readBarcodesImagePathString`). ZXing C++ via FFI, compilato nell'app su Android (CMake/NDK) e iOS: **nessuna rete, nessun servizio Google o Apple**. Ha sostituito `mobile_scanner` (ML Kit su Android) il 2026-10-09 per decisione del proprietario. ☠ Non chiamare mai `readBarcodeImageUrl`/`readBarcodesImageUrl`: l'unico punto del pacchetto che va in rete. ☠ vedi F17.1.11 punto 3 |
+| `camera` | `^0.12.1` (risolta 0.12.1; `camera_android_camerax` 0.7.5+1, `camera_avfoundation` 0.10.3+1) | gia' portata da `flutter_zxing`; diretta perche' `scan_page.dart` usa `FlashMode`, `CameraException`, `availableCameras`, che `flutter_zxing` non riesporta. CameraX 1.6.2 + Guava, nessuna libreria di analytics |
 | `micro_share` | `path: ../../packages/micro_share` | ricezione da Share Sheet (F17.2b) |
 | `screen_brightness` | `^2.1.11` | luminosita' **dell'app** al massimo mentre il QR e' mostrato; nessun permesso |
 | `wakelock_plus` | ultima stabile | lo schermo non si spegne mentre qualcuno inquadra |
@@ -5680,12 +5682,26 @@ giusto di usarla e' dalla condivisione.
   (bianco, o il colore di sfondo dello stile) con la zona di rispetto: abbaglia meno di una pagina
   tutta bianca e la fotocamera trova comunque il bordo chiaro di cui ha bisogno.
 
-**`ScanPage`**: `MobileScanner` a tutto schermo con mirino disegnato, `formats: [BarcodeFormat.qrCode]`
-(⚑ solo QR: i codici a barre dei prodotti non sono il mestiere dell'app e farebbero scattare letture
-accidentali), torcia, **Da immagine** (image_picker → `controller.analyzeImage(path)`).
-Alla prima lettura valida: vibrazione leggera, si ferma lo scanner, `/scan/result`.
-Permesso negato → `MicroEmptyState` con «Apri le impostazioni» (e il bottone Da immagine resta
-usabile: non serve la fotocamera).
+**`ScanPage`** (`lib/features/scan/scan_page.dart`, riscritta il 2026-10-09 su ZXing): il
+`ReaderWidget` di `flutter_zxing` a tutto schermo con `codeFormat: Format.qrCode` (⚑ solo QR: i codici
+a barre dei prodotti non sono il mestiere dell'app e farebbero scattare letture accidentali),
+`tryInverted: true`, `cropPercent: ScanPage.cropPercent` (0.8, piu' largo del mirino disegnato
+`_Viewfinder.sideFraction` 0.66), `scanDelay` 150 ms, `scanDelaySuccess: Duration.zero`. Del widget
+si usano solo anteprima e decodifica: `showScannerOverlay`, `showFlashlight`, `showGallery`,
+`showToggleCamera` tutti `false` (doppioni dei nostri). Il mirino Neon resta il nostro `_Viewfinder`.
+- **Torcia**: nella barra, con il `CameraController` che il widget consegna in `onControllerCreated`
+  (`setFlashMode(FlashMode.torch/off)`); solo con la fotocamera posteriore; al primo errore sparisce.
+- **Prima lettura valida** (`onScan`): vibrazione leggera, poi `_showResult` **smonta** il
+  `ReaderWidget` (spegne davvero la fotocamera) e apre `/scan/result`; al ritorno lo rimonta.
+  `_handling` blocca le letture doppie.
+- **Da immagine**: `pickImageProvider` → `qrImageReaderProvider.read(path)` (ZXing su file).
+- **Errori**: `onControllerCreated(null, error)` → `_ScanError`. Permesso negato = `CameraException`
+  con codice che inizia per `CameraAccessDenied` (Android CameraX e iOS; iOS anche
+  `CameraAccessDeniedWithoutPrompt`) → `MicroEmptyState` «La fotocamera e' spenta» con «Apri le
+  impostazioni» su iOS e «Riprova» su Android (chiave nuova al `ReaderWidget` = nuova richiesta);
+  qualunque altro errore, o **nessuna fotocamera** (`availableCameras()` vuota: il widget altrimenti
+  resterebbe nero per sempre) → «La fotocamera non e' partita». Il bottone Da immagine resta sempre
+  usabile.
 
 **`ScanResultPage`**: tipo riconosciuto (icona + etichetta), contenuto leggibile, azioni secondo il
 tipo: link → **Apri** (url_launcher, `LaunchMode.externalApplication`) e Copia; telefono → Chiama;
@@ -5742,16 +5758,35 @@ font MaterialIcons); `PhotoLogo` si legge da `ImageStore`, ritagliata quadrata a
 rotonda) quando la si importa, una volta sola, a 512 px.
 
 ```dart
+abstract interface class QrImageReader { Future<List<String>> read(String path); }
+class QrReaderUnavailable implements Exception { const QrReaderUnavailable(this.cause); final Object cause; }
+class ZxingImageReader implements QrImageReader {
+  const ZxingImageReader({this.tryInverted = true});   // «Da immagine», condivisione
+  const ZxingImageReader.strict() : tryInverted = false; // verifica di leggibilita'
+  static const int maxSize = 1600;
+}
 class ReadabilityCheck {
-  ReadabilityCheck(this._scanner);
-  /// Genera il PNG, lo scrive in un file temporaneo, lo rilegge con MobileScannerController.analyzeImage
-  /// e confronta il rawValue con il payload. true solo se coincide esattamente.
-  Future<bool> isReadable({required String payload, required QrStyle style});
+  ReadabilityCheck(QrImageReader reader, {QrRenderer renderer, Future<Directory> Function()? tempDir});
+  /// Genera il PNG (720 px), lo scrive in un file temporaneo, lo rilegge con il lettore e confronta
+  /// il testo con il payload. readable solo se coincide esattamente.
+  Future<Readability> check({required String payload, required QrStyle style, ui.Image? logo});
 }
 ```
+Tutto in `lib/services/readability_check.dart`. `ZxingImageReader.read` gira in `Isolate.run`
+(decodifica PNG + ricerca: decine di ms di CPU, la verifica scatta a ogni pausa mentre si cambia
+stile) e chiama `zx.readBarcodesImagePathString(path, DecodeParams(format: Format.qrCode,
+tryHarder: true, tryInverted: …, tryDownscale: true, maxSize: 1600, isMultiScan: true))`.
+`maxSize` 1600 e non 768 (default): uno screenshot intero ridotto a 768 lascia moduli di 1–2 px.
+Un file che non si decodifica come immagine torna come lista vuota («nessun QR»); la libreria nativa
+non caricabile (`ArgumentError` da `DynamicLibrary.open`, come sotto `flutter test` sul PC) diventa
+`QrReaderUnavailable`.
+⚑ La verifica usa **`ZxingImageReader.strict`** (niente QR invertiti): molti lettori non leggono
+un QR chiaro su scuro, e dire «Leggibile» perche' ZXing ci riesce provando l'inverso sarebbe una
+promessa falsa (lo stile invertito ha gia' l'avviso di `Contrast.inverted`). Per questo
+`readabilityCheckProvider` non passa da `qrImageReaderProvider`.
 ⚑ E' la difesa vera contro i QR «carini ma illeggibili»: le regole di contrasto sono euristiche,
-questo e' il test. ☠ Su emulatore/simulatore `analyzeImage` puo' non essere disponibile: in quel
-caso il risultato e' «non verificato» (grigio), **non** «illeggibile».
+questo e' il test. ☠ Se il lettore non c'e' il risultato e' «non verificato» (grigio), **non**
+«illeggibile». Con ZXing succede solo per guasti veri: legge anche su emulatore e simulatore.
 
 ```dart
 class ScreenBoost {
@@ -5764,7 +5799,7 @@ luminosita' deve comunque mostrare il QR.
 
 ```dart
 class ShareRouter {
-  /// SharedText → QrDecoder.decode → /show (source: shared). SharedImage → analyzeImage → /scan/result
+  /// SharedText → QrDecoder.decode → /show (source: shared). SharedImage → QrImageReader (ZXing) → /scan/result
   /// (o messaggio «Nessun QR in questa immagine»). Piu' elementi: si prende il primo testo, poi la prima immagine.
   Future<void> handle(SharedPayload payload, GoRouter router);
 }
@@ -5848,18 +5883,35 @@ diventano rossi. Nessun cambiamento di comportamento per loro.
 
 | Piattaforma | Permesso | Quando |
 |---|---|---|
-| Android | `CAMERA` (dichiarato da mobile_scanner) | alla prima apertura di `/scan` |
+| Android | `CAMERA` (dichiarato **da noi** nel manifest, oltre che da `camera_android_camerax`) | alla prima apertura di `/scan` |
+| Android | **tolti** con `tools:node="remove"`: `RECORD_AUDIO` e `WRITE_EXTERNAL_STORAGE` (li dichiara `camera_android_camerax` per chi registra video; noi apriamo la fotocamera con `enableAudio: false`) e `READ_EXTERNAL_STORAGE` (il fusore la «deduce» da WRITE, IMPLIED nel report di fusione); `uses-feature android.hardware.camera.any` portata a `required="false"` (`tools:replace`): l'app crea QR e legge da immagine anche senza fotocamera | — |
 | iOS | `NSCameraUsageDescription` («Per leggere i QR con la fotocamera.» / «To read QR codes with the camera.») | idem |
+| iOS | **niente** `NSMicrophoneUsageDescription`: il `ReaderWidget` crea il `CameraController` con `enableAudio: false` e `camera_avfoundation` chiede il microfono solo se `enableAudio` (verificato nel sorgente, `CameraPlugin.swift`). ⚠ Da controllare al primo caricamento su App Store Connect: il binario contiene comunque le API audio del plugin, e se Apple manda l'avviso ITMS-90683 si aggiunge la stringa (F17.7.6) | — |
 | iOS | `NSPhotoLibraryUsageDescription` (richiesto da image_picker anche col picker di sistema) | idem per il logo e «Da immagine» |
 | Android | `<queries>` per `https`, `tel`, `mailto`, `smsto` (url_launcher su Android 11+) | — |
 
-Informativa: nessun dato esce dal telefono (come le altre app; su Android solo il server licenze
-per il Pro). ☠ **ML Kit** (Android): Google dichiara che le API di ML Kit possono inviare metriche
-d'uso anonime. Va verificato in F17.2 su quali dati e come si spengono; se non si spengono, va
-detto nell'informativa e nella Data safety di Play, oppure si passa a uno scanner ZXing puro
-(`flutter_zxing`). La scelta si scrive in `memory/decisioni.md` **prima** di pubblicare.
+Informativa: **nessun dato esce dal telefono, su Android come su iOS** (come le altre app; salvo
+il server licenze per il Pro). Vale anche per la lettura dei QR da quando lo scanner e' ZXing
+(2026-10-09): la decodifica gira tutta dentro l'app, via FFI, senza rete.
 
-**Verifica di F17.7 (2026-10-09) — decisione APERTA, spetta al proprietario prima di Play.**
+**Decisione del proprietario (2026-10-09, non negoziabile)**: «niente dati a Google, assolutamente.
+Uno dei requisiti delle microapps e' i dati solo sul telefono». ML Kit e' stato **tolto del tutto**:
+`mobile_scanner` → `flutter_zxing` su entrambe le piattaforme (F17.7.7). Registro:
+`memory/decisioni.md`, voce «QR Me: ML Kit».
+
+**Verifica «niente Google» dopo il cambio (2026-10-09)**:
+- `gradlew :app:dependencies --configuration releaseRuntimeClasspath`: **nessun** `com.google.mlkit`,
+  `barcode-scanning`, `play-services-mlkit`, `vision`. `flutter_zxing` non ha dipendenze Maven;
+  `camera_android_camerax` porta solo `androidx.camera:*` 1.6.2 e Guava.
+- Manifest dell'APK (`aapt dump xmltree`): nessun componente `com.google.mlkit`.
+- ⚠ **Restano** `com.google.android.datatransport:*` (servizi `TransportBackendDiscovery`,
+  `JobInfoSchedulerService`, `AlarmManagerSchedulerBroadcastReceiver`), `com.google.firebase:firebase-encoders*`
+  e `play-services-base/basement/tasks/location`: li porta **`com.android.billingclient:billing:8.0.0`**
+  (tramite `in_app_purchase_android`, cioe' il Pro di `micro_core`), non lo scanner. Sono gli stessi in
+  tutte le app con il Pro su Android. Se anche il canale di Play Billing va considerato, e' una
+  decisione da prendere per **tutte** le microapp, non per QR Me.
+
+**Storico — verifica di F17.7 (2026-10-09), prima della decisione** (superata: ML Kit non c'e' piu').
 - **Cosa usa l'app**: `mobile_scanner` 7.4.2 su Android dipende da `com.google.mlkit:barcode-scanning:17.3.0`
   (**bundled**, modello nell'APK; `useUnbundled` non impostato). `autoZoom` spento. Su **iOS** usa
   **Vision di Apple** (solo `Vision`/`AVFoundation` nel codice `darwin/`, nessuna dipendenza esterna):
@@ -5881,7 +5933,9 @@ detto nell'informativa e nella Data safety di Play, oppure si passa a uno scanne
 
 1. **Escape del Wi-Fi** (F17.1.3): test con SSID e password contenenti `; , : " \`.
 2. **Luminosita'** ripristinata anche in pausa (F17.1.6).
-3. **ML Kit** e privacy (F17.1.10).
+3. **ML Kit** e privacy (F17.1.10): risolta togliendo ML Kit (ZXing dal 2026-10-09). ☠ Non
+   rimettere `mobile_scanner` ne' altri scanner basati su ML Kit/Google; non chiamare le letture
+   «da URL» di `flutter_zxing`.
 4. **Logo che copre troppo**: lato fisso al 22% e livello H; la `ReadabilityCheck` e' la prova.
 5. **Doppia apertura da condivisione**: con l'app aperta, `incoming` e `initial` possono consegnare
    lo stesso elemento: `reset()` subito dopo aver letto `initial()`, e `ShareRouter` ignora un
@@ -5903,6 +5957,7 @@ detto nell'informativa e nella Data safety di Play, oppure si passa a uno scanne
 | `test/domain/contrast_test.dart` | nero/bianco 21, grigi simili < 3, inversione |
 | `test/data/qr_repository_test.dart` | niente doppioni in cronologia, potatura a 5 che non tocca i preferiti, cronologia spenta = nessuna scrittura, cancellazione logo orfano |
 | `test/data/qr_backup_test.dart` | round-trip del backup con un logo foto |
+| `test/services/services_test.dart` (gruppo `ZxingImageReader`) | senza libreria nativa (sotto `flutter test`) il lettore lancia `QrReaderUnavailable` e non un errore qualunque; un file che non si apre come immagine e' «nessun QR»; `strict` non prova gli invertiti |
 | `test/services/share_router_test.dart` | testo → `/show`, link → UrlContent, immagine senza QR → messaggio, doppione entro 2 s ignorato (con `FakeShareInbox`) |
 | `test/widget/paywall_config_test.dart` | tutte le chiavi mappate, limiti come in F17.0 punto 6 |
 | `test/widget/display_page_test.dart` | password Wi-Fi nascosta, azioni Pro con lucchetto, `ScreenBoost` chiamato e ripristinato in pausa (finto) |

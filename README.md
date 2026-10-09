@@ -11,12 +11,14 @@ il monorepo e' la base per tutte le microapp che verranno.
 | **Full Freezer** | `apps/full_freezer/` | Inventario del freezer ordinato per anzianità | `apps/full_freezer/codebase_reference.md` |
 | **Scorte Calore** | `apps/scorte_calore/` | Autonomia residua di pellet, GPL, gasolio, legna | `apps/scorte_calore/codebase_reference.md` |
 | **Film Tracker** | `apps/film_tracker/` | Diario dei rullini fotografici analogici | `apps/film_tracker/codebase_reference.md` |
+| **QR Me** | `apps/qr_me/` | Condividi qualunque cosa ed e' un QR a tutto schermo; legge anche i QR | `apps/qr_me/codebase_reference.md` |
 | **micro_core** | `packages/micro_core/` | Nucleo condiviso: tema, billing, licenze, notifiche, backup | `packages/micro_core/codebase_reference.md` |
+| **micro_share** | `packages/micro_share/` | Ricezione da Share Sheet (Android e iOS), per le app che ricevono condivisioni | `packages/micro_share/codebase_reference.md` |
 | **Vetrina** | `site/` | Il sito pubblico su smpmicroapps.it, in italiano e inglese: catalogo, pagina di TrashCan, contatti, pagine legali | `site/codebase_reference.md` |
 | **License Server** | `server/` — **repo separata** | Verifica acquisti Play, registro entitlement, pannello admin | `server/codebase_reference.md` |
 
-> **Stato al 2026-10-08**: esistono e sono aggiornati gli atlanti di `micro_core`, del
-> License Server, di TrashCan, della Vetrina, di Full Freezer, di Scorte Calore e di Film Tracker. Gli altri vengono creati alla
+> **Stato al 2026-10-09**: esistono e sono aggiornati gli atlanti di `micro_core`, di `micro_share`, del
+> License Server, di TrashCan, della Vetrina, di Full Freezer, di Scorte Calore, di Film Tracker e di QR Me. Gli altri vengono creati alla
 > fine della fase che costruisce il rispettivo progetto. Vedi `develop_microapps.md`.
 
 ## A che punto siamo
@@ -33,10 +35,11 @@ il monorepo e' la base per tutte le microapp che verranno.
 | **F6** | **Film Tracker**, Android e iPhone | **completa**, 185 test; App Store in revisione (2026-10-08), Play dopo il D-U-N-S |
 | F7 | Hardening | da fare |
 | F8 | Deploy e pubblicazione | da fare |
-| F10–F19 | **Dieci app nuove** (Te l'ho prestato, Dove l'ho lasciato?, Quanto sto spendendo?, Quanto dividiamo?, Ricordamelo qui, Quanti sono?, Riassumilo, QR Me (ex Fammi un QR, in sviluppo dal 2026-10-09), Leggimelo, Dove porta?) | da fare, decise il 2026-10-08 (`develop_microapps.md` §1.6) |
+| **F17** | **QR Me** (ex Fammi un QR), Android e iPhone | **completa**, 152 test (2026-10-09); store dopo il D-U-N-S (Play) e gli App ID con App Group (Apple) |
+| F10–F19 | **Altre nove app nuove** (Te l'ho prestato, Dove l'ho lasciato?, Quanto sto spendendo?, Quanto dividiamo?, Ricordamelo qui, Quanti sono?, Riassumilo, Leggimelo, Dove porta?) | da fare, decise il 2026-10-08 (`develop_microapps.md` §1.6) |
 
-TrashCan e' pubblicata: su App Store in vendita in 148 paesi (l'Unione Europea attende la
-verifica DSA di Apple), su Google Play in revisione. Lo stato aggiornato delle build e delle
+TrashCan e' pubblicata su Google Play e su App Store in tutti i paesi, Unione Europea compresa
+(2026-10-09). Lo stato aggiornato delle build e delle
 pubblicazioni sta in [`StatusMicroApps.md`](StatusMicroApps.md).
 
 Full Freezer e' completa nel codice e provata sull'emulatore Android e sul simulatore iPhone:

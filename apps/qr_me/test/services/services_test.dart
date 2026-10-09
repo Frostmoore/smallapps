@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:qr_me/domain/qr_capacity.dart';
 import 'package:qr_me/domain/qr_content.dart';
 import 'package:qr_me/domain/qr_style.dart';
 import 'package:qr_me/services/content_actions.dart';
 import 'package:qr_me/services/qr_renderer.dart';
+import 'package:qr_me/services/readability_check.dart';
 
 /// F17.1.7: `QrRenderer` e `ContentActions`.
 void main() {
@@ -94,6 +98,39 @@ void main() {
     test('un lanciatore che fallisce diventa false, non un\'eccezione', () async {
       final a = ContentActions(launcher: (_) async => throw StateError('nessuna app'));
       expect(await a.open(const PhoneContent('123')), isFalse);
+    });
+  });
+
+  group('ZxingImageReader', () {
+    // ⚑ Sotto `flutter test` sul PC la libreria nativa di ZXing non c'e' (si compila solo dentro
+    // l'app Android/iOS): il lettore deve dirlo con QrReaderUnavailable, che chi chiama traduce
+    // in "non verificato"/"non riesco a leggere le immagini", e non con un'eccezione qualunque
+    // che diventerebbe un crash o un "nessun QR" falso. La lettura vera la prova F17.7
+    // sull'emulatore (ZXing legge da file anche li').
+    test('senza libreria nativa: QrReaderUnavailable, non un errore qualunque', () async {
+      // ☠ Serve un'immagine vera: un file che non c'e' o non e' un'immagine si ferma prima di
+      // toccare la libreria nativa e torna come "nessun QR" (lista vuota), non come eccezione.
+      final dir = await Directory.systemTemp.createTemp('qrme_zxing_');
+      addTearDown(() => dir.delete(recursive: true));
+      final png = File('${dir.path}/vuota.png')
+        ..writeAsBytesSync(img.encodePng(img.Image(width: 8, height: 8)));
+      await expectLater(
+        const ZxingImageReader().read(png.path),
+        throwsA(isA<QrReaderUnavailable>()),
+      );
+      await expectLater(
+        const ZxingImageReader.strict().read(png.path),
+        throwsA(isA<QrReaderUnavailable>()),
+      );
+    });
+
+    test("un file che non si apre come immagine: nessun QR, non 'non disponibile'", () async {
+      expect(await const ZxingImageReader().read('non_esiste.png'), isEmpty);
+    });
+
+    test('strict non prova i QR invertiti, quello normale si', () {
+      expect(const ZxingImageReader().tryInverted, isTrue);
+      expect(const ZxingImageReader.strict().tryInverted, isFalse);
     });
   });
 }

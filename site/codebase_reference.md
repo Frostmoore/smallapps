@@ -553,7 +553,7 @@ php -S 127.0.0.1:8099 -t public deploy/router.php
 
 - **Nessun pannello di amministrazione**: i messaggi ricevuti si leggono con
   `sudo cat /var/www/smpmicroapps/var/contatti.jsonl`.
-- **Nessuna pagina di dettaglio** per Full Freezer, Scorte Calore e Film Tracker: le card
+- **Nessuna pagina di dettaglio** per Full Freezer, Scorte Calore, Film Tracker e QR Me: le card
   ci sono ma non sono link. La pagina si crea alla chiusura della fase che costruisce l'app.
 - **Nessuna terza lingua**: solo italiano e inglese. Aggiungerne una vuol dire un nuovo codice in `LINGUE`, due file di dizionario e una bandiera.
 - **Nessun blog, nessuna newsletter, nessun analytics.**
@@ -674,3 +674,14 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
   non rompe la home.
 - Per le prossime app: quando hanno la testata dello store, WebP in `public/assets/img/<slug>/` e la
   chiave `testata` nel catalogo.
+
+## Aggiornamento 2026-10-09 — card «In arrivo» di QR Me
+
+- `catalogo()` in `src/apps.php`: voce **`qr-me`** (`nome` «QR Me», `accento` `#15803D`, cioe' il
+  verde dell'app scurito per stare sul bianco della card, `pubblicata` false, `packageId`
+  `com.smp.qrme`, `suPlay` false, `testata` null). E' la quinta card, dopo Film Tracker.
+- Dizionari: `app.qr-me.claim` («Condividi, ed è già un QR.» / «Share it, and it's a QR.») e
+  `app.qr-me.sommario`, in entrambi (`verifica_lingue.php`: allineati).
+- **Pubblicata il 2026-10-09** su clawserver con il via del proprietario (siti critici a 200 prima e
+  dopo, pagine a 200 in entrambe le lingue, file riservati 404). Il sito vivo ha cinque card.
+

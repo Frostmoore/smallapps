@@ -1,13 +1,32 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Gli acquisti in-app: dichiarato qui e non solo dalla libreria, perche' Play Console guarda
          il pacchetto caricato per sbloccare la creazione del prodotto Pro (vedi Full Freezer). -->
     <uses-permission android:name="com.android.vending.BILLING"/>
-    <!-- La fotocamera la dichiara mobile_scanner (fuso dal build): si chiede alla prima apertura
-         di /scan (F17.1.10).
+    <!-- La fotocamera per leggere i QR (flutter_zxing -> plugin camera, CameraX): si chiede alla
+         prima apertura di /scan (F17.1.10). ⚑ Dichiarata qui anche se camera_android_camerax la
+         dichiara gia': il permesso e' del prodotto, non deve dipendere da cosa porta un plugin.
+         ☠ Niente ML Kit da quando lo scanner e' ZXing (2026-10-09, «niente dati a Google»): nel
+         manifest fuso non devono comparire servizi com.google.mlkit, datatransport o firebase.
          ☠ NIENTE READ_EXTERNAL_STORAGE, anche se il README di receive_sharing_intent lo elenca:
          le immagini condivise arrivano come content:// con un permesso temporaneo concesso dal
          mittente, e il permesso di storage su Play chiede una giustificazione che non abbiamo
          (F17.1.8). Da verificare in F17.2b con una condivisione vera da Galleria e da Chrome. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- ☠ camera_android_camerax dichiara anche microfono e scrittura su storage (servono a chi
+         registra video). Noi apriamo la fotocamera con enableAudio: false e non salviamo nulla:
+         tolti dal manifest fuso, cosi' Play e l'utente non vedono permessi che non usiamo. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- ☠ E il fusore la "deduce" da WRITE_EXTERNAL_STORAGE del plugin (IMPLIED nel report di
+         fusione, build/app/outputs/logs/manifest-merger-*-report.txt) anche dopo averla tolta:
+         va rimossa esplicitamente, o ricompare nell'APK (visto il 2026-10-09). -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- ⚑ La fotocamera non e' obbligatoria: senza, l'app crea QR e li legge da un'immagine. Il
+         plugin la dichiara richiesta (default di uses-feature), e Play nasconderebbe l'app ai
+         dispositivi senza fotocamera. -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="false"
+        tools:replace="android:required"/>
 
     <!-- ⚑ allowBackup="false": nel database ci sono password del Wi-Fi e testi privati (F17.1.4).
          Il backup automatico di Android li porterebbe sul Drive dell'utente senza che l'abbia

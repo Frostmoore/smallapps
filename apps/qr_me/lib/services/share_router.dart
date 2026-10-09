@@ -22,7 +22,7 @@ enum ShareOutcome {
   /// Un'immagine senza QR: «Nessun QR in questa immagine».
   noQrInImage,
 
-  /// Lo scanner non c'e' su questo dispositivo: «Non riesco a leggere le immagini qui».
+  /// Il lettore di QR (ZXing) non c'e' su questo dispositivo: «Non riesco a leggere le immagini qui».
   readerUnavailable,
 
   /// Lo stesso elemento arrivato di nuovo entro [ShareRouter.duplicateWindow]: ignorato.
@@ -36,7 +36,7 @@ enum ShareOutcome {
 ///
 /// - [SharedText] → `QrDecoder.decodeTyped` (un link senza schema diventa un link) → `/show` con
 ///   `source: shared`. ⚑ `decodeTyped` e non `decode`: chi condivide «esempio.it» intende il sito.
-/// - [SharedImage] → lo scanner sul file → `/scan/result` con `source: image`, o
+/// - [SharedImage] → il lettore ZXing sul file → `/scan/result` con `source: image`, o
 ///   [ShareOutcome.noQrInImage].
 /// - Piu' elementi: il primo testo, altrimenti la prima immagine.
 ///
@@ -125,7 +125,7 @@ class ShareIntake {
   final ShareRouter router;
   final GoRouter goRouter;
 
-  /// Per i messaggi (immagine senza QR, scanner assente).
+  /// Per i messaggi (immagine senza QR, lettore assente).
   final void Function(ShareOutcome outcome)? onOutcome;
 
   StreamSubscription<List<SharedPayload>>? _sub;

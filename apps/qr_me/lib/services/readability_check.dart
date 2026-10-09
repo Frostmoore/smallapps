@@ -1,18 +1,19 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
+import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:micro_core/micro_core.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../domain/qr_style.dart';
 import 'qr_renderer.dart';
 
-/// Lo scanner su un file immagine non c'e' (emulatore senza ML Kit, simulatore, piattaforma
-/// senza implementazione). ⚑ Diverso da "nessun QR trovato": chi lo riceve deve dire "non
-/// verificato", non "illeggibile".
+/// Il lettore su un file immagine non c'e' (libreria nativa di ZXing non caricabile: sotto
+/// `flutter test` sul PC, o su una piattaforma senza il plugin). ⚑ Diverso da "nessun QR
+/// trovato": chi lo riceve deve dire "non verificato", non "illeggibile".
 class QrReaderUnavailable implements Exception {
   const QrReaderUnavailable(this.cause);
 
@@ -23,53 +24,80 @@ class QrReaderUnavailable implements Exception {
 }
 
 /// Legge i QR da un file immagine. Interfaccia perche' i test (condivisione, "Da immagine",
-/// verifica di leggibilita') non hanno una piattaforma su cui gira lo scanner.
+/// verifica di leggibilita') non hanno una piattaforma su cui gira il lettore nativo.
 abstract interface class QrImageReader {
-  /// I `rawValue` dei QR trovati in [path], nell'ordine dello scanner; vuota se non ce ne sono.
-  /// Lancia [QrReaderUnavailable] se lo scanner non e' disponibile.
+  /// I testi dei QR trovati in [path], nell'ordine del lettore; vuota se non ce ne sono.
+  /// Lancia [QrReaderUnavailable] se il lettore non e' disponibile.
   Future<List<String>> read(String path);
 }
 
-/// [QrImageReader] su `MobileScannerController.analyzeImage` (ML Kit su Android, Vision su iOS).
+/// [QrImageReader] su ZXing C++ (`flutter_zxing`, FFI), uguale su Android e iOS.
 ///
-/// ⚑ Solo QR (`BarcodeFormat.qrCode`), come la fotocamera: un codice a barre in uno screenshot
-/// non e' il mestiere dell'app.
-class MobileScannerImageReader implements QrImageReader {
-  const MobileScannerImageReader();
+/// ⚑ ZXing e non ML Kit/Vision (2026-10-09, decisione del proprietario): la decodifica gira
+/// tutta dentro l'app, nessun dato esce dal telefono (develop_microapps.md F17.1.10). E a
+/// differenza di ML Kit legge anche sull'emulatore: [QrReaderUnavailable] resta per i guasti veri.
+///
+/// ⚑ Solo QR (`Format.qrCode`), come la fotocamera: un codice a barre in uno screenshot non e'
+/// il mestiere dell'app.
+class ZxingImageReader implements QrImageReader {
+  /// [tryInverted]: legge anche i QR chiari su fondo scuro. Si' per quello che l'utente vuole
+  /// leggere («Da immagine», condivisione); no per la verifica di leggibilita' (vedi
+  /// [ZxingImageReader.strict]).
+  const ZxingImageReader({this.tryInverted = true});
+
+  /// Il lettore della verifica di leggibilita' (F17.1.7): niente QR invertiti.
+  ///
+  /// ☠ Molti lettori (la fotocamera di diversi Android, varie app) non leggono un QR invertito:
+  /// dire «Leggibile» perche' ZXing ci riesce provando anche l'inverso sarebbe una promessa
+  /// falsa. Lo stile invertito ha gia' il suo avviso da `Contrast.inverted`.
+  const ZxingImageReader.strict() : tryInverted = false;
+
+  final bool tryInverted;
+
+  /// Il lato massimo a cui ZXing riduce l'immagine prima di cercare. ⚑ Piu' del default (768):
+  /// uno screenshot intero di un telefono (1080x2400) ridotto a 768 lascia un QR piccolo con
+  /// moduli di 1-2 pixel. 1600 resta sotto il decimo di secondo su un telefono medio.
+  static const int maxSize = 1600;
 
   @override
   Future<List<String>> read(String path) async {
-    // ⚑ Un controller usa e getta: `analyzeImage` non ha bisogno della fotocamera accesa, e non
-    // si tocca quello della pagina di scansione (che potrebbe non esistere).
-    final controller = MobileScannerController(
-      autoStart: false,
-      formats: const [BarcodeFormat.qrCode],
-    );
+    final inverted = tryInverted;
     try {
-      final capture = await controller.analyzeImage(path, formats: const [BarcodeFormat.qrCode]);
-      return [
-        for (final b in capture?.barcodes ?? const <Barcode>[])
-          if (b.rawValue case final String raw when raw.isNotEmpty) raw,
-      ];
-    } on MissingPluginException catch (e) {
-      throw QrReaderUnavailable(e);
-    } on UnimplementedError catch (e) {
+      // ⚑ In un isolate a parte: decodificare il PNG e cercare il QR sono decine di millisecondi
+      // di CPU, e la verifica di leggibilita' gira a ogni pausa mentre l'utente cambia stile.
+      // La libreria nativa si apre in ogni isolate per conto suo (`DynamicLibrary`), va bene.
+      // Si restituiscono solo stringhe: tutto il resto di `Codes` non serve fuori.
+      final (texts, error) = await Isolate.run(() async {
+        final codes = await zx.readBarcodesImagePathString(
+          path,
+          DecodeParams(
+            format: Format.qrCode,
+            tryHarder: true,
+            tryInverted: inverted,
+            tryDownscale: true,
+            maxSize: maxSize,
+            isMultiScan: true,
+          ),
+        );
+        return (
+          [
+            for (final c in codes.codes)
+              if (c.isValid && (c.text ?? '').isNotEmpty) c.text!,
+          ],
+          codes.error,
+        );
+      });
+      // ☠ Un file che non e' un'immagine (o e' troncato) torna come `error` e non come
+      // eccezione: per chi chiama e' "nessun QR", non "non disponibile".
+      if (texts.isEmpty && error != null) MicroLog.w('lettura QR da file: $error');
+      return texts;
+    } on ArgumentError catch (e) {
+      // `DynamicLibrary.open` fallito: la libreria nativa non c'e' (test sul PC).
       throw QrReaderUnavailable(e);
     } on UnsupportedError catch (e) {
       throw QrReaderUnavailable(e);
-    } on MobileScannerBarcodeException catch (e) {
-      // ☠ Un'immagine che lo scanner non sa decodificare (o in cui non trova nulla) arriva come
-      // eccezione e non come lista vuota: per chi chiama e' "nessun QR", non "non disponibile".
-      MicroLog.w('analyzeImage: ${e.message}');
-      return const [];
-    } on MobileScannerException catch (e) {
-      if (e.errorCode == MobileScannerErrorCode.unsupported) throw QrReaderUnavailable(e);
-      MicroLog.w('analyzeImage: ${e.errorCode.name}', error: e.errorDetails?.message);
-      return const [];
-    } on PlatformException catch (e) {
+    } on MissingPluginException catch (e) {
       throw QrReaderUnavailable(e);
-    } finally {
-      await controller.dispose();
     }
   }
 }
@@ -77,14 +105,15 @@ class MobileScannerImageReader implements QrImageReader {
 /// L'esito della verifica: [unknown] e' "non verificato" (grigio), **non** "illeggibile".
 enum Readability { readable, unreadable, unknown }
 
-/// Rilegge il PNG del QR con lo scanner vero (develop_microapps.md F17.1.7).
+/// Rilegge il PNG del QR con il lettore vero, ZXing (develop_microapps.md F17.1.7).
 ///
 /// ⚑ E' la difesa vera contro i QR «carini ma illeggibili»: le regole di contrasto
 /// (`Contrast`) sono euristiche, questo e' il test. Si confronta il `rawValue` con il payload
 /// **esattamente**: un QR che si legge come un'altra stringa e' peggio di uno che non si legge.
 ///
-/// ☠ Su emulatore/simulatore `analyzeImage` puo' non esserci: il risultato e'
-/// [Readability.unknown], mai [Readability.unreadable] (F17.1.7).
+/// ☠ Se il lettore non c'e' ([QrReaderUnavailable]: libreria nativa non caricata) il risultato
+/// e' [Readability.unknown], mai [Readability.unreadable] (F17.1.7). Con ZXing succede solo per
+/// guasti veri: legge anche sull'emulatore e sul simulatore.
 class ReadabilityCheck {
   ReadabilityCheck(
     this._reader, {
@@ -96,7 +125,7 @@ class ReadabilityCheck {
   final QrRenderer _renderer;
   final Future<Directory> Function() _tempDir;
 
-  /// Il lato del PNG di prova. ⚑ Piu' piccolo di quello condiviso (1024): basta allo scanner, e
+  /// Il lato del PNG di prova. ⚑ Piu' piccolo di quello condiviso (1024): basta al lettore, e
   /// la verifica gira a ogni pausa dell'utente mentre cambia stile.
   static const int pixels = 720;
 
