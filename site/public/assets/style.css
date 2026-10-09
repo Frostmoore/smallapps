@@ -427,6 +427,23 @@ a.card:hover {
   letter-spacing: -0.02em;
 }
 
+/*
+  La testata dello store in cima alla card, a filo dei bordi: i margini negativi annullano il
+  padding della card. Copre anche la fascia colorata di ::before, che sopra un'immagine
+  sarebbe solo una riga storta.
+*/
+.card__testata {
+  display: block;
+  width: calc(100% + 3.2rem);
+  max-width: none;
+  height: auto;
+  aspect-ratio: 1024 / 500;
+  object-fit: cover;
+  margin: -1.6rem -1.6rem 0.2rem;
+  position: relative;
+  z-index: 1;
+}
+
 .card__name { font-size: 1.3rem; margin: 0; letter-spacing: -0.02em; }
 .card__claim { margin: 0; font-weight: 600; color: var(--card-accent, var(--accent)); }
 .card__text { margin: 0; color: var(--ink-soft); font-size: 0.98rem; }

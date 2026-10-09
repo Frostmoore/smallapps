@@ -57,7 +57,11 @@ pagina_inizio('home.titolo', 'home.descrizione', '/');
           style="--card-accent: <?= e($app['accento']) ?>"
           <?= $app['pubblicata'] ? 'href="' . e(url_per($lingua, '/' . $slug)) . '"' : '' ?>>
 
-          <?php if ($app['logo'] !== null): ?>
+          <?php if (($app['testata'] ?? null) !== null): ?>
+            <?php /* La testata ha gia' icona e nome dell'app: il logo sotto sarebbe un doppione. */ ?>
+            <img class="card__testata" src="<?= e(str_replace('{lingua}', $lingua, $app['testata'])) ?>"
+                 alt="" width="1024" height="500">
+          <?php elseif ($app['logo'] !== null): ?>
             <img class="card__logo" src="<?= e($app['logo']) ?>" alt="" width="58" height="58">
           <?php else: ?>
             <span class="card__logo card__logo--letter" aria-hidden="true">

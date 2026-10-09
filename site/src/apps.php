@@ -35,6 +35,9 @@ function catalogo(): array
             'nome'      => 'TrashCan',
             'accento'   => '#2E7D5B',
             'logo'      => '/assets/img/trashcan.png',
+            // La testata dello store in cima alla card in home. `{lingua}` diventa it o en,
+            // perche' la testata ha il testo dentro. null = card col solo logo.
+            'testata'   => '/assets/img/trashcan/testata-{lingua}.webp',
             // Pubblicata: la card e' cliccabile e porta alla sua pagina.
             'pubblicata' => true,
             // L'indirizzo su Play e' deterministico: e' costruito sul nome del pacchetto,
@@ -54,6 +57,7 @@ function catalogo(): array
             'nome'      => 'Full Freezer',
             'accento'   => '#2C5F9E',
             'logo'      => null,
+            'testata'   => null,
             'pubblicata' => false,
             'packageId' => 'com.smp.fullfreezer',
             'suPlay'    => false,
@@ -62,6 +66,7 @@ function catalogo(): array
             'nome'      => 'Scorte Calore',
             'accento'   => '#A6503A',
             'logo'      => null,
+            'testata'   => null,
             'pubblicata' => false,
             'packageId' => 'com.smp.scortecalore',
             'suPlay'    => false,
@@ -70,6 +75,7 @@ function catalogo(): array
             'nome'      => 'Film Tracker',
             'accento'   => '#4A5560',
             'logo'      => null,
+            'testata'   => null,
             'pubblicata' => false,
             'packageId' => 'com.smp.filmtracker',
             'suPlay'    => false,

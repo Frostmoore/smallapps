@@ -27,6 +27,7 @@
 | La pagina di TrashCan | `public/trashcan.php` |
 | Testata, screenshot e promozionali di TrashCan | `public/assets/img/trashcan/` (WebP, §Aggiornamento 2026-10-09) |
 | Il CSS delle immagini di una pagina app (`.hero__grid`, `.shots`, `.promo`) | in fondo a `public/assets/style.css` |
+| La testata in cima alla card di un'app in home | chiave `testata` in `src/apps.php`, `.card__testata` in `style.css` |
 | Il modulo di contatto (pagina) | `public/contatti.php` |
 | Validazione, antispam, archiviazione | `src/contact.php` |
 | L'invio della mail | `src/mailer.php` |
@@ -658,3 +659,18 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
   sopra la piega.
 - Provata in locale a 1400 px e in un iframe da 390 px (⚠ Edge headless non scende sotto ~500 px di
   finestra: una cattura con `--window-size=400` sembra tagliata a destra anche sulle pagine sane).
+
+### La testata sulla card in home (2026-10-09, richiesta del proprietario)
+
+- `catalogo()` in `src/apps.php` ha una chiave in piu' per app: **`testata`** (`string|null`), un
+  percorso con il segnaposto `{lingua}` che `public/index.php` sostituisce con `$lingua` (la testata
+  ha il testo dentro, quindi una per lingua). TrashCan: `/assets/img/trashcan/testata-{lingua}.webp`;
+  le altre tre: `null`.
+- Con la testata la card **non mostra il logo**: la testata ha gia' icona e nome, il logo sotto
+  sarebbe un doppione. Senza testata resta tutto come prima (logo o iniziale).
+- `.card__testata`: margini negativi pari al padding della card (1,6rem) per andare a filo dei
+  bordi, `aspect-ratio: 1024 / 500`, `z-index: 1` per coprire la fascia colorata di `.card::before`.
+  `index.php` legge `$app['testata'] ?? null`, quindi una voce nuova del catalogo senza la chiave
+  non rompe la home.
+- Per le prossime app: quando hanno la testata dello store, WebP in `public/assets/img/<slug>/` e la
+  chiave `testata` nel catalogo.
