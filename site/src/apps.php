@@ -41,11 +41,14 @@ function catalogo(): array
             // che non cambia piu' dopo il primo caricamento. Diventa un bottone vero
             // quando `suPlay` passa a true.
             'packageId' => 'com.smp.trashcan',
-            'suPlay'    => false,
+            // Pubblicata su Play il 2026-10-08; acceso insieme ad App Store (decisione del
+            // proprietario: i due pulsanti di TrashCan si accendono insieme).
+            'suPlay'    => true,
             // L'id Apple e' quello di App Store Connect, assegnato alla creazione della
             // scheda e mai piu' cambiato. Diventa un bottone quando `suAppStore` passa a true.
             'appStoreId' => '6818986320',
-            'suAppStore' => false,
+            // Disponibile in Italia (e in tutta l'UE) dal 2026-10-09, verificato via API.
+            'suAppStore' => true,
         ],
         'full-freezer' => [
             'nome'      => 'Full Freezer',

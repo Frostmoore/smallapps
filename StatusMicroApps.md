@@ -19,7 +19,7 @@ Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verifica
 
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
-| **TrashCan** | 1.0.0 (11) | 🟢 **pubblicata** (2026-10-08) | 🟠 pubblicata, **tranne UE** (Italia bloccata dalla verifica DSA di Apple) | spenti («Presto su Google Play e App Store»): si accendono insieme quando c'e' anche iOS in Italia |
+| **TrashCan** | 1.0.0 (11) | 🟢 **pubblicata** (2026-10-08) | 🟢 **pubblicata ovunque**, UE compresa (2026-10-09) | 🟢 **accesi tutti e due** (2026-10-09) |
 | **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
 | **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
@@ -102,11 +102,10 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 | 2026-10-06 | Stato: **in revisione** |
 | 2026-10-08 | **Pubblicata, disponibile su Google Play** (comunicato dal proprietario; scheda raggiungibile dall'Italia, HTTP 200) |
 
-**Per accendere il pulsante sul sito:** app visibile su Play dall'Italia → `suPlay => true`.
-⚑ **Decisione del 2026-10-08:** il pulsante Play di TrashCan si accende **insieme** a quello
-App Store, quando l'app e' disponibile anche su iOS in Italia (vedi `memory/decisioni.md`).
+**Sito:** pulsante Play acceso il 2026-10-09, **insieme** a quello App Store come deciso il
+2026-10-08 (vedi `memory/decisioni.md`).
 
-### App Store — 🟠 pubblicata tranne UE
+### App Store — 🟢 pubblicata ovunque
 
 | Data | Evento |
 |---|---|
@@ -117,11 +116,10 @@ App Store, quando l'app e' disponibile anche su iOS in Italia (vedi `memory/deci
 | 2026-10-06 | In vendita in **148 paesi**; nei **27 paesi UE (Italia compresa)** bloccata con `TRADER_STATUS_NOT_PROVIDED` |
 | 2026-10-07 | Ricontrollato via API: Italia ancora `TRADER_STATUS_NOT_PROVIDED` (verifica DSA di Apple in corso, niente da fare da parte nostra) |
 | 2026-10-08 | Ricontrollato via API (due volte): Italia ancora `TRADER_STATUS_NOT_PROVIDED`; versione READY_FOR_SALE, Pro APPROVED |
+| 2026-10-09 | Verifica DSA approvata da Apple (comunicato dal proprietario): **disponibile in tutti i 175 paesi, Italia compresa** (ITA = AVAILABLE, nessun paese bloccato; verificato via API) |
 
-⏳ **In attesa di Apple:** Business → Conformità → *Normativa sui servizi digitali* =
-«Verifica in corso» (dati inviati il 2026-10-05, niente da cliccare). Quando diventa «Attivo»
-l'app compare in UE da sola, senza un nuovo invio. Se dopo 3–4 giorni lavorativi è ancora così e
-non è arrivata nessuna mail: developer.apple.com/contact → App Store Connect → Business.
+✅ **Verifica DSA chiusa il 2026-10-09** (dati inviati il 2026-10-05): l'app e' comparsa in UE da
+sola, senza un nuovo invio. Vale per l'account: le altre app nasceranno gia' disponibili in UE.
 
 Verifica via API (sul Mac):
 ```bash
@@ -129,7 +127,8 @@ cd ~/microapps && python3 tool/asc_api.py GET '/v2/appAvailabilities/6818986320/
 # ITA deve passare da TRADER_STATUS_NOT_PROVIDED ad AVAILABLE
 ```
 
-**Per accendere il pulsante sul sito:** ITA = `AVAILABLE` → `suAppStore => true`.
+**Sito:** ✅ il 2026-10-09 `suPlay => true` e `suAppStore => true` per TrashCan, pubblicato su
+clawserver (siti critici a 200 prima e dopo, verifica §11 dell'atlante del sito superata).
 
 ---
 

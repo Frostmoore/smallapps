@@ -601,8 +601,8 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 | **Le pagine legali inglesi sono una traduzione** | l'originale italiano fa fede e le pagine lo dichiarano. Una revisione da parte di un legale madrelingua non è stata fatta | se e quando ci saranno clienti fuori dall'Italia |
 | **Numero REA assente** | non fornito. Se c'è iscrizione al Registro delle Imprese va indicato (art. 2250 c.c.) | va riempita `AZIENDA['rea']` in `src/config.php` |
 | **Nessuna schermata delle app** | la pagina di TrashCan descrive a parole; qualche immagine venderebbe meglio | quando ci saranno gli screenshot per Play, che servono comunque |
-| **Il bottone Play è spento** | l'app non è ancora pubblicata | si mette `suPlay => true` in `src/apps.php`, e basta |
-| **Il bottone App Store è spento** | Apple non ha ancora approvato | si mette `suAppStore => true` in `src/apps.php`, e basta: l'id è già scritto |
+| ~~**Il bottone Play è spento**~~ | **chiuso il 2026-10-09**: TrashCan ha `suPlay => true` | per le app successive: `suPlay => true` in `src/apps.php`, e basta |
+| ~~**Il bottone App Store è spento**~~ | **chiuso il 2026-10-09**: TrashCan ha `suAppStore => true` (disponibile anche in UE) | per le app successive: `suAppStore => true` e il loro `appStoreId` |
 | **Nessun backup dell'archivio messaggi** | `var/contatti.jsonl` vive solo sul server | quando arriveranno messaggi che valga la pena non perdere |
 
 ---
