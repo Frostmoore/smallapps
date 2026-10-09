@@ -54,7 +54,11 @@ Future<void> createBackup(BuildContext context, WidgetRef ref) async {
   }
   final l = L.of(context);
   final service = ref.read(backupServiceProvider);
-  final source = QrBackupSource(ref.read(databaseProvider), paths: ref.read(appPathsProvider));
+  final source = QrBackupSource(
+    ref.read(databaseProvider),
+    paths: ref.read(appPathsProvider),
+    settings: ref.read(settingsProvider),
+  );
   final result = await _withProgress(
     context,
     l.backup_creating,
@@ -136,13 +140,22 @@ Future<void> restoreBackup(BuildContext context, WidgetRef ref) async {
     l.backup_restoring,
     () => service.restore(
       file,
-      QrBackupSource(ref.read(databaseProvider), paths: ref.read(appPathsProvider)),
+      QrBackupSource(
+        ref.read(databaseProvider),
+        paths: ref.read(appPathsProvider),
+        settings: ref.read(settingsProvider),
+      ),
       mode: mode,
     ),
   );
   if (!context.mounted) return;
   restored.fold(
-    ok: (_) => MicroSnack.success(context, l.backup_restored),
+    ok: (_) {
+      // ⚑ La scheda «Io» puo' essere arrivata dal file: `MyContactNotifier` la legge dalle
+      // preferenze solo quando si costruisce, e `settingsProvider` non cambia, quindi va riletta.
+      ref.invalidate(myContactProvider);
+      MicroSnack.success(context, l.backup_restored);
+    },
     err: (_) => MicroSnack.error(context, l.backup_failed),
   );
 }

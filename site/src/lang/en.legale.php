@@ -221,6 +221,14 @@ HTML,
   its processing depends on the service you chose to store or share it with.
 </p>
 
+<p>
+  Some apps use your phone's <strong>camera</strong> or <strong>photos</strong>, and only when
+  you ask them to: Film Tracker for photos of your rolls, QR Me to read a QR code by pointing the
+  camera at it or picking an image. Images are processed <strong>on the phone only</strong>: QR
+  codes are read by a library built into the app that connects to no outside service, and no
+  image is ever sent to us or to anyone else.
+</p>
+
 <h3>Buying and verifying the Pro version</h3>
 
 <p>
@@ -230,6 +238,17 @@ HTML,
   independent controllers. See
   <a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a> and
   <a href="https://www.apple.com/legal/privacy/" rel="noopener">Apple's</a>.
+</p>
+
+<p>
+  On Android, to sell the Pro version, the app includes <strong>Google Play's official purchasing
+  library</strong> (Google Play Billing), which Google requires from anyone selling digital
+  content on Google Play. When you open the purchase screen or restore a purchase, this library
+  talks directly to Google Play and may send Google technical information about how the
+  purchasing service is working. That data goes to Google, which processes it as an independent
+  controller under its own privacy policy: we do not receive it. It is the only third-party
+  component of the apps that communicates with the outside world, and it is tied to purchasing
+  alone.
 </p>
 
 <p>
@@ -299,7 +318,8 @@ HTML,
 <p>
   The apps contain no analytics tools (Firebase Analytics, Crashlytics or equivalents), collect
   no statistics on how you use them, do not record the screens you open, and contain no
-  advertising and no advertising identifiers.
+  advertising and no advertising identifiers. The only exception to the principle that "your data stays on
+  your phone" is buying the Pro version, as described above.
 </p>
 
 <h2>5. Who we share data with</h2>

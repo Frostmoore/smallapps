@@ -5,10 +5,16 @@
 > il suo stile (colori, forme, logo). Gesto principale: **Condividi → QR Me → il QR e' gia' li'**.
 > **Obiettivo**: capire il codice, trovare cio' che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-10-09 · **Fase**: F17.0–F17.7 (parte Android) concluse, questo atlante e'
-> F17.8 · **Ramo git al momento della scrittura**: `v8.6.0`, commit `7a48532` (F17.7) ·
-> **versionName+Code**: `1.0.0+1` · **Test**: **182 verdi** (155 + 27 dei difetti corretti dopo la
-> rilettura F17.8), `analyze` senza issue (2026-10-09)
+> **Aggiornato al**: 2026-10-09 · **Fase**: F17.0–F17.9 concluse, **F17.10** (revisione del
+> proprietario dopo la prova su iPad: moduli rifatti, Pro «Genera etichetta») fatta fino a F17.10.6
+> con le due correzioni successive (pulsante «Etichetta» solo icona, scheda «Io» nel backup); manca
+> F17.10.7 (store rifatto con la build 1.0.0 (2)) · **Ultimo commit al momento della scrittura**:
+> `dfe907a` (F17.10) · **versionName+Code**: `1.0.0+1` · **Test**: **241 verdi** (228 di F17.10 + 8
+> della pagina del QR al 130% + 5 della scheda «Io» nel backup), `analyze` senza issue (2026-10-09)
+>
+> ⚠ **F17.10 supera F17.0 punto 3 e F17.1.6 sui moduli**: niente piu' moduli SMS e Telefono (la
+> **lettura** di `SMSTO:`/`tel:` resta), Wi-Fi da un QR letto o dalla rete connessa, Contatto dalla
+> rubrica o «Io», «Email precompilata». Dettaglio in §9 «Moduli» e nel piano, `### F17.10`.
 > **Package Android / bundle iOS**: `com.smp.qrme` (immutabile dopo il primo upload) ·
 > estensione iOS `com.smp.qrme.ShareExtension` · App Group `group.com.smp.qrme`
 > **SKU Pro**: `qrme_pro_lifetime` — **1,99 €** una tantum (Play: base **1,63 EUR senza IVA**)
@@ -61,7 +67,7 @@ del piano, vincono queste.**
 |---|---|---|---|
 | 1 | Nome «QR Me» in it ed en; `com.smp.qrme`, `appId 'qr_me'`, `licenseAppId 'qrme'`, SKU `qrme_pro_lifetime`. Se il nome della scheda e' preso: «QR Me – Share & Scan» / «QR Me – Condividi e leggi» (sotto l'icona resta «QR Me») | `app_config.dart`, `build.gradle.kts`, `project.pbxproj`, `Info.plist` | sostituisce «Fammi un QR» |
 | 2 | Android e iPhone dal primo commit, **solo iPhone** (`TARGETED_DEVICE_FAMILY = 1`), **App Group** `group.com.smp.qrme` | `project.pbxproj`, `*.entitlements` | l'estensione di condivisione iOS scrive nell'App Group |
-| 3 | Contenuti: testo e link + moduli **Wi-Fi, contatto (vCard), email, SMS, telefono** | `QrKind`, `lib/features/forms/` | |
+| 3 | Contenuti: testo e link + moduli **Wi-Fi, contatto (vCard), email, SMS, telefono**. ⚠ **Superata da F17.10** (2026-10-09): moduli **Wi-Fi** (dal QR della rete o dalla rete connessa), **Contatto** (dalla rubrica o «Io»), **Email precompilata**; SMS e Telefono **solo in lettura** | `QrKind`, `kFormKinds`, `lib/features/forms/` | «Non mi deve far inserire dati a mano» (il proprietario, dopo la prova su iPad) |
 | 4 | **Legge i QR** (fotocamera e immagine) e li rigenera con lo stile; **lettura gratis** | `ScanPage`, `ScanResultPage`, `qrFeatureLimits` | |
 | 5 | Stile: colori, forma moduli/occhi, **logo da foto, icona pronta o emoji/testo (1–3 grafemi)** | `QrStyle`, `QrLogo`, `LogoPicker` | |
 | 6 | «Base generosa», Pro **1,99 €**: cronologia 5 gratis, **1 preferito** gratis; Pro moduli, stile, preferiti e cronologia illimitati, PNG, backup | `qrFeatureLimits`, `buildQrPaywall` | ⚑ 1 preferito e non 0: fa capire a cosa servono (il Wi-Fi di casa) |
@@ -71,6 +77,7 @@ del piano, vincono queste.**
 | 10 | Prima interfaccia essenziale, poi la grafica fra tre (**A · Neon**, scelta) | `qr_palette.dart`, `neon.dart` | applicata gia' in F17.4, F17.6 chiusa con F17.4 |
 | 11 | Trappole gia' pagate: `licenseAppId` senza `_`, deep link di Flutter **spento**, `ProGate` sulle rotte Pro, virgolette tipografiche, `Runner.entitlements` presente (qui serve) | §7, §13 | |
 | 12 | **Dati solo sul telefono** (2026-10-09, regola di tutte le microapp): nessun SDK che manda dati a terzi, nemmeno metriche anonime → **ML Kit sostituito da ZXing** | `pubspec.yaml` (`flutter_zxing`, `camera`), `ZxingImageReader`, `scan_page.dart`, manifest | requisito delle MicroApps; cambiarlo serve un motivo «importantissimo» scritto dal proprietario |
+| 13 | **F17.10** (2026-10-09, dopo la prova su iPad): Wi-Fi senza compilare (QR letto, immagine, rete connessa + password incollata), Contatto dalla rubrica (selettore **senza permesso**) o «Io», «Email precompilata» con testo grande, **via i moduli SMS e Telefono**, Pro **«Genera etichetta»** sotto `imageExport` | `WifiSources`, `ContactSources`, `MyContactPage`, `LabelPage`, `kFormKinds`, `/scan/wifi`, `/label`, `/me` | la compilazione a mano era «ridicola»; Telefono ridondante con Contatto |
 
 Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, ognuna con il suo ⚑.
 
@@ -86,9 +93,10 @@ Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, og
 | Screenshot e video dello store (giri sul simulatore) | `integration_test/screenshots_test.dart`, `integration_test/anteprima_test.dart` |
 | Grafiche degli store, caricamento su App Store Connect | `tool/genera_grafiche_store.py`, `tool/scheda_app_store.py` |
 | Router, tema, ascolto delle condivisioni, pulizia dei loghi orfani, messaggi della condivisione | `lib/app/app.dart` |
-| I percorsi, gli argomenti delle pagine (`QrDisplayArgs`, `ScanResultArgs`, `StyleArgs`), i tipi con modulo | `lib/app/routes.dart` |
+| I percorsi, gli argomenti delle pagine (`QrDisplayArgs`, `ScanResultArgs`, `StyleArgs`, `LabelArgs`), i tipi con modulo (`kFormKinds`: Wi-Fi, Contatto, Email) | `lib/app/routes.dart` |
 | Id app, SKU, seme, font, `licenseAppId` | `lib/app/app_config.dart` |
-| Tutti i provider (config, database, repository, stream, servizi, logo, galleria, backup, cronologia accesa, tema) | `lib/app/providers.dart` |
+| Tutti i provider (config, database, repository, stream, servizi, logo, galleria, backup, cronologia accesa, tema, scheda «Io», nome del Wi-Fi, rubrica, etichetta) | `lib/app/providers.dart` |
+| La scheda «Io» (`QrSettingKeys.myContact`, `MyContactNotifier`, `myContactProvider`) | `lib/app/providers.dart` |
 | Il Pro: gateway, entitlement, `featureGateProvider`, `appVersion` | `lib/app/entitlement.dart` |
 | Cosa e' gratis e cosa e' Pro | `lib/app/feature_limits.dart` |
 | Testi e benefici del paywall, `showQrPaywall` | `lib/app/paywall_config.dart` |
@@ -97,15 +105,19 @@ Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, og
 | Italiano sui telefoni italiani, inglese altrove | `lib/app/locale_resolution.dart` |
 | **Cosa c'e' in un QR** (tipi, uguaglianza, campi, titolo automatico) | `lib/domain/qr_content.dart` |
 | **Contenuto → stringa del QR** (Wi-Fi, vCard 3.0, mailto, SMSTO, tel); payload di un testo scritto/condiviso (`payloadOfTyped`) | `lib/domain/qr_encoder.dart` |
-| **Stringa letta → contenuto** (anche MECARD, MATMSG, sms:, vCard 4.0) | `lib/domain/qr_decoder.dart` |
+| **Stringa letta → contenuto** (anche MECARD, MATMSG, sms:, vCard 4.0); la prima rete fra piu' QR (`firstWifi`) | `lib/domain/qr_decoder.dart` |
 | Quanti byte stanno in un QR, scelta del livello M/H/L | `lib/domain/qr_capacity.dart` |
 | Stile e logo, JSON tollerante, id stabili delle icone | `lib/domain/qr_style.dart` |
 | Contrasto WCAG e verso dei colori | `lib/domain/contrast.dart` |
 | La tabella `qr_codes`, `QrSource`, `qrKindKeys` | `lib/data/tables.dart` |
 | Apertura del database, conversioni riga → dominio | `lib/data/database.dart` |
 | **Tutte** le letture e scritture (cronologia, preferiti, potatura, loghi orfani) | `lib/data/qr_repository.dart` |
-| Backup e ripristino con i loghi foto | `lib/data/qr_backup_source.dart` |
-| Il QR disegnato (widget e PNG con gli stessi parametri) | `lib/services/qr_renderer.dart` |
+| Backup e ripristino con i loghi foto **e la scheda «Io»** | `lib/data/qr_backup_source.dart` |
+| Il QR disegnato (widget, PNG e `paintSquare` per l'etichetta, con gli stessi parametri) | `lib/services/qr_renderer.dart` |
+| Il nome della rete Wi-Fi connessa e il permesso di posizione (`WifiNameReader`, `cleanSsid`) | `lib/services/wifi_name_reader.dart` |
+| Il selettore dei contatti di sistema, senza permesso (`ContactPicker`, `contactFromPicked`) | `lib/services/contact_picker.dart` |
+| Il disegno dell'etichetta: anteprima, PNG, PDF (`LabelFormat`, `LabelPainter`, `LabelRenderer`) | `lib/services/label_renderer.dart` |
+| Stampa e condivisione dell'etichetta (`LabelOutput`, `SystemLabelOutput`) | `lib/services/label_output.dart` |
 | Il logo come immagine (piatto, icona, testo, foto), import della foto | `lib/services/logo_renderer.dart` |
 | Lettura di QR da file, verifica di leggibilita' **[SCANNER]** | `lib/services/readability_check.dart` |
 | Luminosita' al massimo e schermo acceso | `lib/services/screen_boost.dart` |
@@ -114,25 +126,30 @@ Le decisioni tecniche della specsheet (F17.1) sono nelle sezioni che seguono, og
 | «Apri le impostazioni» dell'app (fotocamera negata): iOS `app-settings:`, Android canale nostro | `lib/services/app_settings.dart` + MainActivity.kt |
 | La home: scrivi/incolla, leggi, moduli, preferiti, recenti | `lib/features/home/home_page.dart` |
 | **IL QR a tutto schermo** e le sue azioni | `lib/features/display/qr_display_page.dart` |
-| Azioni condivise con il loro controllo Pro (salva, stile, PNG, moduli, copia, apri, cronologia) | `lib/features/common/qr_actions.dart` |
-| Mattoni grafici Neon (pulsante, etichetta, pannello, miniatura, riga, tessera azione) | `lib/features/common/neon.dart` |
+| Azioni condivise con il loro controllo Pro (salva, stile, PNG, etichetta, scheda «Io», moduli, copia, apri, cronologia) | `lib/features/common/qr_actions.dart` |
+| Mattoni grafici Neon (pulsante, etichetta, pannello, miniatura, riga, tessera azione, riga-strada `SourceCard`) | `lib/features/common/neon.dart` |
 | Il lucchetto delle pagine Pro aperte senza Pro | `lib/features/common/pro_gate.dart` |
-| La fotocamera, la torcia, «Da immagine» **[SCANNER]** | `lib/features/scan/scan_page.dart` |
+| La fotocamera, la torcia, «Da immagine» **[SCANNER]**; la lettura **solo Wi-Fi** (`ScanPage(wifiOnly: true)`, `/scan/wifi`) | `lib/features/scan/scan_page.dart` |
 | Cosa c'era nel QR letto, con le azioni del tipo | `lib/features/scan/scan_result_page.dart` |
-| I moduli speciali (una pagina, cinque moduli) | `lib/features/forms/form_page.dart` + `wifi_form.dart`, `contact_form.dart`, `email_form.dart`, `sms_form.dart`, `phone_form.dart` |
+| I moduli speciali (una pagina, tre moduli: Wi-Fi, Contatto, Email precompilata) | `lib/features/forms/form_page.dart` + `wifi_form.dart`, `contact_form.dart`, `email_form.dart` |
+| Le strade del Wi-Fi (QR della rete, immagine, rete connessa, a mano) | `lib/features/forms/wifi_sources.dart` |
+| Le strade del Contatto (rubrica, «Io», a mano), `pickContact` | `lib/features/forms/contact_sources.dart` |
+| La scheda «Io» (`/me`) | `lib/features/forms/my_contact_page.dart` |
+| «Genera etichetta» (`/label`) | `lib/features/label/label_page.dart` |
 | Validatori e campo di testo dei moduli | `lib/features/forms/form_fields.dart` |
 | Lo stile (colori, forme, logo, avvisi, verifica) | `lib/features/style/style_page.dart` |
 | Il selettore del logo e il catalogo delle icone `kLogoIcons` | `lib/features/style/logo_picker.dart` |
 | Preferiti | `lib/features/saved/saved_page.dart` |
 | Cronologia | `lib/features/history/history_page.dart` |
-| Impostazioni (cronologia, Pro, dati, tema, privacy, info) | `lib/features/settings/settings_page.dart` |
+| Impostazioni (cronologia, Pro, «La mia scheda», dati, tema, privacy, info) | `lib/features/settings/settings_page.dart` |
 | Backup e ripristino (azioni) | `lib/features/settings/data_section.dart` |
-| Manifest: intent SEND, `allowBackup=false`, deep link spento, `<queries>` | `android/app/src/main/AndroidManifest.xml` |
+| Manifest: intent SEND, `allowBackup=false`, deep link spento, `<queries>`, posizione per il nome del Wi-Fi | `android/app/src/main/AndroidManifest.xml` |
 | `onNewIntent` → `setIntent`; canale `com.smp.qrme/app_settings` (impostazioni dell'app) | `android/app/src/main/kotlin/com/smp/qrme/MainActivity.kt` |
 | **`finalizeDsl { compileSdk = 36 }`** per `receive_sharing_intent` | `android/build.gradle.kts` |
 | Firma, minify, desugaring | `android/app/build.gradle.kts` |
 | Esclusione dal backup iCloud di `Documents/` | `ios/Runner/AppDelegate.swift` |
-| Schema `ShareMedia-…`, `AppGroupId`, deep link spento, permessi | `ios/Runner/Info.plist` (+ `ios/Runner/{it,en}.lproj/InfoPlist.strings`) |
+| Schema `ShareMedia-…`, `AppGroupId`, deep link spento, permessi (anche `NSLocationWhenInUseUsageDescription`) | `ios/Runner/Info.plist` (+ `ios/Runner/{it,en}.lproj/InfoPlist.strings`) |
+| App Group ed entitlement `com.apple.developer.networking.wifi-info` | `ios/Runner/Runner.entitlements` |
 | L'estensione di condivisione iOS | `ios/ShareExtension/` (copiata da `packages/micro_share/ios_template/` dallo script) |
 | Le stringhe tradotte | **`tool/testi.py` + `tool/testi_*.py`** (sorgente unica) → `lib/l10n/app_en.arb`, `app_it.arb` |
 | Icona e splash | `tool/genera_icone.py` + `flutter_launcher_icons.yaml`, `flutter_native_splash.yaml` |
@@ -154,68 +171,74 @@ apps/qr_me/
 │   ├── dev/
 │   │   └── demo_data.dart                demoRequested, demoEnabled, kDemoNeonStyle, seedDemoData (solo con --dart-define=QM_DEMO=true, mai in release)
 │   ├── app/
-│   │   ├── app.dart                      buildRouter(), formKindOf, QrMeApp (router, tema Neon, ShareIntake, pruneOrphanLogos dopo 3 s)
+│   │   ├── app.dart                      buildRouter() (anche /scan/wifi, /label, /me), formKindOf, QrMeApp (router, tema Neon, ShareIntake, pruneOrphanLogos dopo 3 s)
 │   │   ├── app_config.dart               licenseAppId, buildQrConfig(): qr_me, «QR Me», qrme_pro_lifetime, #3BD13B, PlusJakartaSans, scuro
 │   │   ├── entitlement.dart              appVersion, installIdProvider, purchaseGatewayProvider (finto a 1,99 €), EntitlementView/Notifier, isProProvider, featureGateProvider
 │   │   ├── feature_limits.dart           qrFeatureLimits (tutte le 15 FeatureKey)
 │   │   ├── labels.dart                   kindName, kindIcon, plainText, kMaskedPassword, rowMeta
 │   │   ├── locale_resolution.dart        kSupportedLocales, resolveAppLocale
 │   │   ├── paywall_config.dart           buildQrPaywall (6 benefici), showQrPaywall
-│   │   ├── providers.dart                provider radice, QrSettingKeys, ThemeModeNotifier, HistoryEnabledNotifier, stream, servizi, PickImage, LogoKey, kLogoPixels, logoImageProvider, logoKeyOf
+│   │   ├── providers.dart                provider radice, QrSettingKeys (+ myContact), ThemeModeNotifier, HistoryEnabledNotifier, MyContactNotifier, stream, servizi (+ Wi-Fi, rubrica, etichetta), PickImage, LogoKey, kLogoPixels, logoImageProvider, logoKeyOf
 │   │   ├── qr_palette.dart               kTitleFont, QrPalette (ThemeExtension, dark/light), withQrLook (cambia anche il ColorScheme)
-│   │   └── routes.dart                   Routes, kFormKinds, QrDisplayArgs, ScanResultArgs, StyleArgs
+│   │   └── routes.dart                   Routes (+ scanWifi, label, myContact), kFormKinds (wifi, contact, email), QrDisplayArgs, ScanResultArgs, StyleArgs, LabelArgs
 │   ├── data/
 │   │   ├── tables.dart                   qrKindKeys, QrSource, QrCodes (la sola tabella)
 │   │   ├── database.dart                 QrDatabase (schema 1) + estensione QrCodeToDomain; riesporta QrSource, qrKindKeys
 │   │   ├── database.g.dart               GENERATO da drift_dev
 │   │   ├── qr_repository.dart            QrLogoFiles, QrRepository (la sola porta sul database)
-│   │   └── qr_backup_source.dart         QrBackupSource (BackupSource di micro_core, con i loghi)
+│   │   └── qr_backup_source.dart         QrBackupSource (BackupSource di micro_core, con i loghi e la scheda «Io»)
 │   ├── domain/                           Dart puro: niente Flutter, niente Drift, niente stringhe dell'app
 │   │   ├── qr_content.dart               QrKind, WifiSecurity, normalizePhone, QrContent + 7 sottoclassi
 │   │   ├── qr_encoder.dart               QrEncoder (encode, payloadOfTyped, wifiEscape, vcardEscape)
-│   │   ├── qr_decoder.dart               QrDecoder (decode, decodeTyped)
+│   │   ├── qr_decoder.dart               QrDecoder (decode, decodeTyped, firstWifi)
 │   │   ├── qr_capacity.dart              QrErrorLevel, QrCapacity, QrLevelChoice
 │   │   ├── qr_style.dart                 QrModuleShape, QrEyeShape, kLogoIconIds, QrLogo + 4 sottoclassi, QrStyle
 │   │   └── contrast.dart                 Contrast (ratio WCAG, inverted)
 │   ├── services/
-│   │   ├── qr_renderer.dart              QrRenderer (widget, png, painter: UN solo traduttore stile → qr_flutter)
+│   │   ├── qr_renderer.dart              QrRenderer (widget, png, paintSquare, painter: UN solo traduttore stile → qr_flutter)
 │   │   ├── logo_renderer.dart            LogoRenderer (render con piatto, importPhoto quadrata 512 px)
 │   │   ├── readability_check.dart        QrReaderUnavailable, QrImageReader, ZxingImageReader (normale / strict), Readability, ReadabilityCheck
 │   │   ├── screen_boost.dart             ScreenBoost (luminosita' dell'app + wakelock, errori ingoiati)
 │   │   ├── share_router.dart             ShareOutcome, ShareRouter (doppioni 2 s), ShareIntake (initial → reset → incoming)
 │   │   ├── content_actions.dart          ContentActions (uriFor, open)
-│   │   └── app_settings.dart             AppSettings (open: iOS app-settings:, Android MethodChannel verso MainActivity)
+│   │   ├── app_settings.dart             AppSettings (open: iOS app-settings:, Android MethodChannel verso MainActivity)
+│   │   ├── wifi_name_reader.dart         WifiNameReader, WifiNameStatus, WifiNameLookup, cleanSsid, PluginWifiNameReader (network_info_plus + permission_handler)
+│   │   ├── contact_picker.dart           ContactPicker, contactFromPicked, NativeContactPicker (flutter_native_contact_picker)
+│   │   ├── label_renderer.dart           LabelFormat (square, tall), LabelPainter, LabelRenderer (png, pdf)
+│   │   └── label_output.dart             LabelOutput, SystemLabelOutput (printing + share_plus)
 │   ├── features/
 │   │   ├── common/
-│   │   │   ├── neon.dart                 NeonButton, SectionLabel, QrPanel, QrThumb, QrRow, ActionTile
+│   │   │   ├── neon.dart                 NeonButton, SectionLabel, QrPanel, QrThumb, QrRow, ActionTile, SourceCard
 │   │   │   ├── pro_gate.dart             ProGate (copia di Film Tracker)
-│   │   │   └── qr_actions.dart           historyKeep, recordIfEnabled, saveAsFavorite, askTitle, openStyle, openEditForm, openNewForm, shareQrImage, copyContent, copyText, openContent, openPro
-│   │   ├── display/qr_display_page.dart  QrDisplayPage (.args / .saved), argsOfRow
-│   │   ├── forms/                        FormPage + 5 moduli (QrFormWidget) + form_fields (validatori, QrTextField)
+│   │   │   └── qr_actions.dart           historyKeep, recordIfEnabled, saveAsFavorite, askTitle, openStyle, openEditForm, openNewForm, shareQrImage, copyContent, copyText, openContent, openPro, openLabel, openMyContact
+│   │   ├── display/qr_display_page.dart  QrDisplayPage (.args / .saved), argsOfRow; «Etichetta» = IconButton nella barra
+│   │   ├── forms/                        FormPage + 3 moduli (QrFormWidget: wifi_form, contact_form, email_form) + form_fields (validatori, QrTextField)
+│   │   │                                 + wifi_sources (WifiSources), contact_sources (ContactSources, pickContact), my_contact_page (MyContactPage)
+│   │   ├── label/label_page.dart         LabelPage («Genera etichetta», Pro imageExport)
 │   │   ├── history/history_page.dart     HistoryPage
 │   │   ├── home/home_page.dart           HomePage, kHomeFavorites, kHomeRecents
 │   │   ├── saved/saved_page.dart         SavedPage (menu rinomina/togli/elimina)
-│   │   ├── scan/scan_page.dart           [SCANNER] ScanPage (ReaderWidget di flutter_zxing, torcia, Da immagine, mirino), ScanErrorView, _Viewfinder
+│   │   ├── scan/scan_page.dart           [SCANNER] ScanPage({wifiOnly}) (ReaderWidget di flutter_zxing, torcia, Da immagine, mirino), ScanErrorView, _Viewfinder
 │   │   ├── scan/scan_result_page.dart    ScanResultPage (tipo, contenuto, azioni, stile scelto tenuto nello stato)
-│   │   ├── settings/settings_page.dart   SettingsPage
-│   │   ├── settings/data_section.dart    DataSection, createBackup, restoreBackup
+│   │   ├── settings/settings_page.dart   SettingsPage (+ riga «La mia scheda»)
+│   │   ├── settings/data_section.dart    DataSection, createBackup, restoreBackup (con SettingsStore per la scheda «Io»)
 │   │   └── style/
 │   │       ├── style_page.dart           StylePage, kSwatches, kReadabilityDelay
 │   │       └── logo_picker.dart          kLogoIcons, LogoPicker
 │   └── l10n/
-│       ├── app_en.arb, app_it.arb        GENERATI da tool/testi.py (202 chiavi)
+│       ├── app_en.arb, app_it.arb        GENERATI da tool/testi.py (246 chiavi)
 │       ├── untranslated.json             vuoto ({}): nessuna chiave senza traduzione
 │       └── generated/                    GENERATO da gen-l10n (classe L)
-├── test/                                 182 test (§12)
+├── test/                                 241 test (§12)
 │   ├── data/      qr_repository_test.dart, qr_backup_test.dart, qr_code_domain_test.dart
 │   ├── domain/    qr_encoder_test, qr_decoder_test, qr_capacity_test, qr_style_test, contrast_test
 │   ├── services/  services_test.dart, share_router_test.dart, app_settings_test.dart
 │   └── widget/    qr_test_harness.dart (impianto), display_page_test, form_page_test, home_page_test,
 │                  style_page_test, paywall_config_test, palette_contrast_test, texts_glyphs_test,
-│                  scan_result_page_test, scan_error_test
+│                  scan_result_page_test, scan_error_test, wifi_sources_test, contact_sources_test, label_test
 ├── tool/
 │   ├── testi.py                          sorgente dei testi comuni + generatore degli ARB (54 chiavi)
-│   ├── testi_forms.py                    contact_, email_, form_, phone_, sms_, wifi_ (25)
+│   ├── testi_forms.py                    contact_, contactSource_, display_label, email_, form_, label_, myContact_, wifi_, wifiSource_ (69; phone_ e sms_ tolti in F17.10)
 │   ├── testi_home.py                     common_, display_, home_, save_, share_, wifi_ (37)
 │   ├── testi_lists.py                    backup_, data_, history_, saved_, settings_ (40; TIPI favorites/history int)
 │   ├── testi_scan.py                     result_, scan_ (19)
@@ -244,15 +267,15 @@ apps/qr_me/
 │       ├── build.gradle.kts              com.smp.qrme, minSdk 24, desugaring, firma da key.properties (PKCS12), minify+shrink
 │       ├── proguard-rules.pro            keep com.dexterous.**, com.tekartik.**
 │       └── src/main/
-│           ├── AndroidManifest.xml       BILLING, CAMERA (+ remove di RECORD_AUDIO e storage), camera non obbligatoria, allowBackup=false, singleTask, SEND text/plain e image/*, deep link spento, <queries>
+│           ├── AndroidManifest.xml       BILLING, CAMERA (+ remove di RECORD_AUDIO e storage), ACCESS_FINE/COARSE_LOCATION (nome del Wi-Fi), camera e GPS non obbligatori, allowBackup=false, singleTask, SEND text/plain e image/*, deep link spento, <queries>
 │           └── kotlin/com/smp/qrme/MainActivity.kt   onNewIntent → setIntent; configureFlutterEngine: canale com.smp.qrme/app_settings
 ├── ios/
 │   ├── ExportOptions.plist               app-store-connect, automatic, export
 │   ├── Runner/
 │   │   ├── AppDelegate.swift             excludeUserDataFromBackup() su Documents/ a ogni avvio
 │   │   ├── SceneDelegate.swift           vuoto (FlutterSceneDelegate)
-│   │   ├── Info.plist                    QR Me, deep link spento, permessi, AppGroupId, CFBundleURLTypes ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)
-│   │   ├── Runner.entitlements           application-groups: group.com.smp.qrme
+│   │   ├── Info.plist                    QR Me, deep link spento, permessi (camera, foto, posizione «mentre usi l'app»), AppGroupId, CFBundleURLTypes ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)
+│   │   ├── Runner.entitlements           application-groups: group.com.smp.qrme; com.apple.developer.networking.wifi-info: true (F17.10)
 │   │   └── {it,en}.lproj/InfoPlist.strings   testi dei permessi
 │   ├── ShareExtension/                   creata da tool/aggiungi_share_extension_ios.rb (modello in packages/micro_share/ios_template/)
 │   │   ├── ShareViewController.swift     RSIShareViewController con shouldAutoRedirect() -> true
@@ -268,7 +291,10 @@ apps/qr_me/
 ```
 
 **Non esistono**: `test/` per pagine di
-scansione, risultato, preferiti, cronologia, impostazioni.
+scansione, preferiti, cronologia, impostazioni.
+**Cancellati in F17.10 (non cercarli)**: `lib/features/forms/sms_form.dart` (`SmsForm`) e
+`lib/features/forms/phone_form.dart` (`PhoneForm`), con le chiavi l10n `sms_number`, `sms_body`,
+`phone_number`.
 
 ---
 
@@ -323,7 +349,8 @@ Poi: `pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons` e
   e `Flutter/ephemeral/Packages/.packages/receive_sharing_intent-1.9.0`.
 - `Info.plist` del Runner: `CFBundleDisplayName`/`CFBundleName` «QR Me», `CFBundleLocalizations`
   it/en, `ITSAppUsesNonExemptEncryption` false, **`FlutterDeepLinkingEnabled` false**,
-  `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, `AppGroupId = $(CUSTOM_GROUP_ID)`,
+  `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, **`NSLocationWhenInUseUsageDescription`**
+  (F17.10: solo per leggere il nome del Wi-Fi), `AppGroupId = $(CUSTOM_GROUP_ID)`,
   `CFBundleURLTypes` con schema **`ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)`** (cioe'
   `ShareMedia-com.smp.qrme`), orientamenti verticale e orizzontali.
 - `ios/Runner/AppDelegate.swift` — `@main class AppDelegate: FlutterAppDelegate,
@@ -343,9 +370,22 @@ Poi: `pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons` e
   ✔ **Compilato** sul Mac il 2026-10-09 (build per il simulatore riuscita, con l'estensione). ☐ Che
   l'attributo resti davvero sui file va visto su un iPad (F17.7.6).
 - `SceneDelegate.swift`: `class SceneDelegate: FlutterSceneDelegate {}` (template).
+- **Nome della rete Wi-Fi (F17.10)**: `ios/Runner/Runner.entitlements` ha
+  **`com.apple.developer.networking.wifi-info` = true** accanto all'App Group. La capability
+  **`ACCESS_WIFI_INFORMATION`** («Access Wi-Fi Information») e' stata **abilitata via API** sull'App ID
+  `com.smp.qrme` (bundleId `Z538F48ZUS`) e il **profilo dell'app rigenerato il 2026-10-09** (uuid
+  `7310650a-…`, gruppo + wifi-info); quello dell'estensione e' stato ricreato lo stesso giorno (uuid
+  `d8bc04db-…`, vedi la trappola del filtro per prefisso in §13). Senza entitlement **o** senza
+  autorizzazione alla posizione, `NEHotspotNetwork.fetchCurrent` non da' il nome e la pagina mostra il
+  riquadro «non riesco a leggere». Sul simulatore il nome non c'e' mai.
+  ☠ Con Swift Package Manager **`permission_handler_apple` compila il codice di un permesso solo se trova
+  la sua chiave in Info.plist**: dopo aver aggiunto `NSLocationWhenInUseUsageDescription` va svuotata
+  **una volta** la DerivedData, o resta la build vecchia senza il permesso di posizione.
 - Testi dei permessi: `en.lproj` e `it.lproj/InfoPlist.strings` (camera: «Per leggere i QR con la
   fotocamera.»; foto: «Per scegliere una foto da mettere come logo nel QR, o un'immagine con un QR da
-  leggere.»), gia' nel gruppo di varianti del progetto (☠ solo su disco iOS non li legge).
+  leggere.»; posizione (F17.10): «Serve solo a leggere il nome della rete Wi-Fi a cui sei connesso. QR Me
+  non usa né salva la posizione.»), gia' nel gruppo di varianti del progetto (☠ solo su disco iOS non li
+  legge).
 - **Estensione**: `ShareViewController: RSIShareViewController` con `override func
   shouldAutoRedirect() -> Bool { true }` (nessuna schermata intermedia: salva nell'App Group e
   riapre l'app con `ShareMedia-com.smp.qrme`). `Info.plist` dell'estensione:
@@ -527,7 +567,9 @@ compreso.
 ### `qr_content.dart` — cosa c'e' in un QR
 
 `enum QrKind { text, url, wifi, contact, email, sms, phone }` — `name` e' la chiave di
-`qr_codes.kind`: **non si rinomina**.
+`qr_codes.kind`: **non si rinomina**. ⚑ `sms` e `phone` **restano** anche dopo F17.10 (moduli tolti):
+servono ai QR **letti** (`SMSTO:`, `tel:`) e alle righe gia' salvate; toglierli romperebbe il CHECK di
+`qr_codes.kind` e i backup.
 `enum WifiSecurity { wpa, wep, none }` — `wpa` copre WPA/WPA2/WPA3 (nella stringa sono tutte `T:WPA`).
 
 | Funzione | Firma | Effetto |
@@ -616,6 +658,7 @@ resta solo dove l'utente compila o modifica un modulo (`FormPage`): li' il conte
 |---|---|---|
 | `decode` | `static QrContent decode(String raw)` | riconosce il tipo; **non lancia mai** (try/`on Object` → `TextContent(raw)`); cio' che non riconosce **o riconosce ma e' rotto** (un `WIFI:` senza SSID) diventa `TextContent(raw)` intatto. Proprieta': `decode(QrEncoder.encode(c)) == c` |
 | `decodeTyped` | `static QrContent decodeTyped(String raw)` | per cio' che l'utente **scrive, incolla o condivide**: come `decode`, ma un `TextContent` che `UrlContent.tryParse` riconosce diventa link (`esempio.it` → `https://esempio.it`) |
+| `firstWifi` | `static WifiContent? firstWifi(Iterable<String> raws)` | F17.10: la **prima rete** fra le stringhe lette (un'inquadratura, o tutti i QR di un'immagine) passandole a `decode`; null se nessuna e' un `WIFI:` valido. ⚑ L'etichetta di un router ha spesso anche il QR dell'app del gestore: si prende la rete ovunque sia. Usata da `ScanPage` (`wifiOnly`) e `WifiSources` («Da un'immagine») |
 
 ⚑ **Due metodi di proposito**: un QR **letto** che contiene «esempio.it» e' un testo (chi l'ha
 generato non l'ha fatto link) e cambiarlo romperebbe il round-trip; cio' che scrive l'utente e'
@@ -825,22 +868,46 @@ scorre tutta `images/`, `thumbs/` compresa, e con le sole immagini cancellerebbe
 
 ### `class QrBackupSource implements BackupSource` (`qr_backup_source.dart`)
 
-`const QrBackupSource(this.db, {this.paths, this.clock})` — `final QrDatabase db`; `final AppPaths?
-paths` (per cancellare i loghi orfani dopo un «sostituisci tutto»; null nei test del solo database);
-`final DateTime Function()? clock` (ora usata quando il file non porta le date).
+`const QrBackupSource(this.db, {this.paths, this.settings, this.clock})` — `final QrDatabase db`;
+`final AppPaths? paths` (per cancellare i loghi orfani dopo un «sostituisci tutto»; null nei test del
+solo database); `final SettingsStore? settings` (per la **scheda «Io»**, `QrSettingKeys.myContact`;
+null nei test del solo database: allora la scheda non si esporta e non si ripristina); `final DateTime
+Function()? clock` (ora usata quando il file non porta le date). ⚑ Importa `QrSettingKeys` da
+`lib/app/providers.dart` con `show`: una sola fonte per il nome della preferenza.
 
 | Membro | Firma | Effetto |
 |---|---|---|
 | `id` | `static const String id = 'qr_me'` | **immutabile**: lo schema dei backup |
 | `schemaId` | `String get schemaId` → `id` | |
 | `schemaVersion` | `int get schemaVersion` → `1` | |
-| `exportPayload` | `Future<Map<String, Object?>> exportPayload()` | `{codes: [{kind, payload, fields?, title, source, style?, favorite, createdAt, lastUsedAt}]}` per id; `fields` e `style` come **oggetti JSON** (file leggibile) |
+| `exportPayload` | `Future<Map<String, Object?>> exportPayload()` | `{codes: [{kind, payload, fields?, title, source, style?, favorite, createdAt, lastUsedAt}], myContact?: {name, phone, email, organization, url, note}}` (codes per id); `fields`, `style` e `myContact` come **oggetti JSON** (file leggibile). `myContact` c'e' solo se il telefono ha una scheda **leggibile** |
 | `imagePaths` | `Future<List<String>> imagePaths()` | immagine e miniatura di ogni logo usato, ordinati |
 | `counts` | `Future<Map<String, int>> counts()` | `{'favorites': n, 'history': n}` (li legge il riepilogo del ripristino) |
-| `importPayload` | `Future<void> importPayload(Map<String, Object?> payload, {required ImportMode mode})` | in **una transazione**: `replaceAll` cancella tutto; `mergeKeepExisting` salta i gia' presenti (stessi payload, style_json, preferito **e** `createdAt`). Valida `kind`, `source`, `fields` (rilette con `fromFields`), `style` (riscritto dalla forma letta: chiavi di versioni future cadono), percorso del logo. ☠ Tutto diventa **FormatException** (TypeError e InvalidDataException compresi): `BackupService.restore` intercetta solo le Exception. Dopo la transazione riuscita, con `replaceAll`, cancella i loghi del telefono che il file **non** riporta |
+| `importPayload` | `Future<void> importPayload(Map<String, Object?> payload, {required ImportMode mode})` | prima valida `myContact` se c'e' (una scheda rotta rifiuta **tutto** il file, prima di toccare il database); poi in **una transazione**: `replaceAll` cancella tutto; `mergeKeepExisting` salta i gia' presenti (stessi payload, style_json, preferito **e** `createdAt`). Valida `kind`, `source`, `fields` (rilette con `fromFields`), `style` (riscritto dalla forma letta: chiavi di versioni future cadono), percorso del logo. ☠ Tutto diventa **FormatException** (TypeError e InvalidDataException compresi): `BackupService.restore` intercetta solo le Exception. Dopo la transazione riuscita: scrive la scheda «Io» (regole sotto), poi, con `replaceAll`, cancella i loghi del telefono che il file **non** riporta |
 
 Private: `static String _logoPath(String path)` (☠ deve iniziare con `images/`, niente `..`, `\`, `:`),
-`static List<Map<String, Object?>> _list(Object? raw)` (gli elementi non mappa si scartano).
+`static List<Map<String, Object?>> _list(Object? raw)` (gli elementi non mappa si scartano),
+`ContactContent? _phoneContact()` (la scheda del telefono da `settings`; assente, senza `settings` o
+illeggibile → null, l'illeggibile con `MicroLog.e`), `static ContactContent _contactOf(Object? raw)`
+(mappa → `QrContent.fromFields(QrKind.contact, …)`; altrimenti FormatException).
+
+**La scheda «Io» nel backup** (aggiunta dopo F17.10, 2026-10-09):
+
+| Il file ha `myContact`? | Il telefono ha la scheda? | `mergeKeepExisting` | `replaceAll` |
+|---|---|---|---|
+| si' | no | la si imposta | la si imposta |
+| si' | si' | **vince il telefono** | **vince il file** (come per i QR) |
+| no (backup vecchio) | si' o no | il telefono resta com'e' | il telefono resta com'e' |
+| rotta (non mappa, senza `name`) | — | FormatException, niente cambia | FormatException, niente cambia |
+
+⚑ **Campo facoltativo, `schemaVersion` resta 1**: un backup di prima di F17.10 senza il campo resta
+valido, e un'app vecchia che legge un backup nuovo ignora una chiave che non conosce.
+⚑ **Campo assente ≠ scheda cancellata**: anche con «sostituisci tutto» un backup senza `myContact`
+non cancella la scheda del telefono; il file e' stato fatto quando la scheda non esisteva.
+⚑ **Scritta dopo la transazione**: le preferenze non sono transazionali; con un file rotto la scheda del
+telefono resta com'era. ☠ Dopo il ripristino `restoreBackup` fa **`ref.invalidate(myContactProvider)`**:
+`MyContactNotifier.build` legge le preferenze solo quando si costruisce, e `settingsProvider` non
+cambia, quindi senza invalidare la pagina mostrerebbe la scheda di prima.
 
 ⚑ **Niente id nel file**: non significano niente su un altro telefono e nessuno li referenzia.
 ⚑ **Il limite di 5 non si applica al ripristino**: riporta i dati come erano; lo riapplica la prossima
@@ -863,11 +930,13 @@ schermata bianca all'avvio, e chi arriva da una condivisione vuole il QR subito)
 | `appConfigProvider` | `Provider<MicroAppConfig>` | **lancia** UnimplementedError se non sovrascritto in `main` |
 | `appPathsProvider` | `Provider<AppPaths>` | idem |
 | `settingsProvider` | `Provider<SettingsStore>` | idem |
-| `QrSettingKeys` | `abstract final class QrSettingKeys` | `static const String historyEnabled = 'history_enabled'` |
+| `QrSettingKeys` | `abstract final class QrSettingKeys` | `static const String historyEnabled = 'history_enabled'`; `static const String myContact = 'my_contact'` (F17.10: la scheda «Io», i campi di `ContactContent.toFields()` in JSON; assente finche' non la si salva) |
 | `ThemeModeNotifier` | `class ThemeModeNotifier extends Notifier<ThemeMode>` | `ThemeMode build()`: `light`/`system` salvati, **altrimenti scuro**; `Future<void> set(ThemeMode mode)` salva `mode.name` |
 | `themeModeProvider` | `NotifierProvider<ThemeModeNotifier, ThemeMode>` | |
 | `HistoryEnabledNotifier` | `class HistoryEnabledNotifier extends Notifier<bool>` | `bool build()` → `getBool(historyEnabled, orElse: true)`; `Future<void> set(bool enabled)` |
 | `historyEnabledProvider` | `NotifierProvider<HistoryEnabledNotifier, bool>` | |
+| `MyContactNotifier` | `class MyContactNotifier extends Notifier<ContactContent?>` | F17.10, la scheda «Io». `ContactContent? build()` legge `QrSettingKeys.myContact` e lo rilegge con `QrContent.fromFields(QrKind.contact, …)`; **illeggibile = assente** (`MicroLog.e`, si rifa', non si blocca il modulo). `Future<void> save(ContactContent contact)` (stato + `setString` JSON); `Future<void> clear()` (stato null + `remove`) |
+| `myContactProvider` | `NotifierProvider<MyContactNotifier, ContactContent?>` | letto da `ContactSources`, `MyContactPage`, `SettingsPage`; ☠ invalidato da `restoreBackup` dopo un ripristino |
 | `databaseProvider` | `Provider<QrDatabase>` | `QrDatabase.open()`, chiuso con `onDispose` |
 | `imageStoreProvider` | `Provider<ImageStore>` | `ImageStore(paths: appPaths)` (i loghi foto) |
 | `repositoryProvider` | `Provider<QrRepository>` | `QrRepository(db, images: imageStore)` |
@@ -883,6 +952,10 @@ schermata bianca all'avvio, e chi arriva da una condivisione vuole il QR subito)
 | `appSettingsProvider` | `Provider<AppSettings>` | `const AppSettings()` («Apri le impostazioni» della lettura) |
 | `shareInboxProvider` | `Provider<ShareInbox>` | `RsiShareInbox()` (micro_share); nei test FakeShareInbox |
 | `shareRouterProvider` | `Provider<ShareRouter>` | ⚑ **uno solo per l'app**: il filtro dei doppioni ricorda l'ultima condivisione |
+| `wifiNameReaderProvider` | `Provider<WifiNameReader>` | `const PluginWifiNameReader()` (F17.10); nei test un doppio finto |
+| `contactPickerProvider` | `Provider<ContactPicker>` | `const NativeContactPicker()` (F17.10); nei test un doppio finto |
+| `labelRendererProvider` | `Provider<LabelRenderer>` | `LabelRenderer(renderer: qrRendererProvider)`: l'etichetta con lo **stesso** `QrRenderer` dell'app |
+| `labelOutputProvider` | `Provider<LabelOutput>` | `SystemLabelOutput(paths: appPathsProvider)`; nei test un doppio che registra stampe e condivisioni |
 | `PickImage` | `typedef PickImage = Future<String?> Function()` | |
 | `pickImageProvider` | `Provider<PickImage>` | `ImagePicker().pickImage(source: gallery)?.path`; ⚑ selettore di sistema, nessun permesso su Android 13+ e iOS |
 | `backupServiceProvider` | `Provider<BackupService>` | `BackupService(paths:, appVersion: appVersion)` |
@@ -893,6 +966,10 @@ schermata bianca all'avvio, e chi arriva da una condivisione vuole il QR subito)
 
 ⚑ Tutti i servizi stanno dietro un provider: sotto `flutter test` non c'e' nessun plugin e i test li
 sostituiscono con doppi.
+⚑ **La scheda «Io» nelle preferenze e non nel database** (F17.10): e' una sola, non e' un QR e non deve
+finire in cronologia. ☠ Ne' iOS ne' Android danno a un'app «la mia scheda» senza permessi speciali (iOS
+non la espone affatto, Android vuole `READ_PROFILE`): per questo la si sceglie dalla rubrica la prima
+volta, o la si compila, e la si tiene qui. Entra nel backup (§5, `QrBackupSource`).
 
 ### `entitlement.dart` — il Pro
 
@@ -921,9 +998,9 @@ coerenza le vuole tutte):
 |---|---|---|
 | `FeatureKey.fullHistory` | `count(freeMax: 5)` | cronologia: 5 righe **vere** |
 | `FeatureKey.unlimitedEntities` | `count(freeMax: 1)` | preferiti: **uno** gratis |
-| `FeatureKey.customCategories` | `locked()` | i cinque moduli speciali (compilare o modificare) |
+| `FeatureKey.customCategories` | `locked()` | i moduli speciali (Wi-Fi, Contatto, Email precompilata: crearli, dalle strade o a mano, o modificarli) **e la scheda «Io»** (`/me`) |
 | `FeatureKey.themeCustomization` | `locked()` | colori, forme, logo |
-| `FeatureKey.imageExport` | `locked()` | condividere il QR come PNG (chiave nata con QR Me, F17.2a) |
+| `FeatureKey.imageExport` | `locked()` | condividere il QR come PNG (chiave nata con QR Me, F17.2a) **e «Genera etichetta»** (`/label`, F17.10: stessa famiglia, il QR che esce dall'app) |
 | `FeatureKey.backupRestore` | `locked()` | **creare** il backup (il ripristino e' gratis) |
 | `secondaryEntities`, `photos`, `statistics`, `csvExport`, `pdfReport`, `advancedWidget`, `notifications`, `multipleNotifications`, `calendarSync` | `open()` | QR Me non le vende |
 
@@ -934,7 +1011,7 @@ e' un contenuto, non un modulo. ⚑ Se il proprietario volesse 0 preferiti grati
 
 | Funzione | Firma | Effetto |
 |---|---|---|
-| `buildQrPaywall` | `PaywallConfig buildQrPaywall(L l)` | titolo «QR Me Pro», sottotitolo «Un pagamento unico…», **6 benefici** in quest'ordine: stile (`themeCustomization`, palette), moduli (`customCategories`, wifi), preferiti (`unlimitedEntities`, star), cronologia (`fullHistory`, history), immagine (`imageExport`, ios_share), backup (`backupRestore`, cloud_download) |
+| `buildQrPaywall` | `PaywallConfig buildQrPaywall(L l)` | titolo «QR Me Pro», sottotitolo «Un pagamento unico…», **6 benefici** in quest'ordine: stile (`themeCustomization`, palette), moduli (`customCategories`, wifi: dopo F17.10 «Wi-Fi, contatti ed email precompilate»), preferiti (`unlimitedEntities`, star), cronologia (`fullHistory`, history), immagine (`imageExport`, ios_share: dopo F17.10 «Condividi il QR come immagine o come etichetta da stampare»), backup (`backupRestore`, cloud_download) |
 | `showQrPaywall` | `Future<bool> showQrPaywall(BuildContext context, WidgetRef ref, {FeatureKey? highlight})` | `PaywallPage.show` con la funzione evidenziata; `true` se si esce col Pro |
 
 ⚑ **Sei righe e non le «quattro piu' backup» della spec**: preferiti e cronologia sono due chiavi e il
@@ -992,6 +1069,9 @@ sotto il 4,5:1 di WCAG AA per il testo normale (visto sull'emulatore). `#15803D`
 |---|---|---|
 | `kindName` | `String kindName(L l, QrKind k)` | `kind_*` dagli ARB; switch esaustivo (un tipo nuovo non compila senza etichetta) |
 | `kindIcon` | `IconData kindIcon(QrKind k)` | notes, link, wifi, person_outline, mail_outline, sms_outlined, call_outlined |
+
+⚑ `kind_email` = **«Email precompilata» / «Pre-filled email»** da F17.10 (chip, titolo, righe): il modulo
+crea un QR che apre un'email gia' scritta, non un modo di condividere il proprio indirizzo.
 | `plainText` | `String plainText(L l, QrContent c, {bool withPassword = true})` | il contenuto **in chiaro**, una riga per campo (⚑ non il payload: una vCard e' illeggibile); Wi-Fi: «Rete: …» + «Password: …» (assente per le reti aperte), mascherata senza `withPassword` |
 | `kMaskedPassword` | `const String kMaskedPassword = '••••••••'` | ⚑ sempre otto pallini: anche la lunghezza e' un indizio |
 | `rowMeta` | `String rowMeta(L l, QrCode code)` | «tipo · 9 ott» (`DateFormat.MMMd`, ora locale) |
@@ -1019,9 +1099,12 @@ buildRouter()` (`lib/app/app.dart`, **senza parametri**), `initialLocation: Rout
 | `Routes.show` | `/show` | `QrDisplayPage.args(args)` | `extra: QrDisplayArgs` | | `extra` assente o di altro tipo |
 | `Routes.qr` | `/qr/:id` | `QrDisplayPage.saved(id)` | `id` | | id non numerico (`_id` → -1); id inesistente → pagina «Questo QR non esiste piu'» |
 | `Routes.scan` | `/scan` | `ScanPage` | | gratis | |
+| `Routes.scanWifi` | `/scan/wifi` | `ScanPage(wifiOnly: true)` | torna (`pop`) con il `WifiContent` letto | **nessun ProGate** (legge e restituisce una rete, non crea niente; chi la apre, il modulo Wi-Fi, e' gia' dietro il suo) | |
 | `Routes.scanResult` | `/scan/result` | `ScanResultPage(args:)` | `extra: ScanResultArgs` | gratis | `extra` assente |
-| `Routes.form` | `/form/:kind` (+ `?id=`) | `ProGate(customCategories, FormPage(kind:, id:))` | `kind` ∈ `kFormKinds`, `id` facoltativo | **Pro** | tipo sconosciuto o senza modulo (`text`, `url`); `?id=` non numerico (⚑ non un modulo nuovo che sembri una modifica) |
+| `Routes.form` | `/form/:kind` (+ `?id=`) | `ProGate(customCategories, FormPage(kind:, id:))` | `kind` ∈ `kFormKinds`, `id` facoltativo | **Pro** | tipo sconosciuto o senza modulo (`text`, `url`, e da F17.10 `sms`, `phone`); `?id=` non numerico (⚑ non un modulo nuovo che sembri una modifica) |
 | `Routes.style` | `/style` | `ProGate(themeCustomization, StylePage(args:))` | `extra: StyleArgs` | **Pro** | `extra` assente |
+| `Routes.label` | `/label` | `ProGate(imageExport, LabelPage(args:))` | `extra: LabelArgs` | **Pro** | `extra` assente o di altro tipo |
+| `Routes.myContact` | `/me` | `ProGate(customCategories, MyContactPage())` | (pop con il `ContactContent` salvato) | **Pro** | |
 | `Routes.saved` | `/saved` | `SavedPage` | | | |
 | `Routes.history` | `/history` | `HistoryPage` | | | |
 | `Routes.settings` | `/settings` | `SettingsPage` | | | |
@@ -1031,7 +1114,11 @@ Helper: `static String qrOf(int id)` → `/qr/<id>`; `static String formOf(QrKin
 privata `int _id(GoRouterState s)` (`int.tryParse(...) ?? -1`, ☠ `tryParse` e non `parse`: un percorso
 scritto a mano darebbe un'eccezione nel builder).
 
-`const List<QrKind> kFormKinds = [wifi, contact, email, sms, phone]` (testo e link si scrivono nella home).
+`const List<QrKind> kFormKinds = [QrKind.wifi, QrKind.contact, QrKind.email]` (testo e link si scrivono
+nella home). ⚑ **SMS e Telefono tolti in F17.10** (Telefono ridondante con Contatto, SMS non serve): si
+tolgono i **moduli**, non la lettura. `QrKind.sms`/`phone` restano nel dominio, un QR `SMSTO:`/`tel:`
+letto si riconosce e offre «Manda SMS»/«Chiama», e i preferiti gia' salvati di quei tipi si mostrano
+**senza «Modifica»** (che guarda questa lista); `/form/sms` e `/form/phone` dicono «Non trovato».
 
 ⚑ **Nessuna rotta `/pro`** (tolta il 2026-10-09 con `_PaywallRoutePage`): nessun codice la apriva. Il
 paywall si apre sempre con `showQrPaywall` (`PaywallPage.show` di micro_core, un `Navigator.push`), che
@@ -1044,12 +1131,13 @@ Argomenti (`routes.dart`):
 | `QrDisplayArgs` | `const QrDisplayArgs({required this.content, required this.payload, required this.source, this.style = QrStyle.plain, this.qrId})` | `QrContent content`, `String payload` (la stringa esatta), `String source` (chiave di `QrSource`), `QrStyle style`, `int? qrId` (se gia' registrato) |
 | `ScanResultArgs` | `const ScanResultArgs({required this.raw, required this.source})` | `String raw`, `String source` (`scanned` o `image`) |
 | `StyleArgs` | `const StyleArgs({required this.display})` | `QrDisplayArgs display`; `int? get qrId` → `display.qrId` (se c'e', «Applica» scrive sulla riga) |
+| `LabelArgs` | `const LabelArgs({required this.display, required this.title})` | `QrDisplayArgs display` (il QR con il suo stile), `String title` (il testo di partenza sotto il QR: il titolo del QR, modificabile) |
 
 ⚑ `ProGate` **sulla rotta** (F17.0 punto 11): un `push` diretto non deve aprire una pagina Pro gratis; i
 pulsanti controllano comunque prima (`qr_actions.dart`) per mostrare subito il paywall.
 ⚑ **Nessun redirect**: ☠ un `push` che redireziona a «/» mette «/» due volte nella pila e go_router
 mostra la sua pagina d'errore (Full Freezer).
-⚑ `/scan/result` non e' figlio di `/scan`: e' un percorso a se'.
+⚑ `/scan/result` e `/scan/wifi` non sono figli di `/scan`: sono percorsi a se'.
 ⚑ Percorsi fissati tutti insieme nel bootstrap (F17.2c), prima delle schermate scritte in parallelo.
 
 ### `QrMeApp` (`app.dart`)
@@ -1099,7 +1187,8 @@ esporta `QrEyeShape` come il nostro dominio e, tramite `qr`, `QrCode` come la ri
 | `choose` | `QrLevelChoice choose(String payload, QrStyle style)` | `QrCapacity.choose(payload, wantsLogo: style.hasLogo)`; le pagine la leggono **prima** di disegnare |
 | `levelFor` | `QrErrorLevel levelFor(String payload, QrStyle style)` | ☠ **ArgumentError** se non sta in nessun QR (chi chiama deve aver guardato `choose`) |
 | `widget` | `Widget widget({required String payload, required QrStyle style, required double size, ui.Image? logo, String? semanticsLabel})` | quadrato di lato `size`, zona di rispetto calcolata in moduli veri e **piena del colore di sfondo** (ColoredBox + Padding + CustomPaint); `Semantics(image: true)` |
-| `png` | `Future<Uint8List> png({required String payload, required QrStyle style, int pixels = 1024, ui.Image? logo})` | PNG quadrato con zona di rispetto: per «Condividi immagine» e per la verifica |
+| `png` | `Future<Uint8List> png({required String payload, required QrStyle style, int pixels = 1024, ui.Image? logo})` | PNG quadrato con zona di rispetto: per «Condividi immagine» e per la verifica. Da F17.10 disegna passando da `paintSquare` |
+| `paintSquare` | `void paintSquare(Canvas canvas, Offset topLeft, {required String payload, required QrStyle style, required double side, ui.Image? logo})` | F17.10: disegna su `canvas` il QR in un quadrato di lato `side` con l'angolo in `topLeft`: sfondo, zona di rispetto (in moduli veri) e codice, con `save`/`translate`/`restore`. ⚑ Pubblico per l'etichetta (`LabelPainter`), che mette il QR in un riquadro della sua tela e deve disegnarlo **identico** a PNG e schermo: un solo disegno, tre usi |
 | `painter` | `qf.QrPainter painter({required qf.QrCode qr, required QrStyle style, required double codeSide, ui.Image? logo})` | **IL** punto che traduce lo stile: `gapless: true`, occhi e moduli del colore di primo piano con la forma scelta, logo `embeddedImage` di lato `codeSide * 0,22`. Pubblico per i test |
 | `errorCorrectLevelOf` | `static int errorCorrectLevelOf(QrErrorLevel level)` | → costanti `QrErrorCorrectLevel` L/M/Q/H |
 
@@ -1233,9 +1322,109 @@ uri)?` e `TargetPlatform?`, iniettabili nei test).
 Lato Android, `MainActivity.configureFlutterEngine` registra il canale: metodo `open` →
 `startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package",
 packageName, null)))` → `true`, eccezione → `false`, altri metodi → `notImplemented`.
-⚑ **Codice nostro e non un plugin** (`permission_handler`, `app_settings`): un Intent non vale una
-dipendenza in piu' (ne' una riga in piu' nella scheda dello store). Android non ha uno schema URL per
-«le impostazioni di quest'app», quindi `url_launcher` da solo non basta.
+⚑ **Codice nostro e non un plugin** (`app_settings`): un Intent non vale una dipendenza in piu'.
+Android non ha uno schema URL per «le impostazioni di quest'app», quindi `url_launcher` da solo non
+basta. ⚑ Da F17.10 `permission_handler` **c'e'** (serve al permesso di posizione per il nome del
+Wi-Fi), ma «Apri le impostazioni» resta su `AppSettings`: funziona, e' provato, e non dipende dal plugin.
+
+### `wifi_name_reader.dart` — il nome della rete connessa (F17.10)
+
+Per «La rete a cui sei connesso» del modulo Wi-Fi. ☠ **La password nessuna app la puo' leggere**, ne' su
+Android ne' su iOS: e' un limite dei sistemi, non una scelta. Qui si legge solo il nome (SSID); la
+password l'utente la **incolla** (`WifiForm.pasteHelp`).
+
+| Simbolo | Firma | Effetto |
+|---|---|---|
+| `WifiNameReader` | `abstract interface class WifiNameReader` | interfaccia (sotto `flutter test` non c'e' nessun plugin: i test usano un doppio via `wifiNameReaderProvider`) |
+| `needsPermission` | `Future<bool> needsPermission()` | `true` se bisogna ancora chiedere il permesso (e quindi spiegare prima perche'); `false` se gia' concesso o **negato per sempre** (il dialogo del sistema non comparirebbe comunque) |
+| `lookup` | `Future<WifiNameLookup> lookup()` | chiede il permesso se serve, poi legge il nome. **Non lancia mai** |
+| `WifiNameStatus` | `enum WifiNameStatus { found, denied, deniedForever, locationOff, unavailable }` | `unavailable` = non connesso, posizione solo approssimativa, simulatore, errore del sistema |
+| `WifiNameLookup` | `@immutable final class WifiNameLookup` — `const WifiNameLookup(this.status, [this.ssid])`, `const WifiNameLookup.found(String this.ssid)` | `final WifiNameStatus status`, `final String? ssid` (solo con `found`); `==`, `hashCode`, `toString` |
+| `cleanSsid` | `String? cleanSsid(String? raw)` | toglie le **virgolette** che Android mette attorno a un nome UTF-8 (`"Casa"` → `Casa`); null per `null`, vuoto, `<unknown ssid>`, `0x`. ⚑ **nessun trim**: uno spazio puo' far parte del nome |
+| `PluginWifiNameReader` | `class PluginWifiNameReader implements WifiNameReader` — `const PluginWifiNameReader()` | l'implementazione vera |
+
+`PluginWifiNameReader`: `static const PermissionWithService _permission = Permission.locationWhenInUse`
+(⚑ su iOS basta «mentre usi l'app», «sempre» sarebbe ingiustificabile; su Android sono lo stesso
+gruppo e il plugin chiede insieme precisa e approssimativa, come vuole Android 12). `needsPermission`:
+non concesso, non limitato, non negato per sempre → true; errore → true (log). `lookup`: stato →
+`request()` se serve → `isPermanentlyDenied`/`isRestricted` → `deniedForever`; non concesso → `denied`;
+**Android** con `serviceStatus == disabled` → `locationOff` (☠ senza localizzazione accesa il sistema da'
+`<unknown ssid>` anche col permesso); poi `cleanSsid(await NetworkInfo().getWifiName())` → `found` o
+`unavailable`; ogni eccezione → `unavailable` + `MicroLog.e`.
+
+Cosa serve per leggere il nome: **Android 10+** il permesso di posizione **precisa**
+(`ACCESS_FINE_LOCATION`, nel manifest con `ACCESS_COARSE_LOCATION`) **e** la localizzazione accesa (con la
+sola approssimativa: `<unknown ssid>`); **iOS** l'entitlement `com.apple.developer.networking.wifi-info`
+**e** l'autorizzazione «mentre usi l'app» (`NSLocationWhenInUseUsageDescription`). Sul simulatore mai.
+⚑ Il permesso si chiede **solo al tocco del bottone, dopo una spiegazione dell'app** (`WifiSources._explain`):
+chiederlo all'avvio, senza contesto, fa dire di no, e «posizione» per il nome di una rete sembra un abuso.
+Pacchetti `network_info_plus` (Android `WifiManager.connectionInfo`, iOS `NEHotspotNetwork.fetchCurrent`)
+e `permission_handler`, controllati (§11).
+
+### `contact_picker.dart` — «Scegli dalla rubrica» (F17.10)
+
+| Simbolo | Firma | Effetto |
+|---|---|---|
+| `ContactPicker` | `abstract interface class ContactPicker` — `Future<ContactContent?> pick()` | apre il selettore; il contatto scelto o null se si annulla. ☠ **Puo' lanciare** (nessuna app della rubrica, selettore gia' aperto): chi chiama (`pickContact`) lo dice all'utente |
+| `contactFromPicked` | `ContactContent? contactFromPicked({String? fullName, List<String>? phones, String? selected})` | nome rifilato; numero = `selected` o il primo non vuoto di `phones`, rifilato; nome **e** numero vuoti → null. ⚑ Un nome vuoto **resta vuoto**: il modulo lo chiede, invece di inventarlo dal numero |
+| `NativeContactPicker` | `class NativeContactPicker implements ContactPicker` — `const NativeContactPicker()` | `FlutterNativeContactPicker().selectContact()` → `contactFromPicked(fullName:, phones: phoneNumbers, selected: selectedPhoneNumber)` |
+
+⚑ **Il selettore di sistema** (Android `ACTION_PICK` sui telefoni di ContactsContract, iOS
+CNContactPickerViewController): **nessun permesso dei contatti**, l'app riceve solo il contatto toccato,
+mai la rubrica. `READ_CONTACTS` per un QR sarebbe sproporzionato (e su Play un permesso sensibile da
+giustificare). ☠ **Restituisce solo nome e telefoni**: su Android il selettore e' quello dei numeri e il
+permesso temporaneo copre solo la riga scelta, non le email. Email e altri campi si aggiungono nel
+modulo, che si apre gia' compilato.
+
+### `label_renderer.dart` — il disegno dell'etichetta (F17.10)
+
+«Genera etichetta» (Pro `imageExport`): il QR con il suo stile e del testo sotto. ⚑ **Un solo disegno,
+tre usi**: `LabelPainter` disegna su una tela qualunque; l'anteprima lo usa in un CustomPaint, il PNG
+con un PictureRecorder, il PDF mette quel PNG su un foglio. L'anteprima non puo' differire da cio'
+che esce dalla stampante (stessa regola di `QrRenderer`).
+
+`enum LabelFormat` — `const LabelFormat({required this.aspect, required this.widthMm, required
+this.heightMm})`; campi `final double aspect` (larghezza/altezza), `final double widthMm`, `final double
+heightMm` (la misura vera stampata):
+
+| Valore | `aspect` | Stampata | Note |
+|---|---|---|---|
+| `square` | 1 | 70 × 70 mm | QR grande, una riga di testo sotto |
+| `tall` | 2/3 | 60 × 90 mm | ⚑ **verticale** e non orizzontale: il testo resta **sotto** il QR come nella quadrata, e su un A4 si ritaglia senza girare niente |
+
+`class LabelPainter extends CustomPainter` — `const LabelPainter({required this.renderer, required
+this.payload, required this.style, required this.text, this.logo, this.fontFamily})`; campi `final
+QrRenderer renderer`, `final String payload`, `final QrStyle style`, `final String text`, `final ui.Image?
+logo`, `final String? fontFamily` (nell'app `kTitleFont`; null = font di sistema):
+
+| Membro | Firma | Effetto |
+|---|---|---|
+| `padFraction` | `static const double padFraction = 0.05` | margine attorno a tutto, frazione della larghezza |
+| `squareTextFraction` | `static const double squareTextFraction = 0.2` | altezza del testo nell'etichetta quadrata |
+| `layout` | `static ({Rect qr, Rect text}) layout(Size size, {required bool hasText})` | senza testo: QR centrato di lato `shortestSide - 2·pad`; con testo: quadrata → testo alto 20%, verticale → il testo prende `altezza - larghezza` (il QR tutta la larghezza); QR in alto al centro, testo sotto. Pubblica per i test |
+| `layoutText` | `TextPainter layoutText(Rect box)` | centrato, `maxLines: 2`, ellissi «…», grassetto 700; parte da `min(box.height·0,42, box.width·0,11)` e scende ×0,92 finche' sta, fino a `box.height·0,16`, poi taglia. ⚑ Il tetto sulla larghezza: nella verticale il riquadro e' alto e una parola corta («Bar») uscirebbe enorme |
+| `paint` | `void paint(Canvas canvas, Size size)` | sfondo del colore dello stile, QR con `renderer.paintSquare`, testo **nel colore del QR** (⚑ il contrasto e' gia' quello che Stile ha controllato) centrato nel suo riquadro; testo vuoto → solo il QR |
+| `shouldRepaint` | `bool shouldRepaint(LabelPainter old)` | payload, stile, testo, logo o font cambiati |
+
+`class LabelRenderer` — `const LabelRenderer({this.renderer = const QrRenderer()})`; `final QrRenderer renderer`:
+
+| Membro | Firma | Effetto |
+|---|---|---|
+| `defaultWidthPx` | `static const int defaultWidthPx = 1200` | ~450-500 dpi su 60-70 mm: nitido anche stampato |
+| `png` | `Future<Uint8List> png({required String payload, required QrStyle style, required String text, required LabelFormat format, ui.Image? logo, String? fontFamily, int widthPx = defaultWidthPx})` | tela `widthPx × widthPx/aspect`, `LabelPainter.paint`, `toImage`, PNG; StateError se il PNG non esce; immagine e picture sempre liberate |
+| `pdf` | `Future<Uint8List> pdf({required Uint8List png, required LabelFormat format, required PdfPageFormat page})` | un `pw.Document` (titolo e creatore «QR Me») con una pagina del formato `page` scelto nel dialogo di stampa: l'etichetta **alla misura vera** (`widthMm × heightMm`), **in alto al centro**, con un filo grigio (`PdfColors.grey400`, 0,3) per ritagliarla. ⚑ Alla misura vera e non «adatta al foglio»: un'etichetta grande come un A4 non e' un'etichetta |
+
+### `label_output.dart` — dove va l'etichetta (F17.10)
+
+| Simbolo | Firma | Effetto |
+|---|---|---|
+| `LabelOutput` | `abstract interface class LabelOutput` | interfaccia: i test usano un doppio (`labelOutputProvider`) che registra cosa e' uscito |
+| `printPdf` | `Future<bool> printPdf({required Future<Uint8List> Function(PdfPageFormat page) buildPdf, required String name})` | il dialogo di stampa del sistema; `buildPdf` riceve il foglio scelto li'; `false` se la stampa non e' partita |
+| `sharePng` | `Future<void> sharePng({required Uint8List png, required String title})` | il foglio di condivisione con il PNG, `title` come oggetto |
+| `SystemLabelOutput` | `class SystemLabelOutput implements LabelOutput` — `const SystemLabelOutput({required this.paths})`; `final AppPaths paths` | `printPdf` → `Printing.layoutPdf(onLayout: buildPdf, name:)` (Android PrintManager, iOS UIPrintInteractionController); `sharePng` → AtomicFile in `exports/qr-me-label-<ms>.png`, poi `SharePlus.instance.share(ShareParams(files: [XFile(.., mimeType: 'image/png')], subject: title))` |
+
+⚑ `printing` c'era gia' nel monorepo (Film Tracker); ricontrollato per QR Me: la sua `networkImage`
+va in rete solo se chiamata, e QR Me non la chiama.
 
 ---
 
@@ -1261,6 +1450,8 @@ aperto da un'azione, **si prosegue** (chi ha toccato il pulsante vuole la funzio
 | `copyText` | `Future<void> copyText(BuildContext context, String text)` | idem per un testo qualsiasi |
 | `openContent` | `Future<void> openContent(BuildContext context, WidgetRef ref, QrContent content)` | `ContentActions.open`; false → snack `result_noApp` |
 | `openPro` | `void openPro(BuildContext context, WidgetRef ref, FeatureKey key)` | paywall generico con evidenza |
+| `openLabel` | `Future<void> openLabel(BuildContext context, WidgetRef ref, {required QrDisplayArgs args, required String title})` | F17.10: Pro `imageExport` (paywall, prosegue se comprato); `push(/label, LabelArgs(display: args, title: title))`. ⚑ Stessa chiave di «Condividi immagine»: e' la stessa famiglia |
+| `openMyContact` | `Future<void> openMyContact(BuildContext context, WidgetRef ref)` | F17.10, dalle impostazioni: Pro `customCategories` (paywall, prosegue se comprato); `push(/me)`. Dal modulo ci si arriva gia' col Pro |
 
 Private: `_TitleDialog`/`_TitleDialogState`. ☠ **Un widget con stato e non un controller creato e
 chiuso in `askTitle`**: il dialogo si ridisegna ancora durante l'animazione di chiusura e un controller
@@ -1276,6 +1467,7 @@ gia' chiuso fa esplodere il campo («A TextEditingController was used after bein
 | `QrThumb` | `const QrThumb({required QrCode code, double size = 34, Key? key})` | miniatura 34×34 raggio 8: il codice **vero, senza logo**; troppo lungo → quadrato pieno |
 | `QrRow` | `const QrRow({required QrCode code, required String meta, VoidCallback? onTap, Widget? trailing, Key? key})` | riga di elenco: miniatura, titolo 15/700, meta 12 grigia |
 | `ActionTile` | `const ActionTile({required IconData icon, required String label, required VoidCallback? onTap, bool locked = false, Key? key})` | tessera alta 72 con pallino verde o **lucchetto** (`ValueKey('lock')`) se Pro mancante; ⚑ pallino e lucchetto nello stesso spazio alto 9 |
+| `SourceCard` | `const SourceCard({required IconData icon, required String title, required String body, required VoidCallback? onTap, Widget? trailing, bool busy = false, Key? key})` | F17.10: una **strada** per riempire un modulo («Inquadra il QR della rete», «Scegli dalla rubrica», «Io»…): superficie con bordo, raggio 20, icona nel quadratino verde 38, titolo 16/700, spiegazione 12,5 grigia; a destra freccia, `trailing` (la matita della scheda «Io») o, con `busy`, una rotellina (e tocco spento). ⚑ Alta **almeno** 64 e non fissa: al 130% la spiegazione va a capo e la riga cresce |
 
 ### Il lucchetto — `features/common/pro_gate.dart`
 
@@ -1294,8 +1486,8 @@ Dall'alto: titolo «QR **Me**» (Me in verde), ingranaggio → `/settings` (`hom
 incolla** (`home_text`, 2–5 righe); **Incolla** (`home_paste`: legge gli appunti, vuoti → snack; su iOS
 il sistema mostra il suo avviso, e' normale) e **Mostra QR** (`home_show`, spento con testo vuoto o
 solo spazi) → `QrDecoder.decodeTyped` → `push(/show, payload: QrEncoder.payloadOfTyped(raw, c), source: typed)` (⚑ una vCard incollata si mostra intera); **Leggi un QR** (`home_scan`, riga
-alta 64) → `/scan`; **Moduli**: cinque chip (`form_chip_<kind>`) con `ProBadge` senza Pro →
-`openNewForm`; **Preferiti** (primi 3, «Vedi tutti» → `/saved`); **Recenti** (primi 5, «Vedi tutti»
+alta 64) → `/scan`; **Moduli**: un chip per ogni `kFormKinds` (`form_chip_<kind>`: **tre** da F17.10,
+wifi, contact, email) con `ProBadge` senza Pro → `openNewForm`; **Preferiti** (primi 3, «Vedi tutti» → `/saved`); **Recenti** (primi 5, «Vedi tutti»
 `home_seeHistory` → `/history`) e, **senza Pro e con la cronologia accesa**, la riga
 `home_freeHistory` («La cronologia gratuita tiene gli ultimi 5 QR.» + link al Pro); **stato vuoto**
 `home_empty` se non ci sono ne' preferiti ne' cronologia.
@@ -1330,6 +1522,14 @@ Corpo (`_DisplayBody` / `_DisplayBodyState`):
   `themeCustomization`; `openStyle` → lo stile restituito vale per la pagina), `action_image`
   (lucchetto senza `imageExport`; `shareQrImage`), `action_copy`, e **solo per un preferito con
   modulo** `action_edit` (lucchetto senza `customCategories`; `openEditForm`).
+- **«Etichetta»** (F17.10 punto 5, Pro `imageExport`) **nella barra**, non nella griglia: un
+  **IconButton** `action_label` (icona `Icons.print_outlined` con `semanticLabel` «Etichetta»/«Label»,
+  `tooltip` uguale) → `openLabel(args:, title:)` con il titolo mostrato. Senza Pro l'icona porta un
+  Badge con un piccolo **lucchetto** (`Icons.lock` 10, `ValueKey('lock')`) su fondo `p.accent`.
+  ⚑ Nella barra perche' la griglia ha gia' 4-5 azioni: una sesta le stringe sotto i 60 dp (illeggibili al
+  130%) e una seconda riga ruberebbe altezza al QR. ☠ **Solo icona** (correzione dopo F17.10.6): con
+  `TextButton.icon` la scritta «Etichetta» al 130% di testo si mangiava il titolo («Email precomp…»);
+  fissato da `display_page_test.dart` con il font vero (`SpaceGrotesk`) su un telefono di 412 dp.
 ⚑ Stato locale: `_id`, `_savedHere` (preferito salvato da qui, per `/show` che non segue il database),
 `_style` (stile applicato da qui), `_showPassword`, `_expanded`.
 ⚑ **Pagina scura, pannello chiaro**: abbaglia meno di una pagina tutta bianca e la fotocamera trova il
@@ -1338,7 +1538,8 @@ leggerla chi passa.
 
 ### Lettura — `features/scan/scan_page.dart` **[SCANNER]**
 
-`class ScanPage extends ConsumerStatefulWidget` — `const ScanPage({super.key})`;
+`class ScanPage extends ConsumerStatefulWidget` — `const ScanPage({this.wifiOnly = false, super.key})`;
+`final bool wifiOnly` (F17.10, rotta `/scan/wifi`: solo reti, si torna con il contenuto);
 `static const double cropPercent = 0.8` (la parte del fotogramma in cui ZXing cerca, frazione del lato
 corto; ⚑ piu' larga del mirino disegnato: con l'anteprima a riempimento il fotogramma deborda dallo
 schermo, quindi la zona letta e' gia' piu' grande del mirino, e il margine perdona un QR storto).
@@ -1374,10 +1575,11 @@ Stato di `_ScanPageState`:
 | `_onController` | `void _onController(CameraController? controller, Exception? error)` | callback `onControllerCreated`: salva il controller, spegne lo stato torcia; con `error` lo logga e lo mette in `_error` |
 | `_toggleTorch` | `Future<void> _toggleTorch()` | `setFlashMode(FlashMode.torch / FlashMode.off)`; errore → `_torchUsable = false` |
 | `_showResult` | `Future<void> _showResult(String raw, String source)` | `source` e' una chiave di `QrSource`. Smonta la fotocamera (`_cameraOn = false`), `push(Routes.scanResult, ScanResultArgs(raw:, source:))`, al ritorno la rimonta e azzera `_handling` |
-| `_onScan` | `void _onScan(Code code)` | callback `onScan`: ignorata se `_handling`, fotocamera smontata o testo vuoto; poi `_handling = true`, `HapticFeedback.lightImpact()`, `_showResult(raw, QrSource.scanned)` |
-| `_fromImage` | `Future<void> _fromImage()` | **Da immagine** (`scan_fromImage`): `pickImageProvider` → `qrImageReaderProvider.read` → `QrReaderUnavailable`: snack d'errore `scan_readerUnavailable`; vuota: snack «Nessun QR in questa immagine»; altrimenti `_showResult(values.first, QrSource.image)`. Resta usabile anche senza fotocamera |
+| `_onScan` | `void _onScan(Code code)` | callback `onScan`: ignorata se `_handling`, fotocamera smontata o testo vuoto; poi `_handling = true`, `HapticFeedback.lightImpact()`, `_showResult(raw, QrSource.scanned)` (con `wifiOnly`: `_deliverWifi([raw])`) |
+| `_fromImage` | `Future<void> _fromImage()` | **Da immagine** (`scan_fromImage`): `pickImageProvider` → `qrImageReaderProvider.read` → `QrReaderUnavailable`: snack d'errore `scan_readerUnavailable`; vuota: snack «Nessun QR in questa immagine»; altrimenti `_showResult(values.first, QrSource.image)` (con `wifiOnly`: `_deliverWifi(values)`). Resta usabile anche senza fotocamera |
+| `_deliverWifi` | `void _deliverWifi(List<String> raws)` | F17.10, solo con `wifiOnly`: `QrDecoder.firstWifi(raws)` → `context.pop(wifi)`; nessuna rete → snack `wifiSource_notWifi` («Questo QR non è di una rete Wi-Fi») e `_handling` torna false **dopo 2 s** (☠ lo stesso QR sbagliato resta inquadrato e, senza pausa, ripeterebbe il messaggio a ogni fotogramma) |
 | `_retry` | `void _retry()` | azzera errore, controller e torcia, `_attempt++`, ricontrolla le fotocamere |
-| `build` | | AppBar nera (☠ titolo bianco esplicito `p.title(color: Colors.white)`: il colore del tema vince su `foregroundColor` e nel tema chiaro era nero su nero, F17.7) con la torcia solo se nessun errore, controller pronto, `_torchUsable` e fotocamera posteriore; corpo: `ScanErrorView(error:, onRetry: _retry, onOpenSettings: _openSettings)` se c'e' un errore, altrimenti il `ReaderWidget` (se `_cameraOn`); sopra, mirino e «Inquadra il QR» **solo senza errore** (⚑ sopra lo stato d'errore gli angoli incorniciavano il messaggio); in basso «Da immagine» sempre |
+| `build` | | AppBar nera con titolo `scan_title` (con `wifiOnly`: `wifiSource_scan`, «Inquadra il QR della rete») (☠ titolo bianco esplicito `p.title(color: Colors.white)`: il colore del tema vince su `foregroundColor` e nel tema chiaro era nero su nero, F17.7) con la torcia solo se nessun errore, controller pronto, `_torchUsable` e fotocamera posteriore; corpo: `ScanErrorView(error:, onRetry: _retry, onOpenSettings: _openSettings)` se c'e' un errore, altrimenti il `ReaderWidget` (se `_cameraOn`); sopra, mirino e «Inquadra il QR» **solo senza errore** (⚑ sopra lo stato d'errore gli angoli incorniciavano il messaggio); in basso «Da immagine» sempre |
 
 - `ScanErrorView` (pubblica per i test: `const ScanErrorView({required Object error, required
   VoidCallback onRetry, required Future<void> Function() onOpenSettings, super.key})`;
@@ -1394,6 +1596,8 @@ Stato di `_ScanPageState`:
   quattro angoli dell'accento attorno a un quadrato centrale alzato di 40 px. ⚑ `sideFraction` minore di
   `ScanPage.cropPercent`: la zona in cui ZXing cerca deve contenere il mirino.
 ⚑ **Solo QR**: i codici a barre dei prodotti farebbero scattare letture accidentali. ⚑ Gratis.
+⚑ **`wifiOnly` riusa la pagina invece di copiarla** (F17.10): fotocamera, permesso, torcia e «Da
+immagine» devono comportarsi uguale nei due posti.
 ⚑ Provato sull'emulatore il 2026-10-09: anteprima della scena virtuale, mirino, torcia accesa e spenta,
 ritorno dal risultato con la fotocamera che riparte, permesso negato. ☐ La lettura **dal vivo** di un
 QR non e' provata (la scena virtuale non ne mostra): su telefono vero.
@@ -1428,14 +1632,38 @@ cronologia accesa «Mostra come QR» e «Salva» ripartivano dal QR semplice): `
 
 `class FormPage extends ConsumerStatefulWidget` — `const FormPage({required QrKind kind, int? id,
 super.key})` (dietro `ProGate(customCategories)` sulla rotta).
+
+⚠ **Dopo F17.10** (supera F17.1.6 per i moduli nuovi): **Wi-Fi e Contatto nuovi non partono dal modulo
+vuoto ma dalle loro strade** (`WifiSources`, `ContactSources`); il modulo compare solo dopo, gia'
+compilato («La rete a cui sei connesso», un contatto della rubrica) o con «Inserisci a mano». Un QR di
+rete letto e la scheda «Io» vanno **dritti al QR**, senza modulo. L'Email precompilata resta un modulo
+(non c'e' niente da cui leggerla). La modifica di un preferito (`id`) apre sempre il modulo.
+
+Stato di `_FormPageState`: `QrContent? _content`, `QrCode? _row`, `bool _loading`, `bool _busy`,
+`late _Stage _stage` (enum privato `_Stage { sources, seeded, manual }`: strade, modulo compilato da una
+strada, modulo a mano; si parte da `sources` solo se `_hasSources`), `QrContent? _seed` (il contenuto con
+cui parte il modulo dopo una strada), `int _generation` (⚑ cambia a ogni strada ed entra nella chiave del
+modulo, `form_wifi_<n>` / `form_contact_<n>`: i moduli leggono i valori iniziali solo quando nascono, e
+una chiave nuova li fa rinascere). Getter `bool get _hasSources` (`id == null` e tipo wifi o contact).
+Metodi privati: `void _open(_Stage stage, [QrContent? seed])` (cambia fase, azzera `_content`,
+`_generation++`), `Future<void> _submit([QrContent? direct])` (vedi sotto: `direct` = un contenuto gia'
+completo che non passa dal modulo).
+- Fase `sources`: AppBar col titolo e la lista con `WifiSources(onRead: → _submit(wifi), onConnected:
+  (ssid) → _open(seeded, WifiContent(ssid: ssid)), onManual: → _open(manual))` o `ContactSources(onPicked:
+  (c) → _open(seeded, c), onMe: (c) → _submit(c), onManual: → _open(manual))`.
+- Fasi `seeded`/`manual` con `_hasSources`: in cima il pulsante **«Altri modi»** (`form_otherWays`) →
+  `_open(sources)`. `WifiForm(pasteHelp: _stage == seeded)`.
 - Con `id`: legge la riga **una volta** (`byId`); inesistente → «non trovato»; riga di un altro tipo →
   modulo vuoto (⚑ non si apre col modulo sbagliato).
 - Anteprima dal vivo `_Preview` in alto: vuota (`form_preview_empty`, «Compila il modulo…») finche' il
   contenuto non e' valido, poi `form_preview` 168 px **con i colori del preferito ma senza logo**
   (l'anteprima e' per il contenuto); troppo lungo → testo d'errore e pulsante spento.
-- Pulsante `form_submit`: nuovo → «Mostra QR»: `recordIfEnabled(source: form)` → `pushReplacement(/qr/<id>)`,
-  **con la cronologia spenta** `pushReplacement(/show)` dalla memoria; modifica → «Salva»:
-  `updateContent` (titolo e stile restano) e `pop`.
+- Pulsante `form_submit` (e `_submit(direct)` dalle strade): nuovo → «Mostra QR»: `recordIfEnabled(source:
+  form)` → `pushReplacement(/qr/<id>)`, **con la cronologia spenta** `pushReplacement(/show)` dalla
+  memoria; modifica → «Salva»: `updateContent` (titolo e stile restano) e `pop`. Poi lo Stile come sempre
+  (logo e colori dalla pagina del QR).
+- ⚑ SMS e Telefono **non hanno piu' un modulo** (F17.10 punto 4): `formKindOf` li rifiuta prima di
+  arrivare qui; nello `switch` dei moduli `sms`, `phone`, `text`, `url` danno `SizedBox.shrink()`.
 
 `abstract class QrFormWidget<T extends QrContent> extends StatefulWidget` — `const
 QrFormWidget({required this.onChanged, this.initial, super.key})`; `final T? initial`; `final
@@ -1444,11 +1672,76 @@ frame e a ogni modifica.
 
 | Modulo | Costruttore | Campi (chiavi) | Valido se | Note |
 |---|---|---|---|---|
-| `WifiForm` | `const WifiForm({required super.onChanged, super.initial, super.key})` | `wifi_ssid`, `wifi_security` (WPA/WEP/Nessuna), `wifi_password` (solo se protetta, nascosta con l'occhio), `wifi_hidden` | SSID non vuoto e, se protetta, password non vuota | ⚑ SSID e password **non si rifilano** (uno spazio in coda puo' far parte del nome) |
-| `ContactForm` | `const ContactForm({…})` | `contact_name`, `contact_phone`, `contact_email`, azienda, sito, nota | nome; telefono ed email facoltativi ma validi se scritti | tutto rifilato; vuoti → null |
-| `EmailForm` | `const EmailForm({…})` | `email_to`, oggetto, testo | destinatario email valido | oggetto e testo non rifilati |
-| `SmsForm` | `const SmsForm({…})` | `sms_number`, testo | numero valido | |
-| `PhoneForm` | `const PhoneForm({…})` | `phone_number` | numero valido | |
+| `WifiForm` | `const WifiForm({required super.onChanged, super.initial, this.pasteHelp = false, super.key})`; `final bool pasteHelp` | `wifi_ssid`, `wifi_security` (WPA/WEP/Nessuna), `wifi_password` (solo se protetta, nascosta con l'occhio), `wifi_hidden`; con `pasteHelp` e rete protetta anche **«Incolla la password»** (`wifi_paste`, alto 52) e le istruzioni (`wifi_pasteHelp`: `wifiSource_whereIos` su iOS, `wifiSource_whereAndroid` altrove) | SSID non vuoto e, se protetta, password non vuota | ⚑ SSID e password **non si rifilano** (uno spazio in coda puo' far parte del nome). `_paste()`: appunti → toglie solo gli **a capo in coda**; vuoti → snack `home_clipboardEmpty`; con sicurezza «Nessuna» passa a WPA. ☠ Nessuna app puo' leggere la password: incollarla e' l'unica strada che non obbliga a scriverla |
+| `ContactForm` | `const ContactForm({required super.onChanged, super.initial, super.key})` | `contact_name`, `contact_phone`, `contact_email`, azienda, sito, nota | nome; telefono ed email facoltativi ma validi se scritti | tutto rifilato; vuoti → null |
+| `EmailForm` | `const EmailForm({required super.onChanged, super.initial, super.key})` | `email_to`, `email_subject`, `email_body` | destinatario email valido | «Email precompilata» (F17.10 punto 3): testo con `minLines: kEmailBodyMinLines` (`const int kEmailBodyMinLines = 6`), `maxLines: null` (cresce), tastiera multilinea. Oggetto e testo non rifilati |
+
+**Tolti in F17.10 (non cercarli)**: `SmsForm` (`sms_form.dart`) e `PhoneForm` (`phone_form.dart`).
+
+#### Le strade del Wi-Fi — `wifi_sources.dart` (F17.10 punto 1)
+
+`class WifiSources extends ConsumerStatefulWidget` — `const WifiSources({required this.onRead, required
+this.onConnected, required this.onManual, super.key})`; `final ValueChanged<WifiContent> onRead` (rete letta
+da un QR: la pagina la mostra subito), `final ValueChanged<String> onConnected` (il nome della rete
+connessa: la pagina apre il modulo col nome), `final VoidCallback onManual`. Intro `wifiSource_intro`, poi:
+
+| Strada (chiave) | Cosa fa |
+|---|---|
+| «Inquadra il QR della rete» (`wifi_source_scan`) | `context.push<WifiContent>(/scan/wifi)` → `onRead` |
+| «Da un'immagine» (`wifi_source_image`) | `pickImageProvider` → `qrImageReaderProvider.read`: `QrReaderUnavailable` → snack d'errore; nessun QR → snack `share_noQrInImage`; nessuna rete → snack `wifiSource_notWifiImage` (nessun salvataggio); altrimenti `QrDecoder.firstWifi` → `onRead`. ⚑ Es. lo screenshot del QR di Android (Impostazioni › Wi-Fi › Condividi) o la foto dell'etichetta del router |
+| «La rete a cui sei connesso» (`wifi_source_connected`, `busy` durante la lettura) | `needsPermission()` → spiegazione **prima** del dialogo del sistema (`_explain`: `wifiSource_permissionTitle`, testo `…Ios`/`…Android`, «Continua» `wifi_permission_ok`; annullata → niente richiesta) → `lookup()` → `found` → `onConnected(ssid)`; altrimenti il riquadro `_Notice` |
+| «Inserisci a mano» (`wifi_manual`) | ultima riga, **piccola** (13) → `onManual` |
+
+Stato: `WifiNameStatus? _notice`, `bool _reading`; metodi `_scan`, `_fromImage`, `_connected`,
+`Future<bool> _explain()`. Privata `_Notice` (`wifi_notice`): testo per stato (`wifiSource_denied`,
+`…deniedForever`, `…locationOff`, `…unavailable`), «Apri le impostazioni» (`wifi_notice_settings`,
+`AppSettings`) solo per `deniedForever`, e «Inserisci a mano» (`wifi_notice_manual`).
+
+#### Le strade del Contatto — `contact_sources.dart` (F17.10 punto 2)
+
+`class ContactSources extends ConsumerWidget` — `const ContactSources({required this.onPicked, required
+this.onMe, required this.onManual, super.key})`; `ValueChanged<ContactContent> onPicked`,
+`ValueChanged<ContactContent> onMe`, `VoidCallback onManual`. Intro `contactSource_intro`, poi:
+
+| Strada (chiave) | Cosa fa |
+|---|---|
+| «Scegli dalla rubrica» (`contact_source_pick`) | `pickContact` → `onPicked`: il modulo si apre compilato (nome e telefono; l'email si aggiunge li') |
+| «Io» (`contact_source_me`) | testo `contactSource_meEmpty` o `contactSource_meSaved(nome)`; con la scheda → `onMe(scheda)` (QR subito); senza → `push<ContactContent>(/me)` e al ritorno `onMe` con quella salvata. Con la scheda c'e' la matita `contact_me_edit` (`push(/me)`) |
+| «Inserisci a mano» (`contact_manual`) | piccola → `onManual` |
+
+Funzione `Future<ContactContent?> pickContact(BuildContext context, WidgetRef ref)`:
+`contactPickerProvider.pick()`; ⚑ nel log **solo l'esito** («contatto scelto»), mai il contatto; un'eccezione →
+`MicroLog.e` + snack `contactSource_pickFailed` + null. Usata anche da `MyContactPage`.
+
+#### La scheda «Io» — `my_contact_page.dart` (F17.10 punto 2, rotta `/me`)
+
+`class MyContactPage extends ConsumerStatefulWidget` — `const MyContactPage({super.key})` (dietro
+`ProGate(customCategories)` sulla rotta). La si sceglie dalla rubrica o la si compila **una volta**, e il
+modulo Contatto la riusa. Si apre da «Io» (la prima volta), dalla matita e dalle Impostazioni.
+Stato: `QrContent? _content`, `late ContactContent? _seed = ref.read(myContactProvider)`, `int
+_generation` (chiave `me_form_<n>` del `ContactForm`, stesso trucco di `FormPage`). Metodi: `_pick()`
+(`pickContact` → nuovo seme), `_save()` (`myContactProvider.notifier.save`, snack `myContact_saved`,
+`pop(c)` se si puo'), `_delete()` (MicroConfirmSheet distruttivo → `clear()` → `pop` se si puo').
+Pagina: intro `myContact_intro`, `SourceCard` `me_pick`, `ContactForm`, `NeonButton` `me_save` (spento
+finche' il modulo non e' valido), `me_delete` solo se c'e' una scheda salvata.
+⚑ `canPop` prima di ogni `pop`: la pagina puo' essere la prima della pila (un test, un percorso futuro).
+
+### Etichetta — `features/label/label_page.dart` (F17.10 punto 5)
+
+`class LabelPage extends ConsumerStatefulWidget` — `const LabelPage({required this.args, super.key})`;
+`final LabelArgs args` (dietro `ProGate(imageExport)` sulla rotta; il pulsante della pagina del QR
+controlla prima con `openLabel`).
+Stato: `late final TextEditingController _text` (parte da `args.title`, ridisegna a ogni tasto),
+`LabelFormat _format = LabelFormat.square`, `bool _busy`. Metodi: `Future<Uint8List> _png()` (logo da
+`logoImageProvider`, `labelRendererProvider.png(..., fontFamily: kTitleFont)`), `Future<void> _run(String
+what, Future<void> Function() action)` (un'uscita alla volta; errore → `MicroLog.e` + snack
+`label_failed`), `_print()` (`labelOutputProvider.printPdf(name: titolo, buildPdf: (page) =>
+renderer.pdf(png:, format:, page:))`), `_share()` (`sharePng(png:, title:)`).
+Pagina: anteprima `label_preview` (CustomPaint con `LabelPainter`, max 280×340, raggio 12, bordo) → campo
+`label_text` (1-2 righe, max 60, helper `label_textHelp`) → SegmentedButton `label_format` (quadrata
+`crop_square`, rettangolare `crop_portrait`, senza spunta) → **«Stampa»** (`label_print`, NeonButton) →
+**«Condividi immagine»** (`label_share`). Testo vuoto: solo il QR.
+⚑ Anteprima e PNG dallo **stesso** `LabelPainter`: cio' che si vede e' cio' che esce.
 
 `form_fields.dart`:
 
@@ -1458,7 +1751,7 @@ frame e a ogni modifica.
 | `requiredText` | `String? requiredText(L l, String v)` | vuoto dopo trim → «Obbligatorio» |
 | `emailText` | `String? emailText(L l, String v, {bool required = true})` | |
 | `phoneText` | `String? phoneText(L l, String v, {bool required = true})` | normalizzato, `^\+?[0-9]{3,}$` |
-| `QrTextField` | `const QrTextField({required TextEditingController controller, required String label, String? Function(String value)? validator, TextInputType? keyboardType, int maxLines = 1, bool obscure = false, Widget? suffix, TextCapitalization capitalization = TextCapitalization.none, Key? key})` | TextFormField con errore dopo il primo tocco; nascosto → niente autocorrect e suggerimenti |
+| `QrTextField` | `const QrTextField({required TextEditingController controller, required String label, String? Function(String value)? validator, TextInputType? keyboardType, int? maxLines = 1, int minLines = 1, bool obscure = false, Widget? suffix, TextCapitalization capitalization = TextCapitalization.none, Key? key})` | TextFormField con errore dopo il primo tocco; nascosto → niente autocorrect e suggerimenti, una riga. F17.10: `maxLines` null = cresce col testo; `minLines` righe sempre visibili; con `minLines > 1` l'etichetta sta **in alto** (`alignLabelWithHint`: a meta' di un riquadro alto 6 righe sembrava testo gia' scritto) |
 
 ⚑ **Un validatore, due usi**: il campo (errore in linea) e il modulo (contenuto valido o null) usano la
 stessa funzione: l'anteprima non puo' mostrare un QR che il campo dice sbagliato.
@@ -1525,7 +1818,9 @@ righe oltre 5 sono gia' cancellate.
 **Cronologia** (⚑ per prima: chi condivide cose riservate deve trovare subito come spegnerla):
 interruttore `settings_history`, «Cancella la cronologia» `settings_clearHistory` con conferma; **Pro**
 (riga intera toccabile → paywall; col Pro «attivo»), **Ripristina acquisti** (testo Apple/Google
-secondo `defaultTargetPlatform`); `DataSection`; **App**: tema (foglio Scuro/Chiaro/Sistema),
+secondo `defaultTargetPlatform`); **Moduli** (F17.10): riga **«La mia scheda»** (`settings_myContact`,
+icona `badge_outlined`, sottotitolo il nome salvato o `myContact_none`, `ProBadge` senza Pro) →
+`openMyContact`; `DataSection`; **App**: tema (foglio Scuro/Chiaro/Sistema),
 **Informativa** (dialogo con `settings_privacyBody`), **Informazioni** (versione `appVersion`).
 Privata `static Future<void> _info(BuildContext, String title, String body)`.
 
@@ -1534,8 +1829,8 @@ Privata `static Future<void> _info(BuildContext, String title, String body)`.
 | Simbolo | Firma | Effetto |
 |---|---|---|
 | `DataSection` | `class DataSection extends ConsumerWidget` — `const DataSection({super.key})` | «I tuoi dati»: `data_backup` (ProBadge senza Pro; ⚑ **visibile anche senza Pro**, nasconderla non farebbe sapere che esiste) e `data_restore` |
-| `createBackup` | `Future<void> createBackup(BuildContext context, WidgetRef ref)` | Pro `backupRestore` (senza → paywall); `BackupService.createBackup(QrBackupSource, label: «QR Me», includeImages: true)` con dialogo d'attesa; `shareBackup` |
-| `restoreBackup` | `Future<void> restoreBackup(BuildContext context, WidgetRef ref)` | **gratis**: sceglie il file, `inspect` (schema diverso da `qr_me` → errore), foglio con riepilogo «N preferiti, M in cronologia» e **Sostituisci tutto / Aggiungi**, poi `restore` |
+| `createBackup` | `Future<void> createBackup(BuildContext context, WidgetRef ref)` | Pro `backupRestore` (senza → paywall); `BackupService.createBackup(QrBackupSource(db, paths:, settings: settingsProvider), label: «QR Me», includeImages: true)` con dialogo d'attesa; `shareBackup`. La scheda «Io» entra nel file |
+| `restoreBackup` | `Future<void> restoreBackup(BuildContext context, WidgetRef ref)` | **gratis**: sceglie il file, `inspect` (schema diverso da `qr_me` → errore), foglio con riepilogo «N preferiti, M in cronologia» e **Sostituisci tutto / Aggiungi**, poi `restore` con `QrBackupSource(db, paths:, settings:)`; riuscito → **`ref.invalidate(myContactProvider)`** (la scheda puo' essere arrivata dal file) e snack |
 
 Privata `Future<T> _withProgress<T>(BuildContext, String message, Future<T> Function() work)` (dialogo
 non chiudibile sul navigatore radice). ⚑ Ripristino gratis: chi cambia telefono deve riavere i dati
@@ -1563,15 +1858,18 @@ paths, settings, child: QrMeApp()))`. **Niente database qui** fuori dalla demo (
 | Ri-mostrare un QR letto, anche Wi-Fi/contatto | ✔ | ✔ | — | |
 | Cronologia | ultimi **5** (cancellati davvero) | illimitata da adesso | `fullHistory` | `historyKeep` in `recordIfEnabled` e `SavedPage` |
 | Preferiti | **1** | illimitati | `unlimitedEntities` | `saveAsFavorite` |
-| Moduli speciali (compilare, modificare) | — | ✔ | `customCategories` | `openNewForm`, `openEditForm`, `ProGate` su `/form` |
+| Moduli speciali (Wi-Fi, Contatto, Email precompilata: dalle strade o a mano, modificare) | — | ✔ | `customCategories` | `openNewForm`, `openEditForm`, `ProGate` su `/form` |
+| La scheda «Io» | — | ✔ | `customCategories` | `openMyContact`, `ProGate` su `/me` |
+| Inquadrare il QR di una rete dal modulo Wi-Fi (`/scan/wifi`) | (solo dal modulo, che e' Pro) | ✔ | — | nessun ProGate: legge e restituisce |
 | Stile (colori, forme, logo) | — | ✔ | `themeCustomization` | `openStyle`, `ProGate` su `/style` |
 | Condividere il QR come PNG | — | ✔ | `imageExport` | `shareQrImage` |
+| **«Genera etichetta»** (anteprima, stampa, PNG) | — | ✔ | `imageExport` | `openLabel`, `ProGate` su `/label` |
 | Creare il backup | — | ✔ | `backupRestore` | `createBackup` |
-| Ripristinare un backup | ✔ | ✔ | — | |
+| Ripristinare un backup (anche la scheda «Io») | ✔ | ✔ | — | |
 | Copia testo / password, apri link, chiama… | ✔ | ✔ | — | |
 
 Prezzo: **1,99 €** (App Store base Italia), **Play 1,63 EUR senza IVA** (1,99 / 1,22). Paywall: 6
-benefici (§6). ⚠ Nessuno ha ancora creato il prodotto negli store.
+benefici (§6). Prodotto creato su App Store (§2quater); ⚠ su Play non ancora.
 
 ---
 
@@ -1598,6 +1896,9 @@ benefici (§6). ⚠ Nessuno ha ancora creato il prodotto negli store.
 | file del database | `_openConnection` | `<Documenti>/qr_me.sqlite` | escluso da iCloud |
 | loghi foto | `QrLogoFiles` + ImageStore | `<Documenti>/qr_me/images/logos/<uuid>.jpg` e `images/thumbs/logos/<uuid>.jpg` | 512 px / 128 px, JPEG 90 |
 | PNG condivisi | `shareQrImage` | `<cache>/qr_me/exports/qr-me-<ms>.png` | mai cancellati dall'app (§14) |
+| PNG delle etichette | `SystemLabelOutput.sharePng` | `<cache>/qr_me/exports/qr-me-label-<ms>.png` | idem |
+| misure dell'etichetta | `LabelFormat` | quadrata 70×70 mm, rettangolare 60×90 mm; PNG 1200 px di larghezza | |
+| entitlement iOS Wi-Fi | `ios/Runner/Runner.entitlements` | `com.apple.developer.networking.wifi-info = true` | capability `ACCESS_WIFI_INFORMATION` sull'App ID, profilo rigenerato il 2026-10-09 |
 | file della verifica | `ReadabilityCheck` | `<tmp>/qrme_check_<µs>.png` | cancellato subito |
 | log, entitlement | `main`, `EntitlementNotifier` | `<support>/qr_me/logs/qr_me.log`, `<support>/qr_me/entitlement.json` | restano nel backup iCloud |
 
@@ -1607,6 +1908,7 @@ benefici (§6). ⚠ Nessuno ha ancora creato il prodotto negli store.
 |---|---|---|---|
 | SettingKeys.themeMode | `theme_mode` | `light`\|`dark`\|`system`; **assente → scuro** | `ThemeModeNotifier` |
 | `QrSettingKeys.historyEnabled` | `history_enabled` | bool; **assente → true** | `HistoryEnabledNotifier` |
+| `QrSettingKeys.myContact` | `my_contact` | String: JSON di `ContactContent.toFields()`; **assente → nessuna scheda**; illeggibile → come assente | `MyContactNotifier`, `QrBackupSource` (entra nel backup) |
 | SettingKeys.launchCount, SettingKeys.firstLaunchAt | `launch_count`, `first_launch_at` | int, istante | `main` |
 
 ### Permessi
@@ -1622,12 +1924,19 @@ benefici (§6). ⚠ Nessuno ha ancora creato il prodotto negli store.
 | Android | intent-filter `SEND` `text/plain` e `image/*` su MainActivity (`singleTask`) | Condividi → QR Me |
 | Android | `<queries>` VIEW per `http`, `https`, `tel`, `mailto`, `smsto`, `sms` (+ PROCESS_TEXT del template) | url_launcher su Android 11+ |
 | Android | INTERNET solo nei manifest debug/profile | (vedi §14) |
+| Android | **`ACCESS_FINE_LOCATION` + `ACCESS_COARSE_LOCATION`** (F17.10) | **solo** per il nome della rete Wi-Fi connessa (Android 10+ lo da' solo con la posizione **precisa** concessa e la localizzazione accesa). Chiesti **al tocco** di «La rete a cui sei connesso», dopo la spiegazione; COARSE accanto a FINE perche' Android 12 lo vuole (l'utente sceglie nel dialogo). QR Me non usa ne' salva la posizione |
+| Android | `uses-feature android.hardware.location.gps` **`required="false"`** | Play lo dedurrebbe richiesto da FINE e nasconderebbe l'app ai dispositivi senza GPS |
+| Android | `ACCESS_WIFI_STATE`, `ACCESS_NETWORK_STATE` | li dichiara `network_info_plus` (nel manifest fuso) |
+| Android | `PrintFileProvider` (provider di `printing`) | stampa dell'etichetta, nel manifest fuso |
+| Android | **nessun permesso dei contatti** | il selettore di sistema (`ACTION_PICK`) da' un permesso temporaneo sulla sola riga scelta |
 | iOS | `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` | lettura; logo e «Da immagine» (☠ image_picker la vuole anche col selettore di sistema, o App Store Connect rifiuta) |
+| iOS | **`NSLocationWhenInUseUsageDescription`** (F17.10) + entitlement `com.apple.developer.networking.wifi-info` | il nome della rete (NEHotspotNetwork); posizione «mentre usi l'app», chiesta al tocco. ☠ Con SPM `permission_handler_apple` compila il permesso solo se trova la chiave: dopo averla aggiunta, DerivedData svuotata una volta |
+| iOS | **nessun permesso dei contatti** | CNContactPickerViewController non lo richiede |
 | iOS | **niente** `NSMicrophoneUsageDescription` | il `ReaderWidget` apre la fotocamera con `enableAudio: false` e `camera_avfoundation` chiede il microfono solo con `enableAudio` (verificato nel sorgente). ⚠ Al primo caricamento su App Store Connect controllare che non arrivi l'avviso ITMS-90683 per il microfono (il binario contiene le API audio del plugin): se arriva, si aggiunge la stringa |
 
 ### Testi (l10n)
 
-**205 chiavi**, template **inglese** (`l10n.yaml`: `template-arb-file: app_en.arb`, `output-class: L`,
+**246 chiavi** (F17.10), template **inglese** (`l10n.yaml`: `template-arb-file: app_en.arb`, `output-class: L`,
 `nullable-getter: false`, `output-dir: lib/l10n/generated`, `untranslated-messages-file:
 lib/l10n/untranslated.json` — oggi `{}`). Classi generate: `abstract class L` (`L.of`, `L.delegate`),
 `LEn`, `LIt`, `L lookupL(Locale locale)` (usata dai test).
@@ -1641,8 +1950,8 @@ testi** (`texts_glyphs_test`): il segno lo mette l'icona.
 
 | File | Prefissi (chiavi) |
 |---|---|
-| `tool/testi.py` (57) | appTitle 1, common 9, form 1, history 1, kind 7, paywall 22, pro 1, saved 1, scan 1, scanResult 1, settings 7, show 1, style 1, theme 3 |
-| `tool/testi_forms.py` (25) | contact 6, email 3, form 6, phone 1, sms 2, wifi 7 |
+| `tool/testi.py` (54) | appTitle 1, common 8, history 1, kind 7, paywall 22, pro 1, saved 1, scan 1, scanResult 1, settings 7, style 1, theme 3 |
+| `tool/testi_forms.py` (69) | contact 6, contactSource 7, display 1 (`display_label`), email 3, form 7, label 8, myContact 9, wifi 7, wifiSource 21 (☠ `phone_` e `sms_` tolti in F17.10) |
 | `tool/testi_home.py` (37) | common 3, display 13, home 15, save 3, share 1, wifi 2 |
 | `tool/testi_lists.py` (40) | backup 16, data 1, history 8, saved 7, settings 8 |
 | `tool/testi_scan.py` (19) | result 10, scan 9 |
@@ -1652,7 +1961,21 @@ Flusso: `python tool/testi.py` → `pwsh ../../tool/fl.ps1 gen-l10n`.
 
 ### Dipendenze proprie (oltre a micro_core)
 
-`micro_share` (path), `qr_flutter ^4.1.0`, **`flutter_zxing ^3.1.0`** (ha sostituito `mobile_scanner`
+**Nuovi in F17.10** (sorgente controllato il 2026-10-09 in pub cache, regola «dati solo sul telefono»:
+nessun SDK di analytics/telemetria/Firebase/ML Kit, nessuna chiamata di rete):
+
+| Pacchetto | Versione | A cosa serve | Esito del controllo |
+|---|---|---|---|
+| `network_info_plus` | `^8.2.1` | nome della rete (Android WifiManager, iOS NEHotspotNetwork) | pulito |
+| `permission_handler` | `^12.0.1` | permesso di posizione, al tocco | pulito. ☠ **non la 13**: porta `permission_handler_android` 14, che vuole **compileSdk 37** (costante `ACCESS_LOCAL_NETWORK` di Android 17) e con AGP 9.1 / SDK 36 il build falliva in `checkDebugAarMetadata`. La 12 usa `permission_handler_android` 13 (compileSdk 35). Si alza quando l'app passa a compileSdk 37 |
+| `flutter_native_contact_picker` | `^0.0.12` | selettore di sistema dei contatti, senza permesso | pulito, nessuna dipendenza, manifest vuoto. ☠ da' **solo nome e telefoni** |
+| `printing` | `^5.15.1` | dialogo di stampa dell'etichetta (come Film Tracker) | pulito; `networkImage` va in rete solo se chiamata, QR Me non la chiama |
+| `pdf` | `^3.13.1` | il PDF dell'etichetta (Dart puro) | pulito |
+
+Manifest fuso dopo F17.10: nuovi solo i permessi di posizione, `ACCESS_WIFI_STATE` e il
+`PrintFileProvider`; `datatransport` c'era gia' (Play Billing, §14).
+
+Le altre: `micro_share` (path), `qr_flutter ^4.1.0`, **`flutter_zxing ^3.1.0`** (ha sostituito `mobile_scanner`
 il 2026-10-09: non rimetterlo), **`camera ^0.12.1`** (diretta perche' la pagina di scansione usa
 `FlashMode` e `CameraException`; stesso vincolo che risolve flutter_zxing, non allargarlo),
 `screen_brightness ^2.1.11`, `wakelock_plus ^1.8.0`, `image_picker
@@ -1674,7 +1997,7 @@ pubblicita'): se ne porta una, non si usa.
 Dalla cartella `apps/qr_me`:
 
 ```
-pwsh ../../tool/fl.ps1 test                                   # i test (182)
+pwsh ../../tool/fl.ps1 test                                   # i test (241)
 pwsh ../../tool/fl.ps1 analyze
 python tool/testi.py; pwsh ../../tool/fl.ps1 gen-l10n         # dopo aver cambiato un testo
 pwsh ../../tool/fl.ps1 pub run build_runner build             # dopo una modifica a lib/data/tables.dart
@@ -1690,11 +2013,13 @@ ruby tool/aggiungi_share_extension_ios.rb apps/qr_me ShareExtension group.com.sm
 
 ## 12. Catalogo dei test
 
-**182 test** in `apps/qr_me/test/`, tutti verdi il 2026-10-09: 152 al commit `7a48532`, piu' i 3 di
-`ZxingImageReader` (sostituzione di ML Kit) = 155, piu' **27** scritti con la correzione dei difetti
-trovati rileggendo l'atlante (F17.8): 9 `qr_code_domain_test`, 4 `qr_encoder_test`
-(`payloadOfTyped`), 1 `services_test` (`open` che non lancia), 2 `share_router_test` (vCard e MECARD
-tal quali), 5 `app_settings_test`, 3 `scan_result_page_test`, 3 `scan_error_test`.
+**241 test** in `apps/qr_me/test/`, tutti verdi il 2026-10-09 (contati a macchina con `flutter test
+--reporter json`). Storia: 152 al commit `7a48532`, +3 di `ZxingImageReader` = 155, +27 dei difetti della
+rilettura F17.8 = **182**; **F17.10** +46 = **228** (`wifi_sources_test` 15, `contact_sources_test` 10,
+`label_test` 12, `form_page_test` +5, `home_page_test` +1, `display_page_test` +3; il piano dice +45 e
+«14» per `wifi_sources_test`: il conteggio a macchina da' 15, con i 4 stati di «nome non letto» generati
+in un ciclo); poi le due correzioni successive: **+8** `display_page_test` (titolo al 130% e pulsante
+«Etichetta») e **+5** `qr_backup_test` (scheda «Io») = **241**.
 
 | File | N. | Cosa dimostra |
 |---|---|---|
@@ -1704,14 +2029,17 @@ tal quali), 5 `app_settings_test`, 3 `scan_result_page_test`, 3 `scan_error_test
 | `test/domain/qr_style_test.dart` | 11 | `isPlain`, JSON (5 andata e ritorno), tolleranza, id icone, grafemi |
 | `test/domain/contrast_test.dart` | 5 | WCAG e inversione |
 | `test/data/qr_repository_test.dart` | 17 | le regole del repository su `QrDatabase.memory()` + ImageStore vero in cartella temporanea |
-| `test/data/qr_backup_test.dart` | 4 | backup vero (ZIP di BackupService) fra due «telefoni» |
+| `test/data/qr_backup_test.dart` | 9 | backup vero (ZIP di BackupService) fra due «telefoni»; **la scheda «Io»** nel file e nelle due modalita' |
 | `test/data/qr_code_domain_test.dart` | 9 | `QrCodeToDomain.content`: campi buoni usati, campi rotti → payload |
 | `test/services/services_test.dart` | 11 | QrRenderer e ContentActions (anche `open` che non lancia); **3 di `ZxingImageReader`** |
 | `test/services/share_router_test.dart` | 10 | ShareRouter e ShareIntake con router vero e FakeShareInbox; testo condiviso tal quale |
 | `test/services/app_settings_test.dart` | 5 | `AppSettings`: canale su Android, `app-settings:` su iOS, mai un'eccezione |
-| `test/widget/display_page_test.dart` | 12 | la pagina del QR |
-| `test/widget/form_page_test.dart` | 4 | i moduli |
-| `test/widget/home_page_test.dart` | 9 | la home |
+| `test/widget/display_page_test.dart` | 23 | la pagina del QR; SMS/Telefono senza «Modifica»; **titolo intero al 130%** e pulsante «Etichetta» solo icona |
+| `test/widget/form_page_test.dart` | 9 | i moduli; Email precompilata; SMS e Telefono tolti |
+| `test/widget/home_page_test.dart` | 10 | la home; tre chip dei moduli |
+| `test/widget/wifi_sources_test.dart` | 15 | le strade del Wi-Fi, `cleanSsid`, `QrDecoder.firstWifi` |
+| `test/widget/contact_sources_test.dart` | 10 | rubrica, «Io», `contactFromPicked` |
+| `test/widget/label_test.dart` | 12 | `LabelRenderer`, `LabelPage`, il Pro dell'etichetta |
 | `test/widget/style_page_test.dart` | 6 | stile, avvisi, verifica |
 | `test/widget/paywall_config_test.dart` | 6 | coerenza del Pro |
 | `test/widget/palette_contrast_test.dart` | 6 | contrasto AA della palette nei due temi |
@@ -1771,12 +2099,19 @@ l'abbandonato, salvo quello in uso **con la miniatura**, salvo quello di 1 minut
 15 minuti; senza ImageStore → 0; `updateStyle`/`pruneHistory`/`clearHistory` cancellano i loghi; il
 repository **non scrive da solo**; titolo rifilato, max 80, mai vuoto; `updateContent` tiene il nome.
 
-### `qr_backup_test.dart` (4, due QrDatabase.memory e due cartelle)
+### `qr_backup_test.dart` (9, due QrDatabase.memory e due cartelle)
 andata e ritorno con **logo foto** e Wi-Fi con `; , : " \` (preferito con titolo, stile, contenuto,
 payload; cronologia; file del logo arrivato allo stesso percorso relativo); ripristino doppio in unione
 senza doppioni; «sostituisci tutto» cancella il logo che il backup non riporta; **5 file malformati**
 (tipo, provenienza, payload non testo, titolo vuoto, percorso `../../segreto`) → FormatException e
 database intatto.
+**Gruppo «la scheda «Io» nel backup»** (5, due SettingsStore sulle stesse SharedPreferences finte con
+namespace `vecchio`/`nuovo`): `exportPayload` porta `myContact` = `toFields()` e un telefono senza scheda
+la riceve **in entrambe le modalita'** (ZIP vero), con i QR; **entrambe**: in unione vince il telefono,
+con «sostituisci tutto» il file; **backup senza scheda** (fatto senza `settings`, come prima di F17.10)
+valido e non cancella quella del telefono in nessuna modalita'; scheda **illeggibile** sul telefono →
+fuori dal file, i QR dentro; scheda **rotta nel file** (`'Mario'`, senza `name`, lista) →
+FormatException e ne' database ne' scheda toccati.
 
 ### `services_test.dart` (11)
 `levelFor` M/H/logo tolto; troppo lungo: `choose` lo dice e `levelFor` lancia; il widget ha la **zona di
@@ -1797,25 +2132,64 @@ immagine con QR → `/scan/result` con `source: image` e il percorso letto; imma
 diverso passa, dopo 3 s passa; piu' elementi: il testo vince e l'immagine non si legge; **ShareIntake**:
 `initial` letto una volta, `reset` subito, poi lo stesso elemento su `incoming` → `duplicate`, uno nuovo passa.
 
-### `display_page_test.dart` (12)
+### `display_page_test.dart` (23)
 password Wi-Fi nascosta finche' non si tocca l'occhio («Rete: Casa», `••••••••`); senza Pro lucchetto su
 Stile e Immagine e non su Salva e Copia; col Pro nessun lucchetto; **luminosita' accesa all'apertura,
 ripristinata in pausa, riaccesa al ritorno, ripristinata uscendo**; cronologia accesa: registrato e
 `pruneCalls == [5]`; col Pro `[null]`; **cronologia spenta: niente scritture**; un QR salvato si apre per
 id e si **tocca** (preferito con modulo: c'e' Modifica); id inesistente → «Questo QR non esiste più.»;
 secondo preferito senza Pro → paywall e nessun nome chiesto; primo preferito salvato col nome scelto;
-testo da 3000 → «Troppo lungo per un QR» senza eccezioni.
+testo da 3000 → «Troppo lungo per un QR» senza eccezioni. **F17.10**: preferiti SMS e Telefono gia'
+salvati si mostrano **senza «Modifica»**, un Wi-Fi ancora con (3).
+**Gruppo «Etichetta» nella barra e titolo al 130%** (8, correzione dopo F17.10.6): carica il font vero
+dei titoli (`SpaceGrotesk-Variable.ttf` con FontLoader: ⚑ col font dei test, 1 em per glifo, ogni
+titolo sembrerebbe troncato), telefono di **412 dp** (Medium Phone) con `textScaleFactorTestValue = 1.3`;
+per «Email precompilata», «Contatto», «Wi-Fi», gratis e Pro: la larghezza intrinseca del RenderParagraph
+del titolo nella AppBar **non supera** quella data (6; ☠ con il vecchio `TextButton.icon` i 2 casi «Email
+precompilata» falliscono: verificato); `action_label` e' un IconButton con `tooltip` «Etichetta» e la
+semantica «Etichetta»; il lucchetto (`lock`) sulla stampante senza Pro, assente col Pro.
 
-### `form_page_test.dart` (4)
+### `form_page_test.dart` (9)
 Wi-Fi con `;` `:` `"` `\` → `WIFI:T:WPA;S:Casa\;1;P:pa\:ss\"\\;;` e `source: form` (cronologia spenta →
 `/show`); rete aperta → niente campo password e `WIFI:T:nopass;S:Bar;;`; SSID vuoto → «Obbligatorio» e
-pulsante spento; cronologia accesa → registrato `tel:+393331234567` e aperto `/qr/100`.
+pulsante spento; cronologia accesa → registrato con `source: form` e aperto `/qr/100`. **F17.10**:
+titolo «Email precompilata» e testo di almeno 6 righe senza tetto; un testo lungo su piu' righe entra
+intero nel `mailto:`; niente moduli SMS e Telefono (`kFormKinds` = Wi-Fi, Contatto, Email);
+`/form/sms` e `/form/phone` «Non trovato»; `SMSTO:` e `tel:` ancora riconosciuti dal decoder.
 
-### `home_page_test.dart` (9)
+### `home_page_test.dart` (10)
 incolla `esempio.it/menu` → `/show` con `https://esempio.it/menu`, `source: typed`; un testo resta
 identico (spazio finale compreso); Mostra QR spento a campo vuoto; **al massimo 5 recenti** e la riga
-della cronologia gratuita; col Pro la riga sparisce; i 5 chip con ProBadge senza Pro; nessun badge col
-Pro; chip senza Pro → paywall; stato vuoto che spiega la condivisione.
+della cronologia gratuita; col Pro la riga sparisce; **tre chip** (Wi-Fi, Contatto, Email precompilata;
+niente SMS e Telefono) con ProBadge senza Pro; nessun badge col Pro; chip senza Pro → paywall; stato
+vuoto che spiega la condivisione.
+
+### `wifi_sources_test.dart` (15, `FakeWifiNameReader`, `FakeQrReader`, rotte vere)
+si parte dalle strade, non dal modulo; **QR della rete inquadrato** (rotta `/scan/wifi` finta che torna
+con `Casa;1`/`pa:ss`) → QR con gli stessi dati, senza modulo; inquadrare e tornare senza leggere non
+salva niente; **da un'immagine**: la rete fra piu' QR si trova e si mostra; un'immagine senza rete →
+messaggio, nessun salvataggio; **rete connessa**: spiegazione, nome letto, password incollata → stringa
+`WIFI:T:WPA;S:AndroidWifi;P:segreta 123;;` (a capo in coda tolto); permesso gia' concesso → niente
+spiegazione; spiegazione annullata → niente richiesta; **nome non letto** per ciascuno dei 4 stati
+(`denied`, `deniedForever` con «Apri le impostazioni», `locationOff`, `unavailable`) → messaggio e
+ripiego a mano; «Altri modi» torna alle strade. Regole pure: `cleanSsid` (virgolette di Android,
+`<unknown ssid>`, `0x`, vuoto, spazi tenuti); `QrDecoder.firstWifi` (prima rete, null se nessuna).
+
+### `contact_sources_test.dart` (10, `FakeContactPicker`, preferenze vere su SharedPreferences finte)
+dalla rubrica il modulo si apre compilato (nome e telefono) e diventa una vCard; rubrica annullata → si
+resta sulle strade; rubrica che lancia → messaggio; «Io» salvato → QR subito, senza modulo; «Io» la
+prima volta → `/me`, scelta dalla rubrica, «Salva», scheda nelle preferenze e riusata; «Io» si elimina
+dalla sua pagina. `contactFromPicked` (4): nome e primo telefono non vuoto; il numero scelto vince; niente
+nome e niente numero → null; senza nome il nome resta vuoto.
+
+### `label_test.dart` (12, `FakeLabelOutput`)
+`LabelRenderer`: PNG quadrato 1200×1200 e rettangolare 1200×1800; sotto il QR c'e' inchiostro con il
+testo e non senza; il testo prende il colore del QR; `layout`: il QR sta nella tela e sopra il testo; il
+PDF e' un PDF con l'etichetta alla misura vera. `LabelPage`: testo di partenza = titolo, formati,
+anteprima; «Condividi immagine» → PNG ad alta risoluzione col testo scritto; «Stampa» → il dialogo riceve
+un PDF (`%PDF-`). Il Pro: senza Pro «Etichetta» nella pagina del QR apre il paywall; col Pro apre
+`/label` con il QR e il titolo; la rotta ha il suo ProGate; il paywall dice «immagine o etichetta da
+stampare».
 
 ### `style_page_test.dart` (6)
 `kLogoIcons.keys == kLogoIconIds` (stesso ordine); nero su bianco: nessun avviso e «Leggibile» dopo 600 ms
@@ -1860,8 +2234,12 @@ permesso negato: «Apri le impostazioni» e sotto «Riprova», ognuno chiama il 
 | `FakeReadabilityCheck` | `class FakeReadabilityCheck extends ReadabilityCheck` — `FakeReadabilityCheck(this.result)` | risponde sempre `result`, conta `calls` |
 | `FakeEntitlementNotifier` | `class FakeEntitlementNotifier extends EntitlementNotifier` | sul servizio dato, senza bootstrap |
 | `FixedHistoryNotifier` | `class FixedHistoryNotifier extends HistoryEnabledNotifier` | cronologia fissa |
-| `QrHarness` | `class QrHarness` — `repo`, `boost`, `reader`, `router` | |
-| `pumpQr` | `Future<QrHarness> pumpQr(WidgetTester tester, {Widget? page, List<RouteBase>? routes, String initialLocation = '/', bool pro = false, bool historyOn = true, List<QrCode>? rows, FakeQrReader? reader, ReadabilityCheck? readability, List<Override> extra = const []})` | monta una pagina **o** le rotte in **italiano**, tema scuro Neon, con tutti i doppi (gate, entitlement finto a 1,99 €, cartella temporanea) |
+| `FakeWifiNameReader` | `class FakeWifiNameReader implements WifiNameReader` — `FakeWifiNameReader(this.result, {this.needs = true})` | F17.10: risponde `result`, `needs` per la spiegazione, conta `lookups` |
+| `FakeContactPicker` | `class FakeContactPicker implements ContactPicker` — `FakeContactPicker(this.contact, {this.fails = false})` | F17.10: restituisce `contact` (null = annullato) o lancia con `fails`; conta `picks` |
+| `FakeLabelOutput` | `class FakeLabelOutput implements LabelOutput` | F17.10: registra `shared` (`({Uint8List png, String title})`) e `printed` (`({String name, Future<Uint8List> Function(PdfPageFormat) buildPdf})`) |
+| `kTestSettingsNamespace` | `const String kTestSettingsNamespace = 'qrme_test'` | namespace delle preferenze dei test |
+| `QrHarness` | `class QrHarness` — `repo`, `boost`, `reader`, `router`, `settings` (SettingsStore vero) | |
+| `pumpQr` | `Future<QrHarness> pumpQr(WidgetTester tester, {Widget? page, List<RouteBase>? routes, String initialLocation = '/', bool pro = false, bool historyOn = true, List<QrCode>? rows, FakeQrReader? reader, ReadabilityCheck? readability, Map<String, String> settingsValues = const {}, List<Override> extra = const []})` | monta una pagina **o** le rotte in **italiano**, tema scuro Neon, con tutti i doppi (gate, entitlement finto a 1,99 €, cartella temporanea); da F17.10 **preferenze vere** (SettingsStore su SharedPreferences finte, `settingsValues` con le chiavi senza namespace) |
 | `captureRoute` | `GoRoute captureRoute(String path, List<Object?> sink, {String label = 'DESTINAZIONE'})` | rotta che registra l'`extra` (una volta) e mostra «DESTINAZIONE <path>» |
 
 ⚑ **Niente Drift nei widget test**: dentro `testWidgets` FakeAsync congela l'I/O di SQLite e gli stream
@@ -1869,7 +2247,9 @@ non arrivano mai (TrashCan, Film Tracker). Che le scritture vere funzionino lo d
 `qr_repository_test` e `qr_backup_test`. ⚑ **Niente golden** (i font cambiano fra Windows e Mac).
 ⚑ `pumpAndSettle` non aspetta un Timer senza fotogrammi: la pausa di 600 ms va fatta passare a mano.
 
-**Senza test**: `ScanPage` (oltre a `ScanErrorView`; la ripresa dopo le impostazioni), `ScanResultPage` oltre
+**Senza test**: `ScanPage` (oltre a `ScanErrorView`; la ripresa dopo le impostazioni; la modalita' `wifiOnly` e' provata
+solo attraverso una rotta finta e sull'emulatore), `PluginWifiNameReader`, `NativeContactPicker`, `SystemLabelOutput`
+(plugin: provati sull'emulatore), la riga «La mia scheda» delle Impostazioni, `ScanResultPage` oltre
 allo stile (azioni del tipo), `SavedPage`, `HistoryPage`, `SettingsPage`, `DataSection`,
 `LogoPicker` (oltre al catalogo), `LogoRenderer`, `ReadabilityCheck` vera, la lettura vera di `ZxingImageReader` (serve la libreria nativa: emulatore),
 `ScreenBoost` vero, `QrMeApp`/`buildRouter` (rotte «Non trovato»), il lato Kotlin del canale delle
@@ -1950,6 +2330,18 @@ impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schem
 | «requires core library desugaring» | flutter_local_notifications in micro_core | `isCoreLibraryDesugaringEnabled` |
 | Build Kotlin bloccate su Windows | cache incrementale bloccata | `kotlin.incremental=false` |
 | Icona iOS rifiutata a caricamento finito | canale alfa | icona su fondo pieno + `remove_alpha_ios` |
+| **F17.10** — «La rete a cui sei connesso» non da' mai la password | ☠ **nessuna app puo' leggere la password Wi-Fi**, ne' su Android ne' su iOS: limite dei sistemi | si legge solo il nome; la password si **incolla** (`WifiForm.pasteHelp`, istruzioni iPhone/Android) |
+| «Io» non si puo' leggere dal telefono | ☠ i sistemi non espongono «la mia scheda» (iOS mai, Android con `READ_PROFILE`) | scheda salvata una volta nelle preferenze (`myContactProvider`) |
+| Nome della rete `"Casa"` con le virgolette, o `<unknown ssid>` | Android mette le virgolette ai nomi UTF-8 e risponde `<unknown ssid>` senza permesso/posizione | `cleanSsid`; `locationOff` detto prima di leggere |
+| Il nome della rete non arriva con la sola posizione approssimativa | Android 10+ vuole la **precisa** | FINE + COARSE nel manifest, `Permission.locationWhenInUse` |
+| Screenshot neri del selettore dei contatti sull'emulatore | il selettore di sistema e' **FLAG_SECURE** | navigato con `uiautomator dump` (provato il 2026-10-09) |
+| Il permesso di posizione non compare mai su iOS dopo averlo aggiunto | con **SPM** `permission_handler_apple` compila il permesso solo se trova la chiave in Info.plist, e Xcode tiene la build vecchia | `NSLocationWhenInUseUsageDescription` + **DerivedData svuotata una volta** |
+| `checkDebugAarMetadata` fallisce («compileSdk 37») | `permission_handler` 13 porta `permission_handler_android` 14 | **`permission_handler ^12.0.1`** finche' l'app non passa a compileSdk 37 |
+| Cancellando il profilo dell'app sparisce anche quello dell'estensione | ☠ `GET /v1/profiles?filter[name]=…` dell'API App Store Connect confronta **per prefisso**: «MicroApps AppStore com.smp.qrme» trovava anche «… com.smp.qrme.ShareExtension» | prima di un DELETE filtrare a mano sul nome **esatto** (profilo dell'estensione ricreato subito, uuid `d8bc04db-…`) |
+| Un QR non di rete inquadrato ripete il messaggio a ogni fotogramma | `/scan/wifi` rilegge subito lo stesso QR | `_deliverWifi`: `_handling` torna libero dopo 2 s |
+| Il modulo resta con i valori vecchi dopo una seconda strada | i moduli leggono `initial` solo quando nascono | `_generation` nella chiave del modulo (`FormPage`, `MyContactPage`) |
+| Titolo «Email precomp…» al 130% nella pagina del QR | `TextButton.icon` «Etichetta» nella barra si prendeva lo spazio | **IconButton** con tooltip e `semanticLabel`, test con il font vero |
+| Dopo il ripristino la scheda «Io» resta quella di prima | `MyContactNotifier` legge le preferenze solo al build e `settingsProvider` non cambia | `ref.invalidate(myContactProvider)` in `restoreBackup` |
 
 ### Regole non negoziabili
 
@@ -1970,7 +2362,8 @@ impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schem
     chiave limitata ha il suo beneficio nel paywall e viceversa; tutte le FeatureKey dichiarate.
 11. **Le chiavi stabili non si rinominano**: `QrKind.name`, `QrSource`, chiavi JSON di `QrStyle`/`QrLogo`
     (`fg`, `bg`, `module`, `eye`, `logo`, `type`, `image`, `round`, `id`, `text`), campi di `toFields`,
-    `kLogoIconIds`, `QrBackupSource.id`, `QrSettingKeys.historyEnabled`.
+    `kLogoIconIds`, `QrBackupSource.id`, `QrSettingKeys.historyEnabled`, `QrSettingKeys.myContact` e la
+    chiave `myContact` del backup.
 12. **Il deep link di Flutter resta spento.**
 13. **I testi si cambiano in `tool/testi*.py`**, mai negli ARB; niente glifi di spunta nei testi.
 14. **L'estensione iOS si cambia nel modello** `packages/micro_share/ios_template/` e si rilancia lo script.
@@ -1983,6 +2376,14 @@ impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schem
     del dominio solo quando l'utente compila o modifica un modulo.
 20. **Nessuna dipendenza per un pulsante**: le impostazioni dell'app si aprono con il canale nostro
     (`com.smp.qrme/app_settings`), il cui nome e' scritto uguale in Dart e in Kotlin.
+21. **Niente compilazione a mano come strada principale** (F17.10): Wi-Fi dal QR della rete, da
+    un'immagine o dalla rete connessa; Contatto dalla rubrica o «Io». «Inserisci a mano» resta l'ultima
+    riga, piccola.
+22. **Permessi solo al tocco e con una spiegazione prima** (posizione per il nome del Wi-Fi); **mai il
+    permesso dei contatti** (selettore di sistema).
+23. **`QrKind.sms` e `QrKind.phone` restano** (lettura e righe salvate): si sono tolti i moduli, non i tipi.
+24. **Etichetta e PNG sotto la stessa chiave `imageExport`**, anteprima e uscita dallo stesso
+    `LabelPainter`.
 
 ---
 
@@ -2002,10 +2403,17 @@ impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schem
   `_PaywallRoutePage`: il paywall passa sempre da `showQrPaywall`), `favoriteCountProvider` e
   `QrRepository.watchFavoriteCount` (il limite si controlla con `countFavorites` al momento di
   salvare), le chiavi l10n `common_optional`, `show_title`, `form_title`.
-- **Nessun `permission_handler`**: lo stato preciso del permesso fotocamera (negato una volta o per
-  sempre) non si conosce; per questo «Apri le impostazioni» e «Riprova» compaiono insieme.
+- **`permission_handler` c'e' da F17.10 ma solo per la posizione** (nome del Wi-Fi): lo stato preciso
+  del permesso **fotocamera** non si interroga; per questo nella lettura «Apri le impostazioni» e
+  «Riprova» compaiono ancora insieme.
+- **Nessun modulo SMS o Telefono** (F17.10): `sms_form.dart`, `phone_form.dart`, `SmsForm`, `PhoneForm` e
+  le chiavi `sms_number`, `sms_body`, `phone_number` **non esistono piu'**. La lettura di `SMSTO:`/`tel:`
+  e le azioni «Manda SMS»/«Chiama» invece restano.
+- **Nessuna lettura della password Wi-Fi** e **nessuna lettura della «mia scheda»** dal sistema: non
+  sono possibili (§13).
+- **Nessuna email dalla rubrica**: il selettore da' solo nome e telefoni.
 - **Nessuna pulizia dei PNG condivisi** in `exports/` (cartella cache: la svuota il sistema).
-- **Google Play e App Store**: niente ancora (app, prodotto, scheda); License Server senza la riga `qrme`.
+- **Google Play**: niente ancora (app, prodotto, scheda). **App Store**: app e prodotto `qrme_pro_lifetime` creati, scheda caricata, **non inviata in revisione** (§2quater). License Server senza la riga `qrme`.
 
 ### Debito tecnico
 
@@ -2027,6 +2435,10 @@ impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schem
 | **Test mancanti** (elenco in §12) | interfaccia essenziale gia' provata sull'emulatore | con le prossime modifiche a quelle pagine |
 | **«Apri le impostazioni» su Android mai toccato su un telefono** | il canale e' compilato (`build apk --debug`) e testato lato Dart; l'Intent vero no | primo giro sull'emulatore o sul telefono: negare due volte, toccare, concedere, tornare (deve ripartire da solo) |
 | **Commento di `locale_resolution.dart` sbagliato nelle altre app** | corretto solo in QR Me (questo lavoro tocca solo `apps/qr_me`) | alla prossima modifica di ciascuna app, o una volta per tutte |
+| **F17.10 su iPhone/iPad mai provato** (permesso posizione, entitlement wifi-info, CNContactPickerViewController, UIPrintInteractionController) e **fotocamera dal vivo su un QR di rete vero** | provato tutto sull'emulatore Android (SSID «AndroidWifi» letto, immagini, rubrica, «Io», etichetta, stampa, 130%) | build 1.0.0 (2) via TestFlight (F17.10.7) |
+| **Store da rifare** (screenshot, grafiche, video mostrano SMS e Telefono) | nuovo lavoro dopo la revisione | F17.10.7, con la build 1.0.0 (2) |
+| **`permission_handler` fermo alla 12** | la 13 vuole compileSdk 37 | quando l'app passa a compileSdk 37 |
+| **Riga del paywall sul backup** («Preferiti, cronologia e loghi in un file») non cita la scheda «Io» | testo ancora vero, la scheda e' un dettaglio | se il proprietario lo chiede, con `tool/testi.py` |
 
 ### Differenze consapevoli dal piano (`develop_microapps.md` F17)
 
@@ -2047,6 +2459,9 @@ impostazioni (provato solo compilandolo: `build apk --debug`), migrazioni (schem
 | «Apri le impostazioni» con permesso negato | su **iOS e Android** (Android con un MethodChannel nostro in MainActivity.kt), piu' «Riprova» | evitare `permission_handler`; senza, Android restava bloccato dopo un rifiuto definitivo |
 | Testo condiviso → `QrEncoder.encode(decodeTyped(text))` | `QrEncoder.payloadOfTyped`: il testo tal quale, ricodificato solo il link senza schema | la ricodifica perdeva i campi che il dominio non conosce (ADR…) |
 | Rotta `/pro` per il paywall (§8.T) | nessuna rotta; solo `showQrPaywall` | nessuno la apriva |
+| F17.10 punto 5: «Genera etichetta» dalla pagina del QR | un'azione nella **barra** (IconButton), non nella griglia | una sesta tessera stringeva le etichette sotto i 60 dp; la scritta accanto all'icona troncava il titolo al 130% |
+| F17.10 punto 1: «Inquadra il QR della rete» | la **stessa** `ScanPage` in modalita' `wifiOnly` (`/scan/wifi`) | fotocamera, permesso, torcia e «Da immagine» uguali nei due posti |
+| F17.10 punto 2: la scheda «Io» salvata nell'app | nelle **preferenze** (`QrSettingKeys.myContact`) e nel backup (campo facoltativo `myContact`) | una sola, non e' un QR; chi cambia telefono la ritrova |
 
 ### Difetti e incoerenze trovati rileggendo l'atlante (F17.8) — tutti corretti il 2026-10-09
 

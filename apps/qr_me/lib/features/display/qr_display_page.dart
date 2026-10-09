@@ -177,15 +177,30 @@ class _DisplayBodyState extends ConsumerState<_DisplayBody> {
         // ⚑ «Genera etichetta» (Pro, F17.10 punto 5) nella barra e non nella griglia: la griglia ha
         // gia' 4-5 azioni, una sesta le stringe sotto i 60 dp e taglia le etichette (al 130% di
         // testo diventano illeggibili), e una seconda riga ruberebbe altezza al QR, che e' il
-        // motivo dell'app. Con testo e icona, non solo icona: si deve capire senza tenerla premuta.
+        // motivo dell'app.
+        // ⚑ Solo icona (IconButton), non `TextButton.icon` con la scritta: al 130% di testo la
+        // scritta «Etichetta» si mangiava il titolo («Email precomp…», correzione di F17.10). Il
+        // nome resta nel `tooltip` (pressione lunga) e nel `semanticLabel` (lettori di schermo).
+        // Senza Pro la stampante resta riconoscibile e prende un lucchetto nell'angolo, nel
+        // colore d'accento Neon, invece di sparire dietro un lucchetto generico.
         actions: [
-          TextButton.icon(
+          IconButton(
             key: const ValueKey('action_label'),
+            tooltip: l.display_label,
             onPressed: () => unawaited(openLabel(context, ref, args: args, title: title)),
-            icon: Icon(labelLocked ? Icons.lock_outline : Icons.print_outlined, size: 18),
-            label: Text(l.display_label),
+            icon: Badge(
+              isLabelVisible: labelLocked,
+              backgroundColor: p.accent,
+              padding: EdgeInsets.zero,
+              label: Icon(
+                Icons.lock,
+                key: const ValueKey('lock'),
+                size: 10,
+                color: p.onAccent,
+              ),
+              child: Icon(Icons.print_outlined, semanticLabel: l.display_label),
+            ),
           ),
-          MicroSpacing.hGapS,
         ],
       ),
       body: SafeArea(

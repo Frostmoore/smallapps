@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:micro_core/micro_core.dart';
 
+// ⚑ Solo la chiave della scheda «Io»: una sola fonte per il nome della preferenza, che
+// `MyContactNotifier` legge e il backup copia. Il `show` tiene fuori il resto dei provider.
+import '../app/providers.dart' show QrSettingKeys;
 import '../domain/qr_content.dart';
 import '../domain/qr_style.dart';
 import 'database.dart';
@@ -18,6 +21,7 @@ import 'qr_repository.dart';
 /// Forma del payload:
 /// ```
 /// codes: [{kind, payload, fields?, title, source, style?, favorite, createdAt, lastUsedAt}]
+/// myContact?: {name, phone, email, organization, url, note}   // la scheda «Io», se c'e' (F17.10)
 /// ```
 /// `fields` e `style` viaggiano come oggetti JSON e non come stringhe: il file resta leggibile
 /// con un editor.
@@ -28,12 +32,29 @@ import 'qr_repository.dart';
 /// spariscono, i file no. Si cancellano **dopo** la transazione riuscita, e solo quelli che il
 /// file non riscrivera' (stessa regola di `FilmBackupSource`).
 ///
+/// ⚑ **La scheda «Io»** (`QrSettingKeys.myContact`) sta nelle preferenze, non nel database, ma e'
+/// un dato dell'utente come i QR: chi cambia telefono deve ritrovarla. Viaggia nel campo
+/// **facoltativo** `myContact` (i campi di `ContactContent.toFields()`), senza alzare
+/// [schemaVersion]: un backup vecchio senza il campo resta valido, e un'app vecchia che legge un
+/// backup nuovo ignora la chiave che non conosce. Al ripristino:
+/// - backup con la scheda, telefono senza → la si imposta (qualunque modalita');
+/// - entrambi → vince il **telefono**, tranne con `replaceAll` («sostituisci tutto»), dove vince il
+///   file come per i QR;
+/// - backup **senza** il campo → la scheda del telefono resta anche con `replaceAll`: un campo
+///   assente vuol dire «backup fatto prima che la scheda esistesse», non «scheda cancellata».
+/// Si scrive **dopo** la transazione riuscita (le preferenze non sono transazionali): con un file
+/// rotto la scheda del telefono resta com'era.
+///
 /// ⚑ Il limite di 5 in cronologia del piano gratuito **non** si applica al ripristino: riporta
 /// i dati come erano. Lo riapplica la prossima `pruneHistory` dopo un QR mostrato.
 class QrBackupSource implements BackupSource {
-  const QrBackupSource(this.db, {this.paths, this.clock});
+  const QrBackupSource(this.db, {this.paths, this.settings, this.clock});
 
   final QrDatabase db;
+
+  /// Le preferenze, per la scheda «Io» (`QrSettingKeys.myContact`). Null nei test che provano
+  /// solo il database: allora la scheda non si esporta e non si ripristina.
+  final SettingsStore? settings;
 
   /// Le cartelle dell'app, per cancellare i loghi orfani dopo un "sostituisci tutto". Null nei
   /// test che provano solo il database.
@@ -70,7 +91,31 @@ class QrBackupSource implements BackupSource {
             'lastUsedAt': r.lastUsedAt,
           },
       ],
+      if (_phoneContact() case final me?) 'myContact': me.toFields(),
     };
+  }
+
+  /// La scheda «Io» salvata sul telefono, o null (assente, niente [settings], o illeggibile).
+  ///
+  /// ⚑ Illeggibile vale come assente, come in `MyContactNotifier.build`: una preferenza rovinata
+  /// non deve impedire di fare il backup dei QR.
+  ContactContent? _phoneContact() {
+    final raw = settings?.getString(QrSettingKeys.myContact);
+    if (raw == null) return null;
+    try {
+      return _contactOf(jsonDecode(raw));
+    } on Object catch (error, stack) {
+      MicroLog.e('scheda «Io» illeggibile, fuori dal backup', error: error, stackTrace: stack);
+      return null;
+    }
+  }
+
+  /// I campi di una scheda «Io» letti da JSON, o [FormatException].
+  static ContactContent _contactOf(Object? raw) {
+    if (raw is! Map) throw FormatException('Scheda «Io» non valida ($raw)');
+    final c = QrContent.fromFields(QrKind.contact, raw.cast<String, Object?>());
+    if (c is! ContactContent) throw FormatException('Scheda «Io» non valida ($raw)');
+    return c;
   }
 
   /// I file dei loghi foto (immagine e miniatura), relativi alla cartella documenti.
@@ -102,7 +147,12 @@ class QrBackupSource implements BackupSource {
   Future<void> importPayload(Map<String, Object?> payload, {required ImportMode mode}) async {
     final now = (clock ?? DateTime.now)().toUtc().millisecondsSinceEpoch;
     final orphans = <String>{};
+    ContactContent? fileContact;
     try {
+      // ⚑ Validata prima di toccare il database: una scheda rotta rifiuta il file intero, come
+      // un QR rotto, invece di ripristinare i QR e perdere la scheda in silenzio.
+      final rawContact = payload['myContact'];
+      if (rawContact != null) fileContact = _contactOf(rawContact);
       await db.transaction(() async {
         if (mode == ImportMode.replaceAll) {
           orphans.addAll(await QrRepository(db).usedLogoImages());
@@ -161,6 +211,14 @@ class QrBackupSource implements BackupSource {
     } on InvalidDataException catch (error) {
       // Un titolo vuoto o un payload troppo lungo: i vincoli di Drift.
       throw FormatException('Backup di QR Me non valido: ${error.message}');
+    }
+
+    // Solo a transazione riuscita, come i loghi qui sotto.
+    final store = settings;
+    if (store != null &&
+        fileContact != null &&
+        (mode == ImportMode.replaceAll || _phoneContact() == null)) {
+      await store.setString(QrSettingKeys.myContact, jsonEncode(fileContact.toFields()));
     }
 
     // Solo a transazione riuscita: con un file rotto i loghi del telefono restano.

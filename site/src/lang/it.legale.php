@@ -215,6 +215,14 @@ HTML,
   momento il trattamento dipende dal servizio che hai scelto per conservarli o condividerli.
 </p>
 
+<p>
+  Alcune app usano la <strong>fotocamera</strong> o le <strong>foto</strong> del telefono, e
+  solo quando lo chiedi tu: Film Tracker per le foto dei rullini, QR Me per leggere un codice QR
+  inquadrandolo o scegliendo un'immagine. Le immagini sono elaborate <strong>esclusivamente sul
+  telefono</strong>: la lettura dei codici QR avviene con una libreria inclusa nell'app, che non
+  si collega a nessun servizio esterno, e nessuna immagine viene inviata a noi o a terzi.
+</p>
+
 <h3>Acquisto e verifica della versione Pro</h3>
 
 <p>
@@ -225,6 +233,17 @@ HTML,
   <a href="https://policies.google.com/privacy" rel="noopener">informativa privacy di
   Google</a> e quella <a href="https://www.apple.com/it/legal/privacy/" rel="noopener">di
   Apple</a>.
+</p>
+
+<p>
+  Su Android, per vendere la versione Pro, l'app contiene la <strong>libreria ufficiale di
+  Google Play per gli acquisti</strong> (Google Play Billing), che Google richiede a chi vende
+  contenuti digitali su Google Play. Quando apri la schermata d'acquisto o ripristini un
+  acquisto, questa libreria comunica direttamente con Google Play e può inviare a Google
+  informazioni tecniche sul funzionamento del servizio d'acquisto. Questi dati vanno a Google, che
+  li tratta come titolare autonomo secondo la propria informativa: noi non li riceviamo. È
+  l'unico componente di terze parti delle app che comunica con l'esterno, ed è legato solo
+  all'acquisto.
 </p>
 
 <p>
@@ -294,7 +313,8 @@ HTML,
 <p>
   Le app non contengono strumenti di analisi (Firebase Analytics, Crashlytics o equivalenti),
   non raccolgono statistiche su come le usi, non registrano le schermate che apri e non
-  contengono pubblicità né identificatori pubblicitari.
+  contengono pubblicità né identificatori pubblicitari. L'unica eccezione al principio «i dati
+  restano sul telefono» è l'acquisto della versione Pro descritto sopra.
 </p>
 
 <h2>5. A chi comunichiamo i dati</h2>

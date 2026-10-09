@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qr_me/app/qr_palette.dart';
 import 'package:qr_me/app/routes.dart';
 import 'package:qr_me/data/database.dart';
 import 'package:qr_me/domain/qr_content.dart';
@@ -183,6 +188,76 @@ void main() {
         rows: [qrRow(8, content: wifi, payload: wifiArgs.payload, favorite: true)],
       );
       expect(find.byKey(const ValueKey('action_edit')), findsOneWidget);
+    });
+  });
+
+  group('«Etichetta» nella barra e titolo al 130% (correzione di F17.10)', () {
+    // ⚑ Il font vero dei titoli: con il font dei test (ogni glifo largo 1 em) qualunque titolo
+    // sembrerebbe troncato, e il test non direbbe niente sulla barra vera.
+    setUpAll(() async {
+      final bytes = File('assets/fonts/SpaceGrotesk-Variable.ttf').readAsBytesSync();
+      final loader = FontLoader(kTitleFont)
+        ..addFont(Future.value(ByteData.sublistView(Uint8List.fromList(bytes))));
+      await loader.load();
+    });
+
+    /// Un telefono medio (412 dp, il Medium Phone dell'emulatore) con il testo al 130%.
+    void phoneAt130(WidgetTester tester) {
+      tester.view
+        ..physicalSize = const Size(412 * 3, 915 * 3)
+        ..devicePixelRatio = 3;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    }
+
+    for (final (content, title) in [
+      (const EmailContent(to: 'mario@esempio.it', subject: 'Ciao'), 'Email precompilata'),
+      (const ContactContent(name: 'Mario Rossi', phone: '+39 333 123 4567'), 'Contatto'),
+      (wifi, 'Wi-Fi'),
+    ]) {
+      for (final pro in [false, true]) {
+        testWidgets('«$title» non si tronca al 130% (${pro ? 'Pro' : 'gratis'})', (tester) async {
+          phoneAt130(tester);
+          await pumpQr(
+            tester,
+            pro: pro,
+            page: QrDisplayPage.args(
+              QrDisplayArgs(
+                content: content,
+                payload: QrEncoder.encode(content),
+                source: QrSource.typed,
+              ),
+            ),
+          );
+          final paragraph = tester.renderObject<RenderParagraph>(
+            find.descendant(of: find.byType(AppBar), matching: find.text(title)),
+          );
+          // Troncato = il testo intero vorrebbe piu' spazio di quello che la barra gli da'.
+          expect(
+            paragraph.getMaxIntrinsicWidth(double.infinity),
+            lessThanOrEqualTo(paragraph.size.width + 0.5),
+          );
+        });
+      }
+    }
+
+    testWidgets('e\' un IconButton con tooltip e nome per i lettori di schermo', (tester) async {
+      await pumpQr(tester, page: QrDisplayPage.args(wifiArgs));
+      final button = tester.widget<IconButton>(find.byKey(const ValueKey('action_label')));
+      expect(button.tooltip, 'Etichetta');
+      expect(find.bySemanticsLabel(RegExp('Etichetta')), findsWidgets);
+    });
+
+    testWidgets('senza Pro il lucchetto sulla stampante, col Pro no', (tester) async {
+      await pumpQr(tester, page: QrDisplayPage.args(wifiArgs));
+      Finder lock() => find.descendant(
+        of: find.byKey(const ValueKey('action_label')),
+        matching: find.byKey(const ValueKey('lock')),
+      );
+      expect(lock(), findsOneWidget);
+      await pumpQr(tester, page: QrDisplayPage.args(wifiArgs), pro: true);
+      expect(lock(), findsNothing);
     });
   });
 }

@@ -23,7 +23,7 @@ return [
     'comune.in_inglese'        => 'Read in English',
     'comune.salta'             => 'Skip to content',
     'comune.aggiornato'        => 'Last updated: {data}',
-    'comune.data_legale'       => '6 October 2026',
+    'comune.data_legale'       => '9 October 2026',
     'comune.scopri'            => 'Find out more &rarr;',
     'comune.in_lavorazione'    => 'In the works',
     'comune.in_arrivo'         => 'Coming soon',

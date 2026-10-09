@@ -1,14 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:micro_core/micro_core.dart';
+import 'package:qr_me/app/providers.dart' show QrSettingKeys;
 import 'package:qr_me/data/database.dart';
 import 'package:qr_me/data/qr_backup_source.dart';
 import 'package:qr_me/data/qr_repository.dart';
 import 'package:qr_me/domain/qr_content.dart';
 import 'package:qr_me/domain/qr_encoder.dart';
 import 'package:qr_me/domain/qr_style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Il backup completo **con un logo foto** fa andata e ritorno: lo ZIP vero di
 /// `BackupService`, scritto e riletto da disco fra due "telefoni" (due database in memoria e
@@ -137,5 +140,113 @@ void main() {
       await expectLater(source.importPayload(p, mode: ImportMode.replaceAll), throwsFormatException, reason: '$p');
     }
     expect((await nuovo.watchHistory().first).single.payload, 'resto qui');
+  });
+
+  group('la scheda «Io» nel backup (F17.10)', () {
+    const io = ContactContent(name: 'Riccardo Bianchi', phone: '+39 333 000 1111', email: 'r@esempio.it');
+    const altro = ContactContent(name: 'Telefono Nuovo', phone: '+39 347 222 3333');
+    late SettingsStore vecchieStore;
+    late SettingsStore nuoveStore;
+
+    setUp(() async {
+      // ⚑ Due "telefoni" sulle stesse SharedPreferences finte: namespace diversi.
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      vecchieStore = SettingsStore.withPreferences(prefs, namespace: 'vecchio');
+      nuoveStore = SettingsStore.withPreferences(prefs, namespace: 'nuovo');
+    });
+
+    Future<void> salvaIo(SettingsStore store, ContactContent c) =>
+        store.setString(QrSettingKeys.myContact, jsonEncode(c.toFields()));
+
+    ContactContent? ioDi(SettingsStore store) {
+      final raw = store.getString(QrSettingKeys.myContact);
+      return raw == null
+          ? null
+          : QrContent.fromFields(QrKind.contact, jsonDecode(raw) as Map<String, Object?>) as ContactContent;
+    }
+
+    Future<File> backupConIo() async {
+      final service = BackupService(paths: vecchiePaths, appVersion: '1.0.0');
+      final r = await service.createBackup(
+        QrBackupSource(vecchioDb, paths: vecchiePaths, settings: vecchieStore),
+        includeImages: true,
+      );
+      return r.valueOrNull!;
+    }
+
+    Future<void> ripristina(File file, ImportMode mode) async {
+      final r = await BackupService(paths: nuovePaths, appVersion: '1.0.0').restore(
+        file,
+        QrBackupSource(nuovoDb, paths: nuovePaths, settings: nuoveStore),
+        mode: mode,
+      );
+      expect(r.isOk, isTrue, reason: '${r.errorOrNull}');
+    }
+
+    test('andata e ritorno: telefono nuovo senza scheda la riceve (in entrambe le modalita\')', () async {
+      await salvaIo(vecchieStore, io);
+      await mostra(vecchio, const TextContent('una nota'));
+      final payload = await QrBackupSource(vecchioDb, settings: vecchieStore).exportPayload();
+      expect(payload['myContact'], io.toFields());
+
+      final file = await backupConIo();
+      for (final mode in ImportMode.values) {
+        await nuoveStore.remove(QrSettingKeys.myContact);
+        await ripristina(file, mode);
+        expect(ioDi(nuoveStore), io, reason: '$mode');
+      }
+      expect((await nuovo.watchHistory().first).single.payload, 'una nota');
+    });
+
+    test('entrambe: in unione vince il telefono, con «sostituisci tutto» vince il file', () async {
+      await salvaIo(vecchieStore, io);
+      final file = await backupConIo();
+
+      await salvaIo(nuoveStore, altro);
+      await ripristina(file, ImportMode.mergeKeepExisting);
+      expect(ioDi(nuoveStore), altro);
+
+      await ripristina(file, ImportMode.replaceAll);
+      expect(ioDi(nuoveStore), io);
+    });
+
+    test('un backup senza scheda (vecchio) resta valido e non cancella quella del telefono', () async {
+      await mostra(vecchio, const TextContent('prima della scheda'));
+      final payload = await QrBackupSource(vecchioDb, settings: vecchieStore).exportPayload();
+      expect(payload.containsKey('myContact'), isFalse);
+      // Il backup di prima di F17.10: senza `settings`, cioe' senza nemmeno la possibilita'.
+      final file = await backup();
+
+      await salvaIo(nuoveStore, altro);
+      for (final mode in ImportMode.values) {
+        await ripristina(file, mode);
+        expect(ioDi(nuoveStore), altro, reason: '$mode');
+      }
+      expect((await nuovo.watchHistory().first).single.payload, 'prima della scheda');
+    });
+
+    test('una scheda illeggibile sul telefono resta fuori dal backup, i QR no', () async {
+      await vecchieStore.setString(QrSettingKeys.myContact, '{rotta');
+      await mostra(vecchio, const TextContent('salvami'));
+      final payload = await QrBackupSource(vecchioDb, settings: vecchieStore).exportPayload();
+      expect(payload.containsKey('myContact'), isFalse);
+      expect(payload['codes'], hasLength(1));
+    });
+
+    test('una scheda rotta nel file rifiuta il file e non tocca ne\' database ne\' scheda', () async {
+      await mostra(nuovo, const TextContent('resto qui'));
+      await salvaIo(nuoveStore, altro);
+      final source = QrBackupSource(nuovoDb, settings: nuoveStore);
+      for (final rotta in <Object>['Mario', <String, Object?>{'phone': '333'}, <Object>[1, 2]]) {
+        await expectLater(
+          source.importPayload({'codes': <Object>[], 'myContact': rotta}, mode: ImportMode.replaceAll),
+          throwsFormatException,
+          reason: '$rotta',
+        );
+      }
+      expect((await nuovo.watchHistory().first).single.payload, 'resto qui');
+      expect(ioDi(nuoveStore), altro);
+    });
   });
 }

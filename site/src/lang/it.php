@@ -27,7 +27,7 @@ return [
     'comune.in_inglese'        => 'Read in English',
     'comune.salta'             => 'Salta al contenuto',
     'comune.aggiornato'        => 'Ultimo aggiornamento: {data}',
-    'comune.data_legale'       => '6 ottobre 2026',
+    'comune.data_legale'       => '9 ottobre 2026',
     'comune.scopri'            => 'Scopri di più &rarr;',
     'comune.in_lavorazione'    => 'In lavorazione',
     'comune.in_arrivo'         => 'In arrivo',
