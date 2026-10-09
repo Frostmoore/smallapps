@@ -1,0 +1,5 @@
+/* Permission texts in English: the same as Info.plist, kept here so that both languages
+   live in the same place (F17.1.10). */
+"CFBundleDisplayName" = "QR Me";
+"NSCameraUsageDescription" = "To read QR codes with the camera.";
+"NSPhotoLibraryUsageDescription" = "To choose a picture for the QR code’s logo, or an image with a QR code to read.";

@@ -38,6 +38,8 @@ const FeatureLimits trashcanFeatureLimits = <FeatureKey, FeatureLimit>{
 
   // Colori e icone liberi per ogni tipo di rifiuto.
   FeatureKey.themeCustomization: FeatureLimit.locked(),
+  // Nessuna esportazione di immagini in questa app (chiave nata con QR Me, F17.2a).
+  FeatureKey.imageExport: FeatureLimit.open(),
 
 
   // Dichiarate esplicitamente come aperte: TrashCan non le vende e non le limita.

@@ -1,0 +1,7 @@
+/* Testi dei permessi in italiano (F17.1.10). Le chiavi sono quelle di Info.plist, dove restano
+   i testi inglesi di ripiego. ☠ Il file e' gia' nel gruppo di varianti InfoPlist.strings del
+   progetto Xcode (aggiunto a mano come lo fa tool/aggiungi_infoplist_strings.rb): presente solo
+   su disco, iOS non lo leggerebbe e mostrerebbe l'inglese. */
+"CFBundleDisplayName" = "QR Me";
+"NSCameraUsageDescription" = "Per leggere i QR con la fotocamera.";
+"NSPhotoLibraryUsageDescription" = "Per scegliere una foto da mettere come logo nel QR, o un’immagine con un QR da leggere.";

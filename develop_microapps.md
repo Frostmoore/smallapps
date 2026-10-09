@@ -1139,10 +1139,10 @@ volta sola; nella fase di ciascuna app si spuntano.
 - [~] **F17** QR Me (ex «Fammi un QR») — ⚑ **LA PRIMA DA FARE**, in corso dal 2026-10-09 → `v9.0.0`
   - [x] **F17.0** Decisioni di partenza con il proprietario — FATTO il 2026-10-09 (§8 F17.0): nome «QR Me» in it ed en, `com.smp.qrme`, Android e iPhone, moduli Wi-Fi/contatto/email/SMS/telefono, **lettura dei QR gratis**, stile con colori e logo (foto, icone, emoji/testo), base generosa con Pro **1,99 €**, cronologia 5 gratis e spegnibile, 1 preferito gratis, nessun widget, icona dal proprietario
   - [x] **F17.1** Specsheet — FATTO il 2026-10-09 (§8 F17.1): file, dipendenze, dominio con codifiche esatte, tabella, rotte, schermate, servizi, `micro_share`, Pro, permessi, trappole, test
-  - [ ] **F17.2a** `FeatureKey.imageExport` in `micro_core` + una riga nelle quattro app
-  - [ ] **F17.2b** `packages/micro_share/` + `tool/aggiungi_share_extension_ios.rb` (serve l'App Group dal proprietario per la prova su iPad)
-  - [ ] **F17.2c** Bootstrap `apps/qr_me`, icona e splash (serve l'icona in Download)
-  - [ ] **F17.3** Dominio e dati, con test
+  - [x] **F17.2a** `FeatureKey.imageExport` in `micro_core` + una riga nelle quattro app — FATTO il 2026-10-09: test di micro_core e delle quattro app verdi (121/185/140/158/130)
+  - [~] **F17.2b** `packages/micro_share/` + `tool/aggiungi_share_extension_ios.rb` — package FATTO il 2026-10-09 (20 test, atlante proprio, aggiunto a `tool/_common.ps1`); lo script Ruby va ancora eseguito sul Mac su `apps/qr_me` e la riapertura dell'app provata su iPad (serve l'App Group dal proprietario). ☠ Il pacchetto Swift del plugin sta in `.packages/receive_sharing_intent-<versione>`: lo script legge la versione dal `pubspec.lock` e va rilanciato a ogni aggiornamento del plugin
+  - [x] **F17.2c** Bootstrap `apps/qr_me`, icona e splash — FATTO il 2026-10-09: `com.smp.qrme` Android e iOS (solo iPhone), manifest con ACTION_SEND testo e immagini, `allowBackup=false`, niente READ_EXTERNAL_STORAGE, icone dall'originale del proprietario (iOS su #F3F7F3, adattiva e monocromatica Android), APK debug compilato
+  - [x] **F17.3** Dominio e dati, con test — FATTO il 2026-10-09: `lib/domain/*`, `lib/data/*`, 95 test. Decisioni minori: `QrDecoder.decodeTyped` per il testo scritto (`esempio.it` → link), `decode` per il letto (resta testo); paywall con 6 righe (una per chiave). Debito: esclusione del database dal backup iCloud (serve codice nativo, F17.7)
   - [ ] **F17.4** Interfaccia essenziale, provata con condivisioni vere
   - [ ] **F17.5** Pro: limiti, paywall, test di coerenza
   - [ ] **F17.6** Proposte grafiche, scelta del proprietario

@@ -41,4 +41,6 @@ const FeatureLimits scorteFeatureLimits = <FeatureKey, FeatureLimit>{
   FeatureKey.customCategories: FeatureLimit.open(),
   FeatureKey.pdfReport: FeatureLimit.open(),
   FeatureKey.themeCustomization: FeatureLimit.open(),
+  // Nessuna esportazione di immagini in questa app (chiave nata con QR Me, F17.2a).
+  FeatureKey.imageExport: FeatureLimit.open(),
 };

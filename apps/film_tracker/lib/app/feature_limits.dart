@@ -36,4 +36,6 @@ const FeatureLimits filmFeatureLimits = <FeatureKey, FeatureLimit>{
   FeatureKey.advancedWidget: FeatureLimit.open(),
   FeatureKey.customCategories: FeatureLimit.open(),
   FeatureKey.themeCustomization: FeatureLimit.open(),
+  // Nessuna esportazione di immagini in questa app (chiave nata con QR Me, F17.2a).
+  FeatureKey.imageExport: FeatureLimit.open(),
 };

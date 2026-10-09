@@ -1,0 +1,103 @@
+name: qr_me
+description: Condividi qualunque cosa e diventa un QR a tutto schermo; e sa anche leggerli.
+publish_to: none
+
+# versionName+versionCode. Il versionCode e' monotono crescente e non si riusa mai:
+# Play rifiuta un AAB con un numero gia' visto e quel numero non si libera.
+# Vedi develop_microapps.md §5.4.
+version: 1.0.0+1
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.35.0"
+
+# Le versioni delle dipendenze si risolvono con "pwsh ../../tool/fl.ps1 pub add <pacchetto>".
+# Non si scrivono a memoria: un vincolo inventato fa fallire la risoluzione (F17.2c, 2026-10-09).
+#
+# ⚑ Qui, a differenza di Film Tracker, le dipendenze native entrano tutte con il bootstrap:
+# la specsheet (F17.1.2) le ha gia' fissate e F17.4 le scrivono in parallelo piu' passi. Il
+# build dell'APK di debug del bootstrap e' la prova che compilano tutte insieme.
+# ☠ `micro_share` (F17.2b, la ricezione da Share Sheet) NON e' ancora qui: si aggiunge quando
+# il package e' pronto. L'app non usa mai `receive_sharing_intent` direttamente.
+dependencies:
+  # I grafemi del logo di testo (1-3 "caratteri" come li vede una persona: una bandiera o una
+  # famiglia di emoji contano uno). Dart puro, gia' presente tramite Flutter: qui e' diretta perche'
+  # la usa lib/domain/qr_style.dart (TextLogo).
+  characters: ^1.4.1
+  # Senza, qualche widget di Material mostra quadrati vuoti nei menu di selezione del
+  # testo. Vedi apps/trashcan/pubspec.yaml.
+  cupertino_icons: ^1.0.8
+  # Cronologia e preferiti (lib/data/, F17.1.4): una tabella sola, `qr_codes`.
+  drift: ^2.35.2
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.2
+  # Il ritaglio quadrato/rotondo del logo foto, una volta sola all'import (F17.1.7). ⚑ Al posto
+  # di image_cropper: una dipendenza nativa in meno. Era gia' nell'app tramite micro_core.
+  image: ^4.10.1
+  # Foto per il logo e immagine da cui leggere un QR. Usa il selettore di sistema: nessun
+  # permesso su Android 13+ e su iOS (ma Info.plist vuole comunque NSPhotoLibraryUsageDescription).
+  image_picker: ^1.2.4
+  intl: ^0.20.3
+  meta: ^1.19.0
+  micro_core:
+    path: ../../packages/micro_core
+  # La ricezione da Share Sheet (F17.2b): package separato perche' porta un plugin nativo che
+  # le app che non ricevono condivisioni non devono avere.
+  micro_share:
+    path: ../../packages/micro_share
+  # La lettura dalla fotocamera e da un'immagine (`analyzeImage`), anche per la verifica di
+  # leggibilita' dello stile (F17.1.7). iOS: AVFoundation + Vision; Android: ML Kit incluso
+  # (+3-10 MB). ☠ ML Kit e privacy: da verificare in F17.7 (F17.1.10) prima di pubblicare.
+  mobile_scanner: ^7.4.2
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  # Il QR: `QrImageView` per lo schermo e `QrPainter` per il PNG, con gli stessi parametri
+  # (un solo punto li traduce da QrStyle, F17.1.7).
+  qr_flutter: ^4.1.0
+  # Luminosita' DELL'APP al massimo mentre il QR e' mostrato (non quella di sistema): nessun
+  # permesso, e il sistema la ripristina da solo se l'app muore.
+  screen_brightness: ^2.1.11
+  # Condividere il PNG del QR (Pro, `imageExport`). ⚑ Lo stesso vincolo di micro_core: due
+  # vincoli diversi sullo stesso plugin finiscono prima o poi in un conflitto di risoluzione.
+  share_plus: ^13.3.0
+  sqlite3: ^3.7.0
+  sqlite3_flutter_libs: ^0.6.0+eol
+  # "Apri link", "Chiama", "Scrivi email", "Manda SMS" dal QR letto. Su Android 11+ servono le
+  # <queries> del manifest, o canLaunchUrl risponde sempre false.
+  url_launcher: ^6.3.3
+  # Lo schermo non si spegne mentre qualcuno inquadra il QR.
+  wakelock_plus: ^1.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  drift_dev: ^2.35.1
+  build_runner: ^2.16.2
+  # ☠ Tetto all'analyzer usato da build_runner. Con analyzer 14.5.0 la generazione di Drift
+  # muore con "The setter 'contextFeatures' isn't defined for AnalysisOptionsImpl" (scoperto
+  # con Film Tracker il 2026-10-06). Si toglie quando la catena supporta la 14.5.
+  analyzer: ">=14.0.0 <14.4.0"
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
+  # Solo per i test: `SharedPreferences.setMockInitialValues` dietro SettingsStore.
+  shared_preferences: ^2.5.6
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  # Plus Jakarta Sans, font VARIABILE (pesi 200-800 in un file solo), come Film Tracker, dal
+  # repository ufficiale google/fonts con la sua licenza (assets/fonts/OFL-PlusJakartaSans.txt:
+  # SIL Open Font License 1.1, che ne consente l'uso in app commerciali purche' la licenza sia
+  # inclusa). I pesi si ottengono con FontVariation in MicroTheme.
+  # ⚑ Provvisorio: la grafica vera la decidono le proposte di F17.6.
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf

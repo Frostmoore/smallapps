@@ -1,0 +1,25 @@
+# Generazione delle icone di QR Me.
+#
+# Si rigenerano con:  pwsh ../../tool/fl.ps1 pub run flutter_launcher_icons
+#
+# ☠ Le immagini qui sotto NON si modificano a mano: le produce tool/genera_icone.py
+# dall'originale del proprietario (assets/icon/originale.png).
+flutter_launcher_icons:
+  android: true
+  ios: true
+
+  # Il disegno sul fondo chiarissimo, senza alfa: icona legacy Android e iOS.
+  image_path: "assets/icon/icona_ios.png"
+  min_sdk_android: 24
+
+  # ⚑ Fondo pieno e disegno separato: l'originale arriva gia' trasparente, quindi il primo piano
+  # e' davvero il disegno (parallasse dei launcher) e c'e' la sagoma per le icone a tema di
+  # Android 13 (vedi l'intestazione di tool/genera_icone.py).
+  adaptive_icon_background: "assets/icon/adaptive_background.png"
+  adaptive_icon_foreground: "assets/icon/adaptive_foreground.png"
+  adaptive_icon_foreground_inset: 0
+  adaptive_icon_monochrome: "assets/icon/adaptive_monochrome.png"
+
+  # ☠ iOS: niente canale alfa, o App Store Connect rifiuta la build a caricamento finito.
+  remove_alpha_ios: true
+  background_color_ios: "#F3F7F3"

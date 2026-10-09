@@ -1,0 +1,23 @@
+name: micro_share
+description: >-
+  Ricezione da Share Sheet per le MicroApps che accettano condivisioni (Android
+  ACTION_SEND, iOS Share Extension). Package separato da micro_core: solo le app
+  che ricevono condivisioni lo includono.
+version: 1.0.0
+publish_to: none
+
+# Le dipendenze si aggiungono con "pwsh tool/fl.ps1 pub add <pacchetto>" e non a mano:
+# i vincoli scritti a memoria invecchiano e fanno fallire la risoluzione. Vedi F1.1.
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  receive_sharing_intent: ^1.9.0
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter

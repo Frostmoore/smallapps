@@ -29,6 +29,11 @@ function Get-DartProjects {
     if (Test-Path (Join-Path $core 'pubspec.yaml')) {
         $projects += [pscustomobject]@{ Name = 'micro_core'; Path = $core }
     }
+    # micro_share (F17.2b): ricezione da Share Sheet, prima delle app che lo usano.
+    $share = Join-Path $script:RepoRoot 'packages\micro_share'
+    if (Test-Path (Join-Path $share 'pubspec.yaml')) {
+        $projects += [pscustomobject]@{ Name = 'micro_share'; Path = $share }
+    }
     $appsDir = Join-Path $script:RepoRoot 'apps'
     if (Test-Path $appsDir) {
         Get-ChildItem $appsDir -Directory | Sort-Object Name | ForEach-Object {

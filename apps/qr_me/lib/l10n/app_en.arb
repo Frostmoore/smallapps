@@ -1,0 +1,75 @@
+{
+  "@@locale": "en",
+  "appTitle": "QR Me",
+  "common_save": "Save",
+  "common_cancel": "Cancel",
+  "common_edit": "Edit",
+  "common_retry": "Try again",
+  "common_delete": "Delete",
+  "common_optional": "Optional",
+  "common_copy": "Copy",
+  "common_copied": "Copied",
+  "common_notFound": "This QR code doesn’t exist any more.",
+  "common_comingSoon": "Coming soon.",
+  "kind_text": "Text",
+  "kind_url": "Link",
+  "kind_wifi": "Wi-Fi",
+  "kind_contact": "Contact",
+  "kind_email": "Email",
+  "kind_sms": "SMS",
+  "kind_phone": "Phone",
+  "show_title": "QR code",
+  "scan_title": "Read a QR code",
+  "scanResult_title": "What the QR code says",
+  "form_title": "New QR code",
+  "style_title": "Style",
+  "saved_title": "Favourites",
+  "history_title": "History",
+  "paywall_headline": "QR Me Pro",
+  "paywall_subhead": "One payment. No subscription. Yours for good.",
+  "paywall_buy": "Unlock Pro",
+  "paywall_buyWithPrice": "Unlock Pro — {price}",
+  "@paywall_buyWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_restore": "Restore purchase",
+  "paywall_pending": "Payment is being processed. We’ll unlock Pro as soon as it goes through.",
+  "paywall_thanks": "Thank you. Pro is unlocked.",
+  "paywall_restoredNothing": "No previous purchase found on this account.",
+  "paywall_unavailable": "The store isn’t responding on this device. Check your connection and try again.",
+  "paywall_productUnavailable": "The Pro price hasn’t arrived from the store. Try again in a moment.",
+  "paywall_benefitStyleTitle": "Colours and a logo in the QR code",
+  "paywall_benefitStyleBody": "Your colours, round dots and eyes, and a photo, an icon or an emoji in the middle.",
+  "paywall_benefitFormsTitle": "Wi-Fi, contacts, email, SMS and phone",
+  "paywall_benefitFormsBody": "Fill in a form: guests join your Wi-Fi or save your contact just by pointing their camera.",
+  "paywall_benefitFavoritesTitle": "Unlimited favourites",
+  "paywall_benefitFavoritesBody": "Keep every QR code you use often, each with its own name.",
+  "paywall_benefitHistoryTitle": "Unlimited history",
+  "paywall_benefitHistoryBody": "Every QR code you show or read, from now on. The free history keeps the last 5.",
+  "paywall_benefitImageTitle": "Share the QR code as a picture",
+  "paywall_benefitImageBody": "A sharp image to send in a chat, print or put on a poster.",
+  "paywall_benefitBackupTitle": "Backup and new phone",
+  "paywall_benefitBackupBody": "Favourites, history and logos in one file, to keep or move to a new phone.",
+  "pro_locked": "This is part of QR Me Pro.",
+  "settings_title": "Settings",
+  "settings_restoreGoogle": "Bought Pro on another phone with the same Google account?",
+  "settings_restoreApple": "Bought Pro on another iPhone with the same Apple ID?",
+  "settings_theme": "Theme",
+  "theme_system": "Like the phone",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
+  "settings_version": "QR Me {version}",
+  "@settings_version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_proActive": "QR Me Pro is active",
+  "settings_proCta": "Discover QR Me Pro"
+}

@@ -1,0 +1,25 @@
+# La schermata di avvio di QR Me.
+#
+# Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
+#
+# Il disegno dell'icona (splash_logo.png, da tool/genera_icone.py) sullo stesso fondo
+# chiarissimo dell'icona (#F3F7F3): chi apre l'app vede continuare l'icona.
+# ⚑ Uguale nei due temi: i moduli del disegno sono quasi neri e su un fondo scuro
+# sparirebbero. L'app e' chiara di default (F17.2c).
+flutter_native_splash:
+  color: "#F3F7F3"
+  image: assets/icon/splash_logo.png
+  color_dark: "#F3F7F3"
+  image_dark: assets/icon/splash_logo.png
+
+  android: true
+  ios: true
+  web: false
+
+  # ☠ Android 12+ ritaglia l'immagine a cerchio e tiene solo i due terzi centrali:
+  # splash_android12.png ha il disegno gia' dentro il cerchio sopravvissuto.
+  android_12:
+    color: "#F3F7F3"
+    color_dark: "#F3F7F3"
+    image: assets/icon/splash_android12.png
+    image_dark: assets/icon/splash_android12.png

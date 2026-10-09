@@ -56,4 +56,11 @@ enum FeatureKey {
 
   /// Colori, icone e tema personalizzabili.
   themeCustomization,
+
+  /// Esportare come immagine un contenuto generato dall'app (es. il QR di QR Me in PNG).
+  ///
+  /// ⛑ Distinta da [csvExport] e [pdfReport]: e' un'altra decisione commerciale. Aggiunta
+  /// il 2026-10-09 con QR Me (F17.2a); le app che non esportano immagini la mappano `open()`
+  /// perche' il loro test di coerenza del paywall vuole tutte le chiavi.
+  imageExport,
 }
