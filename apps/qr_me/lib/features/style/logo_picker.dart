@@ -118,10 +118,10 @@ class _LogoPickerState extends ConsumerState<LogoPicker> {
           key: const ValueKey('logo_source'),
           showSelectedIcon: false,
           segments: [
-            ButtonSegment(value: _Source.none, label: Text(l.logo_none)),
-            ButtonSegment(value: _Source.photo, label: Text(l.logo_photo)),
-            ButtonSegment(value: _Source.icon, label: Text(l.logo_icon)),
-            ButtonSegment(value: _Source.text, label: Text(l.logo_text)),
+            ButtonSegment(value: _Source.none, label: _SegmentLabel(l.logo_none)),
+            ButtonSegment(value: _Source.photo, label: _SegmentLabel(l.logo_photo)),
+            ButtonSegment(value: _Source.icon, label: _SegmentLabel(l.logo_icon)),
+            ButtonSegment(value: _Source.text, label: _SegmentLabel(l.logo_text)),
           ],
           selected: {_source},
           onSelectionChanged: (s) => _select(s.first),
@@ -212,4 +212,21 @@ class _IconChoice extends StatelessWidget {
       ),
     );
   }
+}
+
+/// L'etichetta di un segmento: su una riga sola, rimpicciolita se non ci sta.
+///
+/// ☠ Trovato in F17.7 con il testo al 130%: quattro segmenti larghi uguali su un telefono
+/// medio, e «Nessuno» andava a capo a meta' parola («Nessun / o»). Rimpicciolire di poco e'
+/// meglio che spezzare la parola; e il testo grande resta grande ovunque ci sia spazio.
+class _SegmentLabel extends StatelessWidget {
+  const _SegmentLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text(text, maxLines: 1, softWrap: false),
+  );
 }

@@ -235,7 +235,8 @@ class _StylePageState extends ConsumerState<StylePage> {
   }
 }
 
-/// «✓ Leggibile» / «⚠ Non riesco a leggerlo» / «Verifica non disponibile» / «Verifico…».
+/// La riga di verifica: icona + «Leggibile» / «Non riesco a leggerlo» / «Verifica non
+/// disponibile» / «Verifico…». ⚑ Il segno sta solo nell'icona: niente ✓ o ⚠ nei testi (F17.7).
 class _ReadabilityRow extends StatelessWidget {
   const _ReadabilityRow({required this.readability});
 

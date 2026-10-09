@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:micro_core/micro_core.dart';
@@ -280,6 +281,40 @@ class QrRepository {
         MicroLog.e('logo orfano non cancellato: $name', error: error, stackTrace: stack);
       }
     }
+  }
+
+  /// Quanto e' "giovane" un file di logo che [pruneOrphanLogos] non tocca comunque.
+  ///
+  /// ⚑ La pagina Stile importa la foto (`LogoRenderer.importPhoto` scrive subito il file) ma la
+  /// lega a un QR solo con «Applica». In quella finestra la foto e' un orfano **legittimo**: se
+  /// la pulizia girasse proprio allora (oggi gira solo all'avvio, domani chissa') cancellerebbe
+  /// l'anteprima sotto gli occhi dell'utente. Un quarto d'ora copre qualunque esitazione
+  /// ragionevole; una foto abbandonata sparisce al primo avvio dopo.
+  static const Duration orphanLogoGrace = Duration(minutes: 15);
+
+  /// Cancella i file dei loghi foto che nessun QR usa (immagine **e** miniatura), tranne quelli
+  /// modificati negli ultimi [grace]. Restituisce quanti file ha tolto (0 senza `images`).
+  ///
+  /// ⚑ Perche' serve: una foto scelta nella pagina Stile e poi abbandonata senza «Applica»
+  /// resta su disco, e nessun altro percorso la raccoglie (`_deleteOrphanLogos` parte solo da
+  /// righe che la usavano). Si chiama all'avvio, dopo il primo frame (`QrMeApp`).
+  /// ☠ L'elenco da tenere contiene anche le **miniature** (`QrLogoFiles.filesOf`):
+  /// `ImageStore.pruneOrphans` scorre tutta la cartella `images/`, `thumbs/` compresa, e con
+  /// le sole immagini cancellerebbe le miniature di tutti i loghi in uso.
+  Future<int> pruneOrphanLogos({Duration grace = orphanLogoGrace}) async {
+    final images = this.images;
+    if (images == null) return 0;
+    final keep = {for (final name in await usedLogoImages()) ...QrLogoFiles.filesOf(name)};
+    final dir = images.paths.images;
+    if (dir.existsSync()) {
+      final cutoff = _clock().subtract(grace);
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        if (entity is File && entity.lastModifiedSync().isAfter(cutoff)) {
+          keep.add(images.paths.relativize(entity));
+        }
+      }
+    }
+    return images.pruneOrphans(keep);
   }
 
   /// I loghi foto usati da almeno un QR: per `ImageStore.pruneOrphans` e per il backup.

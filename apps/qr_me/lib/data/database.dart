@@ -58,9 +58,10 @@ LazyDatabase _openConnection() => LazyDatabase(() async {
   // database file", e solo su dispositivo, mai in test. Vedi apps/trashcan.
   sqlite3.tempDirectory = (await getTemporaryDirectory()).path;
 
-  // ☠ Debito (F17.1.4): su iOS la cartella del database va esclusa dal backup iCloud con
-  // NSURLIsExcludedFromBackupKey (password del Wi-Fi). Da Dart non si imposta senza un canale
-  // nativo: si fa in F17.4/F17.7 nell'AppDelegate. Su Android basta allowBackup="false".
+  // ⚑ Fuori dai backup automatici (F17.1.4, password del Wi-Fi): su Android con
+  // allowBackup="false" nel manifest, su iOS con `isExcludedFromBackup` sulla cartella
+  // Documents/ intera, impostato a ogni avvio in ios/Runner/AppDelegate.swift (F17.7). Se il
+  // file cambia nome o cartella, va aggiornato anche li'.
 
   // Su un isolate separato: le query non bloccano il thread della UI.
   return NativeDatabase.createInBackground(file);

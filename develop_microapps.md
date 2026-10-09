@@ -1146,7 +1146,13 @@ volta sola; nella fase di ciascuna app si spuntano.
   - [x] **F17.4** Interfaccia essenziale, provata con condivisioni vere — FATTO il 2026-10-09: servizi (`QrRenderer` unico traduttore stile→qr_flutter, `LogoRenderer`, `ReadabilityCheck` con ML Kit che funziona anche sull'emulatore, `ScreenBoost`, `ShareRouter`/`ShareIntake`, `ContentActions`), tutte le pagine, grafica Neon (`lib/app/qr_palette.dart`, `features/common/neon.dart`, Space Grotesk), 142 test; provate sull'emulatore la condivisione di testo (app aperta e chiusa), moduli, stile, PNG, paywall. ☠ `receive_sharing_intent` 1.9.0 dichiara `compileSdk 37` che AGP 9 non trova: `finalizeDsl { compileSdk = 36 }` in `android/build.gradle.kts` dell'app (da ripetere in ogni app con `micro_share`). Non provati: immagine condivisa con un QR vero, fotocamera reale, backup
   - [x] **F17.5** Pro: limiti, paywall, test di coerenza — FATTO il 2026-10-09: chiavi verificate punto per punto, il gesto che apre il paywall prosegue dopo l'acquisto
   - [x] **F17.6** Proposte grafiche, scelta del proprietario — scelta «A · Neon» il 2026-10-09 (F17.0 punto 10), applicata insieme a F17.4
-  - [ ] **F17.7** Test, rifinitura, iOS sul simulatore, decisione su ML Kit
+  - [~] **F17.7** Test, rifinitura, iOS sul simulatore, decisione su ML Kit — parte Android FATTA il 2026-10-09 (152 test):
+    - [x] **F17.7.1** Doppio segno nella riga di verifica: nei testi (ARB e `tool/testi_*.py`) non c'era nessun ✓/⚠/✗, il segno e' gia' solo l'icona (verificato sull'emulatore); aggiunta la guardia `test/widget/texts_glyphs_test.dart`
+    - [x] **F17.7.2** Loghi foto orfani: `QrRepository.pruneOrphanLogos({Duration grace})` (salta i file degli ultimi 15 minuti, tiene immagini **e** miniature in uso), chiamata 3 s dopo il primo frame in `QrMeApp`; provata sul dispositivo (2 file vecchi tolti, quello nuovo lasciato) e con 2 test
+    - [x] **F17.7.3** Backup iCloud: `isExcludedFromBackup` su `Documents/` (database `qr_me.sqlite` e `qr_me/images`) a ogni avvio in `ios/Runner/AppDelegate.swift`. ☐ **Da compilare e provare sul Mac** (non compilabile da Windows)
+    - [x] **F17.7.4** ML Kit: verificato (bundled `barcode-scanning:17.3.0`, invia metriche d'uso non spegnibili; iOS usa Vision, nulla esce). **Decisione APERTA del proprietario**: tenerlo dichiarandolo (raccomandato) o passare a ZXing — `memory/decisioni.md` «QR Me: ML Kit», F17.1.10
+    - [x] **F17.7.5** Rifinitura sull'emulatore: testo al 130% (corretto «Nessun/o» spezzato nei segmenti del logo), tema chiaro (accento #16A34A → #15803D per il contrasto AA, titolo della pagina di lettura invisibile corretto; test `palette_contrast_test.dart`), condivisione di un PNG con un QR vero da Google Foto ad app chiusa e aperta, «Da immagine» col selettore di sistema, backup → cancella cronologia → ripristino
+    - [ ] **F17.7.6** iOS sul simulatore/iPad (sul Mac): build, esclusione dal backup, estensione di condivisione, Vision
   - [ ] **F17.8** Atlanti di `apps/qr_me` e `packages/micro_share`
   - [ ] **F17.9** Rituale di fine fase, card «In arrivo», branch `v9.0.0`
 - [ ] **F18** Leggimelo — lettura ad alta voce di un articolo condiviso
@@ -5618,7 +5624,7 @@ il paywall: «Cronologia senza limite da adesso in poi»).
 memoria (`QrDisplayArgs`, F17.1.6). Si salva solo se l'utente tocca «Salva nei preferiti».
 ⚑ **Nessun QR in chiaro fuori dall'app**: `android:allowBackup="false"` nel manifest e i file nella
 cartella documenti dell'app (su iOS esclusi dal backup iCloud con `NSURLIsExcludedFromBackupKey`
-sulla cartella del database). Le password Wi-Fi non devono finire in un backup automatico che
+sulla cartella `Documents/` intera, che contiene database e loghi: `ios/Runner/AppDelegate.swift`, F17.7). Le password Wi-Fi non devono finire in un backup automatico che
 l'utente non ha scelto. Il backup lo fa solo l'utente, col Pro, in un file che vede.
 
 #### F17.1.5 — Rotte (`lib/app/routes.dart`)
@@ -5852,6 +5858,24 @@ per il Pro). ☠ **ML Kit** (Android): Google dichiara che le API di ML Kit poss
 d'uso anonime. Va verificato in F17.2 su quali dati e come si spengono; se non si spengono, va
 detto nell'informativa e nella Data safety di Play, oppure si passa a uno scanner ZXing puro
 (`flutter_zxing`). La scelta si scrive in `memory/decisioni.md` **prima** di pubblicare.
+
+**Verifica di F17.7 (2026-10-09) — decisione APERTA, spetta al proprietario prima di Play.**
+- **Cosa usa l'app**: `mobile_scanner` 7.4.2 su Android dipende da `com.google.mlkit:barcode-scanning:17.3.0`
+  (**bundled**, modello nell'APK; `useUnbundled` non impostato). `autoZoom` spento. Su **iOS** usa
+  **Vision di Apple** (solo `Vision`/`AVFoundation` nel codice `darwin/`, nessuna dipendenza esterna):
+  nulla esce dal telefono.
+- **Cosa invia ML Kit**: **non** le immagini ne' il contenuto letto; **si'** metriche d'uso e
+  diagnostica (modello e versione del telefono, pacchetto e versione dell'app, latenza, configurazione,
+  eventi, codici d'errore, un **id per installazione**), cifrate in transito, non cedute a terzi.
+  Fonti: https://developers.google.com/ml-kit/terms e
+  https://developers.google.com/ml-kit/android-data-disclosure
+- **Spegnerlo**: **nessun modo supportato** (l'unico controllo documentato e' l'auto-zoom). I trucchi
+  sul manifest (togliere i servizi `datatransport`) sono scartati: non documentati e fragili. Nel
+  codice non e' cambiato niente.
+- **Raccomandazione**: tenere ML Kit e dichiararlo (Data safety: diagnostica, interazioni, id
+  d'installazione; informativa del sito corretta su Android). Alternativa: `flutter_zxing` se si vuole
+  «nessun dato esce dal telefono» senza eccezioni. Dettagli, testo proposto per l'informativa e
+  motivazioni: `memory/decisioni.md`, voce «QR Me: ML Kit».
 
 #### F17.1.11 — Trappole note in anticipo
 

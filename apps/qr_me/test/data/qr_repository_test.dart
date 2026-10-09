@@ -178,6 +178,38 @@ void main() {
     expect(esiste(condiviso), isFalse, reason: 'orfano: immagine e miniatura cancellate');
   });
 
+  test('pruneOrphanLogos: via le foto abbandonate, salve quelle in uso e quelle appena scelte', () async {
+    final inUso = await logo('in_uso');
+    await mostra(const TextContent('a'), style: QrStyle(logo: PhotoLogo(imageName: inUso)));
+    final abbandonato = await logo('abbandonato');
+    final appenaScelto = await logo('appena_scelto');
+    // Le date dei file rispetto all'orologio del repository: un'ora fa e un minuto fa.
+    Future<void> data(String name, DateTime t) async {
+      for (final rel in QrLogoFiles.filesOf(name)) {
+        await paths.resolve(rel).setLastModified(t);
+      }
+    }
+
+    await data(inUso, clock.subtract(const Duration(hours: 1)));
+    await data(abbandonato, clock.subtract(const Duration(hours: 1)));
+    await data(appenaScelto, clock.subtract(const Duration(minutes: 1)));
+
+    expect(await repo.pruneOrphanLogos(), 2, reason: "immagine e miniatura dell'abbandonato");
+    expect(esiste(inUso), isTrue, reason: 'in uso: anche la miniatura deve restare');
+    expect(esiste(abbandonato), isFalse);
+    expect(esiste(appenaScelto), isTrue, reason: 'la pagina Stile potrebbe averlo aperto adesso');
+
+    // Passato il quarto d'ora, anche la foto mai applicata se ne va.
+    clock = clock.add(QrRepository.orphanLogoGrace);
+    expect(await repo.pruneOrphanLogos(), 2);
+    expect(esiste(appenaScelto), isFalse);
+    expect(esiste(inUso), isTrue);
+  });
+
+  test('pruneOrphanLogos senza ImageStore non fa niente', () async {
+    expect(await QrRepository(db).pruneOrphanLogos(), 0);
+  });
+
   test('cambiare stile cancella il vecchio logo; potatura e svuotamento pure', () async {
     final vecchio = await logo('vecchio');
     final id = await mostra(const TextContent('a'), style: QrStyle(logo: PhotoLogo(imageName: vecchio)));

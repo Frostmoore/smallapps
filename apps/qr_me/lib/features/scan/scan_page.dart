@@ -101,6 +101,9 @@ class _ScanPageState extends ConsumerState<ScanPage> {
         title: Text(l.scan_title),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        // ☠ Il titolo del tema ha un colore suo (`p.ink`) che vince su `foregroundColor`: nel
+        // tema chiaro era quasi nero su nero (visto sull'emulatore in F17.7). Bianco esplicito.
+        titleTextStyle: p.title(size: 20, color: Colors.white),
         actions: [
           ValueListenableBuilder<MobileScannerState>(
             valueListenable: _controller,

@@ -126,7 +126,25 @@ class _QrMeAppState extends ConsumerState<QrMeApp> {
       );
       _intake = intake;
       unawaited(intake.start());
+      unawaited(_pruneOrphanLogos());
     });
+  }
+
+  /// Pulizia dei loghi foto abbandonati (importati nella pagina Stile senza «Applica»).
+  ///
+  /// ⚑ Dopo il primo frame e con qualche secondo di ritardo: chi arriva da una condivisione
+  /// vuole il QR subito, e la pulizia aprirebbe il database e scorrerebbe il disco proprio
+  /// mentre lui aspetta. La foto scelta in questo momento nella pagina Stile e' comunque al
+  /// sicuro: `pruneOrphanLogos` salta i file degli ultimi 15 minuti.
+  /// ☠ Non deve mai far cadere l'app: un errore del disco si scrive nel log e basta.
+  Future<void> _pruneOrphanLogos() async {
+    await Future<void>.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+    try {
+      await ref.read(repositoryProvider).pruneOrphanLogos();
+    } on Object catch (error, stack) {
+      MicroLog.e('pulizia dei loghi orfani', error: error, stackTrace: stack);
+    }
   }
 
   void _onShareOutcome(ShareOutcome outcome) {

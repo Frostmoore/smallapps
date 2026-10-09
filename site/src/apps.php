@@ -80,6 +80,17 @@ function catalogo(): array
             'packageId' => 'com.smp.filmtracker',
             'suPlay'    => false,
         ],
+        // F17, in sviluppo dal 2026-10-09: la prima delle dieci app nuove (F10-F19). Il verde e'
+        // quello dell'icona (grafica «A · Neon»), scurito per stare sul bianco della card.
+        'qr-me' => [
+            'nome'      => 'QR Me',
+            'accento'   => '#15803D',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.qrme',
+            'suPlay'    => false,
+        ],
     ];
 }
 

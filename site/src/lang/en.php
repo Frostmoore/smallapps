@@ -77,6 +77,10 @@ return [
                                  . 'photographers who don\'t want to lose their development '
                                  . 'notes.',
 
+    'app.qr-me.claim'    => 'Share it, and it\'s a QR.',
+    'app.qr-me.sommario' => 'A link, some text or your home Wi-Fi become a big, bright QR code '
+                          . 'for someone to scan. It reads QR codes too.',
+
     // ── Home ────────────────────────────────────────────────────────────────
     'home.titolo'      => 'Small Android and iPhone apps that do one thing',
     'home.descrizione' => 'SMP MicroApps: lightweight Android and iPhone apps with no accounts and no '

@@ -64,8 +64,11 @@ class QrPalette extends ThemeExtension<QrPalette> {
     glow: Color(0x733BD13B), // rgba(59,209,59,0.45)
   );
 
-  /// Chiaro: la stessa app su carta. ⚑ L'accento si scurisce a #16A34A: il #3BD13B su bianco ha
+  /// Chiaro: la stessa app su carta. ⚑ L'accento si scurisce a #15803D: il #3BD13B su bianco ha
   /// un contrasto di 2:1 e i testi verdi (link, «Vedi tutti») non si leggerebbero.
+  /// ☠ Era #16A34A fino a F17.7: 3,0:1 sul fondo e 3,3:1 col bianco sopra (pulsanti), sotto il
+  /// 4,5:1 di WCAG AA per il testo normale; si vedeva sull'emulatore. #15803D da' 4,6:1 sul
+  /// fondo `#F4F6F2` e 5,0:1 col testo bianco dei pulsanti.
   static const QrPalette light = QrPalette(
     ground: Color(0xFFF4F6F2),
     surface: Color(0xFFFFFFFF),
@@ -73,9 +76,9 @@ class QrPalette extends ThemeExtension<QrPalette> {
     borderFaint: Color(0xFFE6EBE6),
     ink: Color(0xFF121614),
     inkMuted: Color(0xFF5A6B5E),
-    accent: Color(0xFF16A34A),
+    accent: Color(0xFF15803D),
     onAccent: Color(0xFFFFFFFF),
-    glow: Color(0x4D16A34A),
+    glow: Color(0x4D15803D),
   );
 
   static QrPalette of(BuildContext context) =>

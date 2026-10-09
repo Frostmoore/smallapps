@@ -81,6 +81,10 @@ return [
     'app.film-tracker.sommario' => 'Pellicole, scatti, tempi e diaframmi. Per chi fotografa '
                                  . 'in analogico e non vuole perdere le note dello sviluppo.',
 
+    'app.qr-me.claim'    => 'Condividi, ed è già un QR.',
+    'app.qr-me.sommario' => 'Un link, un testo o il Wi-Fi di casa diventano un QR grande e '
+                          . 'luminoso, da far inquadrare. E i QR li legge anche.',
+
     // ── Home ────────────────────────────────────────────────────────────────
     'home.titolo'      => 'App piccole per Android e iPhone, che fanno una cosa sola',
     'home.descrizione' => 'SMP MicroApps: applicazioni Android e iPhone leggere, senza account e '
