@@ -21,7 +21,8 @@ pagina_inizio('trashcan.titolo', 'trashcan.descrizione', '/trashcan');
 ?>
 
 <section class="hero">
-  <div class="wrap">
+  <div class="wrap hero__grid">
+    <div>
     <p class="eyebrow"><?= t('trashcan.eyebrow') ?></p>
     <h1 class="display"><?= t('trashcan.hero.titolo') ?></h1>
     <p class="lede"><?= t('trashcan.hero.lede') ?></p>
@@ -36,6 +37,29 @@ pagina_inizio('trashcan.titolo', 'trashcan.descrizione', '/trashcan');
         <span class="btn" aria-disabled="true"><?= t('comune.presto_store') ?></span>
       <?php endif; ?>
       <a class="btn btn--ghost" href="#funzioni"><?= t('trashcan.hero.cta') ?></a>
+    </div>
+    </div>
+    <img class="hero__img" src="/assets/img/trashcan/testata-<?= e($lingua) ?>.webp"
+         width="1024" height="500" alt="<?= t('trashcan.img.testata') ?>">
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 class="title"><?= t('trashcan.schermate.titolo') ?></h2>
+      <p><?= t('trashcan.schermate.lede') ?></p>
+    </div>
+
+    <?php /* Scorre in orizzontale: sei telefoni affiancati non stanno in nessuno schermo. */ ?>
+    <div class="shots" tabindex="0" aria-label="<?= t('trashcan.schermate.titolo') ?>">
+      <?php foreach (['01-home', '02-widget', '03-giorni', '04-regola', '05-tipi', '06-pro'] as $n => $nome): ?>
+        <figure class="shot">
+          <img src="/assets/img/trashcan/screen-<?= e($lingua) ?>-<?= $nome ?>.webp"
+               width="480" height="1043" loading="lazy" alt="<?= t('trashcan.schermate.' . ($n + 1)) ?>">
+          <figcaption><?= t('trashcan.schermate.' . ($n + 1)) ?></figcaption>
+        </figure>
+      <?php endforeach; ?>
     </div>
   </div>
 </section>
@@ -76,6 +100,38 @@ pagina_inizio('trashcan.titolo', 'trashcan.descrizione', '/trashcan');
     </div>
   </div>
 </section>
+
+<?php
+/*
+  Le immagini promozionali hanno il testo in italiano dentro l'immagine: sulla pagina inglese
+  sarebbero una pagina italiana travestita, quindi lì non si mostrano. Se un giorno arrivano le
+  versioni inglesi basta togliere la condizione e mettere la lingua nel nome del file.
+*/
+if ($lingua === 'it'):
+    $promo = [
+        'quadre'    => ['02-widget', '03-promemoria', '04-calendari'],
+        'larghe'    => ['05-festivi', '06-personalizza', '07-nessun-account'],
+        'verticali' => ['08-condividi', '09-piu-calendari', '10-mai-piu'],
+    ];
+?>
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 class="title"><?= t('trashcan.promo.titolo') ?></h2>
+      <p><?= t('trashcan.promo.lede') ?></p>
+    </div>
+
+    <?php foreach ($promo as $forma => $nomi): ?>
+      <div class="promo promo--<?= $forma ?>" tabindex="0">
+        <?php foreach ($nomi as $nome): ?>
+          <img src="/assets/img/trashcan/promo-<?= $nome ?>.webp" loading="lazy"
+               alt="<?= t('trashcan.promo.' . $nome) ?>">
+        <?php endforeach; ?>
+      </div>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>
 
 <section class="section">
   <div class="wrap">

@@ -25,6 +25,8 @@
 | Tutto il CSS | `public/assets/style.css` |
 | La home con la griglia delle card | `public/index.php` |
 | La pagina di TrashCan | `public/trashcan.php` |
+| Testata, screenshot e promozionali di TrashCan | `public/assets/img/trashcan/` (WebP, §Aggiornamento 2026-10-09) |
+| Il CSS delle immagini di una pagina app (`.hero__grid`, `.shots`, `.promo`) | in fondo a `public/assets/style.css` |
 | Il modulo di contatto (pagina) | `public/contatti.php` |
 | Validazione, antispam, archiviazione | `src/contact.php` |
 | L'invio della mail | `src/mailer.php` |
@@ -55,7 +57,8 @@ site/
 │   └── mailer.php              client SMTP minimo (classi Mailer, SmtpError)
 ├── public/                     ← LA DOCUMENT ROOT. Tutto il resto sta fuori.
 │   ├── index.php               home: titolo grande, griglia delle app, tre principi
-│   ├── trashcan.php            vetrina di TrashCan: problema, funzioni, prezzi, privacy
+│   ├── trashcan.php            vetrina di TrashCan: hero con testata, schermate, problema, funzioni,
+│   │                           promozionali (solo it), prezzi, privacy
 │   ├── contatti.php            i tre canali + il modulo
 │   ├── sitemap.php             servita come /sitemap.xml
 │   ├── robots.txt
@@ -75,7 +78,11 @@ site/
 │           ├── apple-touch-icon.png  180x180 su fondo pieno, per iOS
 │           ├── flag-it.svg     il tricolore
 │           ├── flag-gb.svg     la Union Jack
-│           └── trashcan.png    256x256, derivata dal logo dell'app
+│           ├── trashcan.png    256x256, derivata dal logo dell'app
+│           └── trashcan/       23 WebP generati da apps/trashcan/store e dal Desktop (vedi sotto)
+│               ├── testata-{it,en}.webp          1024x500, la testata Play per lingua
+│               ├── screen-{it,en}-0N-<nome>.webp 480x1043, gli screenshot iOS (01-home … 06-pro)
+│               └── promo-NN-<nome>.webp          9 promozionali in italiano (02…10), 640 o 900 px
 ├── deploy/
 │   ├── smpmicroapps.it.nginx   il vhost, PRIMA che certbot ci aggiunga il blocco TLS
 │   ├── verifica_lingue.php     controlla che i dizionari abbiano le stesse chiavi
@@ -600,7 +607,8 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 | **Nessuna pagina per le altre tre app** | non esistono ancora | alla chiusura di F4, F5, F6. **Servono anche le chiavi `app.<slug>.*` in entrambi i dizionari** |
 | **Le pagine legali inglesi sono una traduzione** | l'originale italiano fa fede e le pagine lo dichiarano. Una revisione da parte di un legale madrelingua non è stata fatta | se e quando ci saranno clienti fuori dall'Italia |
 | **Numero REA assente** | non fornito. Se c'è iscrizione al Registro delle Imprese va indicato (art. 2250 c.c.) | va riempita `AZIENDA['rea']` in `src/config.php` |
-| **Nessuna schermata delle app** | la pagina di TrashCan descrive a parole; qualche immagine venderebbe meglio | quando ci saranno gli screenshot per Play, che servono comunque |
+| ~~**Nessuna schermata delle app**~~ | **chiuso il 2026-10-09**: TrashCan ha testata, schermate e promozionali | per le app successive: stessa struttura, `public/assets/img/<slug>/` |
+| **Promozionali solo in italiano** | le immagini di TrashCan hanno il testo italiano dentro, e sulla pagina inglese non si mostrano | se arrivano le versioni inglesi: nome file con la lingua, e via la condizione `$lingua === 'it'` in `trashcan.php` |
 | ~~**Il bottone Play è spento**~~ | **chiuso il 2026-10-09**: TrashCan ha `suPlay => true` | per le app successive: `suPlay => true` in `src/apps.php`, e basta |
 | ~~**Il bottone App Store è spento**~~ | **chiuso il 2026-10-09**: TrashCan ha `suAppStore => true` (disponibile anche in UE) | per le app successive: `suAppStore => true` e il loro `appStoreId` |
 | **Nessun backup dell'archivio messaggi** | `var/contatti.jsonl` vive solo sul server | quando arriveranno messaggi che valga la pena non perdere |
@@ -622,3 +630,31 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 - `app.trashcan.prezzo` → **2,99 € / €2.99**: è il prezzo App Store in Italia (verificato via API il
   2026-10-06), più alto dei 2,39 € di Play. ⚑ Il sito mostra **il più alto dei due**, così nessuno
   trova in negozio un prezzo superiore a quello promesso qui.
+
+## Aggiornamento 2026-10-09 — immagini sulla pagina di TrashCan
+
+- **Hero a due colonne** (`.hero__grid`): testo a sinistra, `testata-<lingua>.webp` a destra; sotto
+  gli 860px la testata va sotto il testo.
+- **«Com'è fatta»** (`.shots`, subito dopo l'hero): i sei screenshot iOS della lingua della pagina in
+  una striscia che scorre in orizzontale con `scroll-snap`, con didascalia (`trashcan.schermate.1..6`).
+  Sono gli screenshot iOS e non quelli Android perché sono quelli piu' nitidi (1320 px di partenza).
+- **«In due parole»** (`.promo`, dopo «Cosa trovi dentro»): nove promozionali in tre righe per forma
+  (quadre 02-04, larghe 05-07, verticali 08-10), cosi' ogni riga ha la stessa altezza. Sotto i 780px
+  ogni riga diventa una striscia che scorre: a due colonne la terza restava orfana. La n. 1
+  («Stasera cosa si butta?») non c'e' perche' ripete il titolo dell'hero.
+  ⚑ **Solo sulla pagina italiana**: il testo e' dentro l'immagine.
+  ⚑ Prima di metterle si e' controllato che ogni funzione promessa esista (condivisione gratuita,
+  piu' calendari e promemoria col Pro, eccezioni, regole mensili, temi e icone). Le immagini hanno
+  il pulsante «Installa» col logo Play anche per chi arriva da iPhone: accettato, l'app e' su
+  entrambi gli store.
+- **Nuove chiavi** (in entrambi i dizionari, 190 in tutto): `trashcan.img.testata`,
+  `trashcan.schermate.{titolo,lede,1..6}`, `trashcan.promo.{titolo,lede}`,
+  `trashcan.promo.<NN-nome>` (gli `alt` delle promozionali).
+- **Come si rifanno le immagini**: lo script che le ha generate (PIL, WebP qualita' 80-85, metodo 6)
+  ridimensiona `apps/trashcan/store/testata-1024x500-<l>.png`, `store/screenshots/ios/<l>/0*.png` a
+  480 px di larghezza e le promozionali del Desktop (`C:/Users/Pixel/Desktop/trashcan/`, originali
+  ChatGPT da 1,6 MB, **non nel repo**) a 640 px (quadre e verticali) o 900 px (larghe). In tutto circa
+  700 KB invece di 16 MB. Tutte con `width`/`height` o `loading="lazy"` tranne la testata, che e'
+  sopra la piega.
+- Provata in locale a 1400 px e in un iframe da 390 px (⚠ Edge headless non scende sotto ~500 px di
+  finestra: una cattura con `--window-size=400` sembra tagliata a destra anche sulle pagine sane).

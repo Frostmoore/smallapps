@@ -219,6 +219,28 @@ return [
                             . 'telefono: è il modo più veloce perché venga sistemato.',
     'trashcan.bug.bottone' => 'Segnala un problema',
 
+    'trashcan.img.testata'     => 'TrashCan: stasera cosa si butta? Il widget te lo dice ogni sera.',
+    'trashcan.schermate.titolo' => 'Com\'è fatta',
+    'trashcan.schermate.lede'   => 'Schermate vere dell\'app, non disegni: quello che vedi qui è '
+                                 . 'quello che trovi sul telefono.',
+    'trashcan.schermate.1'      => 'Stasera e i prossimi sette giorni',
+    'trashcan.schermate.2'      => 'Il widget sulla home',
+    'trashcan.schermate.3'      => 'I giorni di raccolta',
+    'trashcan.schermate.4'      => 'La regola di un tipo di rifiuto',
+    'trashcan.schermate.5'      => 'I tipi di rifiuto, con colori e icone',
+    'trashcan.schermate.6'      => 'Il Pro, un acquisto solo',
+    'trashcan.promo.titolo'     => 'In due parole',
+    'trashcan.promo.lede'       => 'Le cose che contano, una per immagine.',
+    'trashcan.promo.02-widget'         => 'Widget sempre visibile: sai cosa esporre senza aprire l\'app.',
+    'trashcan.promo.03-promemoria'     => 'Non dimenticare il bidone: un promemoria la sera prima.',
+    'trashcan.promo.04-calendari'      => 'Anche calendari complicati: settimanali, alternati, mensili o personalizzati.',
+    'trashcan.promo.05-festivi'        => 'Festivi? Nessun problema: eccezioni e variazioni in un attimo.',
+    'trashcan.promo.06-personalizza'   => 'Personalizza tutto: categorie, colori e icone.',
+    'trashcan.promo.07-nessun-account' => 'Nessun account: funziona offline e senza pubblicità.',
+    'trashcan.promo.08-condividi'      => 'Condividi il calendario con chi vive con te o con i vicini.',
+    'trashcan.promo.09-piu-calendari'  => 'Più calendari in una sola app: casa, vacanze, genitori.',
+    'trashcan.promo.10-mai-piu'        => 'Mai più raccolta dimenticata.',
+
     // ── Contatti ────────────────────────────────────────────────────────────
     'contatti.titolo'      => 'Contatti e sviluppo su misura',
     'contatti.descrizione' => 'Scrivi per una segnalazione, una domanda sulle app o per far '

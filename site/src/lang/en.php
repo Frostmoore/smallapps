@@ -211,6 +211,28 @@ return [
                             . 'is the fastest way to get it fixed.',
     'trashcan.bug.bottone' => 'Report a problem',
 
+    'trashcan.img.testata'     => 'TrashCan: what goes out tonight? The widget tells you every evening.',
+    'trashcan.schermate.titolo' => 'What it looks like',
+    'trashcan.schermate.lede'   => 'Real screenshots of the app, not mock-ups: what you see here is '
+                                 . 'what you get on your phone.',
+    'trashcan.schermate.1'      => 'Tonight and the next seven days',
+    'trashcan.schermate.2'      => 'The home screen widget',
+    'trashcan.schermate.3'      => 'Collection days',
+    'trashcan.schermate.4'      => 'The rule for one waste type',
+    'trashcan.schermate.5'      => 'Waste types, with colours and icons',
+    'trashcan.schermate.6'      => 'Pro, a single purchase',
+    'trashcan.promo.titolo'     => 'In a nutshell',
+    'trashcan.promo.lede'       => 'What matters, one picture at a time.',
+    'trashcan.promo.02-widget'         => 'Always-visible widget: know what to put out without opening the app.',
+    'trashcan.promo.03-promemoria'     => 'Never forget the bin: a reminder the evening before.',
+    'trashcan.promo.04-calendari'      => 'Even complicated schedules: weekly, alternating, monthly or custom.',
+    'trashcan.promo.05-festivi'        => 'Holidays? No problem: exceptions and changes in a moment.',
+    'trashcan.promo.06-personalizza'   => 'Customise everything: categories, colours and icons.',
+    'trashcan.promo.07-nessun-account' => 'No account: works offline, no ads.',
+    'trashcan.promo.08-condividi'      => 'Share the calendar with your household or your neighbours.',
+    'trashcan.promo.09-piu-calendari'  => 'Several calendars in one app: home, holiday home, parents.',
+    'trashcan.promo.10-mai-piu'        => 'Never miss a collection again.',
+
     // ── Contact ─────────────────────────────────────────────────────────────
     'contatti.titolo'      => 'Contact and custom development',
     'contatti.descrizione' => 'Write in about a bug report, a question on the apps, or to '

@@ -845,3 +845,71 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
 /* La riga di servizio sotto il modulo, su fondo chiaro. */
 .meta--scuro { color: var(--ink-faint) !important; }
+
+/* ─── Immagini della pagina di un'app ────────────────────────────────────── */
+
+/*
+  L'hero con l'immagine di testata a destra. Sotto i 860px la testata va sotto il testo: a
+  colonne affiancate su un telefono sarebbe un francobollo.
+*/
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(2rem, 5vw, 3.5rem);
+  align-items: center;
+}
+.hero__img {
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+@media (max-width: 860px) {
+  .hero__grid { grid-template-columns: 1fr; }
+}
+
+/*
+  Gli screenshot scorrono in orizzontale con lo scatto (scroll-snap): sei telefoni in fila non
+  stanno in nessuna finestra, e rimpicciolirli fino a farceli stare li renderebbe illeggibili.
+*/
+.shots {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 1rem;
+  overscroll-behavior-x: contain;
+}
+.shot {
+  flex: 0 0 clamp(170px, 42vw, 230px);
+  margin: 0;
+  scroll-snap-align: start;
+}
+.shot img {
+  width: 100%;
+  height: auto;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+}
+.shot figcaption { margin-top: 0.6rem; font-size: 0.9rem; color: var(--ink-soft); }
+
+/* Le promozionali: una riga per forma, cosi' ogni riga ha immagini della stessa altezza. */
+.promo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.promo + .promo { margin-top: 1rem; }
+.promo img { width: 100%; height: auto; border-radius: 16px; display: block; }
+/*
+  Sul telefono ogni riga diventa una striscia che scorre, come gli screenshot: a due colonne la
+  terza immagine restava orfana, a una colonna sola nove immagini erano un muro da scorrere.
+*/
+@media (max-width: 780px) {
+  .promo {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.5rem;
+  }
+  .promo img { flex: 0 0 78%; width: 78%; scroll-snap-align: start; }
+  .promo--larghe img { flex-basis: 88%; width: 88%; }
+}
