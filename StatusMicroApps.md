@@ -93,8 +93,20 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 | Link App Store | https://apps.apple.com/app/id6818986320 |
 | Link Play | https://play.google.com/store/apps/details?id=com.smp.trashcan |
 
-> ☠ **Bug aperto (2026-10-10):** il widget non si aggiorna da solo a mezzanotte, solo dopo aver
-> aperto l'app. Priorita' 1 per il 2026-10-11; servira' una build nuova su entrambi gli store.
+> **Widget che non cambiava giorno a mezzanotte (segnalato il 2026-10-10): corretto nella 1.0.1 (12).**
+> Causa: su Android 14+ senza permesso di allarmi esatti l'allarme delle 00:05 era inesatto e arrivava
+> verso l'01:05. Ora: preavviso alle 23:00:30 che arriva alle 00:00:30, ridisegno ogni 30 minuti come
+> rete, cambi d'ora e di fuso gestiti; iOS ricarica la timeline a ogni mezzanotte. Provato
+> sull'emulatore in Doze profondo con l'app chiusa (cambio alle 00:00:29).
+>
+> - [x] **App Store:** versione **1.0.1** creata via API con la build **12** collegata e le «Novita'»
+>   it/en-GB (2026-10-10); profili «MicroApps AppStore» di TrashCan creati (prima firmava col portachiavi
+>   di sistema, che da ssh e' chiuso: `errSecInternalComponent`). ☠ La 1.0.0 pubblicata non accetta
+>   build nuove (90186): ogni correzione dopo l'uscita richiede una versione nuova.
+> - [ ] **Proprietario:** inviare la 1.0.1 in revisione su App Store.
+> - [ ] **Proprietario:** caricare `apps/trashcan/store/trashcan-1.0.1-12.aab` in produzione su Play,
+>   con la nota «Il widget ora cambia giorno da solo a mezzanotte».
+> - [ ] Prova di una notte su un telefono Android vero e su iPad.
 
 ### Google Play — 🟢 pubblicata
 
