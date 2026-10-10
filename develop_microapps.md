@@ -204,13 +204,14 @@ dello store come scritto qui (il trattino e' un trattino semplice, «TLDR» senz
 | F10 | Boomerang | Boomerang | Boomerang |
 | F11 | Pin Drop | Pin Drop - Dov'è? | Pin Drop - Where is it? |
 | F13 | Fair Share | Fair Share - Split Payments | Fair Share - Split Payments |
-| F14 | Geo Note | Geo Note - Note Geografiche | Geo Note - Note Geografiche |
-| F16 | TLDR | TLDR - Riassumilo | TLDR - Riassumilo |
-| F18 | Read Aloud | Read Aloud - Leggimelo | Read Aloud - Leggimelo |
+| F14 | Geo Note | Geo Note - Note Geografiche | Geo Note |
+| F16 | TLDR | TLDR - Riassumilo | TLDR |
+| F18 | Read Aloud | Read Aloud - Leggimelo | Read Aloud |
 | F19 | Link Peek | Link Peek | Link Peek |
 
-La disponibilita' dei nomi si verifica solo creando l'app negli store (409 se presi): in quel caso si
-chiede al proprietario. **F15 «Quanti sono?» e' annullata.** **La prossima e' F13 Fair Share**
+⚑ **In inglese niente traduzione italiana nel titolo** (proprietario, 2026-10-11): il nome da solo; se e'
+gia' preso si aggiunge **una parola descrittiva in inglese** (es. «TLDR Summarizer»). La disponibilita' si
+verifica solo creando l'app negli store (409 se preso). **F15 «Quanti sono?» e' annullata.** **La prossima e' F13 Fair Share**
 (scelta del 2026-10-11, si comincia il 2026-10-12 da F13.0).
 
 ⚑ **Il numero di fase non e' l'ordine di sviluppo.** Le fasi seguono l'ordine del file del
