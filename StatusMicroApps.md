@@ -32,7 +32,7 @@ vetrina da aggiungere.
 |---|---|---|---|
 | Te l'ho prestato | F10 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove l'ho lasciato? | F11 | ⚪ non iniziata | ⚪ non iniziata |
-| **Spending Review** (ex Quanto sto spendendo?) | F12 | ⚪ codice Android completo (2026-10-10); app non creata su Play Console, bloccata dall'account (D-U-N-S) | ⚪ codice iOS completo, gira sul simulatore; servono App ID e app su App Store Connect dal proprietario |
+| **Spending Review** (ex Quanto sto spendendo?) | F12 | ⚪ codice Android completo (2026-10-10); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟠 **scheda completa via API**, build 1.0.0 (1) su TestFlight (invito mandato); invio in revisione dal proprietario dopo la prova su iPad |
 | Quanto dividiamo? | F13 | ⚪ non iniziata | ⚪ non iniziata |
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
@@ -379,17 +379,23 @@ pubblicata nel sito il 2026-10-10.
 - [ ] Data safety: nessun dato raccolto salvo l'acquisto del Pro (Play Billing); fotocamera dichiarata
 - [ ] Prova su un Android vero di fascia media (tempi dell'OCR, cartellini veri)
 
-### App Store — ⚪ non ancora creata
+### App Store — 🟠 scheda completa, pronta per l'invio
 
 | Data | Evento |
 |---|---|
 | 2026-10-10 | Codice iOS completo; build e avvio sul simulatore iPhone; esclusione di database e dati dal backup iCloud verificata |
+| 2026-10-10 | App `6821392694` e App ID `com.smp.spendingreview` creati dal proprietario; versione rinominata via API da «1.0» a **1.0.0** (la build e' 1.0.0); profilo «MicroApps AppStore com.smp.spendingreview» via API |
+| 2026-10-10 | Build **1.0.0 (1)** caricata (VALID), gruppo TestFlight «Sviluppatore», **invito mandato** |
+| 2026-10-10 | **Scheda completa via API** (`apps/spending_review/tool/scheda_app_store.py`), verificata: nome «Spending Review» in it **ed** en-GB (libero), sottotitoli «Conto della spesa e budget» / «Grocery total and budget», categorie Finanza + Utilita', gratuita, 175 paesi, eta' 4+ via API, testi it/en-GB, 6 screenshot 6,9" e 6,5" per lingua, video per lingua, contatti e note di revisione, build 1 collegata; PREPARE_FOR_SUBMISSION |
+| 2026-10-10 | Prodotto `spendingreview_pro_lifetime` (id 6821405107) 2,99 € base Italia, testi e screenshot di revisione → READY_TO_SUBMIT |
+| 2026-10-10 | Intestazione e risultati della ricerca it/en sulla Scrivania del Mac (`~/Desktop/Spending Review/`) |
 
 **Prossimi passi App Store:**
-- [ ] **Proprietario:** App ID `com.smp.spendingreview` nel portale (niente App Group) e app «Spending Review» su App Store Connect
-- [ ] Profilo via API, build su TestFlight, invito, scheda completa via API (testi, screenshot, video, Pro, revisione)
-- [ ] Sull'iPad: misura di Vision sul banco; prova di cartellini e scontrini veri
-- [ ] Revisione (proprietario)
+- [x] **Proprietario:** App ID e app su App Store Connect (2026-10-10)
+- [x] Profilo via API, build su TestFlight, invito, scheda completa via API (2026-10-10)
+- [ ] **Proprietario, a mano:** etichetta privacy «Dati non raccolti»; intestazione e ricerca se richieste; spunta dell'acquisto in-app nella versione
+- [ ] Sull'iPad: prova di cartellini e scontrini veri (e misura di Vision sul banco)
+- [ ] Revisione (proprietario, dopo la prova su iPad)
 
 ---
 

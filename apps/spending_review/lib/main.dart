@@ -6,8 +6,11 @@ import 'package:micro_core/micro_core.dart';
 import 'app/app.dart';
 import 'app/app_config.dart';
 import 'app/licenze.dart';
+import 'app/locale_resolution.dart';
 import 'app/providers.dart';
 import 'app/routes.dart';
+import 'data/database.dart';
+import 'dev/demo_data.dart';
 
 /// L'avvio di Spending Review: il minimo indispensabile (configurazione, cartelle, preferenze).
 ///
@@ -39,6 +42,16 @@ Future<void> main() async {
 
   final settings = await SettingsStore.create(namespace: config.appId);
   await _recordLaunch(settings);
+
+  // Solo in sviluppo, con --dart-define=SR_DEMO=true: riempie un database vuoto con una spesa in
+  // corso e qualche mese di storico, prima di runApp (stesso schema di QR Me). ⚑ Il database si
+  // apre e si chiude qui: quello dei provider, pigro, lo riapre dopo.
+  if (demoEnabled) {
+    final db = SpendingDatabase.open();
+    final lingua = resolveAppLocale(WidgetsBinding.instance.platformDispatcher.locales, kSupportedLocales);
+    await seedDemoData(db, settings, english: lingua.languageCode != 'it');
+    await db.close();
+  }
 
   runApp(
     ProviderScope(

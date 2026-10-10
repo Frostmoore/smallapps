@@ -8,7 +8,8 @@
 > storico, statistiche con il budget del mese (Pro). OCR **solo sul telefono** (`packages/micro_ocr`).
 > **Obiettivo**: capire il codice, trovare cio' che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-10-10 · **Fase**: F12.0–F12.7 fatte (F12.7 parziale: restano iPad/TestFlight,
+> **Aggiornato al**: 2026-10-10 (+ **lo store**, §2bis: scheda App Store, dati d'esempio `SR_DEMO`,
+> screenshot, grafiche, video, TestFlight) · **Fase**: F12.0–F12.7 fatte (F12.7 parziale: restano iPad/TestFlight,
 > foto vere del proprietario, Android vero), **F12.8** (questo atlante) · **Ultimo commit al momento
 > della scrittura**: `b6a5c1c` (F12.7) + le correzioni di F12.8 non ancora committate ·
 > **versionName+Code**: `1.0.0+1` · **Test**: **341 esiti, 339 verdi + 2 saltati** (i 336 di F12.7 + 3
@@ -33,7 +34,11 @@
 > (96 nomi al 2026-10-10) e' stato **controllato a mano** in F12.8 — solo tipi di Flutter, Drift, dei
 > plugin, di `micro_core`/`micro_ocr`, costanti di piattaforma (permessi, chiavi di Info.plist),
 > dart-define, i doppi dei test (`test/widget/sr_test_harness.dart`) e le costanti dello script
-> `tool/esporta_fixture_ocr.py`; **nessun nome dell'app superato**.
+> `tool/esporta_fixture_ocr.py`; **nessun nome dell'app superato**. Con lo store (§2bis) sono **125**: i 29
+> in piu' sono costanti di `tool/scheda_app_store.py` e `tool/genera_grafiche_store.py` (`APP`, `NOMI`,
+> `RIPIEGHI`, `SCHEDE`…), stati e categorie di Apple (`VALID`, `READY_TO_SUBMIT`, `FINANCE`, `UTILITIES`),
+> i dart-define `SR_DEMO`/`LINGUA`, le righe `REGISTRA`/`FINE` dei giri e `WidgetRef`/`ConsumerStatefulElement` di
+> Riverpod: controllati a mano il 2026-10-10.
 >
 > **Come sono fatte le tabelle delle classi**: la colonna **Firma** e' estratta **a macchina** dal
 > sorgente (AST dell'analyzer di Dart, F12.8) e non riscritta a mano; i campi d'istanza sono raccolti
@@ -134,6 +139,12 @@ contraddicono il resto del piano, vincono queste.**
 | Manifest, permessi, guardia di privacy | `android/app/src/main/AndroidManifest.xml`, `android/app/build.gradle.kts` | §2.2 |
 | Esclusione da iCloud, canale iOS | `ios/Runner/AppDelegate.swift` | §2.2 |
 | Icona e splash | `tool/genera_icone.py`, `flutter_launcher_icons.yaml`, `flutter_native_splash.yaml`, `assets/icon/` | §2.1 |
+| I dati di esempio per screenshot e video (`SR_DEMO`) | `lib/dev/demo_data.dart` (seminati da `lib/main.dart`) | §2bis |
+| Le letture finte di cartellino, bilancia e scontrino degli scatti | `integration_test/letture_finte.dart` | §2bis |
+| Screenshot e video per gli store (giri sul simulatore) | `integration_test/screenshots_test.dart`, `integration_test/anteprima_test.dart`, `tool/anteprima_app_store.sh`, `tool/converti_anteprima.ps1` | §2bis |
+| Grafiche delle schede (App Store, Play, intestazione e ricerca Apple) | `tool/genera_grafiche_store.py` → `store/grafiche/` | §2bis |
+| Testi della scheda App Store, conteggi, note di revisione | `store/scheda-app-store.md` | §2bis |
+| Caricamento su App Store Connect (scheda, IAP, build) | `tool/scheda_app_store.py` (gira sul Mac) | §2bis |
 
 ## 2. Albero dei file (solo il codice scritto da noi)
 
@@ -154,9 +165,19 @@ apps/spending_review/
 │  ├─ testi.py                  tabella it/en delle chiavi di base → ARB (insieme a testi_schermate.py)
 │  ├─ testi_schermate.py        le chiavi delle schermate (283 chiavi in tutto negli ARB)
 │  ├─ genera_icone.py           icona e splash da docs/specs/icona-spending-review.png
-│  └─ esporta_fixture_ocr.py    fixture del banco: RapidOCR 3.10 (foto intere), --ritagli (mirino), --log (Vision)
+│  ├─ esporta_fixture_ocr.py    fixture del banco: RapidOCR 3.10 (foto intere), --ritagli (mirino), --log (Vision)
+│  ├─ genera_grafiche_store.py  schede App Store 6,9"/6,5", Play, testate, intestazione e ricerca Apple (§2bis)
+│  ├─ scheda_app_store.py       caricamento su App Store Connect, sul Mac (§2bis)
+│  ├─ anteprima_app_store.sh    registra il video grezzo sul simulatore (Mac)
+│  └─ converti_anteprima.ps1    video → 886x1920 30 fps H.264 + audio muto (PC, ffmpeg)
+├─ store/
+│  ├─ scheda-app-store.md       testi it/en-GB contati, file, IAP, TestFlight
+│  ├─ screenshots/ios/{it,en}/  gli scatti veri 1320x2868 (+ paywall-revisione.png)
+│  ├─ grafiche/                 appstore/, appstore-6.5/, play/, apple/, testata-1024x500-{it,en}.png
+│  └─ video/                    anteprima_sr_{it,en}.mov (grezzi) e anteprima-886x1920-{it,en}.mp4
 ├─ lib/
-│  ├─ main.dart                 avvio minimo (§8.3)
+│  ├─ main.dart                 avvio minimo (§8.3); con SR_DEMO semina i dati d'esempio
+│  ├─ dev/demo_data.dart        dati d'esempio per screenshot e video (SR_DEMO, mai in release, §2bis)
 │  ├─ app/
 │  │  ├─ app.dart               buildRouter, SpendingReviewApp (OCR preparato 3 s dopo il primo frame), _NotFoundPage
 │  │  ├─ app_config.dart        licenseAppId, buildSrConfig
@@ -197,7 +218,11 @@ apps/spending_review/
 │  │           chiusura_page, storico_page, pro_gate, dev_route, palette_contrast, paywall_config, texts_glyphs
 │  └─ fixtures/ocr/  soglie.json, ritagli_mirino.json, LICENZE.md, ppocrv5/ (33), ppocrv5-mirino/ (20),
 │                    vision-sim/ (33), vision-sim-mirino/ (20)
-├─ integration_test/flussi_test.dart   OCR vero + database vero + foto dei campioni (SR_FOTO)
+├─ integration_test/
+│  ├─ flussi_test.dart          OCR vero + database vero + foto dei campioni (SR_FOTO)
+│  ├─ screenshots_test.dart     gli scatti per gli store (SCATTO:<nome>, §2bis)
+│  ├─ anteprima_test.dart       il giro del video (REGISTRA … FINE, §2bis)
+│  └─ letture_finte.dart        righe OCR finte ai parser veri: cartellino, bilancia, scontrino
 ├─ android/app/
 │  ├─ build.gradle.kts          com.smp.spendingreview, minSdk 24, noCompress onnx, R8, desugaring, apply(from = privacy_ocr.gradle)
 │  ├─ src/main/AndroidManifest.xml   BILLING, CAMERA; via RECORD_AUDIO, WRITE/READ_EXTERNAL_STORAGE, POST_NOTIFICATIONS; allowBackup=false; deep link spento
@@ -232,6 +257,121 @@ apps/spending_review/
 | `MainActivity.kt` | `MethodChannel("com.smp.spendingreview/impostazioni")`, metodo `apri` → `Settings.ACTION_APPLICATION_DETAILS_SETTINGS` con `package:<id>`; risponde sempre `true`/`false` | un Intent non vale una dipendenza (`permission_handler`, `app_settings`) |
 | `ios/Runner/AppDelegate.swift` | `excludeUserDataFromBackup()` PRIMA di avviare Flutter: `isExcludedFromBackup` su `Documents/`, `Documents/spending_review/`, `spending_review.sqlite{,-wal,-shm,-journal}` (errore → `NSLog`, mai un blocco); canale `com.smp.spendingreview/impostazioni` → `UIApplication.openSettingsURLString` (registrato in `didInitializeImplicitFlutterEngine`) | la cronologia della spesa non va su iCloud senza che l'utente lo scelga; la cartella intera perche' SQLite crea file nuovi |
 | `ios/Runner/Info.plist` | `CFBundleDisplayName` «Spending Review», `FlutterDeepLinkingEnabled` false, `ITSAppUsesNonExemptEncryption` false, `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` (varianti `InfoPlist.strings` it/en); ⚑ niente `NSMicrophoneUsageDescription` (fotocamera con `enableAudio: false`) | |
+
+## 2bis. Lo store (2026-10-10)
+
+App Store: app **`6821392694`** («Spending Review», bundle `com.smp.spendingreview`, creata dal
+proprietario), versione **1.0.0**, build **1.0.0 (1)** (`470a0092-7449-4e6d-a212-3c121b0b85fe`), prodotto
+**`spendingreview_pro_lifetime`** (id `6821405107`, `READY_TO_SUBMIT`) non consumabile a **2,99 €** (base Italia, tutti i paesi). Nome
+«Spending Review» **in tutte e due le lingue** (in en-GB Apple l'ha accettato: il ripiego «– Cart Total» non
+e' servito). Categorie **Finanza + Utilita'** (perche': `store/scheda-app-store.md` §2). Testi, conteggi,
+file e note di revisione: `store/scheda-app-store.md`. TestFlight: gruppo interno **«Sviluppatore»**
+(`253f7667-2b46-4b77-8cb9-f86b16000ae5`, tutte le build) con il proprietario, invito mandato.
+**Non inviata in revisione**: la invia il proprietario dopo la prova su iPad.
+
+### `lib/dev/demo_data.dart`
+
+| Simbolo | Firma | Effetto |
+|---|---|---|
+| `demoRequested` | `const bool demoRequested = bool.fromEnvironment('SR_DEMO')` | chiesto con `--dart-define=SR_DEMO=true` |
+| `demoEnabled` | `bool get demoEnabled` | `demoRequested && !kReleaseMode`: ☠ mai in release |
+| `kDemoBudgetCents` | `const int kDemoBudgetCents = 4000` | budget della spesa in corso e budget abituale: 40 € |
+| `kDemoBudgetMeseCents` | `const int kDemoBudgetMeseCents = 40000` | tetto del mese (Pro, D3): 400 € |
+| `DemoRiga` | `typedef DemoRiga = ({String it, String en, Quantita q, int cents, Offerta? offerta, int? stampato, OrigineRiga o})` | una riga d'esempio in due lingue |
+| `_pz` | `DemoRiga _pz(String it, String en, int cents, {int n = 1, Offerta? offerta, OrigineRiga o = OrigineRiga.tastierino})` | una riga a pezzi |
+| `kDemoInCorso` | `final List<DemoRiga> kDemoInCorso` | la spesa in corso: 9 righe (13 articoli) da tastierino, cartellino (3x2 sulla pasta, caffe' 3,49 barrato 4,29) e bilancia (pomodori 0,486 kg → 1,90; banane 1,120 kg → 2,00); totale **26,61** |
+| `_catalogo` | `const List<(String, String, int)> _catalogo` | 20 prodotti (nome it, nome en, centesimi) da cui si compone lo storico |
+| `_negozi` | `const List<(String, String)> _negozi` | tre negozi **inventati** (Supermercato Sole / Sunny Market, Discount Rondine / Swallow Discount, Mercato di quartiere / Corner Market): niente insegne vere nelle schede |
+| `seedDemoData` | `Future<void> seedDemoData(SpendingDatabase db, SettingsStore settings, {bool english = false}) async` | solo con `demoEnabled` e tabella `spese` vuota: ~45 spese chiuse negli ultimi ~158 giorni (una ogni 3-4, a rotazione nei tre negozi, piccole 6-9 righe e grandi 15-20, meta' con budget e qualche sforamento; un `SpesaRepository(db, ora: …)` con la data della spesa), poi la spesa in corso iniziata 25 minuti fa con `kDemoInCorso`; scrive `SrSettingKeys.budgetPredefinito` e `SrSettingKeys.budgetMensile` |
+
+⚑ **Numeri fissi**: lo storico usa un generatore lineare con seme costante (`20261010`), cosi' gli scatti
+rifatti mostrano gli stessi totali. ⚑ **Il Pro non si attiva nella demo**: lo comprano i due giri con il
+gateway finto (in debug c'e' gia'), cosi' lo stesso giro fotografa il paywall per la revisione di Apple
+(come QR Me). ⚑ `main.dart` apre e chiude un `SpendingDatabase` suo prima di `runApp` (quello dei provider,
+pigro, lo riapre dopo); la lingua viene da `resolveAppLocale` sulle lingue del telefono.
+
+### Le letture finte (`integration_test/letture_finte.dart`)
+
+| Nome | Firma | Effetto |
+|---|---|---|
+| `_r` | `RigaOcr _r(String testo, double x, double y, double w, double h)` | una riga OCR con riquadro normalizzato, confidenza 0,95 |
+| `cartellinoFinto` | `RisultatoCartellino cartellinoFinto({required bool english})` | `LettoCartellino` dal `CartellinoParser` vero: «FROLLINI AL CACAO 350 G» / «COCOA SHORTBREAD 350 G», 2,29 con 2,99 barrato, bollino −23%, 6,54 €/kg (disposizione del campione c33) |
+| `bilanciaFinta` | `RisultatoCartellino bilanciaFinta({required bool english})` | `LettaBilancia` dal `BilanciaParser` vero: provola / smoked cheese 0,612 kg × 12,90 = 7,89; ☠ `StateError` se il parser non la legge |
+| `scontrinoFinto` | `ScontrinoLetto scontrinoFinto({required bool english})` | lo scontrino di `kDemoInCorso` dallo `ScontrinoParser` vero: stesse righe ma caffe' a 4,29 e il sacchetto 0,15; totale 27,56 → confronto **+0,95** con due righe sospette (`PrezzoDiverso`, `SoloSulloScontrino`) e 8 che tornano |
+
+⚑ **Perche' finte**: il simulatore non ha una fotocamera e le foto vere dei campioni non stanno nel repo.
+**Perche' passate ai parser veri** e non scritte gia' interpretate: il foglio fotografato e' esattamente
+quello che l'app mostra leggendo un cartellino fatto cosi'.
+
+### I giri sul simulatore (`integration_test/`)
+
+| File | Cosa fa |
+|---|---|
+| `screenshots_test.dart` | cancella preferenze, `spending_review.sqlite` (+ `-wal`, `-shm`) ed `entitlement.json`; `app.main()` (semina `SR_DEMO`); tocca `spesa_scontrino` → paywall → `SCATTO:paywall-revisione` → compra (finto) → `go('/')`; batte `2 × 1 4 9` → `spesa`; `gestisciRisultatoCartellino` con `cartellinoFinto` → `cartellino` (foglio chiuso con `pop`); con `bilanciaFinta` → `bilancia`; `push(Routes.confronto, extra: scontrinoFinto)` → `scontrino`; `/statistiche` → `statistiche`; `/storico` → `storico`. Costante `lingua` (`LINGUA`) |
+| `anteprima_test.dart` | stesso azzeramento, compra il Pro **prima** di `REGISTRA`; giro: spesa → confronto dello scontrino → cartellino **aggiunto** → bilancia **aggiunta** → `2 × 1,49 +` → statistiche → storico → spesa; `FINE`. ~27 s (Apple: 15–30). ⚑ Lo scontrino PRIMA delle aggiunte: dopo, il confronto mostrerebbe le righe nuove come «non sullo scontrino» |
+
+☠ **Niente `pumpAndSettle` dopo l'acquisto**: il Pro apre il mirino dello scontrino (`/scontrino`), e senza
+fotocamera la sua rotellina non si ferma mai; i due giri aspettano a tempo (`pausa`, frame da 16-50 ms).
+⚑ Il `WidgetRef` per `gestisciRisultatoCartellino` e' l'elemento di `SpesaPage`
+(`tester.element(find.byType(SpesaPage)) as WidgetRef`: `ConsumerStatefulElement` implementa `WidgetRef`).
+
+### Comandi per rifare tutto
+
+```
+# 1. screenshot (Mac, simulatore iPhone 18 Pro Max 6,9"); lo script aggiunge SR_DEMO=true
+ssh mac 'bash ~/microapps/tool/screenshots_ios.sh 2E0C5359-ACED-45E8-8DD3-0ECB0C0BAF85 it ~/sr_shots/it spending_review'
+#    (idem en) poi copia dei PNG in store/screenshots/ios/<lingua>/ (tar con COPYFILE_DISABLE=1)
+# 2. grafiche (PC, da apps/spending_review)
+python tool/genera_grafiche_store.py
+# 3. video (Mac, poi PC)
+ssh mac 'bash ~/microapps/apps/spending_review/tool/anteprima_app_store.sh 2E0C5359-ACED-45E8-8DD3-0ECB0C0BAF85 it'
+#    copia di ~/anteprima_sr_<lingua>.mov in store/video/, poi:
+pwsh tool/converti_anteprima.ps1
+# 4. caricamento (Mac): testi, categorie, eta', prezzo, disponibilita', screenshot 6,5" e 6,9", video,
+#    revisione, prodotto Pro, build; alla fine stampa la verifica campo per campo (rete Mac-Apple lenta)
+ssh mac 'cd ~/microapps && python3 -u apps/spending_review/tool/scheda_app_store.py'
+```
+
+`tool/scheda_app_store.py` (copia di QR Me del 2026-10-09): costanti `APP` (`6821392694`), `VERSIONE`
+(`1.0.0`), `BUILD` (`'1'`), `LINGUE`, `NOMI`, **`RIPIEGHI`** (nuovo: «Spending Review – Conto spesa» /
+«– Cart Total», scritto solo se il nome risponde DUPLICATE), `CATEGORIE` (`FINANCE`, `UTILITIES`), `IAP_ID`,
+**`IAP_NOME`**, `IAP_PREZZO` (`'2.99'`), `IAP_TESTI`, `IAP_NOTA`, `VERSIONE_TRASHCAN` (da li' copia nome e
+telefono del contatto di revisione); funzioni `md5(file)`, `gia_uguale(remoti, locali)` (nome **e**
+`sourceFileChecksum`, nell'ordine), `svuota(tipo_risorsa, remoti)`, `api(metodo, percorso, corpo=None,
+tentativi=4)`, `controlla(r, cosa)`, `testi()`, `carica_file(...)`, `tutti_i_territori()`, `prodotto_pro()`
+(in piu' rispetto a QR Me: **sfoglia le pagine** dei punti di prezzo finche' trova `IAP_PREZZO`), `main()`,
+`eta(info_id)` (in piu' rispetto a QR Me: si corregge da sola sui campi che Apple rifiuta per tipo), `collega_build(versione_id)` (PATCH della versione, solo se la build e' `VALID`),
+`verifica(versione_id)` (stati, poi campo per campo con gli elenchi `VUOTI`, `DOPPIONI`, «DA FARE A MANO»).
+
+`tool/genera_grafiche_store.py` (copia di QR Me): colori di `SrPalette.scuro` (`FONDO #161B22`, `NEON` =
+l'accento `#4ADE80`), `SCHEDE` (6 per lingua: `spesa`, `cartellino`, `bilancia`, `scontrino`, `statistiche`,
+`storico`), `TESTATA`, `FRASI_APPLE`; testata Play con titolo a 56 px e icona 240 (a 72 «Spending Review»
+finiva sotto l'icona); prima di scrivere **cancella i PNG** di ogni cartella di uscita.
+
+### Trappole dello store (gia' pagate qui o nelle altre app)
+
+- ☠ **Python su Windows scrive CRLF** con `write_text`/`open('w')` in modo testo: `screenshots_ios.sh`
+  riscritto cosi' sul Mac fallisce con `set: pipefail: invalid option name`. Scrivere con `newline=''` o in
+  binario, e controllare con `file`.
+- ☠ **`tar` dal Mac porta i file `._*`** (attributi estesi di macOS) e copiarli nelle cartelle degli scatti
+  li manderebbe ad Apple: `COPYFILE_DISABLE=1` sul Mac e `find … -name '._*' -delete` sul PC.
+- ☠ **Nome inglese preso → ripiego** (Full Freezer, Film Tracker, QR Me): qui non e' successo, ma lo
+  script lo gestisce da solo (`RIPIEGHI`).
+- ☠ **Con il Pro `READY_TO_SUBMIT` descrizione e screenshot di revisione dell'IAP non si cambiano via API**
+  (409 UNMODIFIABLE / MEDIA_ASSET_DELETE_NOT_ALLOWED, QR Me 2026-10-09): si cambiano a mano; lo script li
+  elenca in «DA FARE A MANO».
+- ☠ `GET /v1/profiles?filter[name]=` confronta per **prefisso**: filtrare a mano sul nome esatto prima di
+  un DELETE (QR Me, F17.10).
+- ☠ **TestFlight**: aggiungere al gruppo un tester esistente da' 409; si crea il tester con email e nome
+  presi da un `betaTester` esistente del proprietario e la relazione al gruppo (`POST /v1/betaTesters`, un
+  500 e' temporaneo), poi `POST /v1/betaTesterInvitations`.
+- ☠ La **classificazione per eta'** via API (`eta()`): `gracRatingClassificationNumber` (Corea) fuori,
+  altrimenti 409 KOREA_AGE_RATING_OVERRIDE_INVALID. ☠ **Campi nuovi null** (2026-10-10: `socialMedia`,
+  `socialMediaAgeRestricted`): dal nome non si sa il tipo; scritti come `'NONE'` davano 409
+  ENTITY_ERROR.ATTRIBUTE.TYPE «Expected a BOOLEAN». Ora `eta()` legge gli errori di tipo e riscrive quei campi
+  col tipo giusto (fino a 3 tentativi). Esito verificato: **4+** (`appStoreAgeRating FOUR_PLUS`).
+- ☠ Il primo acquisto in-app si invia **con la versione** (FIRST_NON_CONSUMABLE_MUST_BE_SUBMITTED_ON_VERSION):
+  la spunta nella pagina della versione e' a mano.
 
 ## 3. Il database (Drift, schema 1)
 
@@ -1667,7 +1807,7 @@ dira' la prima lettura.
 
 | Nome | Firma | Effetto |
 |---|---|---|
-| `main` | `Future<void> main() async` | Avvio: `WidgetsFlutterBinding.ensureInitialized`; `buildSrConfig()` + `assertUsableInRelease()` (billing finto vietato in release); ☠ `StateError` se `kReleaseMode && kSrDev`; `AppPaths.forApp(appId)` + `ensureAll()`; `MicroLog.init` su `logs/spending_review.log`; `FlutterError.onError` → `MicroLog.e` + `presentError`; `registraLicenze()`; `SettingsStore.create(namespace: 'spending_review')`; `_recordLaunch`; `runApp(ProviderScope(overrides: [appConfigProvider, appPathsProvider, settingsProvider], child: SpendingReviewApp()))`. ⚑ Database e motore OCR NON qui (pigri, nei provider): niente schermata bianca all'avvio |
+| `main` | `Future<void> main() async` | Avvio: `WidgetsFlutterBinding.ensureInitialized`; `buildSrConfig()` + `assertUsableInRelease()` (billing finto vietato in release); ☠ `StateError` se `kReleaseMode && kSrDev`; `AppPaths.forApp(appId)` + `ensureAll()`; `MicroLog.init` su `logs/spending_review.log`; `FlutterError.onError` → `MicroLog.e` + `presentError`; `registraLicenze()`; `SettingsStore.create(namespace: 'spending_review')`; `_recordLaunch`; con `demoEnabled` (`SR_DEMO`, mai in release) apre un `SpendingDatabase`, chiama `seedDemoData` nella lingua di `resolveAppLocale` e lo chiude (§2bis); `runApp(ProviderScope(overrides: [appConfigProvider, appPathsProvider, settingsProvider], child: SpendingReviewApp()))`. ⚑ Database e motore OCR NON qui (pigri, nei provider): niente schermata bianca all'avvio |
 | `_recordLaunch` | `Future<void> _recordLaunch(SettingsStore settings) async` | `SettingKeys.launchCount` +1; scrive `SettingKeys.firstLaunchAt` (UTC) al primo avvio. Servono a decidere quando chiedere una recensione |
 
 ⚑ **Database e motore OCR NON si inizializzano in `main`**: farlo prima del primo frame produce una
@@ -2831,6 +2971,8 @@ Prezzo: **2,99 €** (App Store, base Italia); Play **2,45 EUR** senza IVA. In s
 | `BILLING` | (store) | `fake` → `FakePurchaseGateway` a 2,99 €; ☠ vietato in release (`assertUsableInRelease`) |
 | `MA_LICENSE_URL`, `MA_APP_SECRET` | assenti | server licenze acceso solo se entrambi (come le altre app su Android) |
 | `SR_DEV` | `false` | `true` → `/dev/ocr` e la voce in Impostazioni anche fuori da debug; ☠ in release `main` lancia `StateError` |
+| `SR_DEMO` | `false` | `true` → `seedDemoData` in `main` (database vuoto: storico, spesa in corso, budget); ☠ ignorato in release (`demoEnabled`) |
+| `LINGUA` (dart-define dei giri dello store) | `it` | lingua di `screenshots_test.dart` e `anteprima_test.dart` |
 | `SR_FOTO` (dart-define del test d'integrazione) | assente | cartella delle foto dei campioni fuori dal repo; senza, `flussi_test.dart` salta |
 | `SR_CAMPIONI` (variabile d'ambiente del banco) | assente | cartella con `ppocrv5/`, `ppocrv5-mirino/` … delle 27 fixture private (es. `E:/coding/XAMPP/htdocs/microapps-campioni/f12/fixture`) |
 
@@ -2904,6 +3046,8 @@ pwsh ../../packages/micro_ocr/tool/verifica_privacy_android.ps1 -Apk build/app/o
 pwsh ../../tool/fl.ps1 pub run build_runner build              # dopo una modifica a tables.dart/database.dart
 python tool/testi.py                                           # dopo una modifica ai testi
 pwsh ../../tool/verify_atlas.ps1 -Project apps/spending_review # questo atlante
+pwsh ../../tool/fl.ps1 run -d <dispositivo> --dart-define=SR_DEMO=true   # con i dati d'esempio (solo debug)
+python tool/genera_grafiche_store.py                          # grafiche degli store (§2bis, con gli altri comandi dello store)
 ```
 
 ## 13. Catalogo dei test
@@ -3015,13 +3159,15 @@ temporanea), ritaglio finto, selettore che restituisce `foto`, `ImpostazioniFint
 misure al 130%), `telefono(tester, {larghezza, altezza, scala})`, `zittisciPiattaforma()`,
 `spesaChiusa(...)`, `rigaTastierino(cents, {pezzi, nome, id})`.
 
-### 13.5 Sul dispositivo (`integration_test/flussi_test.dart`, 1)
+### 13.5 Sul dispositivo (`integration_test/`: `flussi_test.dart`, piu' i due giri dello store)
 
 OCR **vero** (Vision su iOS, PP-OCRv5 su Android), database vero, foto dei campioni da `SR_FOTO` (fuori
 dal repo; senza, il test **salta**): cartellino dalla galleria 3,59 → bilancia 7,71 (totale 11,30) →
 scontrino Emme Piu' 6,15 col Pro finto → confronto → chiusura → storico; le copie temporanee spariscono.
 Sostituito solo il selettore di sistema. Fra un passo e l'altro stampa `SR_PASSO|<nome>` e aspetta 3 s
-(screenshot). Tempi misurati (F12.7): simulatore iOS 0,54 / 0,96 / 0,45 s; emulatore Android 0,95 /
+(screenshot). ⚑ `screenshots_test.dart` e `anteprima_test.dart` non sono prove: producono scatti e video
+per gli store (§2bis) e dimostrano solo che il giro arriva in fondo; servono il simulatore e `SR_DEMO`.
+Tempi misurati (F12.7): simulatore iOS 0,54 / 0,96 / 0,45 s; emulatore Android 0,95 /
 0,99 / 1,14 s. ☠ Lanciarlo **installa al posto dell'app una build col test come `main`** (trappola §14.2).
 
 ## 14. Regole non negoziabili e trappole gia' disinnescate
