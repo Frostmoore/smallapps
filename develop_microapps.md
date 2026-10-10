@@ -5253,7 +5253,22 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
 - **Cosa fa esattamente**: aperto, da decidere insieme partendo dall'idea sopra.
 - **2026-10-10, risposte del proprietario:** (1) «Spending Review» **in italiano e in inglese**;
   (2) l'app **legge con la fotocamera i cartellini del prezzo e gli scontrini, con due tasti
-  diversi** (due flussi distinti, non uno «intelligente»). Proposte d'interfaccia in preparazione.
+  diversi** (due flussi distinti, non uno «intelligente»).
+- **2026-10-10, interfaccia scelta: «C · Una mano»** (https://claude.ai/artifact/Y9KH2qk6PeAYKzQBTyvdhY):
+  tema scuro (`#161B22`, superfici `#1E252E`, bordi `#262D36`, testo `#E8EDF2`/`#9AA5B1`), verde
+  `#4ADE80`, totale enorme in Space Grotesk in alto con barra del budget, lista corta degli ultimi
+  articoli, i due tasti **Cartellino** (verde) e **Scontrino** (scuro) a meta', **tastierino numerico
+  sempre visibile** in basso per il prezzo a mano (con ×, −, ⌫, +). Seconda schermata: scontrino
+  contro conto, differenza evidenziata in ambra, righe sospette. Scartate «A · Scontrino» e «B · Cassa».
+- **Il cartellino va INTERPRETATO** (proprietario), non solo letto: dal testo del cartellino ricavare
+  **nome del prodotto** e **prezzo da pagare**, riconoscendo almeno: prezzo in offerta vs prezzo
+  barrato/«anziche'», prezzo **al kg/al litro** (prezzo unitario) vs prezzo della confezione, offerte
+  tipo **3x2 / 2x1 / -30%**, centesimi scritti piccoli. Se c'e' ambiguita' l'app propone e l'utente
+  conferma con un tocco. Da definire il 2026-10-11 nella specsheet: quali formati (cartellini dei
+  supermercati italiani), cosa fare con i prodotti a peso.
+- ☠ **OCR solo sul telefono** (regola «dati solo sul telefono»): su iOS **Vision** (locale); su
+  Android **niente ML Kit** → valutare un OCR che giri tutto nell'app (es. Tesseract via FFI) e la
+  sua precisione sui cartellini; e' il punto tecnico piu' rischioso di F12.
 
 ### F13 — Quanto dividiamo?
 
