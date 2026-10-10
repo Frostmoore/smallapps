@@ -355,3 +355,40 @@ if __name__ == "__main__":
 - Modelli Tesseract italiano: https://github.com/tesseract-ocr/tessdata_fast , https://github.com/tesseract-ocr/tessdata_best
 - LiteRT: https://dl.google.com/android/maven2/com/google/ai/edge/litert/ (POM `litert-api` 2.3.0 → `ai-delivery`) ; https://developers.google.com/edge/litert/android/play_services ; `tflite_flutter` usa `litert:1.4.0`: https://github.com/tensorflow/flutter-tflite
 - Pacchetti scartati: https://pub.dev/packages/pdf_ocr_ondevice , https://pub.dev/packages/thrivexai_paddle_ocr_precompiled , https://pub.dev/documentation/flutter_paddle_ocr/latest/
+
+## 7. Prima misura sui campioni veri (2026-10-11)
+
+60 campioni raccolti dal web (35 cartellini, 16 scontrini, 9 etichette della bilancia; cartella
+`E:/coding/XAMPP/htdocs/microapps-campioni/f12/`, fuori dal repo), 80 righe di verita' (una per
+cartellino quando la foto ne contiene piu' d'uno). Banco: `bench_f12.py` con `--csv` su
+`verita_espansa.csv` (script `espandi_verita.py`), PC, RapidOCR 3.10.
+
+**Richiamo stretto** (il valore compare nel testo come `x,yy`):
+
+| Tipo | Campo | PP-OCRv5 mobile latin | PP-OCRv6 small |
+|---|---|---|---|
+| bilancia | al kg | 9/9 (100%) | 9/9 |
+| bilancia | totale | 9/9 (100%) | 9/9 |
+| scontrino | totale | 16/16 (100%) | 16/16 |
+| cartellino | prezzo al kg/l | 22/27 (81%) | 22/27 |
+| cartellino | prezzo | 30/45 (67%) | 32/45 |
+| cartellino | prezzo barrato | 4/6 | 2/6 |
+
+**Richiamo delle cifre** (PP-OCRv5; il valore c'e' anche senza separatore, es. «229» per 2,29, o
+spezzato in due pezzi adiacenti, es. «1» + «06»): cartellino prezzo **35/45 (78%)**, prezzo barrato
+**6/6**, al kg 22/27, bilancia e scontrino 100%.
+
+**Lettura dei numeri:**
+- ⚑ **Il lettore non e' il collo di bottiglia per bilancia e scontrino**: 100% sul totale.
+- ⚑ Sui **prezzi grandi con i centesimi in apice** il lettore restituisce le cifre senza virgola o in
+  due riquadri separati (`229`, `1 | 06`, `16..50`): l'interpretazione va fatta dal **parser con le
+  posizioni dei riquadri** (cifre grandi + cifre piccole in alto a destra = euro + centesimi), non con
+  una regex sul testo.
+- ☠ **Non letti:** i cartellini **scritti a mano** (c04, c05, c25: zero cifre), gli **LCD tedeschi** e
+  due foto di duty-free sfocate o con il cartellino minuscolo; molte foto del web sono **inquadrature
+  larghe** con il cartellino piccolo. Nell'app l'utente inquadra **un** cartellino da vicino dentro un
+  mirino (ritaglio), che e' il caso favorevole.
+- PP-OCRv6 small non e' nettamente migliore: **si resta su PP-OCRv5 mobile latin** (piu' piccolo).
+- Decisione di prodotto conseguente: il cartellino letto **si propone sempre** (prezzo evidenziato,
+  modificabile con un tocco) e non si aggiunge mai da solo; lo scritto a mano e' dichiarato non
+  supportato (si usa il tastierino).
