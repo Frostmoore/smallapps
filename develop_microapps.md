@@ -1132,7 +1132,19 @@ volta sola; nella fase di ciascuna app si spuntano.
 
 - [ ] **F10** Te l'ho prestato — `apps/prestato/` (nome della cartella da confermare in F10.0)
 - [ ] **F11** Dove l'ho lasciato? — posizione in primo piano + foto
-- [ ] **F12** Quanto sto spendendo? — contatore della spesa con budget — ⚑ **LA PROSSIMA** (scelta del proprietario il 2026-10-10; si comincia il 2026-10-11 da F12.0: decisioni e specsheet insieme a lui)
+- [~] **F12** Spending Review (ex «Quanto sto spendendo?») — contatore della spesa con budget, cartellini e scontrini letti sul telefono — ⚑ **LA PROSSIMA** (scelta del proprietario il 2026-10-10). Specsheet in §8 «F12 — Spending Review»
+  - [x] **F12.0** Decisioni di partenza con il proprietario — FATTO il 2026-10-10/11 (§8 F12.0): nome «Spending Review» in it ed en, `com.smp.spendingreview`, Android e iPhone, nessun widget, interfaccia «C · Una mano», due tasti Cartellino e Scontrino, cartellino interpretato, peso a mano e bilancia, «spesa gratis, revisione Pro» a **2,99 €**, OCR Vision su iOS e PP-OCRv5 su ONNX Runtime **1.28.0 bloccata** su Android
+  - [x] **F12.1** Specsheet — SCRITTA il 2026-10-11 (§8 F12.1.1–F12.1.18): file, dipendenze e guardie di privacy in build, dominio (centesimi, arrotondamenti half-up, offerte, tastierino), parser di cartellino/bilancia/scontrino sui riquadri, confronto, statistiche, `packages/micro_ocr`, dati, rotte, schermate, servizi, Pro (`FeatureKey.documentScan` nuova), permessi e privacy, trappole, test con il banco di regressione, prestazioni. ☐ Da far rileggere al proprietario con le **domande aperte D1–D4** (§8 F12.10)
+  - [ ] **F12.2a** `FeatureKey.documentScan` in `micro_core` + una riga `open()` nelle cinque app; test di tutte verdi
+  - [ ] **F12.2b** `packages/micro_ocr/`: Vision (iOS), PP-OCRv5 su ORT 1.28.0 in Kotlin (Android), modelli nel repo con SHA-256, test JVM, test sul dispositivo, **parita' con RapidOCR ≥ 95%**, verifica 16 KB, atlante
+  - [ ] **F12.2c** Bootstrap `apps/spending_review` (§8.T), icona e splash, manifest, task Gradle `verificaPrivacyOcr` provato in negativo
+  - [ ] **F12.3** Dominio e dati con i test: arrotondamenti, offerte, tastierino, parser con le fixture (33 libere nel repo, 27 fuori), banco con il cricchetto, confronto, statistiche, repository, schema dump
+  - [ ] **F12.4** Interfaccia «C · Una mano» completa con i servizi, provata sull'emulatore con foto vere e sul simulatore
+  - [ ] **F12.5** Pro: limiti, paywall, `ProGate` sulle pagine, test di coerenza
+  - [ ] **F12.6** Grafica (gia' scelta): tema chiaro derivato e test dei contrasti, conferma del proprietario
+  - [ ] **F12.7** Test, rifinitura, iOS su iPad via TestFlight, fixture di Vision, **taratura con le foto vere del proprietario**, misure di prestazione su un Android vero, controllo privacy sull'APK di release
+  - [ ] **F12.8** Atlanti `apps/spending_review` e `packages/micro_ocr` (+ `micro_core` e cinque app per `documentScan`), `verify_atlas` 0 mancanti
+  - [ ] **F12.9** Rituale di fine fase, card «In arrivo» in vetrina, StatusMicroApps con entrambi gli store, branch di versione nuovo
 - [ ] **F13** Quanto dividiamo? — divisione del conto
 - [ ] **F14** Ricordamelo qui — promemoria per luogo (geofencing, permesso in background)
 - [ ] **F15** Quanti sono? — conteggio con la fotocamera (**decisione sull'AI prima di F15.0**)
@@ -5347,6 +5359,10 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
 - ☠ **OCR solo sul telefono** (regola «dati solo sul telefono»): su iOS **Vision** (locale); su
   Android **niente ML Kit** → valutare un OCR che giri tutto nell'app (es. Tesseract via FFI) e la
   sua precisione sui cartellini; e' il punto tecnico piu' rischioso di F12.
+- **Specsheet scritta il 2026-10-11**: vedi la sezione **«F12 — Spending Review»** qui sotto (F12.0
+  riepilogo delle decisioni, F12.1 specsheet, F12.2 ordine di lavoro, F12.10 domande aperte). Le righe
+  qui sopra restano come traccia: dove differiscono (es. «Tesseract via FFI», «Widget possibile»), vince
+  la sezione F12.
 
 ### F13 — Quanto dividiamo?
 
@@ -6193,6 +6209,1792 @@ backup come campo facoltativo `myContact` (al ripristino vince il telefono, salv
 
 ---
 
+## F12 — Spending Review (ex «Quanto sto spendendo?»)
+
+**Obiettivo della fase**: il contatore della spesa che si usa **con una mano sola, col carrello
+nell'altra**. Il gesto principale e' **batti il prezzo (o inquadra il cartellino) → il totale
+enorme in alto sale subito, e la barra dice quanto manca al budget**. Tutto il resto (cartellino
+interpretato, bilancia, scontrino, storico) gira intorno a quel gesto senza rallentarlo: il
+tastierino e' **sempre** sullo schermo, mai dietro un tocco.
+
+E' anche la fase che costruisce **una volta** l'OCR sul telefono per tutta la piattaforma
+(`packages/micro_ocr/`, F12.2b): F13 «Quanto dividiamo?» (scontrino) e qualunque app futura che
+legga testo dalla fotocamera la useranno senza rifarla.
+
+**Come si legge questa sezione** (per un coding agent): F12.0 sono le decisioni gia' prese (non si
+ridiscutono); F12.1.x e' la specsheet, con file, firme, tabelle e regole esatte; F12.2 e' l'ordine di
+lavoro, sottofase per sottofase, con le azioni del proprietario; in fondo, «Domande aperte». Alla
+fine di **ogni** sottofase con codice si esegue il **rituale di fine fase di §6** (piano, atlanti,
+Projects Tracker, messaggio dettagliato, branch di versione nuovo): non si salta, nemmeno «per
+fare prima». Simboli: ☠ = punto rischioso (gia' costato o probabile che costi), ⚑ = scelta non
+ovvia, con il perche'.
+
+### F12.0 — Decisioni di partenza (riepilogo, 2026-10-10/11)
+
+Prese con il proprietario (scheda «F12 — Quanto sto spendendo?» in §8 F10–F19, paragrafo F12.0, e
+`memory/decisioni.md`, voci del 2026-10-10 e 2026-10-11). Dove contraddicono la scheda delle idee,
+vincono queste. Le decisioni **tecniche** prese scrivendo questa specsheet sono marcate ⚑ nei
+punti F12.1.x e vanno registrate in `memory/decisioni.md` al rituale di F12.1.
+
+1. **Nome: «Spending Review», uguale in italiano e in inglese** (proprietario, 2026-10-10). Ne
+   discendono, **immutabili dopo la pubblicazione**:
+
+   | Cosa | Valore | Note |
+   |---|---|---|
+   | cartella | `apps/spending_review/` | |
+   | `appId` (`MicroAppConfig`) | `'spending_review'` | nome di cartelle e preferenze sul telefono |
+   | `licenseAppId` | `'spendingreview'` | **senza trattino basso** (F5.0 punto 7): chiave della tabella `apps` e di `APP_SECRETS` sul License Server |
+   | bundle iOS / `applicationId` Android | `com.smp.spendingreview` | §1.1 |
+   | SKU del Pro | `spendingreview_pro_lifetime` | uno SKU pubblicato non si cancella ne' si riusa |
+   | nome sotto l'icona | «Spending Review» | `CFBundleDisplayName`, `android:label` |
+   | nome della scheda negli store | «Spending Review» | ☠ quasi certamente gia' usato da altri: si prova alla creazione (App Store risponde 409 `DUPLICATE.DIFFERENT_ACCOUNT`, come per Full Freezer e Film Tracker). **Ripiego gia' deciso**: «Spending Review – Conto spesa» (italiano, 29 caratteri) e «Spending Review – Cart Total» (inglese, 28 caratteri); entrambi sotto i 30 caratteri di titolo. «Project Microapps» va nel **sottotitolo** (decisione del 2026-10-08) |
+   | `package_name` Dart | `spending_review` | `name:` del `pubspec.yaml` |
+
+2. **Android e iPhone dal primo commit**, come Film Tracker e QR Me: `flutter create
+   --platforms=android,ios`, iOS solo iPhone (`TARGETED_DEVICE_FAMILY = 1`, decisione del
+   2026-10-04), prove su iPad in compatibilita' iPhone (memoria del proprietario). **Nessun App
+   Group e nessuna estensione** (niente widget, niente condivisione): il proprietario registra solo
+   l'App ID `com.smp.spendingreview`, senza capability.
+3. **Nessun widget** (proprietario, 2026-10-10): niente `home_widget`. **Nessuna notifica** (non
+   richieste: niente `NotificationService`, niente `POST_NOTIFICATIONS`). ⚑ **Niente voce in v1**:
+   la scheda delle idee citava il parser vocale di Full Freezer, ma il proprietario ha scelto
+   tastierino + fotocamera; la voce si aggiunge solo se lui la chiede (e allora solo on-device,
+   decisione del 2026-10-10 su Full Freezer).
+4. **Cosa fa** (proprietario, 2026-10-10/11):
+   - **tastierino numerico sempre visibile** per il prezzo a mano, con i tasti **×** (quantita'),
+     **−** (sconto/buono), **⌫** (cancella), **+** (aggiungi);
+   - **budget** con barra;
+   - **due tasti diversi, due flussi distinti**: **Cartellino** (verde) e **Scontrino** (scuro). Non
+     un tasto «intelligente» che indovina;
+   - il **cartellino va INTERPRETATO**, non solo letto: nome, prezzo da pagare, prezzo
+     barrato/«anziche'», prezzo al kg/al litro, offerte 3x2 / 2x1 / -30%, centesimi scritti piccoli;
+     se c'e' ambiguita' l'app **propone** e l'utente **conferma con un tocco**; un cartellino letto
+     **non si aggiunge mai da solo** (`docs/specs/f12-ocr.md` §7);
+   - **prodotti a peso: entrambe le strade**: peso scritto a mano dopo un cartellino al kg, **e**
+     lettura dell'etichetta della bilancia (che porta gia' il totale);
+   - **Scontrino** serve **sia** a confrontare alla cassa il contato con lo scontrino (differenza e
+     righe sospette) **sia** a registrare la spesa dallo scontrino letto, anche se non si e' contato
+     niente;
+   - **lo scritto a mano non e' supportato** (zero cifre lette sui campioni c04, c05, c25): si usa
+     il tastierino, e l'app lo dice.
+5. **Gratis e Pro: «spesa gratis, revisione Pro»**, Pro **2,99 €** una tantum (proprietario,
+   2026-10-11):
+
+   | Funzione | Gratis | Pro | `FeatureKey` → limite |
+   |---|---|---|---|
+   | Tastierino, totale, quantita', sconti a mano | ✔ | ✔ | — |
+   | Budget con barra | ✔ | ✔ | — |
+   | **Lettura dei cartellini, illimitata** (con interpretazione e offerte) | ✔ | ✔ | — |
+   | Peso a mano e **etichetta della bilancia** | ✔ | ✔ | — |
+   | Spese salvate | ultime **5** visibili | tutte | `fullHistory` → `count(freeMax: 5)` |
+   | **Scontrino**: controllo alla cassa **e** registrazione dallo scontrino | — | ✔ | **`documentScan`** (nuova, F12.2a) → `locked()` |
+   | **Statistiche**: per mese e per negozio, spesa media, sforamenti del budget | — | ✔ | `statistics` → `locked()` |
+   | Export **CSV** | — | ✔ | `csvExport` → `locked()` |
+   | **Backup** | — | ✔ | `backupRestore` → `locked()` (il **ripristino** resta gratis, come in tutte le app) |
+
+   ⚑ **Perche' una chiave nuova `documentScan` per lo Scontrino.** Le chiavi esistenti sono state
+   provate una per una: `photos` vuol dire «allegare fotografie ai record» (in Full Freezer e Film
+   Tracker e' **gratis**, e qui lo scontrino **non** si conserva come foto, F12.1.15); `pdfReport`,
+   `imageExport`, `csvExport` sono esportazioni; `customCategories`, `themeCustomization`,
+   `secondaryEntities`, `unlimitedEntities` sono altro. Usarne una «perche' tanto e' solo un nome»
+   renderebbe falsi gli atlanti di due app e il test di coerenza del paywall. La chiave nuova e'
+   **generica** («leggere con la fotocamera un documento intero e ricavarne i dati») perche' la
+   riusera' F13 per lo scontrino da dividere. **Costo**: una riga `FeatureKey.documentScan:
+   FeatureLimit.open()` nelle mappe delle **cinque** app esistenti (TrashCan, Full Freezer, Scorte
+   Calore, Film Tracker, QR Me), perche' i loro `paywall_config_test` vogliono **tutte** le chiavi
+   (`expect(<mappa>.keys.toSet(), FeatureKey.values.toSet())`): F12.2a.
+   ⚑ **Spese oltre le 5 nel gratis: conservate e nascoste, non cancellate** (proposta, vedi
+   «Domande aperte» D1). Diversamente da QR Me (dove le righe in eccesso **si cancellano** perche'
+   contengono password Wi-Fi), qui i dati sono la cronologia della spesa dell'utente, sul suo
+   telefono: cancellarli toglierebbe proprio cio' che il Pro promette («storico illimitato con
+   statistiche») a chi lo compra dopo tre mesi. Il piano gratuito **mostra** le ultime 5 chiuse e una
+   riga «Le altre N spese sono sul telefono: con il Pro le rivedi tutte, con le statistiche».
+   Prezzi: App Store **2,99 €** (base Italia); Play **2,45 EUR** di base senza IVA (2,99 / 1,22,
+   stessa regola di F17.1.9), che il cliente vede a 2,99 €.
+6. **Interfaccia «C · Una mano»** (proprietario, 2026-10-10,
+   https://claude.ai/artifact/Y9KH2qk6PeAYKzQBTyvdhY, tavola `UnaMano.dc.html`): tema **scuro di
+   default**; valori esatti in F12.1.12. Scartate «A · Scontrino» e «B · Cassa». ⚑ Come in QR Me, la
+   grafica e' gia' scelta: si applica **da F12.4**, e F12.6 si chiude con F12.4.
+7. **Icona del proprietario**: `docs/specs/icona-spending-review.png` (PNG 1254x1254 RGBA
+   trasparente). Si ripulisce e si generano icone e splash con `tool/genera_icone.py` (copiato da
+   `apps/qr_me/tool/genera_icone.py`). Seme del tema `#4ADE80` (il verde della grafica scelta).
+8. **OCR solo sul telefono** (`docs/specs/f12-ocr.md`, `memory/decisioni.md` 2026-10-11): **iOS
+   Vision** (locale, 0 MB); **Android PaddleOCR PP-OCRv5 mobile** (rilevatore `PP-OCRv5_mobile_det`
+   + riconoscitore `latin_PP-OCRv5_mobile_rec`) su **ONNX Runtime 1.28.0 esatta**; ripiego gli stessi
+   modelli su **NCNN**; Tesseract ultima spiaggia; **ML Kit escluso**, **LiteRT 2.x escluso**. ☠ ONNX
+   Runtime **dalla 1.29** contiene telemetria Microsoft accesa di default (ContentProvider
+   `ai.onnxruntime.TelemetryInitializer`, permesso `INTERNET`, invio a
+   `mobile.events.data.microsoft.com`): **mai** una versione diversa da 1.28.0 senza una nuova voce
+   in `memory/decisioni.md`. Misure sui 60 campioni (f12-ocr.md §7): bilancia e scontrino **100%**
+   sul totale; prezzo del cartellino **78%** come cifre, ma i **centesimi in apice** escono senza
+   virgola («229») o spezzati («1 | 06») → **parser con le posizioni dei riquadri** (F12.1.4).
+9. **Dati solo sul telefono** (regola del 2026-10-09, tutte le app): nessun SDK che manda dati a
+   terzi, nemmeno metriche. **Unica eccezione**: Play Billing e il nostro server licenze per il Pro
+   su Android (decisione del 2026-10-09). ☠ Conseguenza pratica gia' verificata scrivendo questa
+   specsheet: Play Billing porta `com.google.android.datatransport:transport-backend-cct`, che
+   dichiara **`INTERNET`** e `ACCESS_NETWORK_STATE` nel manifest unito (report di fusione di QR Me,
+   `apps/qr_me/build/app/outputs/logs/manifest-merger-debug-report.txt`). Quindi il controllo «niente
+   `INTERNET` nel manifest unito» di f12-ocr.md §5.3 **non si puo' fare alla lettera**: diventa
+   «`INTERNET` ammesso **solo** se arriva da `transport-backend-cct` o da `src/debug`» (F12.1.2).
+10. **Sito**: card «In arrivo» in `site/src/apps.php` nello stesso giro in cui l'app nasce (F12.9);
+    pulsanti degli store **solo quando l'app e' su entrambi** (decisione del 2026-10-10).
+11. **Trappole gia' pagate che valgono anche qui**: `licenseAppId` senza trattino basso; deep link
+    di Flutter spento (`FlutterDeepLinkingEnabled = false`, `flutter_deeplinking_enabled = false`:
+    l'app non ne riceve, ma un link estraneo non deve finire in go_router); `ProGate` **sulla
+    pagina** Pro, non solo sul bottone (Full Freezer 2026-10-07); virgolette tipografiche nei testi
+    (`tool/testi*.py`); nessun glifo ✓⚠✗ nei testi (guardia `texts_glyphs_test.dart` di QR Me);
+    profili iOS via API e invito TestFlight a parte (`POST /v1/betaTesterInvitations`);
+    `GET /v1/profiles?filter[name]=` confronta per **prefisso** (F17.10): filtrare a mano sul nome
+    esatto prima di un DELETE; `camera_android_camerax` dichiara `RECORD_AUDIO` e
+    `WRITE_EXTERNAL_STORAGE`: si tolgono con `tools:node="remove"` (F17.1.10); `analyzer` con tetto
+    `<14.4.0` per Drift (pubspec di QR Me); `permission_handler` non serve (il permesso della
+    fotocamera lo chiede il plugin `camera`).
+
+### F12.1 — Specsheet
+
+#### F12.1.1 — Albero dei file da creare
+
+```
+packages/micro_core/lib/src/gate/feature_key.dart       + FeatureKey.documentScan (F12.2a)
+apps/{trashcan,full_freezer,scorte_calore,film_tracker,qr_me}/lib/app/feature_limits.dart
+                                                        + FeatureKey.documentScan: FeatureLimit.open() (F12.2a)
+packages/micro_ocr/                                     NUOVO plugin Flutter (F12.2b), Android + iOS
+├─ pubspec.yaml                                         plugin: android (package com.smp.micro_ocr, pluginClass MicroOcrPlugin), ios (pluginClass MicroOcrPlugin)
+├─ lib/micro_ocr.dart                                   barrel: esporta tutto (usa flutter/services)
+├─ lib/riga_ocr.dart                                    libreria PURA (niente Flutter): Riquadro, RigaOcr, OcrModo — la importa il dominio dell'app
+├─ lib/src/riga_ocr.dart                                Riquadro, RigaOcr, OcrModo
+├─ lib/src/ocr_engine.dart                              interfaccia OcrEngine + OcrNonDisponibile
+├─ lib/src/canale_ocr_engine.dart                       CanaleOcrEngine (MethodChannel 'micro_ocr')
+├─ lib/src/fake_ocr_engine.dart                         FakeOcrEngine per i test delle app
+├─ android/build.gradle.kts                             onnxruntime-android strictly 1.28.0, exifinterface
+├─ android/consumer-rules.pro                           keep di ai.onnxruntime.** (R8)
+├─ android/src/main/AndroidManifest.xml                 VUOTO di permessi
+├─ android/src/main/assets/ppocrv5/det.onnx             PP-OCRv5_mobile_det (≈ 4,8 MB) — F12.1.9
+├─ android/src/main/assets/ppocrv5/rec_latin.onnx       latin_PP-OCRv5_mobile_rec (≈ 7,9 MB)
+├─ android/src/main/assets/ppocrv5/latin_dict.txt       dizionario del riconoscitore (502 simboli, € compreso)
+├─ android/src/main/assets/ppocrv5/MODELLI.md           provenienza, SHA-256, licenza Apache-2.0
+├─ android/src/main/assets/ppocrv5/LICENSE-PaddleOCR.txt  testo Apache-2.0
+├─ android/src/main/kotlin/com/smp/micro_ocr/MicroOcrPlugin.kt     canale, thread di lavoro
+├─ android/src/main/kotlin/com/smp/micro_ocr/PpOcrEngine.kt        sessioni ORT, det → crop → rec
+├─ android/src/main/kotlin/com/smp/micro_ocr/ImmagineIngresso.kt   decodifica + rotazione EXIF + riduzione
+├─ android/src/main/kotlin/com/smp/micro_ocr/Preprocess.kt         tensori di det e rec
+├─ android/src/main/kotlin/com/smp/micro_ocr/DbPostprocess.kt      mappa di probabilita' → riquadri
+├─ android/src/main/kotlin/com/smp/micro_ocr/CtcDecoder.kt         uscita del rec → testo + confidenza
+├─ android/src/main/kotlin/com/smp/micro_ocr/Strisce.kt            scontrini lunghi: strisce sovrapposte e fusione riquadri
+├─ android/src/test/kotlin/com/smp/micro_ocr/{DbPostprocessTest,CtcDecoderTest,PreprocessTest,StrisceTest}.kt  JUnit sulla JVM
+├─ ios/micro_ocr/Sources/micro_ocr/MicroOcrPlugin.swift            canale
+├─ ios/micro_ocr/Sources/micro_ocr/VisionOcr.swift                 VNRecognizeTextRequest
+├─ ios/micro_ocr/Package.swift  +  ios/micro_ocr.podspec           generati da flutter create, nessuna dipendenza esterna
+├─ test/riga_ocr_test.dart, test/canale_ocr_engine_test.dart, test/fake_ocr_engine_test.dart
+├─ tool/verifica_privacy_android.ps1                    controllo sull'APK di release (F12.1.2)
+└─ codebase_reference.md
+tool/_common.ps1                                        + micro_ocr nell'elenco dei progetti (come micro_share)
+apps/spending_review/
+├─ pubspec.yaml, l10n.yaml, analysis_options.yaml, flutter_launcher_icons.yaml, flutter_native_splash.yaml
+├─ assets/fonts/{PlusJakartaSans-Variable.ttf,SpaceGrotesk-Variable.ttf,OFL-*.txt}   copiati da apps/qr_me/assets/fonts
+├─ assets/icons/spending_review_logo.png                 dall'originale del proprietario
+├─ lib/main.dart
+├─ lib/app/{app,app_config,entitlement,feature_limits,paywall_config,providers,routes,labels,locale_resolution}.dart
+├─ lib/app/sr_palette.dart          i colori di «C · Una mano» (F12.1.12)
+├─ lib/domain/
+│  ├─ arrotonda.dart                arrotondamenti al centesimo, interi (F12.1.3)
+│  ├─ quantita.dart                 sealed Quantita: Pezzi, AMisura; UnitaMisura
+│  ├─ offerta.dart                  sealed Offerta: NxM, Percentuale, PrezzoBarrato, SecondoAPercento, PrezzoConCarta
+│  ├─ riga_spesa.dart               RigaSpesa, OrigineRiga, calcolo del totale di riga
+│  ├─ spesa.dart                    Spesa, StatoSpesa, FonteRighe, StatoBudget
+│  ├─ tastierino.dart               TastierinoState (macchina a stati del tastierino) + TastoTastierino
+│  ├─ nomi.dart                     normalizzazione dei nomi, similarita' (cartellino ↔ scontrino)
+│  ├─ lettura/numeri_ocr.dart       estrazione e normalizzazione dei numeri dal testo OCR
+│  ├─ lettura/righe_visive.dart     raggruppamento dei riquadri in righe visive
+│  ├─ lettura/cartellino_parser.dart   CartellinoParser → LetturaCartellino
+│  ├─ lettura/bilancia_parser.dart     BilanciaParser → LetturaBilancia
+│  ├─ lettura/scontrino_parser.dart    ScontrinoParser → LetturaScontrino
+│  ├─ lettura/unisci_parti.dart        fusione di piu' foto dello stesso scontrino
+│  ├─ confronto.dart                Confronto: contato vs scontrino → EsitoConfronto
+│  └─ statistiche.dart              StatisticheSpesa: per mese, per negozio, media, sforamenti
+├─ lib/data/
+│  ├─ tables.dart                   Negozi, Spese, Righe
+│  ├─ database.dart                 SpendingDatabase, schemaVersion 1
+│  ├─ spesa_repository.dart         SpesaRepository
+│  └─ spending_backup_source.dart   BackupSource
+├─ drift_schemas/drift_schema_v1.json   dump dello schema per i test di migrazione futuri
+├─ lib/services/
+│  ├─ lettura_service.dart          foto → OcrEngine → parser, in background
+│  ├─ fotocamera.dart               scatto + ritaglio al mirino
+│  ├─ csv_export.dart               CsvWriter di micro_core
+│  └─ aptica.dart                   vibrazioni brevi, spegnibili
+├─ lib/features/
+│  ├─ common/{pro_gate,una_mano}.dart   ProGate (copia di QR Me) e componenti grafici comuni
+│  ├─ spesa/spesa_page.dart             LA schermata: totale, budget, lista, due tasti, tastierino
+│  ├─ spesa/tastierino_widget.dart      i 16 tasti
+│  ├─ spesa/budget_sheet.dart           imposta il budget di questa spesa
+│  ├─ spesa/riga_sheet.dart             modifica/elimina una riga
+│  ├─ cartellino/cartellino_camera_page.dart   mirino, scatto, «Cartellino | Bilancia»
+│  ├─ cartellino/conferma_cartellino_sheet.dart   la proposta da confermare con un tocco
+│  ├─ cartellino/peso_sheet.dart               peso a mano dopo un cartellino al kg
+│  ├─ cartellino/conferma_bilancia_sheet.dart  etichetta della bilancia letta
+│  ├─ scontrino/scontrino_camera_page.dart     foto (anche in piu' parti), Pro
+│  ├─ scontrino/confronto_page.dart            scontrino contro conto
+│  ├─ scontrino/registra_scontrino_page.dart   registrazione della spesa dallo scontrino
+│  ├─ chiusura/chiusura_page.dart              chiudere e salvare la spesa
+│  ├─ storico/storico_page.dart                le spese chiuse (5 visibili nel gratis)
+│  ├─ storico/dettaglio_spesa_page.dart
+│  ├─ statistiche/{statistiche_page,grafico_mesi}.dart   Pro
+│  ├─ impostazioni/{impostazioni_page,data_section,negozi_page}.dart
+│  └─ dev/ocr_dev_page.dart                    SOLO debug: esporta le righe OCR come fixture (F12.1.17)
+├─ android/app/build.gradle.kts         + task verificaPrivacyOcr (F12.1.2)
+├─ ios/Runner/{Info.plist,AppDelegate.swift,it.lproj,en.lproj}
+├─ tool/{testi.py,testi_*.py,genera_icone.py}          testi → ARB come QR Me
+├─ tool/esporta_fixture_ocr.py          crea le fixture del banco del parser (F12.1.17)
+├─ test/fixtures/ocr/ppocrv5/*.json     righe OCR + verita' dei 33 campioni a licenza libera
+├─ test/fixtures/ocr/LICENZE.md         fonte, autore, licenza di ogni fixture
+├─ test/fixtures/ocr/soglie.json        il «cricchetto» del banco (F12.1.17)
+└─ test/ …                              (F12.1.17)
+```
+
+#### F12.1.2 — Dipendenze e guardie di privacy in build
+
+**`packages/micro_ocr/pubspec.yaml`**: `flutter`, `meta`, `plugin_platform_interface` **non**
+serve (plugin interno, non federato). Nessuna dipendenza pub oltre a Flutter.
+
+**`packages/micro_ocr/android/build.gradle.kts`** (le righe che contano):
+
+```kotlin
+android {
+    namespace = "com.smp.micro_ocr"
+    compileSdk = 36
+    defaultConfig { minSdk = 24; consumerProguardFiles("consumer-rules.pro") }
+    androidResources { noCompress += "onnx" }   // ⚑ vedi sotto
+}
+dependencies {
+    implementation("com.microsoft.onnxruntime:onnxruntime-android") {
+        version { strictly("1.28.0") }          // ☠ MAI 1.29+: telemetria (F12.0 punto 8)
+    }
+    implementation("androidx.exifinterface:exifinterface:1.4.1")   // rotazione delle foto
+    testImplementation("junit:junit:4.13.2")
+}
+```
+
+⚑ **ONNX Runtime direttamente da Maven, NON tramite `flutter_onnxruntime`** (che f12-ocr.md §5.1
+suggeriva). Motivi, in ordine di peso:
+1. `flutter_onnxruntime` 1.9.0 ha anche il lato iOS e porta **`onnxruntime-objc` 1.28.0** nell'app
+   iPhone: ≈ 10 MB di motore **inutile** (su iOS legge Vision) e una seconda copia di ORT da tenere
+   bloccata. Un plugin Flutter non si puo' escludere da una piattaforma.
+2. Con `strictly("1.28.0")` nel **nostro** `build.gradle.kts` la versione la blocca Gradle (risoluzione
+   che **fallisce** se qualcuno chiede altro), non la buona volonta' di un pacchetto di terzi che al
+   prossimo aggiornamento portera' la 1.29.
+3. Pre e post-elaborazione girano in Kotlin sui `Bitmap` nativi: nessun tensore da milioni di float
+   che attraversa il canale verso Dart.
+Costo: circa 600 righe di Kotlin scritte da noi (F12.1.9), testate sulla JVM.
+
+⚑ **`noCompress += "onnx"`**: i pesi in virgola mobile si comprimono poco (f12-ocr.md §3.1) e
+decomprimere 12,7 MB a ogni avvio a freddo costa tempo; l'AAB viene comunque compresso da Play per il
+download.
+
+**`apps/spending_review/pubspec.yaml`** — le versioni si risolvono con
+`pwsh ../../tool/fl.ps1 pub add <pacchetto>`, **non** a memoria (regola del pubspec di QR Me):
+
+| Pacchetto | Versione | Perche' |
+|---|---|---|
+| `micro_core` | `path: ../../packages/micro_core` | Money, CivilDate, gate, paywall, backup, CSV, tema |
+| `micro_ocr` | `path: ../../packages/micro_ocr` | l'OCR (F12.1.9) |
+| `camera` | `^0.12.1` (come QR Me) | anteprima con il **nostro** mirino e `takePicture()`. ⚑ Non la fotocamera di sistema via `image_picker`: serve il mirino per far inquadrare **un** cartellino da vicino, che e' il caso in cui l'OCR rende (f12-ocr.md §7: le foto larghe del web sono il caso sfavorevole) |
+| `image_picker` | `^1.2.4` (come QR Me) | «Da una foto»: un cartellino o uno scontrino gia' fotografati (photo picker di sistema, nessun permesso su Android 13+ e iOS). ⚑ Si', serve: lo scontrino lungo spesso lo si fotografa con calma a casa |
+| `image` | `^4.10.1` (come QR Me) | ritaglio della foto al mirino prima dell'OCR, in un isolate |
+| `drift`, `sqlite3`, `sqlite3_flutter_libs`, `flutter_riverpod`, `go_router`, `intl`, `meta`, `path`, `path_provider`, `share_plus` | come QR Me | §8.T; `share_plus` per CSV e backup (stesso vincolo di `micro_core`) |
+| dev: `drift_dev`, `build_runner`, `analyzer: ">=14.0.0 <14.4.0"`, `flutter_launcher_icons`, `flutter_native_splash`, `shared_preferences`, `integration_test` | come QR Me | |
+
+**Non** si usano: `flutter_onnxruntime` (sopra), `google_mlkit_text_recognition` e qualunque
+pacchetto ML Kit (regola del 2026-10-09), `tflite_flutter`/LiteRT 2.x (porta `play-services-*`),
+`flutter_tesseract_ocr` (ultima spiaggia, non ora), `pdf_ocr_ondevice` (scarica il modello da
+internet), `mobile_scanner`, `home_widget`, `permission_handler` (il permesso della fotocamera lo
+chiede `camera`), `speech_to_text`, `fl_chart` (grafici con `CustomPainter`, come le altre app).
+☠ Prima di aggiungere **qualunque** altra dipendenza nativa: controllarne nel `pubspec.lock` e in
+`gradlew :app:dependencies` le dipendenze Android/iOS (Firebase, `datatransport` fuori da Billing,
+`play-services-*`, ML Kit, SDK di crash o analisi). Se ne porta una, non si usa.
+
+**Le guardie di privacy (obbligatorie, nate dalla telemetria di ORT 1.29):**
+
+1. **In Gradle, a ogni build di release** — task `verificaPrivacyOcr` in
+   `apps/spending_review/android/app/build.gradle.kts`, agganciato con
+   `tasks.named("processReleaseMainManifest") { finalizedBy("verificaPrivacyOcr") }`. Legge il
+   manifest unito di release e il report
+   `build/app/outputs/logs/manifest-merger-release-report.txt` e **fa fallire la build** se:
+   - compare la stringa `ai.onnxruntime.TelemetryInitializer` o qualunque `provider` con
+     `ai.onnxruntime` nel nome;
+   - il blocco `uses-permission#android.permission.INTERNET` del report contiene una riga
+     `ADDED from`/`MERGED from` che **non** sia `com.google.android.datatransport:transport-backend-cct`
+     (Play Billing, eccezione del 2026-10-09);
+   - compare `uses-permission#android.permission.ACCESS_NETWORK_STATE` da una fonte diversa da
+     `transport-backend-cct` (in QR Me lo portava anche `network_info_plus`, che qui non c'e').
+   ⚑ Nel manifest unito i permessi sono deduplicati: guardare solo il manifest non dice **chi** ha
+   portato `INTERNET`. Per questo si legge il **report di fusione**, che elenca le fonti.
+2. **Sulle dipendenze risolte** — nello stesso task: `configurations.getByName("releaseRuntimeClasspath")`
+   e le sue `resolvedConfiguration.resolvedArtifacts`; fallisce se `com.microsoft.onnxruntime` ha
+   versione ≠ `1.28.0`, o se compare un gruppo `com.google.mlkit`, `com.google.firebase:firebase-analytics`,
+   `com.google.android.gms:play-services-tflite*`, `com.google.ai.edge.litert`.
+3. **Sul binario** — `packages/micro_ocr/tool/verifica_privacy_android.ps1 -Apk <percorso>`, da
+   lanciare dopo `flutter build apk --release` (e in F12.7 prima di ogni caricamento su Play): estrae
+   `lib/arm64-v8a/libonnxruntime.so` e cerca le stringhe `events.data.microsoft.com`, `OneCollector`,
+   `1DS`; ne basta una per uscire con codice 1. Stampa anche la riga di `aapt2 dump permissions`.
+4. ☠ **16 KB page size** (obbligo Play per le app con target Android 15+): in F12.2b verificare
+   l'allineamento delle `.so` di ORT 1.28.0 con `zipalign -c -P 16 -v 4 app-release.apk`. Se ORT
+   1.28.0 non e' allineata a 16 KB: **non** si sale di versione; si passa al ripiego NCNN o alla
+   build ORT nostra con `--no_telemetry` (f12-ocr.md §5.1, §5.2), con una voce nuova in
+   `memory/decisioni.md`.
+
+#### F12.1.3 — Dominio: denaro, quantita', offerte, righe, spesa, tastierino (Dart puro, `lib/domain/`)
+
+Regola di tutto il dominio: **importi in centesimi interi** (`Money` di `micro_core`), **pesi e volumi
+in millesimi interi** (grammi, millilitri). Nessun `double` nei conti.
+
+```dart
+// lib/domain/arrotonda.dart
+abstract final class Arrotonda {
+  /// a × b / divisore, arrotondato al centesimo con la regola «mezzo in su» (half-up), in interi.
+  /// Per i valori negativi arrotonda il valore assoluto e rimette il segno (simmetrico).
+  static int mezzoInSu(int a, int b, int divisore);
+  /// Prezzo di una quantita' a misura: centesimiAlKg × millesimi / 1000, half-up.
+  static Money perMisura(Money alKgOLitro, int millesimi);
+  /// Importo dello sconto percentuale: pieno × percento / 100, half-up.
+  static Money scontoPercentuale(Money pieno, int percento);
+}
+```
+
+⚑ **Perche' half-up e in interi**: tutte le 9 etichette della bilancia e le 4 righe pesate di s03
+tornano **solo** con «mezzo in su» (s03: 0,126 kg × 7,50 = 0,945 → **0,95**; 0,098 × 7,50 = 0,735 →
+**0,74**: l'arrotondamento bancario darebbe 0,94 e 0,74, sbagliando la prima). `Money.operator *`
+di `micro_core` usa `double.round()`: va bene per moltiplicare per un intero, **non** per pesi
+(0,1 + 0,2 in virgola mobile). Formula intera per valori ≥ 0: `(a * b + divisore ~/ 2) ~/ divisore`.
+⚑ **Sconto percentuale: si arrotonda lo SCONTO, poi si sottrae** (come le righe «SCONTO -0,40» dello
+scontrino). Prova: c29 «2,99 −50%» stampa **1,49**: lo sconto 1,495 → 1,50, e 2,99 − 1,50 = 1,49;
+arrotondare il prezzo finale (1,495 → 1,50) darebbe il numero sbagliato.
+
+```dart
+// lib/domain/quantita.dart
+enum UnitaMisura { kg, l }
+
+sealed class Quantita { const Quantita(); }
+/// Pezzi interi, 1..999.
+final class Pezzi extends Quantita { const Pezzi(this.n); final int n; }
+/// Peso (grammi) o volume (millilitri), 1..99999 millesimi di [unita].
+final class AMisura extends Quantita { const AMisura(this.millesimi, this.unita); final int millesimi; final UnitaMisura unita; }
+```
+
+```dart
+// lib/domain/offerta.dart
+sealed class Offerta {
+  const Offerta();
+  /// Il totale di [pezzi] pezzi a [prezzoUnitario] con questa offerta. Per le offerte che non
+  /// dipendono dalla quantita' (PrezzoBarrato, PrezzoConCarta) e' prezzoUnitario × pezzi.
+  Money totale(Money prezzoUnitario, int pezzi);
+  /// Testo breve per la riga ("3x2", "−30%"): lo produce lib/app/labels.dart, NON il dominio.
+  Map<String, Object?> toJson();                  // {"tipo": "...", ...}
+  static Offerta? fromJson(Map<String, Object?>? json);   // tollerante: tipo sconosciuto → null
+}
+/// «Prendi N paghi M»: 3x2, 2x1, «2+1» (= 3x2), «1+1» (= 2x1), «3x1».
+final class OffertaNxM extends Offerta { const OffertaNxM({required this.prendi, required this.paghi}); final int prendi; final int paghi; }
+/// Sconto percentuale applicato al prezzo pieno (bollino «−30%» con il prezzo pieno stampato).
+final class OffertaPercentuale extends Offerta { const OffertaPercentuale(this.percento); final int percento; }   // 1..99
+/// Prezzo gia' scontato sul cartellino, con il pieno barrato o «anziche'»: informativa.
+final class OffertaPrezzoBarrato extends Offerta { const OffertaPrezzoBarrato(this.prezzoPieno); final Money prezzoPieno; }
+/// «−50% sul secondo pezzo»: ogni coppia, il secondo scontato.
+final class OffertaSecondoAPercento extends Offerta { const OffertaSecondoAPercento(this.percento); final int percento; }
+/// Prezzo riservato a chi ha la carta fedelta' (informativa: il prezzo unitario e' gia' quello scelto).
+final class OffertaPrezzoConCarta extends Offerta { const OffertaPrezzoConCarta(this.prezzoSenzaCarta); final Money prezzoSenzaCarta; }
+```
+
+Regole di calcolo, **esattamente** queste:
+
+| Offerta | `totale(p, q)` | Esempio |
+|---|---|---|
+| `OffertaNxM(prendi: N, paghi: M)` | `p × ((q ~/ N) × M + q % N)` | 3x2, p = 1,89, q = 4 → 1,89 × (1×2 + 1) = 5,67 |
+| `OffertaPercentuale(x)` | `q × (p − Arrotonda.scontoPercentuale(p, x))` | p = 1,98, −40% → sconto 0,79 → 1,19 a pezzo |
+| `OffertaPrezzoBarrato(pieno)` | `p × q` (p e' gia' il prezzo scontato) | 1,49 anziche' 2,99 |
+| `OffertaSecondoAPercento(x)` | `p × q − (q ~/ 2) × Arrotonda.scontoPercentuale(p, x)` | p = 3,00, −50%, q = 3 → 9,00 − 1,50 = 7,50 |
+| `OffertaPrezzoConCarta(senza)` | `p × q` | |
+| nessuna | `p × q` (Pezzi) / `Arrotonda.perMisura(p, millesimi)` (AMisura) | |
+
+⚑ **Il prezzo unitario di una riga con offerta NxM e' il prezzo PIENO**, anche se il cartellino
+mostra in grande il prezzo «effettivo». Caso c11 (Carrefour «2+1»): grande 1,26, piccolo 1,89; 1,89 ×
+2/3 = 1,26 → l'app salva p = 1,89 con `OffertaNxM(3, 2)` e mostra «1,26 cad. se ne prendi 3». Caso c01
+(Tigros «3x1 anziche' 3,19»): 3,19 × 1/3 = 1,063 → 1,06 → p = 3,19, `OffertaNxM(3, 1)`. Cosi' il
+totale e' quello della cassa (3 pezzi = 3,19, non 3 × 1,06 = 3,18) e una quantita' non multipla di N
+si conta giusta. Le offerte NxM su `AMisura` **non** esistono (si ignorano: offerta null).
+⚑ **Un bollino «−X%» con il solo prezzo pieno stampato** (c28, c30: lo sconto si applica alla cassa)
+diventa `OffertaPercentuale(X)`; con **entrambi** i prezzi stampati (c29, c33) vince il prezzo
+stampato (`OffertaPrezzoBarrato`) e la percentuale e' solo descrittiva: le percentuali dei cartellini
+sono arrotondate (c33: 2,99 «−23%» stampa 2,29, mentre 2,99 × 0,77 = 2,30). `−0%` (c23) = nessuna
+offerta.
+
+```dart
+// lib/domain/riga_spesa.dart
+enum OrigineRiga { tastierino, cartellino, bilancia, scontrino }
+
+@immutable
+final class RigaSpesa {
+  const RigaSpesa({this.id, required this.nome, required this.quantita, required this.prezzoUnitario,
+      this.offerta, this.prezzoRiferimento, this.unitaRiferimento, this.totaleStampato,
+      required this.origine});
+  final int? id;
+  final String nome;                 // 0..80 caratteri; '' = «Articolo» nell'interfaccia
+  final Quantita quantita;
+  /// Per Pezzi: il prezzo di un pezzo (PIENO se c'e' un'offerta NxM). Per AMisura: €/kg o €/l.
+  /// Negativo solo per le righe di sconto/buono battute con «−» (quantita' Pezzi(1)).
+  final Money prezzoUnitario;
+  final Offerta? offerta;
+  /// Il prezzo al kg/l stampato sul cartellino di un prodotto a pezzi (solo informativo).
+  final Money? prezzoRiferimento;
+  final UnitaMisura? unitaRiferimento;
+  /// Bilancia: il totale stampato sull'etichetta. Se presente VINCE sul calcolo (e' cio' che si paga).
+  final Money? totaleStampato;
+  final OrigineRiga origine;
+
+  /// totaleStampato ?? (offerta?.totale(...) ?? calcolo base di F12.1.3).
+  Money get totale;
+  bool get eSconto => prezzoUnitario.isNegative;
+  RigaSpesa copyWith({...});
+}
+```
+
+```dart
+// lib/domain/spesa.dart
+enum StatoSpesa { inCorso, chiusa }
+enum FonteRighe { contate, scontrino }   // quale insieme di righe fa fede per totale e statistiche
+enum LivelloBudget { nessuno, ok, vicino, sforato }   // vicino = da 80% a 100% incluso
+
+@immutable
+final class Spesa {
+  const Spesa({this.id, required this.stato, this.negozioId, required this.iniziataIl, this.chiusaIl,
+      this.dataSpesa, this.budget, required this.righe, this.righeScontrino = const [],
+      this.totaleScontrino, this.fonte = FonteRighe.contate});
+  final int? id; final StatoSpesa stato; final int? negozioId;
+  final DateTime iniziataIl; final DateTime? chiusaIl; final CivilDate? dataSpesa;
+  final Money? budget;                       // null = nessun budget
+  final List<RigaSpesa> righe;               // le contate, in ordine di inserimento
+  final List<RigaSpesa> righeScontrino;      // origine scontrino, solo Pro
+  final Money? totaleScontrino;              // il TOTALE stampato, se letto
+  final FonteRighe fonte;
+  Money get totaleContato;                   // Money.sum(righe.map((r) => r.totale))
+  Money get totale;                          // fonte == scontrino ? (totaleScontrino ?? somma righeScontrino) : totaleContato
+  int get articoli;                          // somma dei Pezzi.n + 1 per ogni AMisura, righe di sconto escluse
+  Money? get residuoBudget;                  // budget − totale (negativo = sforato)
+  LivelloBudget get livelloBudget;
+}
+```
+
+⚑ **Il budget e' una colonna della spesa, non una tabella**: ogni spesa ha il suo (la spesa
+grande del sabato non e' quella del pane), e il «budget abituale» e' un'impostazione
+(`SrSettingKeys.budgetPredefinito`) che precompila quello della spesa nuova. Un budget mensile non
+e' stato chiesto: non esiste (se servira', D3).
+
+```dart
+// lib/domain/tastierino.dart
+enum TastoTastierino { c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c00, virgola, per, meno, cancella, piu }
+
+/// Cosa produce un tocco: niente, una riga nuova, o «+1 all'ultima riga».
+sealed class EffettoTasto { const EffettoTasto(); }
+final class NessunEffetto extends EffettoTasto { const NessunEffetto({this.rifiutato = false}); final bool rifiutato; } // rifiutato = vibrazione d'errore
+final class AggiungiRiga extends EffettoTasto { const AggiungiRiga({required this.prezzo, required this.pezzi}); final Money prezzo; final int pezzi; }
+final class IncrementaUltima extends EffettoTasto { const IncrementaUltima(); }
+
+@immutable
+final class TastierinoState {
+  const TastierinoState.vuoto();
+  /// Il testo grande da mostrare a destra di «Prezzo a mano»: "2,49", "3 × 2,49", "− 1,50", "".
+  String get display;          // costruito SENZA intl: virgola decimale fissa (l'app e' in euro)
+  bool get vuoto;
+  (TastierinoState, EffettoTasto) premi(TastoTastierino tasto);
+  TastierinoState svuota();    // pressione lunga su ⌫
+}
+```
+
+Regole del tastierino (⚑ **modalita' «cassa» con virgola facoltativa**: chi batte `2 4 9` ottiene
+2,49 come alla cassa; chi batte `2 , 4 9` come legge sul cartellino ottiene lo stesso 2,49; il
+display grande mostra **sempre** il valore formattato, quindi un errore si vede prima del `+`):
+
+| Situazione | Tasto | Risultato |
+|---|---|---|
+| cifre senza virgola | `c0`..`c9` | le cifre entrano da destra come centesimi: `2` → 0,02; `2 4` → 0,24; `2 4 9` → 2,49 |
+| cifre senza virgola | `c00` | come due `c0`: `3 00` → 3,00 (il tasto «00» delle casse) |
+| cifre senza virgola | `virgola` | le cifre gia' battute diventano **euro**: `2 ,` → «2,» ; poi al massimo **2** cifre di decimali (`2 , 5` → 2,50 al `+`) |
+| dopo la virgola, gia' 2 decimali | cifra | rifiutata (`NessunEffetto(rifiutato: true)`) |
+| prezzo > 9999,99 | cifra | rifiutata |
+| numero battuto, niente × | `per` | il numero (come **intero**, 1..99) diventa la quantita': display «3 ×»; poi si batte il prezzo |
+| prezzo battuto | `per` | il prezzo resta, display «2,49 ×»; il numero battuto dopo e' la quantita' (`2 4 9 × 3 +` = 3 × 2,49) |
+| quantita' 0 o > 99 | `piu` | rifiutato |
+| display vuoto | `meno` | segno negativo: «−»; la riga sara' uno **sconto/buono** (prezzo negativo, `Pezzi(1)`, nome «Sconto») |
+| display non vuoto | `meno` | inverte il segno |
+| qualunque | `cancella` | toglie l'ultimo carattere logico (cifra, virgola, «×», «−»); pressione lunga = `svuota()` |
+| valore valido ≠ 0 | `piu` | `AggiungiRiga(prezzo, pezzi)` e stato vuoto |
+| display vuoto | `piu` | `IncrementaUltima` (+1 pezzo all'ultima riga a pezzi; se l'ultima e' a misura o sconto → rifiutato) |
+| valore 0,00 | `piu` | rifiutato |
+
+⚑ «Togliere l'ultimo» (dalla scheda delle idee) **non** e' un tasto: l'ultima riga della lista ha lo
+scorrimento per eliminarla, con «Annulla» nello snack (F12.1.12). Un tasto del tastierino che
+cancella righe sarebbe a un pollice da ⌫, e un errore costerebbe un articolo.
+
+```dart
+// lib/domain/nomi.dart
+abstract final class Nomi {
+  /// Maiuscolo, senza accenti, punteggiatura → spazio, spazi singoli, formati («200 G», «GR.600»,
+  /// «LT 1», «X2») tolti. "Crema NUTKAO bicch.birra gr.600" → "CREMA NUTKAO BICCH BIRRA".
+  static String normalizza(String nome);
+  /// Similarita' 0..1 fra un nome di cartellino e una descrizione di scontrino (troncata, abbreviata):
+  /// massimo fra Jaccard sulle parole e "prefissi": una parola dello scontrino di ≥ 3 lettere vale
+  /// come uguale se e' prefisso di una parola del cartellino ("PR COTTO" ~ "PROSCIUTTO COTTO").
+  static double similarita(String a, String b);
+  /// Il formato della confezione, se c'e' nel nome: "200 g" → AMisura(200, kg); "LT 1" → AMisura(1000, l);
+  /// "6x180 ml" → AMisura(1080, l); "50 cl" → AMisura(500, l). Serve al controllo prezzo/formato ≈ €/kg.
+  static AMisura? formato(String nome);
+}
+```
+
+#### F12.1.4 — OCR nel dominio e parser del cartellino (`lib/domain/lettura/`)
+
+Il dominio lavora **solo** su `RigaOcr` (da `package:micro_ocr/riga_ocr.dart`, libreria pura),
+qualunque sia il motore: **un solo parser per Vision e per PP-OCR** (f12-ocr.md §4).
+
+```dart
+// packages/micro_ocr/lib/src/riga_ocr.dart
+/// Un rettangolo in coordinate NORMALIZZATE 0..1 rispetto all'immagine passata al motore,
+/// origine in ALTO a sinistra, asse y verso il basso.
+@immutable
+final class Riquadro {
+  const Riquadro({required this.sinistra, required this.alto, required this.larghezza, required this.altezza});
+  /// Da Vision: boundingBox normalizzato con origine in BASSO a sinistra. alto = 1 − (y + h).
+  factory Riquadro.daVision(double x, double y, double w, double h);
+  final double sinistra, alto, larghezza, altezza;
+  double get destra; double get basso; double get centroX; double get centroY;
+  /// Sovrapposizione verticale 0..1, misurata sul piu' basso dei due: serve a dire «stessa riga».
+  double sovrapposizioneVerticale(Riquadro altro);
+  Map<String, double> toJson();                       // {"x":..,"y":..,"w":..,"h":..}
+  factory Riquadro.fromJson(Map<String, Object?> json);
+}
+
+@immutable
+final class RigaOcr {
+  const RigaOcr({required this.testo, required this.riquadro, required this.confidenza});
+  final String testo; final Riquadro riquadro; final double confidenza;   // 0..1
+  Map<String, Object?> toJson();                      // {"t":..,"x":..,"y":..,"w":..,"h":..,"c":..}
+  factory RigaOcr.fromJson(Map<String, Object?> json);
+}
+
+enum OcrModo { cartellino, scontrino }
+```
+
+⚑ **La conversione di Vision si fa in Dart** (`Riquadro.daVision`), non in Swift: cosi' e' testata
+(`riga_ocr_test.dart`) e la trappola dell'asse y capovolto non vive in un file che nessun test tocca.
+
+```dart
+// lib/domain/lettura/numeri_ocr.dart
+/// Un numero «da prezzo» trovato nel testo OCR, con il riquadro da cui viene.
+@immutable final class NumeroOcr {
+  const NumeroOcr({required this.valore, required this.riquadro, required this.forma, required this.testo});
+  final Money valore; final Riquadro riquadro; final FormaNumero forma; final String testo;
+}
+enum FormaNumero { esplicito, spezzato, fuso, peso }   // peso = 3 decimali (0,258)
+
+abstract final class NumeriOcr {
+  /// Correzioni di lettura DENTRO i gruppi di cifre: O/o→0, I/l/|→1, S→5 (solo se adiacente a cifre),
+  /// "16..50"→"16,50", spazio fra cifre e separatore tolto ("2 ,49"→"2,49"), "€" e "EUR" tolti.
+  static String pulisci(String testo);
+  /// I numeri espliciti di una riga: \d{1,4}(\.\d{3})*[,.]\d{2}, piu' "0,258"-like (peso, 3 decimali).
+  /// "1.100,00" → 1100,00 (separatore delle migliaia, c26). Prezzo negativo: "-0,40" e "0,40-".
+  static List<NumeroOcr> espliciti(RigaOcr riga);
+  /// Euro grandi + centesimi piccoli in apice in DUE riquadri (c01: "1" | "06" → 1,06). Regola:
+  /// A ha solo 1..4 cifre; B ha esattamente 2 cifre; B.altezza fra 0,25 e 0,75 × A.altezza;
+  /// B.sinistra fra A.destra − 0,2·A.altezza e A.destra + 0,6·A.altezza; B.alto ≤ A.alto + 0,35·A.altezza.
+  static List<NumeroOcr> spezzati(List<RigaOcr> righe);
+  /// Cifre senza separatore in un riquadro alto (c33: "229" → 2,29): 3..5 cifre, nessun altro carattere,
+  /// altezza ≥ 1,5 × mediana delle altezze delle altre righe con lettere. Le ultime 2 cifre sono i centesimi.
+  static List<NumeroOcr> fusi(List<RigaOcr> righe);
+}
+```
+
+```dart
+// lib/domain/lettura/cartellino_parser.dart
+@immutable final class PrezzoUnitario { const PrezzoUnitario(this.valore, this.unita); final Money valore; final UnitaMisura unita; }
+
+@immutable final class PropostaCartellino {
+  const PropostaCartellino({required this.nome, this.prezzo, this.prezzoPieno, this.unitario,
+      this.offerta, this.formato, required this.affidabilita, this.alternative = const []});
+  final String nome;                 // '' se non trovato
+  final Money? prezzo;               // il prezzo UNITARIO da usare nella riga (PIENO con NxM, F12.1.3)
+  final Money? prezzoPieno;          // barrato / «anziche'»
+  final PrezzoUnitario? unitario;    // €/kg o €/l stampato
+  final Offerta? offerta;
+  final AMisura? formato;            // dal nome ("200 g")
+  final double affidabilita;         // 0..1, vedi «Punteggio»
+  final List<Money> alternative;     // gli altri prezzi letti, come chip «Era invece…»
+  /// Prodotto venduto a peso/volume: c'e' solo il prezzo al kg/l (c02 zucchine, c03 borlotti, c24).
+  bool get aMisura => prezzo == null && unitario != null;
+}
+
+@immutable final class LetturaCartellino {
+  const LetturaCartellino(this.proposte);
+  final List<PropostaCartellino> proposte;    // ordinate per affidabilita'; vuota = niente di utile
+  bool get vuota => proposte.isEmpty;
+}
+
+class CartellinoParser {
+  const CartellinoParser({this.preferisciPrezzoCarta = true});
+  final bool preferisciPrezzoCarta;           // impostazione «Ho la carta fedelta'»
+  LetturaCartellino interpreta(List<RigaOcr> righe);
+}
+```
+
+**Algoritmo di `CartellinoParser.interpreta`, nell'ordine:**
+
+1. **Pulizia**: `NumeriOcr.pulisci` su ogni riga; scartate le righe con confidenza < 0,30 e quelle
+   con riquadro di area < 0,0004 (rumore).
+2. **Candidati prezzo**: `espliciti` ∪ `spezzati` ∪ `fusi` (un riquadro gia' usato da uno spezzato
+   non genera anche un fuso). Ogni candidato ha la sua **altezza** (quella del riquadro delle cifre
+   grandi).
+3. **Contesto di ogni candidato**: le parole nella stessa riga visiva (`RigheVisive`, F12.1.6) e
+   nelle righe entro 1,5 altezze sopra/sotto, cercate in minuscolo e senza accenti (nelle tabelle di
+   questa sezione `\|` e' il `|` della regex, scappato per Markdown):
+
+   | Parole (regex, minuscolo, senza accenti) | Il candidato e'… |
+   |---|---|
+   | `€\s*/\s*kg`, `/\s*kg`, `al\s*kg`, `euro\s*al\s*kg`, `prezzo\s*(al\|per)\s*kg`, `eur/kg` | prezzo unitario, `UnitaMisura.kg` |
+   | `€\s*/\s*l(t\|itro)?\b`, `al\s*l(t\|itro)\b`, `/\s*lt?\b`, `prezzo\s*al\s*litro` | prezzo unitario, `UnitaMisura.l` |
+   | `anziche`, `invece\s*di`, `prima\b`, `prezzo\s*pieno`, `era\b` | prezzo pieno |
+   | `con\s*(la\s*)?carta`, `carta\s*fedelta`, `soci\b`, `prezzo\s*carta` | prezzo con carta |
+
+4. **Offerte nel testo** (tutta l'immagine):
+
+   | Regex | Offerta |
+   |---|---|
+   | `\b([2-5])\s*[x×]\s*([1-4])\b` con N > M | `OffertaNxM(N, M)` |
+   | `prendi\s*([2-5])\s*paghi\s*([1-4])` | `OffertaNxM(N, M)` |
+   | `\b([1-4])\s*\+\s*1\b` («2+1», «1+1») | `OffertaNxM(N + 1, N)` |
+   | `-?\s*([1-9]\d?)\s*%` vicino a `sul\s*(2\|secondo)`, `2°\s*pezzo` | `OffertaSecondoAPercento(x)` |
+   | `-\s*([1-9]\d?)\s*%` oppure `sconto\s*([1-9]\d?)\s*%` | percentuale x (vedi passo 6) |
+   | `\b0\s*%` | nessuna (c23) |
+
+5. **Scelta del prezzo da pagare** fra i candidati che **non** sono unitari ne' pieni:
+   - si prende il candidato **piu' alto** (altezza del riquadro); a parita' (±10%), quello col
+     **controllo formato** riuscito: se c'e' un `formato` nel nome e un prezzo unitario U, il
+     candidato P per cui `|P × 1000 / formato.millesimi − U| ≤ max(2 cent, 0,5% di U)` vince (c14:
+     1,99 / 0,200 kg = 9,95 = U; c16: 3,59 / 0,600 = 5,98 vs 5,99 stampato, dentro la tolleranza);
+   - prezzo **con carta** e prezzo normale presenti → si usa quello con carta se
+     `preferisciPrezzoCarta`, l'altro va in `OffertaPrezzoConCarta(senza)` e in `alternative`;
+   - se **non** resta nessun candidato ma c'e' un unitario → proposta `aMisura` (si apre il foglio
+     del peso, F12.1.12).
+6. **Offerta e prezzo pieno**:
+   - NxM trovata e due prezzi P (grande) e Q (piccolo, > P) con `|P − round(Q × M / N)| ≤ 1 cent`
+     → `prezzo = Q` (pieno), `offerta = OffertaNxM(N, M)` (c01, c11). Senza Q, `prezzo = P`
+     con l'offerta NxM e affidabilita' ridotta di 0,2 (il «grande» potrebbe essere l'effettivo);
+   - pieno trovato (parole del passo 3, oppure un secondo prezzo **maggiore** di P e alto meno di
+     0,8 × P) → `OffertaPrezzoBarrato(pieno)`; con percentuale anche presente, la percentuale si
+     ignora (F12.1.3);
+   - solo percentuale e un solo prezzo → `OffertaPercentuale(x)` sul prezzo letto (c28, c30).
+7. **Nome**: le righe con almeno 3 lettere, che non sono parole chiave ne' numeri ne' codici
+   (`^\d{8,13}$` EAN, `cod\.`, date `\d{2}[/.-]\d{2}`), **sopra** il prezzo scelto o alla sua sinistra,
+   dall'alto in basso; si uniscono **al massimo 2**, con uno spazio; si tronca a 60 caratteri.
+   Maiuscole conservate come sul cartellino (l'interfaccia lo mostra cosi', lo scontrino e' in
+   maiuscolo e il confronto normalizza).
+8. **Piu' cartellini nella stessa foto** (c18, c22, c26, c27, c33): se ci sono ≥ 2 candidati «prezzo
+   da pagare» con altezza entro il 25% l'uno dell'altro e centri distanti > 0,3 della larghezza o
+   > 0,3 dell'altezza, ogni riga si assegna al prezzo **piu' vicino** (distanza fra centri, con il
+   verticale pesato 1,5) e si ripetono i passi 3–7 per gruppo. Risultato: piu' proposte, ordinate per
+   **vicinanza al centro del mirino** (l'utente ha puntato quello). L'interfaccia chiede «Ho visto 2
+   cartellini: quale?».
+9. **Punteggio** `affidabilita'` (0..1): parte da 0,5; +0,2 forma `esplicito`, +0,1 `spezzato`,
+   −0,1 `fuso`; +0,2 controllo formato riuscito; +0,1 nome trovato; −0,2 ambiguita' (altri candidati
+   entro il 10% di altezza); media con la confidenza OCR delle righe usate; tagliato a [0, 1].
+   ⚑ **Il punteggio non decide se aggiungere** (non si aggiunge mai da solo, F12.0 punto 4): decide
+   solo se il foglio di conferma mette in evidenza le `alternative` (sotto 0,6) e il testo «Controlla
+   il prezzo».
+10. **Lettura vuota**: nessun candidato → `LetturaCartellino(const [])`; l'interfaccia dice «Non
+    riesco a leggere il prezzo» con «Batti a mano» (e, se le righe lette hanno poche lettere e
+    nessuna cifra, «Lo scritto a mano non lo leggo ancora»).
+
+**Casi di test che DEVONO passare** (in `test/domain/cartellino_parser_test.dart`, con `RigaOcr`
+**scritte a mano** che riproducono la disposizione del campione citato; prodotti e nomi **inventati**,
+non copiati dai campioni):
+
+| Caso (ispirato a) | Righe OCR finte | Atteso |
+|---|---|---|
+| `c01_tigros_3x1_anziche` | «PROSCIUTTO…», «1» grande + «06» piccolo in apice, «3x1», «anziche' 3,19», «10,60 €/kg» | prezzo 3,19, `OffertaNxM(3,1)`, unitario 10,60/kg, alternative [1,06] |
+| `c11_carrefour_fr_2piu1` | «1,26» grande, «1,89» piccolo, «2+1», «5,04 €/kg» | prezzo 1,89, `OffertaNxM(3,2)` |
+| `c14_esselunga_borotalco` | «SAPONE … 200 g», «1,99», «9,95 €/kg» piccolo | prezzo 1,99, formato 200 g, controllo riuscito |
+| `c16_esselunga_nutkao` | «… GR.600», «3,59», «5,99 €/kg» | prezzo 3,59 (tolleranza del controllo) |
+| `c19_esselunga_distillato_litro` | «… 50 cl», «21,90», «43,80 €/l» | prezzo 21,90, unitario litro |
+| `c20_esselunga_tonica_litro` | «… 6x180 ml», «1,98», «1,84 €/lt» | formato 1080 ml, 1,98 / 1,08 = 1,833 vs 1,84: dentro la tolleranza |
+| `c22_esselunga_farine_due_cartellini` | due prezzi grandi lontani | 2 proposte, la piu' vicina al centro prima |
+| `c26_peck_carciofini_kg` | «132,00», «1.100,00 €/kg» | unitario 1100,00 (migliaia) |
+| `c28_esselunga_misticanza_sconto40` | «1,98», bollino «-40%» | `OffertaPercentuale(40)`, totale di 1 pezzo 1,19 |
+| `c29_last_minute_barrato_50` | «1,49» grande, «2,99» piccolo, «-50%» | prezzo 1,49, `OffertaPrezzoBarrato(2,99)` |
+| `c30_pam_rucola_sconto30` | «0,99», «-30%» | totale 1 pezzo 0,69 (sconto 0,297 → 0,30) |
+| `c33_iper_esl_prezzo_dinamico` | «229» fuso grande, «2,99» piccolo, «-23%» | prezzo 2,29 (fuso), barrato 2,99 |
+| `c02_palermo_offerta_ortofrutta` / `c03_borlotti_manoscritto_kg` | «ZUCCHINE», «1,48 €/kg» | `aMisura`, unitario 1,48/kg |
+| `c23_cartello_barrato_sconto_0` | «2,50», «0%» | prezzo 2,50, nessuna offerta |
+| `c04_friggitelli_manoscritto_kg` | sole lettere, nessuna cifra | lettura vuota |
+| (prezzo con carta) | «2,49», «con carta 1,99» | prezzo 1,99, `OffertaPrezzoConCarta(2,49)`; con `preferisciPrezzoCarta: false` → 2,49 |
+
+#### F12.1.5 — Parser dell'etichetta della bilancia (`lib/domain/lettura/bilancia_parser.dart`)
+
+```dart
+@immutable final class LetturaBilancia {
+  const LetturaBilancia({this.prodotto, this.pesoNetto, this.alKg, this.totale, this.tara, required this.coerente});
+  final String? prodotto;
+  final AMisura? pesoNetto;          // grammi (UnitaMisura.kg)
+  final Money? alKg;
+  final Money? totale;               // cio' che si paga: VINCE nel conto
+  final AMisura? tara;
+  /// Arrotonda.perMisura(alKg, peso) == totale entro 1 centesimo.
+  final bool coerente;
+  bool get utile => totale != null;  // senza totale non e' un'etichetta utilizzabile
+}
+
+class BilanciaParser {
+  const BilanciaParser();
+  LetturaBilancia? interpreta(List<RigaOcr> righe);   // null = non sembra un'etichetta di bilancia
+  /// Vero se le righe hanno la «firma» della bilancia: un peso con 3 decimali e una tripla
+  /// peso × €/kg ≈ totale. Lo usa la pagina della fotocamera per passare da sola a «Bilancia».
+  bool riconosce(List<RigaOcr> righe);
+}
+```
+
+**Algoritmo:**
+1. Candidati: pesi = numeri con **3 decimali** (`0,258`) oppure `\d+\s*g\b` (→ grammi); importi =
+   numeri espliciti con 2 decimali (`NumeriOcr.espliciti`).
+2. Etichette vicine (stessa riga visiva o riga sopra): `netto|peso\s*netto|p\.?\s*netto|kg\s*netto`
+   → peso netto; `tara` → tara (esclusa dal conto); `€\s*/\s*kg|eur/kg|prezzo\s*/?\s*kg|prezzo\s*al\s*kg`
+   → al kg; `importo|prezzo\s*€?$|totale|da\s*pagare|euro\b` → totale.
+3. Se manca qualche etichetta: **ricerca combinatoria** su (peso, alKg, totale) fra i candidati
+   rimasti, con `|Arrotonda.perMisura(alKg, peso) − totale| ≤ 1 cent`; se c'e' **una sola** tripla
+   coerente, si prende; se piu' d'una, vince quella con il totale nel riquadro piu' alto.
+4. `coerente = false` se i tre valori ci sono ma la verifica fallisce (> 1 cent): si usa comunque il
+   **totale stampato** (e' quello della cassa) e il foglio mostra «Il conto peso × prezzo non torna:
+   controlla» in ambra.
+5. Prodotto: la riga di lettere piu' in alto che non e' un'etichetta (`peso`, `tara`, `prezzo`,
+   `confezionato`, `da consumarsi`, `lotto`, date).
+6. ⚑ Il codice a barre «a peso variabile» (EAN che inizia per 2, con il prezzo dentro) potrebbe dare un
+   quarto controllo: **non in v1** (vedi §9, voce nuova DT-SR1).
+
+**Casi di test** (`test/domain/bilancia_parser_test.dart`; numeri dai campioni, sono fatti, non
+immagini): tutte e 9 le verita' di `campioni.csv` devono essere **coerenti** con `Arrotonda`
+(b01 0,258 × 29,90 = 7,71; b02 0,326 × 5,90 = 1,92; b03 0,160 × 7,39 = 1,18; b04 0,099 × 280,00 =
+27,72; b05 0,494 × 44,99 = 22,23; b06 0,500 × 5,86 = 2,93; b07 1,082 × 1,59 = 1,72; b08 0,225 × 12,00
+= 2,70; b09 0,314 × 8,90 = 2,79), piu': tara presente e ignorata (come b01, b02, b04); etichette senza
+parole chiave risolte dalla ricerca combinatoria; due etichette sovrapposte (come b06) → si propone
+quella con la tripla coerente; peso in grammi «258 g»; totale incoerente → `coerente: false` e
+totale stampato.
+
+#### F12.1.6 — Parser dello scontrino (`lib/domain/lettura/scontrino_parser.dart`)
+
+**Com'e' fatto uno scontrino italiano.** Dal 2020 il registratore telematico (RT) stampa il
+**«DOCUMENTO COMMERCIALE di vendita o prestazione»** (campioni s01, s13, s14, s16); restano in giro
+formati vecchi («SCONTRINO FISCALE», «TOTALE EURO»). Struttura tipica, dall'alto (esempio
+**inventato**):
+
+```
+SUPERMERCATO ESEMPIO S.R.L.            ← testata: ragione sociale (= negozio)
+VIA ROMA 1 - 00100 ROMA                ← indirizzo (scartare)
+P.IVA 01234567890                      ← scartare
+DOCUMENTO COMMERCIALE                  ← fine testata
+di vendita o prestazione
+DESCRIZIONE              IVA  Prezzo(€)
+PASTA SEMOLA 500G        10%      0,89 ← riga articolo: descrizione + (IVA) + importo a destra
+2 x 1,29                               ← quantita' (prima O dopo la descrizione, dipende dalla cassa)
+BISCOTTI FROLLINI        10%      2,58
+0,248 kg x 12,50 €/kg                  ← riga pesata
+PROSCIUTTO COTTO         10%      3,10
+SCONTO                           -0,40 ← sconto (anche "0,40-" o "OFFERTA -0,40")
+STORNO PASTA SEMOLA 500G         -0,89 ← storno di una riga gia' battuta
+SUBTOTALE                         5,28
+TOTALE COMPLESSIVO                5,28 ← il TOTALE
+di cui IVA                        0,48 ← scartare
+Pagamento elettronico             5,28 ← sezione pagamento: scartare TUTTA (dati della carta)
+Importo pagato                    5,28
+10-10-2026 18:32  DOC.N. 0123-0045     ← data e ora
+RT 99MEY012345                         ← matricola (scartare)
+```
+
+```dart
+enum TipoRigaScontrino { articolo, sconto, storno }
+
+@immutable final class RigaScontrino {
+  const RigaScontrino({required this.descrizione, required this.importo, required this.tipo,
+      this.quantita, this.prezzoUnitario, this.stornata = false});
+  final String descrizione;
+  final Money importo;               // con segno: sconti e storni negativi
+  final TipoRigaScontrino tipo;
+  final Quantita? quantita;          // da "2 x 1,29" (Pezzi) o "0,248 kg x 12,50" (AMisura)
+  final Money? prezzoUnitario;
+  final bool stornata;               // un articolo annullato da uno storno successivo
+}
+
+@immutable final class LetturaScontrino {
+  const LetturaScontrino({this.negozio, this.data, required this.righe, this.totale, required this.righeIgnorate});
+  final String? negozio;
+  final CivilDate? data;
+  final List<RigaScontrino> righe;   // nell'ordine dello scontrino
+  final Money? totale;               // il TOTALE stampato
+  final int righeIgnorate;           // righe del corpo non capite (per il messaggio «N righe non lette»)
+  Money get sommaRighe;              // somma degli importi (stornate comprese: lo storno le compensa)
+  bool get quadra;                   // totale != null && totale == sommaRighe
+  int get articoli;                  // righe articolo non stornate (confrontabile con "righe" della verita')
+}
+
+class ScontrinoParser {
+  const ScontrinoParser();
+  LetturaScontrino interpreta(List<RigaOcr> righe, {DateTime? oggi});
+}
+```
+
+```dart
+// lib/domain/lettura/righe_visive.dart
+@immutable final class RigaVisiva {
+  const RigaVisiva(this.pezzi);
+  final List<RigaOcr> pezzi;                 // da sinistra a destra
+  String get testo;                          // pezzi uniti con uno spazio
+  Riquadro get riquadro;                     // l'unione
+  /// L'ultimo numero esplicito il cui riquadro finisce oltre il 60% della larghezza: la colonna prezzi.
+  NumeroOcr? get importoADestra;
+}
+abstract final class RigheVisive {
+  /// Ordina per centro verticale; due riquadri stanno nella stessa riga se la loro
+  /// sovrapposizioneVerticale ≥ 0,5. ⚑ Serve perche' PP-OCR spezza una riga in piu' riquadri
+  /// (descrizione | IVA | prezzo) mentre Vision spesso la da' intera: dopo questo passo i due
+  /// motori producono le stesse righe.
+  static List<RigaVisiva> raggruppa(List<RigaOcr> righe);
+}
+```
+
+**Algoritmo di `ScontrinoParser.interpreta`:**
+1. `RigheVisive.raggruppa`, poi `NumeriOcr.pulisci` sul testo di ogni riga.
+2. **Zone**: *testata* fino alla prima riga che contiene `documento\s*commerciale|descrizione|scontrino\s*fiscale`
+   (esclusa) oppure, se non c'e', fino alla prima riga con `importoADestra`; *corpo* fino alla riga
+   del totale (inclusa); *piede* il resto.
+3. **Negozio**: nella testata, la prima riga con ≥ 4 lettere che **non** contiene `via|viale|piazza|p\.?zza|corso|c\.so|tel|p\.?\s*iva|c\.?f\.|cap\b|\d{5}`
+   ne' `documento|commerciale|benvenut|grazie`; si tolgono `s\.?r\.?l\.?|s\.?p\.?a\.?|s\.?a\.?s\.?|snc`
+   in fondo solo per il nome **mostrato** (il nome intero resta nel suggerimento del negozio).
+4. **Corpo**, riga per riga (le regex sul testo pulito, minuscolo):
+
+   | Riga | Riconoscimento | Effetto |
+   |---|---|---|
+   | quantita' | `^\s*(\d{1,3})\s*[x×*]\s*(\d+[.,]\d{2})\s*$` | `Pezzi(n)`, prezzo unitario: si attacca all'articolo **adiacente** (precedente o successivo) il cui importo e' `n × prezzo` ±1 cent; se nessuno quadra, alla riga **successiva** |
+   | pesata | `(\d+[.,]\d{3})\s*kg\s*[x×*]\s*(\d+[.,]\d{2})` | `AMisura(grammi, kg)` + €/kg, attaccata come sopra con `Arrotonda.perMisura` (s03) |
+   | sconto | importo negativo (`-0,40` o `0,40-`) **oppure** `sconto|offerta|promo|buono|coupon|risparmio` con importo | `TipoRigaScontrino.sconto`, importo **negativo** (s06 «OFFERTA -0,40») |
+   | storno | `storno|annull|reso|correzione` con importo | `storno`, importo negativo; marca `stornata` l'ultimo articolo **precedente** con lo stesso importo in valore assoluto e descrizione simile (`Nomi.similarita` ≥ 0,5, o uguale se la riga di storno non ha descrizione) (s16) |
+   | articolo | `importoADestra` e almeno 2 lettere a sinistra | `articolo`: descrizione = testo a sinistra dell'importo, tolti i token IVA in coda (`\b\d{1,2}\s*%`, `\b(a\|b\|c\|d\|vi)\b`, `\*`) |
+   | quantita' in testa alla descrizione | `^(\d{1,2})\s+[a-z]` (s11 «3 COPERTO/ANTIPASTO 3,90») | `Pezzi(n)` e prezzo unitario = importo / n solo se divisibile, altrimenti nessuna quantita' |
+   | totale | `^totale(\s*complessivo\|\s*euro\|\s*eur\|\s*€)?\b` **non** preceduta da `sub` e **non** seguita da `iva` | `totale` = suo importo; se ce ne sono piu', vince `complessivo`, poi l'ultimo |
+   | subtotale, «di cui IVA», «totale IVA», «n. articoli», intestazioni di colonna | | ignorate (non contano in `righeIgnorate`) |
+   | altro | | `righeIgnorate++` |
+
+5. **Piede**: tutto cio' che segue il totale e' **scartato** tranne la data: ☠ la sezione pagamento
+   contiene ultime cifre della carta, codici di autorizzazione, terminale (s13). **Non** entra in
+   nessuna struttura, ne' in memoria oltre la durata del parse, ne' nel database.
+6. **Data**: la prima `\b(\d{2})[-/.](\d{2})[-/.](\d{2}|\d{4})\b` del piede (poi della testata),
+   anno a 2 cifre = 20xx; valida solo se non e' nel futuro di oltre 1 giorno rispetto a `oggi` e non
+   e' piu' vecchia di 366 giorni; altrimenti `null`.
+7. Vecchio formato senza «documento commerciale»: stesse regole (la testata finisce al primo importo).
+
+**Fusione di piu' foto dello stesso scontrino** (`lib/domain/lettura/unisci_parti.dart`):
+
+```dart
+abstract final class UnisciParti {
+  /// Ogni parte e' l'OCR di una foto, dall'alto in basso. Si concatenano le righe visive; se le ultime
+  /// k righe della parte i coincidono con le prime k della parte i+1 (k ≥ 2, stesso importo e testo con
+  /// similarita' ≥ 0,8), si tolgono i doppioni. Ritorna anche se la giunzione e' stata trovata.
+  static ({List<RigaOcr> righe, List<bool> giunzioniTrovate}) unisci(List<List<RigaOcr>> parti);
+}
+```
+⚑ Le coordinate di ogni parte si **impilano**: alla parte i+1 si somma `i + 1` all'asse y (ogni parte
+occupa l'intervallo [i, i+1]), cosi' `RigheVisive` funziona sul tutto senza sapere delle foto.
+☠ Una giunzione non trovata vuol dire «forse ci sono righe doppie o mancanti»: il confronto lo dice
+(«Ho unito 2 foto senza trovare il punto di unione: controlla le righe vicino alla piega»).
+
+**Casi di test** (`test/domain/scontrino_parser_test.dart`, righe finte nello stile del campione
+citato; i numeri della verita' sono fatti e si possono usare):
+
+| Caso (ispirato a) | Atteso |
+|---|---|
+| `s01_documento_commerciale_iva_kg` | totale 11,85, 7 articoli, colonna IVA tolta dalle descrizioni, riga pesata attaccata |
+| `s03_pizzamania_pesate` | 4 righe pesate: 0,248 × 12,50 = 3,10; 0,186 × 14,00 = 2,60; 0,126 × 7,50 = 0,95; 0,098 × 7,50 = 0,74; totale 7,39 quadra |
+| `s06_emmepiu_offerta` | riga «OFFERTA -0,40» = sconto; totale 6,15 = somma |
+| `s07_interspar_catanzaro` | quattro righe uguali «ACQUA …» con la quantita' su riga separata |
+| `s10_dm_reparti` | descrizioni «REPARTO 1»: righe valide anche senza nome di prodotto |
+| `s11_trattoria_righe_qta` | quantita' in testa alla descrizione |
+| `s16_deco_storno_2025` | storno: l'articolo stornato marcato, 2 articoli veri, totale 4,78 |
+| (pagamento) | righe «PAGAMENTO ELETTRONICO», «************1234», «AUT. 123456» dopo il totale → assenti dal risultato |
+| (data) | «10-10-26 18:32» → 2026-10-10; una data nel 2031 → null |
+| (non quadra) | una riga persa → `quadra == false`, `righeIgnorate` > 0 |
+| (due parti) | parti con 3 righe sovrapposte → nessun doppione, giunzione trovata |
+
+#### F12.1.7 — Confronto contato vs scontrino (`lib/domain/confronto.dart`)
+
+```dart
+sealed class RigaSospetta { const RigaSospetta(); Money get delta; }   // delta = quanto in PIU' paghi rispetto al contato
+/// Stesso articolo, prezzo diverso (cartellino 7,90 · scontrino 9,40).
+final class PrezzoDiverso extends RigaSospetta { const PrezzoDiverso(this.contata, this.scontrino); final RigaSpesa contata; final RigaScontrino scontrino; }
+/// Sullo scontrino ma non contato (il sacchetto).
+final class SoloSulloScontrino extends RigaSospetta { const SoloSulloScontrino(this.scontrino); final RigaScontrino scontrino; }
+/// Contato ma non sullo scontrino (un articolo dimenticato dal cassiere, o lasciato).
+final class NonSulloScontrino extends RigaSospetta { const NonSulloScontrino(this.contata); final RigaSpesa contata; }
+/// Due righe uguali sullo scontrino e una sola contata: «battuto due volte?».
+final class ForseDoppia extends RigaSospetta { const ForseDoppia(this.contata, this.scontrino); final RigaSpesa contata; final RigaScontrino scontrino; }
+
+@immutable final class Abbinamento { const Abbinamento(this.contata, this.scontrino); final RigaSpesa contata; final RigaScontrino scontrino; }
+
+@immutable final class EsitoConfronto {
+  const EsitoConfronto({required this.totaleScontrino, required this.totaleContato,
+      required this.abbinate, required this.sospette});
+  final Money totaleScontrino;       // il TOTALE stampato, o la somma delle righe se manca
+  final Money totaleContato;
+  Money get differenza;              // totaleScontrino − totaleContato (positivo = paghi di piu')
+  bool get tuttoTorna;               // differenza == 0 && sospette.isEmpty
+  final List<Abbinamento> abbinate;
+  final List<RigaSospetta> sospette; // ordinate per |delta| decrescente
+}
+
+abstract final class Confronto {
+  static EsitoConfronto confronta(List<RigaSpesa> contate, LetturaScontrino scontrino);
+}
+```
+
+**Algoritmo** (deterministico; si confrontano **totali di riga**, cosi' «3 × 0,35» contato a mano
+e «ACQUA 1,05» sullo scontrino si abbinano):
+1. Dallo scontrino: righe articolo **non stornate**; ogni riga di sconto si **somma** all'articolo
+   che la precede (e' lo sconto di quell'articolo, s06); gli storni si ignorano (gia' compensati).
+   Dal contato: le righe con il loro `totale`; le righe di sconto battute a mano con «−» si confrontano
+   con gli sconti dello scontrino non attribuiti.
+2. **Passata 1** — stesso importo **e** `Nomi.similarita` ≥ 0,5: abbinate, in ordine di similarita'
+   decrescente.
+3. **Passata 2** — stesso importo, nome qualsiasi: abbinate in ordine di apparizione (la cassa batte
+   piu' o meno nell'ordine del nastro). ⚑ Le descrizioni dello scontrino sono troncate a ~18-20
+   caratteri e abbreviate («PR COTTO AQ.AR.SA FF»): l'importo e' l'indizio piu' affidabile.
+4. **Passata 3** — similarita' ≥ 0,6 e importo diverso: `PrezzoDiverso`.
+5. Scontrino rimasto con stessa descrizione e importo di una riga gia' abbinata: `ForseDoppia`;
+   altrimenti `SoloSulloScontrino`. Contato rimasto: `NonSulloScontrino`.
+6. `tuttoTorna` → schermata verde «Tutto torna»; altrimenti la card ambra «Differenza da guardare».
+
+**Casi di test** (`test/domain/confronto_test.dart`): l'esempio della tavola «C · Una mano»
+(contato 43,70, scontrino 45,35; Parmigiano 7,90 vs 9,40 → `PrezzoDiverso` +1,50; «Sacchetto» 0,15 →
+`SoloSulloScontrino`; differenza +1,65); quantita' contata vs riga unica; sconto dello scontrino
+attribuito all'articolo; articolo battuto due volte; contato vuoto (registrazione pura) → tutte
+`SoloSulloScontrino` e differenza = totale; stornata non conta.
+
+#### F12.1.8 — Statistiche (`lib/domain/statistiche.dart`, Pro)
+
+```dart
+@immutable final class VoceNegozio { const VoceNegozio({required this.negozioId, required this.nome, required this.spese, required this.totale}); final int? negozioId; final String nome; final int spese; final Money totale; Money get media; }
+@immutable final class MeseSpesa { const MeseSpesa({required this.anno, required this.mese, required this.spese, required this.totale, required this.sforamenti, required this.conBudget}); final int anno, mese, spese, sforamenti, conBudget; final Money totale; Money? get media; }
+
+abstract final class StatisticheSpesa {
+  /// Solo spese CHIUSE con dataSpesa nel mese; il totale di ogni spesa e' Spesa.totale (segue la fonte).
+  static MeseSpesa mese(List<Spesa> chiuse, int anno, int mese);
+  /// Gli ultimi [n] mesi fino a quello di [oggi] compreso, anche vuoti (spese 0, media null).
+  static List<MeseSpesa> ultimiMesi(List<Spesa> chiuse, CivilDate oggi, {int n = 6});
+  /// Per negozio nel periodo [da, a] inclusi, ordinato per totale decrescente; «Senza negozio» in fondo.
+  static List<VoceNegozio> perNegozio(List<Spesa> chiuse, Map<int, String> nomi, CivilDate da, CivilDate a);
+  /// Spesa media nel periodo (Money.average: null se nessuna spesa) e sforamenti (totale > budget).
+  static ({Money? media, int sforamenti, int conBudget}) riepilogo(List<Spesa> chiuse, CivilDate da, CivilDate a);
+}
+```
+⚑ La media e' quella di `Money.average` (divisione intera, null su lista vuota: «nessun dato» non e'
+«zero», commento in `money.dart`). Test: dataset noto di 12 spese su 3 mesi e 3 negozi, mesi vuoti,
+spese senza budget fuori dal conteggio degli sforamenti, fonte scontrino che usa il totale stampato.
+
+#### F12.1.9 — Il motore OCR: `packages/micro_ocr/` (F12.2b)
+
+**Dart** (`lib/src/ocr_engine.dart`, `canale_ocr_engine.dart`, `fake_ocr_engine.dart`):
+
+```dart
+abstract interface class OcrEngine {
+  /// 'vision' su iOS, 'ppocrv5-ort-1.28.0' su Android, 'fake' nei test. Finisce nelle fixture.
+  Future<String> nome();
+  /// Carica i modelli (Android: ≈ 0,5–1 s la prima volta). Idempotente. Si chiama dopo il primo frame.
+  Future<void> prepara();
+  /// Legge un'immagine JPEG/PNG gia' su disco. L'ordine delle righe non e' garantito.
+  Future<List<RigaOcr>> leggi(String percorsoImmagine, {required OcrModo modo});
+  /// Libera le sessioni (Android). Il prossimo leggi() le ricarica.
+  Future<void> rilascia();
+}
+class OcrNonDisponibile implements Exception { const OcrNonDisponibile(this.causa); final Object causa; }
+
+class CanaleOcrEngine implements OcrEngine {
+  CanaleOcrEngine({MethodChannel canale = const MethodChannel('micro_ocr')});
+  // leggi → invokeListMethod<Map>('leggi', {'percorso': p, 'modo': modo.name}) → RigaOcr.fromJson
+  //   (iOS manda il riquadro come lo da' Vision, chiave 'origine': 'basso': si converte con Riquadro.daVision)
+  // PlatformException(code: 'non_disponibile') e MissingPluginException → OcrNonDisponibile
+}
+
+class FakeOcrEngine implements OcrEngine {
+  FakeOcrEngine({List<RigaOcr> righe = const [], this.ritardo = Duration.zero, this.errore});
+  List<RigaOcr> righe;               // modificabile fra un leggi e l'altro
+  final Duration ritardo; final Object? errore;
+  final List<String> letti = [];     // i percorsi richiesti, per le asserzioni
+}
+```
+⚑ **Un solo canale e una sola classe Dart** per due motori nativi: la piattaforma sceglie il motore,
+l'app non ha `if (Platform.isIOS)`.
+
+**iOS** (`VisionOcr.swift`), `leggi(percorso, modo)`:
+- `CGImageSourceCreateWithURL` + orientamento da `kCGImagePropertyOrientation` →
+  `VNImageRequestHandler(cgImage:orientation:options:)`. ☠ Senza l'orientamento EXIF le foto in
+  verticale arrivano ruotate di 90° e Vision legge pochissimo.
+- `VNRecognizeTextRequest`: `recognitionLevel = .accurate`; `revision` = la piu' alta in
+  `VNRecognizeTextRequest.supportedRevisions`; `recognitionLanguages` = `["it-IT", "en-US"]`
+  filtrate per `supportedRecognitionLanguages()` (f12-ocr.md §2: l'italiano c'e' dalla rev. 2);
+  `usesLanguageCorrection = false` (la correzione «aggiusta» i numeri); `customWords = ["TOTALE",
+  "SUBTOTALE", "COMPLESSIVO", "SCONTO", "ANZICHÉ", "€/KG", "€/LT", "IMPORTO", "TARA", "NETTO", "STORNO"]`
+  (efficaci solo con la correzione accesa: si mettono comunque, costano zero);
+  `minimumTextHeight` = 0 per `cartellino`, `0.008` per `scontrino`.
+- Per ogni `VNRecognizedTextObservation`: `topCandidates(1).first` → `{"t": testo, "c": confidence,
+  "x","y","w","h": boundingBox, "origine": "basso"}`.
+- Gira su una `DispatchQueue(label: "micro_ocr", qos: .userInitiated)`; risposta sul main thread.
+- Nessuna dipendenza in `Package.swift`/podspec oltre a Vision/ImageIO (framework di sistema).
+
+**Android** (Kotlin, `com.smp.micro_ocr`):
+
+```kotlin
+class MicroOcrPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
+    // canale "micro_ocr"; metodi "nome", "prepara", "leggi" {percorso, modo}, "rilascia"
+    // un solo Executors.newSingleThreadExecutor(): le chiamate si mettono in fila, mai due OCR insieme
+}
+class PpOcrEngine(private val assets: AssetManager) : AutoCloseable {
+    fun prepara()                                            // crea le due OrtSession, legge latin_dict.txt
+    fun leggi(bitmap: Bitmap, modo: String): List<RigaRiconosciuta>
+    override fun close()
+}
+data class RigaRiconosciuta(val testo: String, val sinistra: Float, val alto: Float,
+                            val larghezza: Float, val altezza: Float, val confidenza: Float)
+object ImmagineIngresso { fun carica(percorso: String, latoMax: Int = 2400): Bitmap }   // inSampleSize + rotazione EXIF
+object Preprocess {
+    fun dimensioniDet(w: Int, h: Int, latoMax: Int): Pair<Int, Int>   // stesso rapporto, multipli di 32, ≥ 32
+    fun tensoreDet(b: Bitmap, w: Int, h: Int): FloatArray             // CHW, (px/255 − mean)/std
+    fun tensoreRec(crop: Bitmap, altezza: Int = 48, larghezzaMax: Int = 1600): Pair<FloatArray, Int>  // CHW, (px/255 − 0,5)/0,5
+}
+data class Rettangolo(val sinistra: Int, val alto: Int, val destra: Int, val basso: Int)
+object DbPostprocess {
+    fun riquadri(mappa: FloatArray, w: Int, h: Int, soglia: Float = 0.3f, sogliaRiquadro: Float = 0.6f,
+                 unclip: Float = 1.6f, latoMin: Int = 3): List<Rettangolo>
+}
+class CtcDecoder(private val dizionario: List<String>) {
+    fun decodifica(uscita: FloatArray, passi: Int, classi: Int): Pair<String, Float>   // testo, confidenza media
+}
+object Strisce {
+    fun tagli(larghezza: Int, altezza: Int, sovrapposizione: Float = 0.15f): List<IntRange>   // fasce orizzontali alte ≈ larghezza
+    fun unisci(riquadri: List<Rettangolo>, iou: Float = 0.5f): List<Rettangolo>               // doppioni delle sovrapposizioni
+}
+```
+
+Catena di `PpOcrEngine.leggi`, **con i parametri di partenza di RapidOCR 3.10** (gli stessi del banco
+che ha dato le misure di f12-ocr.md §7; ☠ da ricontrollare nel suo `config.yaml` in F12.2b e da
+confermare col test di parita' sotto):
+1. `ImmagineIngresso.carica`: decodifica con `inSampleSize` finche' il lato lungo ≤ 2400, ruota secondo
+   `ExifInterface.TAG_ORIENTATION`.
+2. **Rilevatore**: `cartellino` → l'immagine intera ridotta a lato lungo **960** (multipli di 32);
+   `scontrino` → `Strisce.tagli` (fasce alte quanto la larghezza, sovrapposte del 15%), ognuna ridotta a
+   lato lungo 960. ⚑ Uno scontrino lungo ridotto tutto a 960 px lascerebbe righe alte 3-4 px: il
+   rilevatore non le vede. Tensore `[1, 3, H, W]`, mean `[0.485, 0.456, 0.406]`, std `[0.229, 0.224,
+   0.225]`, ordine dei canali **come RapidOCR** (☠ RGB o BGR: si verifica col test di parita').
+3. `DbPostprocess.riquadri`: soglia 0,3 sulla mappa; componenti connesse (4-vicinato, BFS iterativa con
+   `IntArray` come coda: niente ricorsione, niente OpenCV); per ogni componente il rettangolo
+   **allineato agli assi**; punteggio = media della mappa dentro → scartata sotto 0,6; espansione
+   «unclip» di `area × 1,6 / perimetro` per lato; scartati i lati < 3 px. ⚑ Rettangoli allineati e
+   non ruotati (RapidOCR usa `minAreaRect` di OpenCV): l'utente inquadra dritto nel mirino e PP-OCR
+   regge piccole inclinazioni; risparmia OpenCV (≈ 20 MB).
+4. Per gli scontrini: coordinate riportate nell'immagine intera, `Strisce.unisci` toglie i doppioni.
+5. **Riconoscitore**: ogni rettangolo ritagliato dall'immagine **originale** (non da quella ridotta),
+   portato ad altezza 48 mantenendo il rapporto (larghezza ≤ 1600, multiplo di 8, riempimento a destra
+   con zeri), un'inferenza per riga (⚑ niente batch in v1: semplice, e le righe di un cartellino sono
+   10-30). `CtcDecoder`: argmax per passo, ripetizioni fuse, indice **0 = blank**, poi `dizionario[i − 1]`,
+   l'ultima classe e' lo **spazio**. ☠ In `prepara()`: `assert(classi == dizionario.size + 2)` sull'ultima
+   dimensione dell'uscita del modello: un dizionario sbagliato produce testo plausibile ma sbagliato.
+6. Coordinate normalizzate 0..1 sull'immagine dopo la rotazione EXIF; origine in alto a sinistra.
+- `OrtSession.SessionOptions`: `setIntraOpNumThreads(4)`, `setOptimizationLevel(ALL_OPT)`; **nessun**
+  execution provider extra (NNAPI e' deprecato; XNNPACK si misura in F12.7 solo se i tempi di
+  F12.1.18 non tornano).
+- `consumer-rules.pro`: `-keep class ai.onnxruntime.** { *; }` (☠ JNI + R8: un crash solo in release
+  e' il rischio di §10).
+
+**I modelli** (`packages/micro_ocr/android/src/main/assets/ppocrv5/`):
+
+| File | Origine | Dimensione | Licenza |
+|---|---|---|---|
+| `det.onnx` | `PP-OCRv5_mobile_det` convertito in ONNX da RapidOCR (lo stesso file che RapidOCR 3.10 ha scaricato nel venv del banco: `venv/Lib/site-packages/rapidocr/models/`) | ≈ 4,8 MB | Apache-2.0 (PaddleOCR, RapidOCR) |
+| `rec_latin.onnx` | `latin_PP-OCRv5_mobile_rec`, stessa provenienza | ≈ 7,9 MB | Apache-2.0 |
+| `latin_dict.txt` | `ppocrv5_latin_dict.txt` di PaddleOCR (o i metadati `character` del modello, se RapidOCR lo incorpora: si usa la stessa fonte del banco) | 502 righe | Apache-2.0 |
+
+⚑ **Proprio i file del banco** (non scaricati di nuovo da un'altra pagina): cosi' le misure di
+f12-ocr.md §7 valgono per l'app. `MODELLI.md` registra per ognuno URL d'origine, data e **SHA-256**;
+`packages/micro_ocr/test/modelli_test.dart` ricalcola gli SHA-256 dei file e li confronta (un modello
+cambiato per sbaglio fa fallire i test, non le letture in silenzio).
+
+⚑ **I modelli si versionano nel repo, direttamente, senza Git LFS ne' scarico in build.** Valutate le
+tre strade:
+- **Git LFS**: il repo ha **due remote** (Gitea `origin` e il mirror pubblico `github`, `tool/push_all`):
+  LFS va abilitato su entrambi, GitHub gratuito ha 1 GB/mese di banda, e il Mac (che compila iOS) deve
+  avere `git-lfs`. ☠ Un clone senza LFS ottiene **file puntatore** da 130 byte: la build passa e l'OCR
+  muore a runtime con un errore di formato del modello. Per 12,7 MB il rischio non vale.
+- **Scarico in build** (script che scarica e verifica lo SHA-256): la build dipende dalla rete e da una
+  pagina di terzi (HuggingFace/ModelScope) che puo' sparire o cambiare file; viola lo spirito di f12-ocr.md
+  §5.3 («nessun download al primo avvio», qui spostato in build).
+- **Nel repo** (scelta): 12,7 MB **una volta** nella storia (oggi il repo e' 174 MB di oggetti); si
+  ricambiano solo se si cambia modello (es. PP-OCRv6, che oggi e' scartato). Apache-2.0 permette la
+  redistribuzione con licenza e NOTICE: `LICENSE-PaddleOCR.txt` accanto ai modelli e voce nelle licenze
+  dell'app (F12.1.12, Impostazioni › Informazioni). `.gitattributes`: aggiungere `*.onnx binary`.
+- ⚑ I modelli stanno negli **asset Android del plugin**, non negli asset Flutter: cosi' finiscono
+  **solo** nell'APK (sull'iPhone non servono: Vision). Peso su Android: ORT ≈ 10 MB per ABI + 12,7 MB.
+
+**Test di parita' (F12.2b, obbligatorio prima di F12.3)**: un'app di prova minima o
+`apps/spending_review/integration_test/ocr_parita_test.dart` sull'emulatore Android legge **le 33
+immagini a licenza libera** copiate con `adb push` da `E:/coding/XAMPP/htdocs/microapps-campioni/f12/`
+in `/sdcard/Download/f12/` (mai nel repo) e confronta il testo con quello di RapidOCR delle fixture
+(F12.1.17): **≥ 95% dei numeri `x,yy` della fixture devono comparire anche nella lettura Kotlin**.
+Sotto: la differenza e' nella pre/post-elaborazione (canali, normalizzazione, unclip) e si corregge
+**prima** di scrivere i parser.
+
+#### F12.1.10 — Dati (Drift, `lib/data/`)
+
+**`negozi`**
+
+| Colonna | Tipo | Vincoli | Note |
+|---|---|---|---|
+| `id` | INTEGER | PK autoincrement | |
+| `nome` | TEXT | NOT NULL, 1..60, **UNIQUE COLLATE NOCASE** | come lo scrive l'utente o lo da' lo scontrino ripulito |
+| `creato_il` | INTEGER | NOT NULL | epoch ms UTC |
+
+**`spese`**
+
+| Colonna | Tipo | Vincoli | Note |
+|---|---|---|---|
+| `id` | INTEGER | PK autoincrement | |
+| `stato` | TEXT | NOT NULL, CHECK `IN ('in_corso','chiusa')` | |
+| `negozio_id` | INTEGER | nullable, FK `negozi(id)` **ON DELETE SET NULL** | |
+| `iniziata_il` | INTEGER | NOT NULL | epoch ms UTC |
+| `chiusa_il` | INTEGER | nullable; CHECK `(stato = 'chiusa') = (chiusa_il IS NOT NULL)` | |
+| `data_spesa` | TEXT | nullable, `YYYY-MM-DD` (`CivilDate`, ADR-008); NOT NULL quando chiusa (CHECK) | il giorno della spesa (dallo scontrino se letto) |
+| `budget_cents` | INTEGER | nullable, CHECK `> 0` | |
+| `totale_cents` | INTEGER | NOT NULL default 0 | ⚑ **scritto alla chiusura** (`Spesa.totale`) e non ricalcolato: un aggiornamento delle regole di calcolo non deve cambiare lo storico; per la spesa in corso si calcola dalle righe |
+| `totale_scontrino_cents` | INTEGER | nullable | il TOTALE stampato |
+| `fonte` | TEXT | NOT NULL default `'contate'`, CHECK `IN ('contate','scontrino')` | |
+
+Indici: **`CREATE UNIQUE INDEX spese_una_in_corso ON spese(stato) WHERE stato = 'in_corso'`** (⚑ al
+massimo **una** spesa in corso, garantito dal database e non solo dal codice: due tocchi veloci su
+«+» all'avvio non devono creare due spese); `(stato, data_spesa DESC, id DESC)` per lo storico;
+`(negozio_id)`.
+
+**`righe`**
+
+| Colonna | Tipo | Vincoli | Note |
+|---|---|---|---|
+| `id` | INTEGER | PK autoincrement | |
+| `spesa_id` | INTEGER | NOT NULL, FK `spese(id)` **ON DELETE CASCADE** | |
+| `insieme` | TEXT | NOT NULL, CHECK `IN ('contate','scontrino')` | ⚑ le righe dello scontrino si **affiancano** a quelle contate, non le sostituiscono: nel dettaglio si vedono entrambe |
+| `posizione` | INTEGER | NOT NULL | ordine di inserimento dentro l'insieme |
+| `nome` | TEXT | NOT NULL default '', 0..80 | |
+| `pezzi` | INTEGER | nullable, CHECK 1..999 | |
+| `millesimi` | INTEGER | nullable, CHECK 1..99999 | grammi o millilitri |
+| `unita` | TEXT | nullable, CHECK `IN ('kg','l')` | |
+| — | | CHECK `(pezzi IS NOT NULL AND millesimi IS NULL AND unita IS NULL) OR (pezzi IS NULL AND millesimi IS NOT NULL AND unita IS NOT NULL)` | |
+| `prezzo_unitario_cents` | INTEGER | NOT NULL, CHECK `<> 0` | negativo solo per gli sconti |
+| `totale_cents` | INTEGER | NOT NULL | `RigaSpesa.totale` **al momento dell'inserimento**, per lo stesso motivo di `spese.totale_cents` |
+| `offerta_json` | TEXT | nullable | `Offerta.toJson()` |
+| `prezzo_rif_cents` | INTEGER | nullable | €/kg o €/l stampato |
+| `unita_rif` | TEXT | nullable, CHECK `IN ('kg','l')` | |
+| `totale_stampato_cents` | INTEGER | nullable | bilancia |
+| `origine` | TEXT | NOT NULL, CHECK `IN ('tastierino','cartellino','bilancia','scontrino')` | |
+| `stornata` | BOOLEAN | NOT NULL default false | solo `insieme = 'scontrino'` |
+| `creata_il` | INTEGER | NOT NULL | epoch ms UTC |
+
+Indice `(spesa_id, insieme, posizione)`.
+
+⚑ **Nessuna tabella per le foto e nessuna colonna per il testo OCR grezzo**: la foto si cancella
+appena letta (F12.1.13), il testo OCR vive solo in memoria. Si salvano **solo** le righe interpretate e
+confermate. ☠ E' la garanzia che i dati della carta degli scontrini (s13) non finiscano mai nel
+database, nel backup o nel CSV.
+
+```dart
+// lib/data/spesa_repository.dart
+class SpesaRepository {
+  SpesaRepository(this._db, {DateTime Function() ora = DateTime.now});
+  Stream<Spesa?> osservaInCorso();                              // con le righe, aggiornato a ogni scrittura
+  /// La spesa in corso, creata se non c'e' (budget = budgetPredefinito). Transazione + indice unico.
+  Future<int> assicuraInCorso({Money? budgetPredefinito});
+  Future<int> aggiungiRiga(RigaSpesa riga);                     // nella spesa in corso, insieme 'contate'
+  Future<void> aggiornaRiga(RigaSpesa riga);                    // ricalcola totale_cents
+  Future<void> eliminaRiga(int rigaId);
+  Future<void> ripristinaRiga(RigaSpesa riga, {required int posizione});  // «Annulla» dopo l'eliminazione
+  Future<void> incrementaUltima();                              // +1 pezzo all'ultima riga a pezzi
+  Future<void> impostaBudget(Money? budget);
+  Future<void> salvaScontrino(int spesaId, LetturaScontrino lettura);     // insieme 'scontrino' (sostituisce il precedente)
+  /// Chiude la spesa in corso: scrive totale_cents, data, negozio, fonte. Ritorna l'id.
+  Future<int> chiudi({required CivilDate data, int? negozioId, required FonteRighe fonte});
+  /// Registrazione pura dallo scontrino (nessuna spesa contata): crea una spesa gia' CHIUSA.
+  Future<int> registraDaScontrino(LetturaScontrino lettura, {required CivilDate data, int? negozioId});
+  Future<void> scartaInCorso();                                 // chiusura di una spesa vuota o «Butta via»
+  Stream<List<Spesa>> osservaChiuse({int? limite});             // data_spesa DESC; limite null = tutte (Pro)
+  Future<int> contaChiuse();
+  Future<Spesa?> perId(int id);
+  Future<void> eliminaSpesa(int id);
+  Stream<List<Negozio>> osservaNegozi();                        // per nome
+  Future<int> negozioPerNome(String nome);                      // trova (NOCASE) o crea
+  Future<void> rinominaNegozio(int id, String nome);
+  Future<void> eliminaNegozio(int id);                          // le spese restano «senza negozio»
+}
+```
+⚑ **Le spese chiuse oltre le 5 nel gratis restano nel database** (F12.0 punto 5, D1): il limite lo
+applica la **lettura** (`osservaChiuse(limite: 5)` se non Pro), mai una cancellazione.
+
+`drift_schemas/drift_schema_v1.json` con `dart run drift_dev schema dump lib/data/database.dart
+drift_schemas/` subito in F12.3: e' la base dei test di migrazione della v2 (§10, «migrazione che
+cancella i dati»).
+
+Impostazioni (`SettingsStore` di `micro_core`, classe `SrSettingKeys` in `lib/app/providers.dart`):
+`budgetPredefinito` (int centesimi, assente = nessuno), `preferisciPrezzoCarta` (bool, default
+**true**: chi ha la carta la usa; chi non ce l'ha lo spegne una volta), `vibrazione` (bool, default
+true), `temaScuro` (gestito da `themeModeProvider`, default scuro), `suggerimentoMirinoVisto` (bool).
+
+#### F12.1.11 — Rotte (`lib/app/routes.dart`)
+
+| Rotta | Pagina | Note |
+|---|---|---|
+| `/` | `SpesaPage` | la spesa in corso (creata pigramente al primo «+» o cartellino) |
+| `/cartellino` | `CartellinoCameraPage` | torna (`pop`) con un `RisultatoCartellino`; `SpesaPage` apre il foglio di conferma |
+| `/cartellino?modo=bilancia` | `CartellinoCameraPage(modoIniziale: bilancia)` | dal foglio del peso, «Leggi l'etichetta della bilancia» |
+| `/scontrino` | `ScontrinoCameraPage` | **`ProGate(FeatureKey.documentScan)`** |
+| `/scontrino/confronto` | `ConfrontoPage` | `ProGate(documentScan)`; `extra: LetturaScontrino` |
+| `/scontrino/registra` | `RegistraScontrinoPage` | `ProGate(documentScan)`; `extra: LetturaScontrino` |
+| `/chiudi` | `ChiusuraPage` | `extra: ChiusuraArgs(fonte, lettura?)` |
+| `/storico` | `StoricoPage` | gratis: ultime 5 |
+| `/storico/:id` | `DettaglioSpesaPage` | una spesa nascosta (oltre le 5) dal gratis → paywall, non la pagina |
+| `/statistiche` | `StatistichePage` | **`ProGate(FeatureKey.statistics)`** |
+| `/impostazioni` | `ImpostazioniPage` | |
+| `/impostazioni/negozi` | `NegoziPage` | |
+| `/dev/ocr` | `OcrDevPage` | **solo** se `kDebugMode` o `--dart-define=SR_DEV=true`; in release la rotta non esiste (assert in `main`) |
+
+`_id()` come in Film Tracker: un `:id` non numerico porta a «Non trovato». Il paywall si apre con
+`PaywallPage.show` (§8.T), non con una rotta.
+
+#### F12.1.12 — Le schermate («C · Una mano»)
+
+**Colori e caratteri** (`lib/app/sr_palette.dart`, valori **esatti** della tavola `UnaMano.dc.html`):
+
+| Token | Scuro (default) | Chiaro (⚑ derivato, la tavola e' solo scura) | Uso |
+|---|---|---|---|
+| `sfondo` | `#161B22` | `#F6F8FA` | fondo delle pagine |
+| `fondoProfondo` | `#0F1318` | `#E9EDF1` | pannello del tastierino |
+| `superficie` | `#1E252E` | `#FFFFFF` | tasti numerici, card, bottone Scontrino |
+| `superficieOp` | `#262D36` | `#DDE3E9` | tasti ×, −, ⌫; traccia della barra; separatori della lista |
+| `bordo` | `#3A434E` | `#C3CBD4` | bordo dei bottoni secondari |
+| `testo` | `#E8EDF2` | `#12171D` | |
+| `testoLista` | `#C8D0D8` | `#2B333C` | nomi nella lista degli articoli |
+| `testoSecondario` | `#9AA5B1` | `#55606C` | «9 articoli · budget 60 €», «€», etichette |
+| `accento` | `#4ADE80` | `#15803D` | totale sotto budget, barra, Cartellino, «+» (come QR Me, l'accento chiaro e' scurito per il contrasto AA) |
+| `suAccento` | `#05230F` | `#FFFFFF` | testo sui bottoni verdi |
+| `ambraFondo` / `ambraBordo` / `ambraTesto` / `ambraValore` | `#3B2410` / `#B45309` / `#FCD9A8` / `#FBBF24` | `#FFF4E5` / `#B45309` / `#7A3E06` / `#B45309` | «Differenza da guardare», budget al 80–100% |
+| `rosso` | `#F87171` | `#B91C1C` | budget sforato (⚑ la tavola non lo prevede: serve un terzo stato distinguibile dall'ambra **anche per luminosita'**) |
+
+Caratteri: **Space Grotesk** 700 per il totale, i prezzi del tastierino e i numeri delle card
+(`letterSpacing` −0,03 em sul totale); **Plus Jakarta Sans** 500–800 per tutto il resto. Entrambi
+variabili, dai file di `apps/qr_me/assets/fonts/` con le loro licenze OFL. Raggi: bottoni 28 (pillola
+alta 56), tasti 14 (alti 48), pannello del tastierino 22, card 18. Test `palette_contrast_test.dart`
+(come QR Me): ogni coppia testo/fondo ≥ 4,5:1, i numeri grandi ≥ 3:1, in entrambi i temi.
+
+**`SpesaPage`** (`/`) — LA schermata, dall'alto, tutto in una colonna senza scorrimento della pagina
+(solo la lista scorre):
+1. **Riga di stato** (13, 700, `testoSecondario`): «9 articoli · budget 60 €» a sinistra (tocco →
+   `BudgetSheet`); a destra il **residuo** in `accento` («−16,30», quanto manca), oppure «+3,20» in
+   `rosso` se sforato, oppure niente se non c'e' budget. Senza budget la riga di sinistra dice «9
+   articoli · imposta un budget».
+2. **Totale enorme** (Space Grotesk 64, 700, interlinea 1): «43,70» e «€» a 30 in `testoSecondario`.
+   ⚑ Il totale **non** si colora: resta `testo`. Il colore lo porta la barra e il residuo, cosi' il
+   numero piu' importante si legge sempre al massimo contrasto. `Semantics(label: «Totale 43 euro e
+   70, mancano 16 euro e 30 al budget»)`, `liveRegion: true`.
+3. **Barra del budget**: alta 6, raggio 3, traccia `superficieOp`, riempimento `accento` (< 80%),
+   ambra (80–100%), `rosso` (> 100%, piena). Assente senza budget. Al passaggio della soglia 80% e
+   100% **una** vibrazione media (`Aptica.soglia`), una volta per soglia e per spesa.
+4. **Lista degli articoli**, piu' recente **in alto** (⚑ la tavola mostra gli ultimi aggiunti: e'
+   quello che si controlla subito dopo aver battuto), righe alte ≥ 44: nome in `testoLista` (15) a
+   sinistra — «Articolo» se vuoto, «Sconto» se negativo, con sotto in piccolo «3 × 2,49», «0,258 kg ×
+   29,90 €/kg», «3x2», «−30%» quando servono — e totale di riga (700) a destra. Separatore `superficieOp`.
+   **Scorrimento a sinistra** = elimina, con snack «Eliminato · Annulla» (5 s,
+   `SpesaRepository.ripristinaRiga`); **tocco** = `RigaSheet` (nome, quantita' ±, prezzo, offerta,
+   elimina). Stato vuoto: «Batti un prezzo o inquadra un cartellino».
+5. **Due tasti** affiancati, alti 56, pillola: **Cartellino** (`accento`, testo `suAccento`, 800) →
+   `/cartellino`; **Scontrino** (`superficie`, bordo `bordo`, 800) → `/scontrino`, con `ProBadge` se non
+   Pro (il tocco apre il paywall con `highlight: FeatureKey.documentScan`).
+6. **Pannello del tastierino** (`fondoProfondo`, raggio 22, padding 10): riga «Prezzo a mano» (13,
+   `testoSecondario`) con il **display** a destra (Space Grotesk 24, `TastierinoState.display`); sotto la
+   griglia 4×4, spaziatura 6, tasti alti 48, Space Grotesk 20:
+   ```
+   7  8  9  ⌫
+   4  5  6  ×
+   1  2  3  −
+   0  00 ,  +
+   ```
+   cifre su `superficie`, `⌫ × −` su `superficieOp`, **`+` su `accento`**. Ogni tasto ≥ 48×48 dp,
+   `Semantics` con «cancella», «per», «meno», «aggiungi», «virgola», «doppio zero». Vibrazione leggera
+   a ogni tasto (spegnibile); vibrazione d'errore su un tasto rifiutato.
+7. **Barra in alto** (sopra la riga di stato, discreta): a sinistra il nome dell'app solo come titolo
+   accessibile; a destra tre icone: **Storico**, **Chiudi la spesa** (attiva con almeno una riga) e
+   **Impostazioni**. ⚑ La tavola non le disegna: vanno messe in alto, lontane dal pollice, perche'
+   sono azioni rare e una «chiusura» per sbaglio costa una spesa.
+- **Spesa rimasta aperta**: se la spesa in corso e' iniziata da piu' di 12 ore, un banner in cima
+  «Spesa iniziata ieri alle 18:32» con **Chiudila** e **Continua**.
+- Il paywall **mai** al primo avvio (§8.T); al primo avvio nessun onboarding: la pagina vuota e' gia'
+  la spiegazione.
+- ⚑ Al 130% di testo la pagina deve stare in 390×844 senza tagliare il tastierino: si riduce prima la
+  lista (fino a 2 righe visibili), poi il totale (fino a 48), **mai** i tasti. Test con il font vero
+  (come `display_page_test.dart` di QR Me).
+
+**`CartellinoCameraPage`** (`/cartellino`):
+- Anteprima `camera` a tutto schermo (`ResolutionPreset.veryHigh`, `enableAudio: false`), **mirino**
+  orizzontale al centro: 86% della larghezza, rapporto 4:3 (i cartellini sono larghi), angoli verdi
+  `accento` come nell'icona; fuori dal mirino un velo nero al 55%. Scritta sopra: «Inquadra **un**
+  cartellino, da vicino». Primo uso: suggerimento «Lo scritto a mano non lo leggo: per quello c'e' il
+  tastierino» (una volta, `suggerimentoMirinoVisto`).
+- Interruttore segmentato in alto **Cartellino | Bilancia** (default Cartellino). ⚑ Se il risultato
+  in modo Cartellino ha la firma della bilancia (`BilanciaParser.riconosce`), il foglio si apre come
+  «Etichetta della bilancia» da solo: l'interruttore serve solo a forzare.
+- Bottone di scatto grande in basso al centro (72 dp), **torcia** a sinistra (come QR Me, sparisce al
+  primo errore), **«Da una foto»** a destra (`image_picker`, galleria).
+- Allo scatto: `takePicture()` → `Fotocamera.ritagliaAlMirino` (isolate) → `LetturaService.cartellino`
+  con un indicatore sul mirino «Leggo…»; la fotocamera resta **montata** (si puo' scattare di nuovo
+  subito). Risultato → `pop(RisultatoCartellino)`.
+- Permesso negato / nessuna fotocamera / errore: stato vuoto come `ScanPage` di QR Me («La fotocamera
+  e' spenta» + «Apri le impostazioni» su iOS, «Riprova» su Android; «Da una foto» resta usabile).
+- OCR non disponibile (`OcrNonDisponibile`): «Su questo telefono non riesco a leggere i cartellini:
+  usa il tastierino», mai un crash.
+
+**`ConfermaCartellinoSheet`** — la proposta da **confermare con un tocco** (bottom sheet, mai aggiunta
+da sola):
+- In alto il **nome** (modificabile, campo a una riga) e sotto il **prezzo da pagare grande** (Space
+  Grotesk 40); se c'e' un'offerta, una pillola: «3x2 · 1,26 cad. se ne prendi 3», «−30% alla cassa ·
+  0,69», «Anziche' 2,99 · risparmi 1,50», «Con carta · senza carta 2,49».
+- Riga piccola: «9,95 €/kg» (prezzo unitario stampato) se c'e'.
+- **Quantita'** con − e + (default 1; con NxM il default e' N, ⚑ chi guarda un 3x2 di solito ne prende 3).
+- Se `affidabilita' < 0,6` o ci sono `alternative`: «Controlla il prezzo» in ambra e i **chip** dei
+  prezzi alternativi («2,49», «1,99»): un tocco li sostituisce.
+- Piu' cartellini letti: prima un elenco «Ho visto 2 cartellini: quale?» (nome e prezzo di ciascuno).
+- Prodotto gia' nella spesa (stesso nome normalizzato e stesso prezzo): il bottone principale diventa
+  «**Aggiungi (ora 2)**» e incrementa la riga esistente (⚑ cosi' un 3x2 scattato tre volte fa scattare
+  l'offerta).
+- Bottoni: **Aggiungi** (pillola `accento`, a tutta larghezza, il tocco unico), «Riprova» (torna alla
+  fotocamera), «Batti a mano» (chiude e porta il prezzo letto nel display del tastierino).
+- `aMisura` (solo €/kg): il foglio diventa **`PesoSheet`**.
+
+**`PesoSheet`** — prodotto a peso dopo un cartellino al kg (o dal `RigaSheet`): «1,48 €/kg» in alto, un
+**tastierino uguale** a quello della pagina ma per grammi (interi, con «kg» / «g» commutabile; `0,500 kg`
+= 500 g), anteprima «0,500 kg × 1,48 = 0,74 €» (`Arrotonda.perMisura`) in tempo reale; **Aggiungi**; e
+il bottone **«Leggi l'etichetta della bilancia»** (→ `/cartellino?modo=bilancia`), ⚑ perche' alla
+bilancia self-service il peso esatto lo stampa l'etichetta.
+
+**`ConfermaBilanciaSheet`**: prodotto, «0,258 kg × 29,90 €/kg», **totale grande** (7,71), riga ambra
+«Il conto peso × prezzo non torna: controlla» se `coerente == false`; campi modificabili; **Aggiungi**
+→ riga `AMisura` con `totaleStampato`.
+
+**`ScontrinoCameraPage`** (`/scontrino`, Pro): mirino **verticale** (88% della larghezza, 3:5), «Inquadra
+lo scontrino dritto, tutto in larghezza». Dopo lo scatto: miniatura e due bottoni **«Leggi»** e
+**«Aggiungi un pezzo»** (⚑ fino a **4** foto dello stesso scontrino, dall'alto in basso: uno scontrino
+di 40 righe in una foto sola ha caratteri troppo piccoli). «Da una foto» (anche piu' foto). «Leggi» →
+`LetturaService.scontrino(parti)` → se c'e' una spesa con righe contate: `/scontrino/confronto`;
+altrimenti `/scontrino/registra`.
+
+**`ConfrontoPage`** — «Scontrino contro conto» (seconda schermata della tavola):
+1. Testata con indietro (44×44, bordo) e titolo «Scontrino contro conto» (18, 800).
+2. Due card affiancate (`superficie`, raggio 18): «Scontrino» **45,35** e «Contato» **43,70** (Space
+   Grotesk 28).
+3. Card della differenza: `tuttoTorna` → verde «Tutto torna» con ✔ come **icona** (non nel testo);
+   altrimenti ambra (`ambraFondo`, bordo `ambraBordo`): «Differenza da guardare» (`ambraTesto`, 700)
+   e «+1,65» (`ambraValore`, Space Grotesk 26).
+4. Le **righe sospette**: nome (700) con sotto la nota (12, `testoSecondario`): «cartellino 7,90 ·
+   scontrino 9,40», «solo sullo scontrino», «contato ma non sullo scontrino», «sullo scontrino due
+   volte?»; a destra il delta in ambra. Tocco → dettaglio con entrambe le righe. Sotto, ripiegate,
+   «Righe che tornano (N)».
+5. Avvisi: «Il totale letto non corrisponde alla somma delle righe: N righe non lette» se
+   `!quadra`; «Ho unito N foto senza trovare il punto di unione…» se una giunzione manca.
+6. In fondo: **Chiudi la spesa** (pillola `accento`) → `/chiudi` con la scelta della fonte;
+   **Rifotografa lo scontrino** (secondario, alto 48, trasparente con bordo).
+
+**`RegistraScontrinoPage`** — registrazione pura: negozio (dallo scontrino, modificabile), data (dallo
+scontrino o oggi), righe lette (modificabili, eliminabili, con lo stato «stornata»), totale stampato e
+avviso se non quadra; **Salva la spesa** → `SpesaRepository.registraDaScontrino` → `/storico/:id`.
+
+**`ChiusuraPage`** (`/chiudi`): totale grande; budget con esito («Dentro il budget di 3,20» /
+«Sforato di 4,10»); **Negozio**: chip dei 5 piu' recenti + «Altro…» (campo con suggerimenti da
+`osservaNegozi`, crea con `negozioPerNome`); **Data** (oggi, o quella dello scontrino; selettore);
+se c'e' uno scontrino letto: scelta **«Salva le righe dello scontrino»** (default se `quadra`) /
+**«Salva le righe contate»**; **Salva** → storico. Spesa senza righe: «Non c'e' niente da salvare» e
+**Butta via** (`scartaInCorso`). Dopo il salvataggio, nel gratis, se le spese chiuse superano 5: snack
+«Salvata. Nel piano gratuito vedi le ultime 5: le altre restano sul telefono».
+
+**`StoricoPage`** (`/storico`): spese chiuse raggruppate per mese («Ottobre 2026 · 4 spese · 182,40
+€»), riga: giorno, negozio (o «Senza negozio»), totale, pallino ambra/rosso se il budget e' stato
+sforato. Gratis: le ultime 5 e una card in fondo «Le altre N spese sono sul telefono: con il Pro le
+rivedi tutte, con le statistiche» → paywall (`highlight: fullHistory`). In alto l'icona **Statistiche**
+(`ProBadge` senza Pro). **`DettaglioSpesaPage`**: righe dell'insieme che fa fede, «Mostra anche le
+righe contate/dello scontrino» se ci sono entrambe, totale, budget, negozio e data modificabili,
+**Elimina** con conferma.
+
+**`StatistichePage`** (Pro): selettore del mese (frecce), quattro `MicroStatTile`: **Totale del mese**,
+**Spese**, **Spesa media**, **Sforamenti** («2 su 5 con budget»); grafico a barre degli **ultimi 6
+mesi** (`CustomPainter`, come Film Tracker e Scorte Calore, con `Semantics` che legge i valori); tabella
+**per negozio** (nome, spese, totale, media) per il mese o per «Ultimi 12 mesi» (interruttore).
+
+**`ImpostazioniPage`**: **Budget abituale** (campo prezzo, «nessuno»); **Ho la carta fedelta'**
+(interruttore `preferisciPrezzoCarta`, con la spiegazione «Quando un cartellino ha il prezzo con la
+carta, uso quello»); **Vibrazione**; **Negozi** (→ `/impostazioni/negozi`: rinomina, elimina);
+**Tema** (scuro / chiaro / come il telefono); **Pro** (stato, acquisto, ripristino acquisti);
+**I tuoi dati** (`data_section.dart` come Film Tracker: backup **Pro**, ripristino **gratis**, CSV
+**Pro**); **Informazioni** (versione, informativa privacy, **licenze**: `LicenseRegistry.addLicense`
+per PaddleOCR/RapidOCR Apache-2.0 con NOTICE e ONNX Runtime MIT, solo su Android).
+
+**`OcrDevPage`** (`/dev/ocr`, solo sviluppo): scatta o sceglie una foto, mostra le righe lette con i
+riquadri disegnati sopra, il risultato dei tre parser, e **«Esporta fixture»**: un JSON nel formato di
+F12.1.17 (senza immagine) condiviso con `share_plus`. ⚑ E' lo strumento per raccogliere le fixture di
+**Vision** dall'iPad e quelle delle **foto vere** del proprietario (F12.7). ☠ In release non deve
+esistere: rotta registrata solo se `kDebugMode || SR_DEV`, e test che lo verifica.
+
+#### F12.1.13 — Servizi (`lib/services/`)
+
+```dart
+class Fotocamera {
+  /// Ritaglia la foto al rettangolo del mirino (frazioni 0..1 dell'anteprima, convertite tenendo conto
+  /// del rapporto foto/anteprima e della rotazione EXIF) e la salva JPEG 92 in getTemporaryDirectory().
+  /// In Isolate.run: decodificare una foto da 12 MP sul thread dell'interfaccia blocca 300-800 ms.
+  static Future<String> ritagliaAlMirino(String percorsoFoto, Rect mirino, {required Size anteprima});
+}
+
+class LetturaService {
+  LetturaService({required OcrEngine motore, CartellinoParser cartellino = const CartellinoParser(),
+      BilanciaParser bilancia = const BilanciaParser(), ScontrinoParser scontrino = const ScontrinoParser(),
+      DateTime Function() ora = DateTime.now});
+  /// Foto → OCR (modo cartellino) → bilancia se riconosciuta, altrimenti cartellino.
+  /// La foto (e il ritaglio) si CANCELLANO nel finally, letta o no.
+  Future<RisultatoCartellino> cartellino(String percorso, {required bool forzaBilancia});
+  /// Le parti in ordine; OCR modo scontrino per ognuna; UnisciParti; ScontrinoParser. Foto cancellate.
+  Future<LetturaScontrino> scontrino(List<String> percorsi);
+}
+sealed class RisultatoCartellino { const RisultatoCartellino(); }
+final class LettoCartellino extends RisultatoCartellino { const LettoCartellino(this.lettura); final LetturaCartellino lettura; }
+final class LettaBilancia extends RisultatoCartellino { const LettaBilancia(this.lettura); final LetturaBilancia lettura; }
+final class NienteLetto extends RisultatoCartellino { const NienteLetto({required this.forseAMano}); final bool forseAMano; }
+final class OcrAssente extends RisultatoCartellino { const OcrAssente(); }
+```
+⚑ **Le foto si cancellano sempre** (anche quelle scelte dalla galleria: si cancella la **copia**
+temporanea che `image_picker` crea, mai l'originale dell'utente). Nessuna foto nel database, nel
+backup o nel CSV: e' la regola di privacy dello scontrino (s13).
+Il motore si prepara (`OcrEngine.prepara`) **3 secondi dopo il primo frame** in `SpendingReviewApp`
+(come `pruneOrphanLogos` di QR Me): la prima lettura non paga il caricamento dei modelli, e l'avvio
+non lo paga nemmeno.
+
+```dart
+class CsvExport {
+  const CsvExport();
+  /// Un file, una riga per RIGA di spesa (insieme che fa fede), colonne:
+  /// Data;Negozio;Spesa n.;Articolo;Quantita';Unita';Prezzo unitario;Offerta;Totale riga;Totale spesa;Budget;Origine
+  /// Decimali con la virgola (Money.formatPlain(locale: 'it')), CsvWriter di micro_core (';' e BOM).
+  String costruisci(List<Spesa> chiuse, Map<int, String> negozi, {required AppLocalizations l});
+}
+class SpendingBackupSource implements BackupSource {
+  SpendingBackupSource(SpendingDatabase db);
+  // schemaId 'spending_review', schemaVersion 1; payload {negozi, spese, righe}; counts {spese, righe, negozi}.
+  // imagePaths: nessuna. Import replaceAll: svuota e riscrive in una transazione.
+  // Import mergeKeepExisting: negozi uniti per nome (NOCASE); spese aggiunte con id nuovi; una spesa
+  // IN CORSO del file diventa CHIUSA (data = giorno di iniziata_il) se ha righe, altrimenti si scarta
+  // (l'indice unico ne vuole una sola, e quella del telefono vince).
+}
+class Aptica {
+  Aptica({required bool attiva});
+  void tasto(); void rifiuto(); void soglia(); void aggiunto();   // HapticFeedback.selectionClick/heavy/medium/light
+}
+```
+
+#### F12.1.14 — Pro (`lib/app/feature_limits.dart`, `paywall_config.dart`)
+
+```dart
+const FeatureLimits srFeatureLimits = <FeatureKey, FeatureLimit>{
+  FeatureKey.fullHistory: FeatureLimit.count(freeMax: 5),   // 5 spese chiuse VISIBILI (le altre restano)
+  FeatureKey.documentScan: FeatureLimit.locked(),          // Scontrino: confronto e registrazione
+  FeatureKey.statistics: FeatureLimit.locked(),
+  FeatureKey.csvExport: FeatureLimit.locked(),
+  FeatureKey.backupRestore: FeatureLimit.locked(),          // il ripristino resta gratis
+  // tutte le altre: FeatureLimit.open(), esplicite (il test di coerenza le vuole tutte)
+  FeatureKey.unlimitedEntities: FeatureLimit.open(), FeatureKey.secondaryEntities: FeatureLimit.open(),
+  FeatureKey.photos: FeatureLimit.open(), FeatureKey.pdfReport: FeatureLimit.open(),
+  FeatureKey.advancedWidget: FeatureLimit.open(), FeatureKey.notifications: FeatureLimit.open(),
+  FeatureKey.multipleNotifications: FeatureLimit.open(), FeatureKey.calendarSync: FeatureLimit.open(),
+  FeatureKey.customCategories: FeatureLimit.open(), FeatureKey.themeCustomization: FeatureLimit.open(),
+  FeatureKey.imageExport: FeatureLimit.open(),
+};
+```
+Paywall (`buildSrPaywall(AppLocalizations l)`), **cinque righe, una per chiave limitata**, in
+quest'ordine: «**Scontrino**: controlla la cassa e registra la spesa dallo scontrino»
+(`documentScan`); «**Tutte le spese**, non solo le ultime 5» (`fullHistory`); «**Statistiche** per mese
+e per negozio, spesa media, sforamenti del budget» (`statistics`); «**Export CSV**» (`csvExport`);
+«**Backup**» (`backupRestore`). Titolo «Spending Review Pro», prezzo dallo store, «Una volta sola, per
+sempre». Gateway finto: `FakePurchaseGateway.withProduct(config.proSku, formattedPrice: '2,99 €')`.
+**F12.2a** aggiunge `FeatureKey.documentScan` a `micro_core` (doc: «Leggere con la fotocamera un
+documento intero, es. lo scontrino di Spending Review, e ricavarne i dati. ⛑ Distinta da [photos]:
+il documento si legge e si butta, non si allega») e la riga `FeatureKey.documentScan:
+FeatureLimit.open()` nelle mappe di TrashCan, Full Freezer, Scorte Calore, Film Tracker e QR Me.
+Nessun cambiamento di comportamento per loro.
+
+#### F12.1.15 — Permessi e privacy
+
+| Piattaforma | Permesso | Quando |
+|---|---|---|
+| Android | `CAMERA` (dichiarato **da noi**) | al primo tocco su Cartellino o Scontrino |
+| Android | **tolti** con `tools:node="remove"`: `RECORD_AUDIO`, `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` (portati da `camera_android_camerax`, come in QR Me); `uses-feature android.hardware.camera.any` `required="false"` (`tools:replace`): ⚑ il tastierino funziona senza fotocamera, l'app non deve sparire da Play per i dispositivi senza | — |
+| Android | `com.android.vending.BILLING` | il Pro |
+| Android | `INTERNET` / `ACCESS_NETWORK_STATE`: **non dichiarati da noi**; li porta Play Billing (`transport-backend-cct`), e la guardia di F12.1.2 controlla che arrivino solo da li'. Servono al Pro e al server licenze | — |
+| iOS | `NSCameraUsageDescription` («Per leggere cartellini e scontrini con la fotocamera.» / «To read price tags and receipts with the camera.») | |
+| iOS | `NSPhotoLibraryUsageDescription` (richiesta da `image_picker` anche col picker di sistema) | «Da una foto» |
+| iOS | **niente** `NSMicrophoneUsageDescription` (fotocamera con `enableAudio: false`); ⚠ se App Store Connect manda ITMS-90683 al primo caricamento, si aggiunge (come previsto in F17.1.10) | |
+
+Niente notifiche, niente posizione, niente contatti, niente rete dall'app (a parte il Pro).
+
+**Privacy** (testo per l'informativa del sito, pagina di Spending Review): «Le foto di cartellini e
+scontrini vengono lette **sul telefono** (su iPhone dal sistema di Apple, su Android da un motore
+incluso nell'app) e **cancellate subito dopo la lettura**. Nessuna foto e nessun dato della spesa esce
+dal telefono. L'unica comunicazione esterna e' l'acquisto della versione Pro (Google Play / App
+Store) e, su Android, la sua verifica sul nostro server». Data safety di Play: come le altre app con il
+Pro (eccezione del 2026-10-09). `android:allowBackup="false"` e, su iOS, `isExcludedFromBackup` sulla
+cartella `Documents/` in `AppDelegate.swift` (come QR Me, F17.7.3): ⚑ i dati della spesa (dove e quando
+si compra, quanto si spende) non devono finire in un backup automatico verso Google Drive o iCloud che
+l'utente non ha scelto: la regola «dati solo sul telefono». Il backup lo fa l'utente, col Pro, in un
+file che vede.
+
+#### F12.1.16 — Trappole note in anticipo
+
+1. ☠ **ONNX Runtime ≥ 1.29 = telemetria.** `strictly("1.28.0")` + task Gradle + script sul `.so`
+   (F12.1.2). Un Dependabot, un `flutter pub upgrade` o un plugin nuovo che porta ORT non deve passare.
+2. ☠ **`INTERNET` nel manifest c'e' comunque** (Play Billing): il controllo guarda **chi** lo porta,
+   non **se** c'e' (F12.0 punto 9).
+3. ☠ **Asse y di Vision capovolto** e **orientamento EXIF** su entrambe le piattaforme: test di
+   `Riquadro.daVision`, foto verticali nel test di parita'.
+4. ☠ **Dizionario del riconoscitore** disallineato di una posizione = testo plausibile ma sbagliato:
+   assert sulle classi in `prepara()` e SHA-256 dei file (F12.1.9).
+5. **Centesimi in apice** letti come «229» o «1 | 06»: per questo il parser lavora sui riquadri
+   (F12.1.4), e c'e' un test per ciascuna forma.
+6. **Arrotondamenti**: half-up intero; sconto arrotondato **prima** della sottrazione; mai
+   `Money.operator *` per i pesi (F12.1.3).
+7. **NxM con il prezzo effettivo in grande** (c01, c11): il prezzo della riga e' il pieno.
+8. ☠ **Dati della carta sugli scontrini** (s13): il piede si scarta nel parser, il testo grezzo non si
+   salva, le foto si cancellano, le fixture si ripuliscono (F12.1.17), gli screenshot dello store
+   usano scontrini **inventati**.
+9. **Due spese in corso** da tocchi ravvicinati: indice unico parziale nel database (F12.1.10).
+10. **Plugin con iOS che porta ORT**: per questo niente `flutter_onnxruntime` (F12.1.2).
+11. **Primo OCR lento** (caricamento dei modelli): `prepara()` dopo il primo frame (F12.1.13).
+12. **R8 e JNI di ORT**: `consumer-rules.pro`; build di release provata su dispositivo prima di ogni
+    upload (§10).
+13. **16 KB page size** di Play: verifica in F12.2b (F12.1.2 punto 4).
+14. **Deep link di Flutter spento** (F12.0 punto 11).
+
+#### F12.1.17 — Test da scrivere
+
+| File | Cosa dimostra |
+|---|---|
+| `packages/micro_core/test/…` (esistenti) + i cinque `paywall_config_test.dart` | `documentScan` mappata ovunque, nessun comportamento cambiato (F12.2a) |
+| `packages/micro_ocr/test/riga_ocr_test.dart` | JSON di andata e ritorno; `Riquadro.daVision` (y capovolto) su 4 casi; `sovrapposizioneVerticale` |
+| `packages/micro_ocr/test/canale_ocr_engine_test.dart` | con un `MethodChannel` finto: conversione delle mappe, `origine: basso`, `PlatformException('non_disponibile')` e `MissingPluginException` → `OcrNonDisponibile` |
+| `packages/micro_ocr/test/modelli_test.dart` | SHA-256 dei tre file in `android/src/main/assets/ppocrv5/` uguali a `MODELLI.md` |
+| `packages/micro_ocr/android/src/test/kotlin/…/DbPostprocessTest.kt` | mappa sintetica con due blocchi → due rettangoli; sotto soglia → niente; unclip; lati minimi |
+| `…/CtcDecoderTest.kt` | blank, ripetizioni fuse, spazio finale, confidenza media |
+| `…/PreprocessTest.kt` | dimensioni multiple di 32 e rapporto conservato; valori normalizzati di un pixel noto |
+| `…/StrisceTest.kt` | tagli sovrapposti che coprono tutta l'altezza; fusione dei doppioni (IoU) |
+| `apps/spending_review/test/domain/arrotonda_test.dart` | half-up intero, negativi simmetrici, i 9 casi della bilancia e i 4 di s03, sconto c29/c30 |
+| `test/domain/offerta_test.dart` | tabella di F12.1.3 per q = 1..7, JSON tollerante |
+| `test/domain/riga_spesa_test.dart` | totale per Pezzi/AMisura/offerta/totale stampato/sconto negativo |
+| `test/domain/spesa_test.dart` | totale per fonte, articoli, residuo e `LivelloBudget` ai bordi 79,99% / 80% / 100% / 100,01% |
+| `test/domain/tastierino_test.dart` | **ogni riga** della tabella del tastierino, piu' sequenze complete («2 4 9 +», «2 , 4 9 +», «3 00 +», «3 × 2 4 9 +», «2 4 9 × 3 +», «− 1 5 0 +», «+» a vuoto, rifiuti) |
+| `test/domain/nomi_test.dart` | normalizzazione, formati (200 g, GR.600, LT 1, 6x180 ml, 50 cl), similarita' con abbreviazioni |
+| `test/domain/numeri_ocr_test.dart` | pulizia (O→0, «16..50», «2 ,49»), migliaia, negativi «-0,40» e «0,40-», spezzati e fusi |
+| `test/domain/cartellino_parser_test.dart` | i casi della tabella di F12.1.4 |
+| `test/domain/bilancia_parser_test.dart` | i casi di F12.1.5 |
+| `test/domain/scontrino_parser_test.dart` | i casi di F12.1.6, compresa l'assenza delle righe di pagamento |
+| `test/domain/unisci_parti_test.dart` | giunzione trovata, non trovata, parte singola |
+| `test/domain/confronto_test.dart` | i casi di F12.1.7 |
+| `test/domain/statistiche_test.dart` | dataset noto (F12.1.8) |
+| `test/domain/banco_parser_test.dart` | **il banco di regressione** (sotto) |
+| `test/data/spesa_repository_test.dart` | una sola spesa in corso (anche con due `assicuraInCorso` concorrenti), chiusura con totale scritto, righe scontrino affiancate, spese oltre le 5 **conservate**, cascata, negozio eliminato → spese senza negozio, `ripristinaRiga` |
+| `test/data/backup_test.dart` | round-trip ZIP nelle due modalita', spesa in corso del file in `mergeKeepExisting` |
+| `test/services/lettura_service_test.dart` | con `FakeOcrEngine`: cartellino, bilancia riconosciuta da sola, niente letto, OCR assente; **le foto temporanee non esistono piu'** dopo ogni chiamata, anche con errore |
+| `test/services/csv_export_test.dart` | colonne, virgola decimale, BOM, nessun testo OCR grezzo |
+| `test/widget/paywall_config_test.dart` | tutte le chiavi mappate, una riga per chiave limitata, limiti come F12.0 punto 5 |
+| `test/widget/spesa_page_test.dart` | battere e aggiungere, totale e residuo, colori della barra alle soglie, scorrimento + «Annulla», Scontrino con badge senza Pro, layout a 412 dp al 130% con Space Grotesk vero (nessun tasto tagliato) |
+| `test/widget/conferma_cartellino_test.dart` | niente si aggiunge senza tocco; chip alternativi; «Aggiungi (ora 2)»; NxM con quantita' N di default; scelta fra due cartellini |
+| `test/widget/confronto_page_test.dart` | card ambra con +1,65 e le due righe della tavola; «Tutto torna» |
+| `test/widget/storico_page_test.dart` | 7 spese chiuse, gratis → 5 visibili + card «Le altre 2…»; Pro → 7 |
+| `test/widget/palette_contrast_test.dart` | contrasti di F12.1.12 in entrambi i temi |
+| `test/widget/texts_glyphs_test.dart` | nessun ✓⚠✗ negli ARB (come QR Me) |
+| `test/widget/dev_route_test.dart` | `/dev/ocr` assente quando `kDebugMode` e `SR_DEV` sono falsi (iniettati) |
+| `integration_test/ocr_motore_test.dart` | sul dispositivo: un PNG **generato dal test** (testo «PASTA 500 g» e «2,49» disegnati con `dart:ui`) letto dal motore vero → contiene «2,49» (Android ORT e iOS Vision) |
+| `integration_test/ocr_parita_test.dart` | solo Android, F12.2b: parita' con RapidOCR (F12.1.9), salta se `/sdcard/Download/f12/` non c'e' |
+
+**Il banco di regressione del parser** (`test/domain/banco_parser_test.dart`):
+- ⚑ **Nel repo va solo il TESTO OCR estratto (righe + riquadri + confidenza) e la verita', mai le
+  immagini.** Le immagini restano in `E:/coding/XAMPP/htdocs/microapps-campioni/f12/` (licenze,
+  dati personali, peso: `LEGGIMI.md` dei campioni). Il parser lavora solo sulle righe: con le righe
+  salvate il test e' **deterministico**, gira in millisecondi sotto `flutter test` su Windows e sul
+  Mac, senza motore OCR e senza dispositivo.
+- **Formato** di `test/fixtures/ocr/ppocrv5/<nome-campione>.json`:
+  ```json
+  {"campione": "c14_esselunga_borotalco.jpg", "tipo": "cartellino", "licenza": "CC BY-SA 3.0",
+   "motore": "ppocrv5-mobile-latin/rapidocr-3.10", "creato": "2026-10-12",
+   "righe": [{"t": "1,99", "x": 0.41, "y": 0.38, "w": 0.22, "h": 0.12, "c": 0.97}],
+   "verita": [{"nome": "...", "prezzo": "1,99", "al_kg": "9,95", "unita": "kg"}]}
+  ```
+  `verita` e' una lista (piu' cartellini per foto), con le chiavi di `campioni.csv`.
+- **Quali campioni nel repo**: solo i **33 a licenza libera** (pubblico dominio, CC BY, CC BY-SA):
+  c01–c13, c23, c24, c25, s01–s15, b07, b09. `test/fixtures/ocr/LICENZE.md` elenca per ognuno fonte,
+  autore e licenza (CC BY e BY-SA chiedono l'attribuzione; le trascrizioni si distribuiscono con la
+  stessa licenza). Gli altri **27** (CC BY-NC e licenza sconosciuta: c14–c22, c26–c35, s16, b01–b06,
+  b08) hanno le fixture **fuori dal repo**, in `E:/coding/XAMPP/htdocs/microapps-campioni/f12/fixture/ppocrv5/`,
+  e il banco le carica **se** la variabile d'ambiente `SR_CAMPIONI` punta a quella cartella
+  (`Platform.environment`), altrimenti le salta stampando «27 fixture private non trovate».
+- **Ripulitura dei dati personali**: lo script toglie dalle righe degli scontrini quelle che
+  combaciano con `\*{3,}\d{3,4}|aut(orizzazione)?\.?\s*\d|terminale|term\.|id\s*trans|n\.?\s*operazione|stan\b|a\.?i\.?d\.?`
+  e il banco **fallisce** se in una fixture del repo trova `\*{4}\d{4}`.
+- **Script**: `apps/spending_review/tool/esporta_fixture_ocr.py`, lanciato con
+  `venv\Scripts\python -I esporta_fixture_ocr.py <cartella_campioni> --licenze-libere <dest_repo>
+  --altre <dest_fuori>` nel venv di f12-ocr.md §6.3, con **RapidOCR 3.10 e gli stessi modelli** di
+  `micro_ocr` (det/rec di PP-OCRv5 mobile latin; il riquadro a 4 punti diventa il rettangolo che lo
+  contiene, normalizzato). ⚑ Le fixture vengono dal **PC**, non dal telefono: il test di parita'
+  (F12.1.9) garantisce che il motore Kotlin legga lo stesso testo. Le fixture di **Vision** (cartella
+  `test/fixtures/ocr/vision/`) arrivano in F12.7 dall'iPad con `OcrDevPage` → «Esporta fixture», per gli
+  stessi 33 campioni mostrati a schermo dal PC e fotografati; il banco gira su entrambe le cartelle.
+- **Metriche**, per motore e per tipo: cartellino `prezzo`, `prezzo_pieno`, `al_kg`, `offerta`;
+  bilancia `totale`, `peso_kg`, `al_kg`; scontrino `totale`, `negozio` (similarita' ≥ 0,8), `righe`
+  (numero di articoli ±1). Una verita' vale «presa» se la **prima** proposta del parser ha quel valore.
+- ⚑ **Un «cricchetto», non una soglia inventata**: `test/fixtures/ocr/soglie.json` tiene, per motore,
+  tipo e campo, il numero di casi giusti dell'ultima versione accettata. Il test **fallisce se un
+  numero scende**; se sale, stampa «aggiorna soglie.json: cartellino.prezzo 24 → 26» (si aggiorna a
+  mano, nello stesso commit). Le soglie di f12-ocr.md §6.3 (prezzo ≥ 95%…) sono l'**obiettivo** sulle
+  foto vere fatte col mirino, non sulle foto larghe del web, dove l'OCR stesso legge le cifre del
+  prezzo nel 78% dei casi: imporle oggi farebbe un test sempre rosso, che si impara a ignorare.
+- **Casi che devono passare sempre** (oltre al cricchetto): tutte le bilance (b07, b09 nel repo) e
+  tutti i totali degli scontrini nel repo (s01–s15): il lettore li ha letti al 100% (f12-ocr.md §7),
+  quindi un errore qui e' del parser.
+
+#### F12.1.18 — Prestazioni attese
+
+| Misura | Obiettivo | Dove si misura |
+|---|---|---|
+| Avvio a freddo fino al tastierino usabile | ≤ 1,5 s (Android medio), ≤ 1 s (iPad) | F12.7, `flutter run --profile` |
+| Tocco di un tasto → totale aggiornato | un frame (≤ 16 ms) | DevTools; la riga si scrive in background, il totale si aggiorna dallo stream |
+| `prepara()` dei modelli (Android) | ≤ 1 s, fuori dal thread dell'interfaccia | log `MicroLog` con i tempi |
+| Cartellino: scatto → foglio di conferma | ≤ 1,5 s Android medio (OCR ≤ 1 s), ≤ 0,8 s iPad | idem, 10 letture |
+| Scontrino: 1 foto | ≤ 3 s Android, ≤ 1,5 s iPad; ogni parte in piu' + lo stesso | idem |
+| Parser (qualunque) | ≤ 20 ms | `banco_parser_test.dart` stampa i tempi |
+| Memoria di picco durante l'OCR (Android) | ≤ 300 MB | Android Studio profiler |
+| Peso dell'APK per ABI (arm64) | ≈ +23 MB rispetto a QR Me (ORT + modelli) | `flutter build apk --split-per-abi --analyze-size` |
+
+Se i tempi Android non tornano su un telefono medio: prima si abbassa il lato del rilevatore (960 →
+736), poi si prova l'execution provider XNNPACK di ORT 1.28, poi il batch del riconoscitore; **mai** un
+motore che chiama la rete.
+
+### F12.2 — Ordine di lavoro (le sottofasi standard Fx.2–Fx.9 applicate)
+
+Ogni sottofase si chiude con il **rituale di §6** (piano, atlanti toccati con `verify_atlas`, Projects
+Tracker progetto 17, messaggio dettagliato, branch di versione nuovo con `tool/bump_version.ps1`). Prima
+di cominciare: il **bug del widget di TrashCan** in §7 resta la priorita' 1 se non e' chiuso.
+
+- **F12.2a** `FeatureKey.documentScan` in `packages/micro_core/lib/src/gate/feature_key.dart` + una riga
+  `open()` nei cinque `feature_limits.dart`; aggiornare l'atlante di `micro_core` e i cinque atlanti
+  (sezione Pro); `pwsh tool/test_all.ps1` verde.
+- **F12.2b** `packages/micro_ocr/`: `flutter create --template=plugin --platforms=android,ios --org
+  com.smp packages/micro_ocr`; lato Dart (F12.1.9); iOS Vision; Android ORT `strictly 1.28.0` e la catena
+  Kotlin con i test JVM (`gradlew :micro_ocr:testDebugUnitTest` dall'app di esempio del plugin);
+  modelli dal venv del banco con `MODELLI.md` e SHA-256; `.gitattributes` con `*.onnx binary`; aggiunto a
+  `tool/_common.ps1`; `integration_test/ocr_motore_test.dart` verde su emulatore Android **e** simulatore
+  iPhone (sul Mac); **test di parita'** con RapidOCR ≥ 95%; verifica 16 KB; atlante
+  `packages/micro_ocr/codebase_reference.md`. ☠ Se ORT 1.28.0 fallisce la verifica 16 KB o il test di
+  parita' non si raggiunge in tempi ragionevoli: **fermarsi e dirlo al proprietario** prima di passare a
+  NCNN (cambia una decisione scritta).
+- **F12.2c** Bootstrap `apps/spending_review` (§8.T, come QR Me): `com.smp.spendingreview` Android e
+  iOS (solo iPhone), `licenseAppId 'spendingreview'`, SKU, tema scuro e `sr_palette.dart`, font, testi
+  da `tool/testi.py`, icone e splash da `docs/specs/icona-spending-review.png` con `tool/genera_icone.py`,
+  manifest (F12.1.15), `allowBackup=false`, esclusione dal backup iCloud, deep link spento, task Gradle
+  `verificaPrivacyOcr` (F12.1.2) **provato in negativo** (aggiungendo per prova una dipendenza con
+  `INTERNET`, la build deve fallire; poi si toglie). APK debug compilato, app che parte sull'emulatore e
+  sul simulatore.
+- **F12.3** Dominio e dati con i test (F12.1.3–F12.1.8, F12.1.10): prima `arrotonda`, `offerta`,
+  `tastierino`, poi i parser **con le fixture** (`tool/esporta_fixture_ocr.py` lanciato una volta,
+  fixture libere nel repo, private fuori), il banco con il cricchetto, il confronto, il repository, lo
+  schema dump.
+- **F12.4** Interfaccia «C · Una mano» completa (F12.1.12) con i servizi (F12.1.13): spesa,
+  cartellino, peso, bilancia, scontrino, confronto, registrazione, chiusura, storico, impostazioni,
+  `OcrDevPage`; provata sull'emulatore Android con foto vere (dalla galleria: le 33 libere copiate con
+  `adb push` nella galleria dell'emulatore) e sul simulatore iPhone.
+- **F12.5** Pro: limiti, paywall, `ProGate` sulle pagine, test di coerenza.
+- **F12.6** Grafica: scelta gia' fatta («C · Una mano», F12.0 punto 6), applicata in F12.4; qui si
+  aggiungono il **tema chiaro** derivato e il test dei contrasti, e si mostrano al proprietario due
+  scatti (scuro e chiaro) per conferma. Decisione in `memory/decisioni.md` gia' presente.
+- **F12.7** Test, rifinitura, iOS: testo al 130%, tema chiaro e scuro, stati vuoti, `Semantics`;
+  build sul Mac, **TestFlight su iPad**; **fixture di Vision** con `OcrDevPage`; **taratura con le foto
+  vere del proprietario** (sotto): per ogni foto, fixture in `microapps-campioni/f12/fixture/` (le foto
+  del proprietario sono sue ma contengono scontrini: restano **fuori dal repo** come le altre private),
+  banco rilanciato, regole dei parser corrette, cricchetto aggiornato; misure di F12.1.18 su un Android
+  vero di fascia media; `verifica_privacy_android.ps1` sull'APK di release.
+- **F12.8** Atlanti: `apps/spending_review/codebase_reference.md` e `packages/micro_ocr/codebase_reference.md`
+  (piu' gli aggiornamenti di `micro_core` e delle cinque app per `documentScan`), `verify_atlas` **0
+  mancanti** per ciascuno, firme confrontate a macchina.
+- **F12.9** Rituale di fine fase, card «In arrivo» in `site/src/apps.php` (voce `'spending-review'`,
+  accento `#15803D` come QR Me o il verde dell'icona scurito per il bianco della card, `packageId
+  'com.smp.spendingreview'`, `pubblicata => false`, `suPlay => false`; la pubblicazione del sito la decide
+  il proprietario; siti critici di `clawserver` a 200 prima e dopo), `StatusMicroApps.md` con **tutti e
+  due gli store** (fermi: perche', da quando, cosa sblocca), README, decisioni; branch con
+  `pwsh tool/bump_version.ps1 -Large` (oggi l'ultimo branch e' `v9.3.4`, quindi `v10.0.0`; ☠ §7 F8 indica
+  `v10.0.0` per il deploy: vince lo script, e la riga di F8 si corregge nello stesso rituale).
+
+**Azioni del proprietario** (non si possono fare da qui):
+- [x] icona (`docs/specs/icona-spending-review.png`, gia' consegnata);
+- [ ] portale Apple: App ID **`com.smp.spendingreview`**, nessuna capability (niente App Group, niente
+  estensioni) — serve da F12.7 per TestFlight; i profili poi via API;
+- [ ] App Store Connect: l'app «Spending Review» (o il ripiego di F12.0 punto 1) e il prodotto
+  `spendingreview_pro_lifetime` a 2,99 € quando si arriva allo store; classificazione per eta' ed
+  etichetta privacy (come ha fatto per QR Me);
+- [ ] License Server: riga `spendingreview` nella tabella `apps` e il segreto in `APP_SECRETS` (prima di
+  Play);
+- [ ] **Foto vere per tarare** (le lacune di `microapps-campioni/f12/LEGGIMI.md`), da mettere in
+  `E:/coding/XAMPP/htdocs/microapps-campioni/f12/` con una riga in `campioni.csv` (verita' trascritta),
+  fatte **col mirino dell'app** quando c'e' (F12.4), altrimenti col telefono da vicino:
+  - **etichette della bilancia italiane**: banco salumi e formaggi (Esselunga, Coop, Conad, Carrefour),
+    bilancia self-service dell'ortofrutta, gastronomia — almeno 10, con la **tara** in alcune;
+  - **cartellini delle catene mancanti**: Conad, Coop, Lidl, Eurospin, MD, Penny, Aldi, Carrefour
+    Italia, Bennet — almeno 3 per catena, compresi i **prezzi con la carta fedelta'** (prezzo con carta
+    contro prezzo normale: oggi nessun campione, la regola di F12.1.4 e' scritta alla cieca);
+  - **cartellini elettronici italiani** in primo piano (e-ink Esselunga, Coop, Carrefour);
+  - **offerte attuali**: «prendi 2 paghi 1», «−X% sul secondo», «sottocosto», 3x2;
+  - **scontrini moderni**, lunghi (anche in 2–3 foto), piegati, in controluce, con tessera fedelta',
+    buoni sconto e resi, di catene diverse — ☠ coprire con un dito o un foglio le cifre della carta e i
+    codici POS prima di scattare, o comunque non condividerli fuori dalla cartella dei campioni;
+  - **condizioni difficili**: riflessi sul plexiglass, luce dei frigo, foto mosse, cartellini inclinati
+    sul bordo dello scaffale.
+- [ ] Rispondere alle **domande aperte** qui sotto (D1 prima di F12.3, le altre prima di F12.4).
+
+### F12.10 — Domande aperte per il proprietario
+
+Decisioni di prodotto che questa specsheet **non** prende da sola. Per ciascuna e' scritta la proposta
+con cui si sviluppa se la risposta non arriva prima della sottofase indicata; cambiarla dopo costa poco
+(il punto da toccare e' indicato).
+
+- **D1 — Spese oltre le 5 nel gratis: nascoste o cancellate?** (prima di F12.3) Proposta: **nascoste**
+  (restano sul telefono, il Pro le mostra tutte, con le statistiche gia' piene: F12.0 punto 5).
+  Alternativa «come QR Me»: cancellate davvero dopo la quinta (`SpesaRepository.chiudi` chiama una
+  potatura). Punto da toccare: `osservaChiuse` e un metodo `potaChiuse({required int keep})`.
+- **D2 — Il tastierino «alla cassa» va bene?** (prima di F12.4) Proposta: `2 4 9` = 2,49 (cifre come
+  centesimi, come alla cassa) **e** `2 , 4 9` = 2,49 (virgola facoltativa); conseguenza: `3 +` = **0,03 €**
+  (visibile sul display prima del «+»), per 3 € si batte `3 00 +` o `3 , +`. Alternativa «calcolatrice»:
+  `3 +` = 3,00 €, `2 4 9` = 249,00 €, la virgola e' obbligatoria per i centesimi. Punto da toccare:
+  `TastierinoState.premi` e la sua tabella di test.
+- **D3 — Budget mensile?** Non richiesto: in v1 c'e' solo il budget **per spesa** (con un «budget
+  abituale» che si precompila). Se servisse anche un tetto del mese, va nelle statistiche Pro.
+- **D4 — Prezzo con la carta fedelta' di default?** Proposta: **si'** (interruttore «Ho la carta
+  fedelta'» acceso). Nessun campione lo copre ancora: la regola si tara con le foto vere.
+
+---
+
 ## §9 — Debito tecnico e rinvii consapevoli
 
 Elenco vivo. Ogni voce ha il motivo del rinvio e quando va affrontata.
@@ -6209,6 +8011,7 @@ Elenco vivo. Ogni voce ha il motivo del rinvio e quando va affrontata.
 | DT-08 | Sincronizzazione dati tra dispositivi | Contraddice "nessun account" | Non prevista |
 | DT-09 | Galleria dei componenti (`packages/micro_core/example/`) | I componenti sono in uso reale dalla prima app, che è una verifica migliore di una galleria isolata | Prima dei golden test di F7 |
 | DT-10 | `PdfReportBuilder` | Lo usa solo Film Tracker. Costruirlo ora significherebbe scriverlo senza sapere che forma deve avere il riepilogo | F6.11, insieme al riepilogo annuale |
+| DT-SR1 | Spending Review: controllo del totale della bilancia con il codice a barre «a peso variabile» (EAN che inizia per 2, con il prezzo dentro) | Il parser della bilancia ha gia' la verifica peso × €/kg ≈ totale; leggere il codice a barre vorrebbe un secondo decodificatore e i formati cambiano per catena | Se le foto vere (F12.7) mostrano etichette con peso o €/kg illeggibili ma codice nitido |
 
 ---
 
