@@ -540,6 +540,8 @@
   "voice_stop": "Stop listening",
   "voice_listening": "Listening… e.g. “two portions of lasagne”",
   "voice_unavailable": "Voice input isn’t available: check the microphone permission in the phone settings.",
+  "voice_notOnDevice": "Dictation on the phone isn’t available here: type the name (you can use the keyboard’s microphone).",
+  "voice_notOnDeviceShort": "Dictation on the phone isn’t available",
   "widget_addTitle": "Put the widget on the home screen",
   "widget_addBody": "The oldest things in the freezer, without opening the app.",
   "widget_addUnsupported": "This launcher can’t add widgets by itself. Touch and hold the home screen and look for Full Freezer.",

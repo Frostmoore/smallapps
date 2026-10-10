@@ -201,7 +201,8 @@ freezer,inventory,frozen,food,waste,pantry,kitchen,leftovers,fridge,tracker,remi
 
 Risposta: **«Dati non raccolti»**. La build iOS non parla con nessun server (`tool/build_ios.sh`
 passa solo `BILLING=store`, non `MA_LICENSE_URL`): alimenti e foto restano sul telefono, l'acquisto
-lo gestisce Apple, la voce la riconosce iOS.
+lo gestisce Apple, la voce la riconosce il telefono stesso (solo riconoscimento sul dispositivo,
+mai i server di Apple: dove non c'e', il microfono dice di scrivere — decisione del 2026-10-10).
 
 ☠ Se un giorno la build iOS si collega al License Server, questa etichetta diventa falsa.
 
@@ -211,7 +212,7 @@ lo gestisce Apple, la voce la riconosce iOS.
 
 Accesso richiesto: **No**. Contatto: Riccardo Ronconi, `info@smp-digital.it`.
 
-### Note (1243 su 4000)
+### Note (1414 su 4000)
 
 ```
 Full Freezer is a freezer inventory. No account and no login are needed: the app works fully offline and does not talk to any server.
@@ -219,7 +220,7 @@ Full Freezer is a freezer inventory. No account and no login are needed: the app
 HOW TO TRY IT
 1. On first launch, pick a freezer model (for example "Fridge-freezer, 180 cm") and tap Continue.
 2. Tap "Put in freezer", type a name (for example "Lasagne") and tap Save. The oldest items are always on top, with the days since they were frozen, and the header shows how full the freezer is.
-3. The microphone in the name field lets you dictate "two portions of lasagne": speech is recognised by iOS, the app only receives the text.
+3. The microphone in the name field lets you dictate "two portions of lasagne": speech is recognised on the device only (on-device recognition, never Apple's servers), the app only receives the text. If on-device recognition is not available for the language, the microphone says so and the user types the name.
 4. To add the widget: touch and hold the Home Screen, tap +, search for Full Freezer.
 
 IN-APP PURCHASE

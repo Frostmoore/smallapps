@@ -4,8 +4,8 @@
 > per primo, e quanto e' pieno.
 > **Obiettivo**: capire il codice, trovare cio' che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-10-07 · **Fase**: F4.0–F4.16 concluse (resta F4.17, gli store, che
-> dipende dal proprietario) · **Ramo git**: `v6.0.0` · **versionName+Code**: `1.0.0+1`
+> **Aggiornato al**: 2026-10-10 · **Fase**: F4.0–F4.16 concluse (resta F4.17, gli store, che
+> dipende dal proprietario); dettatura solo sul dispositivo (2026-10-10) · **Ramo git**: `v6.0.0` · **versionName+Code**: `1.0.0+3`
 > **Package Android / bundle iOS**: `com.smp.fullfreezer` (immutabile dopo il primo upload)
 > **Estensione widget iOS**: `com.smp.fullfreezer.FullFreezerWidget` · **App Group**: `group.com.smp.fullfreezer`
 > **SKU Pro**: `fullfreezer_pro_lifetime` — 3,99 € una tantum (stesso gradino su Play e App Store)
@@ -66,6 +66,7 @@
 | Backup, ripristino e CSV (azioni dalle impostazioni) | `lib/features/settings/data_actions.dart` |
 | Il CSV | `lib/services/csv_export.dart` |
 | Il microfono | `lib/services/voice_input.dart` |
+| "La dettatura sul telefono c'e'?" (canale `full_freezer/voice`) | `android/.../MainActivity.kt` (`onDeviceRecognitionAvailable`) e `ios/Runner/AppDelegate.swift` (`onDeviceRecognitionAvailable(localeId:)`) |
 | La home | `lib/features/home/home_page.dart` (+ schede e righe in `item_row_tile.dart`) |
 | L'inserimento rapido | `lib/features/items/quick_add_sheet.dart` |
 | L'inserimento completo e la modifica | `lib/features/items/item_edit_page.dart` |
@@ -82,7 +83,7 @@
 | Le righe e le etichette "Ghiaccio" comuni | `lib/features/common/ghiaccio.dart` |
 | Il lucchetto delle pagine Pro aperte senza Pro (`ProGate`) | `lib/features/common/pro_gate.dart` |
 | Permessi, receiver, widget, deep link spento (Android) | `android/app/src/main/AndroidManifest.xml` |
-| L'intent del widget ad app chiusa | `android/app/src/main/kotlin/com/smp/fullfreezer/MainActivity.kt` |
+| L'intent del widget ad app chiusa, il controllo della dettatura sul telefono | `android/app/src/main/kotlin/com/smp/fullfreezer/MainActivity.kt` |
 | Permessi, schema URL, deep link spento (iOS) | `ios/Runner/Info.plist` (+ `{it,en}.lproj/InfoPlist.strings`) |
 | Le stringhe tradotte | **`tool/testi.py`** (sorgente unica) → `lib/l10n/app_en.arb`, `app_it.arb` |
 | L'icona e la splash | `tool/genera_icone.py` + `flutter_launcher_icons.yaml`, `flutter_native_splash.yaml` (§2bis) |
@@ -144,15 +145,15 @@ apps/full_freezer/
 │   │   ├── freezer_scheduler.dart        freezerChannel, NotificationSettingKeys, FreezerScheduler
 │   │   ├── freezer_widget.dart           FreezerWidget: righe, icone PNG, pubblicazione, sveglie
 │   │   ├── notification_plan.dart        DigestFrequency, digestDates, digestFor, alertTime, PendingAlert, digestId
-│   │   └── voice_input.dart              VoiceInput (speech_to_text)
+│   │   └── voice_input.dart              VoiceInput (speech_to_text, SOLO sul dispositivo), VoiceProblem, OnDeviceProbe
 │   └── l10n/
-│       ├── app_en.arb                    template (249 chiavi) — GENERATO da tool/testi.py
+│       ├── app_en.arb                    template (252 chiavi) — GENERATO da tool/testi.py
 │       ├── app_it.arb                    italiano, stesse chiavi — GENERATO da tool/testi.py
 │       └── untranslated.json             vuoto: nessuna chiave senza traduzione
-├── test/                                 140 test (§12)
+├── test/                                 150 test (§12)
 │   ├── data/freezer_repository_test.dart
 │   ├── domain/{aging,capacity,formats,home_view,item_photo,search,stats,text_norm,voice_parser}_test.dart
-│   ├── services/{backup_csv,freezer_widget,notification_plan}_test.dart
+│   ├── services/{backup_csv,freezer_widget,notification_plan,voice_input}_test.dart
 │   └── widget/{app_smoke,paywall_config,quick_add}_test.dart
 ├── integration_test/flusso_test.dart     flusso vero sul dispositivo (non affidabile sull'emulatore, §14)
 ├── tool/
@@ -174,7 +175,7 @@ apps/full_freezer/
 │   ├── build.gradle.kts                  applicationId, minSdk 24, desugaring, firma da key.properties
 │   └── src/main/
 │       ├── AndroidManifest.xml           permessi BILLING/BOOT/RECORD_AUDIO, receiver, widget, deep link spento
-│       ├── kotlin/com/smp/fullfreezer/MainActivity.kt              onNewIntent → setIntent
+│       ├── kotlin/com/smp/fullfreezer/MainActivity.kt              onNewIntent → setIntent; canale full_freezer/voice
 │       ├── kotlin/com/smp/fullfreezer/FullFreezerWidgetProvider.kt il widget: giorni calcolati qui
 │       └── res/
 │           ├── drawable/ic_notification.xml        fiocco di neve monocromatico (barra di stato)
@@ -189,7 +190,8 @@ apps/full_freezer/
 │           └── mipmap-*, drawable-*dpi/*.png                         icone
 └── ios/
     ├── Runner.xcworkspace                    si apre questo, non .xcodeproj (niente Podfile: SPM)
-    ├── Runner/AppDelegate.swift, SceneDelegate.swift    template Flutter, non toccati
+    ├── Runner/AppDelegate.swift              canale full_freezer/voice (supportsOnDeviceRecognition per lingua)
+    ├── Runner/SceneDelegate.swift            template Flutter, non toccato
     ├── Runner/Info.plist                     permessi (testi inglesi), schema fullfreezer, deep link spento
     ├── Runner/{en,it}.lproj/InfoPlist.strings  testi dei permessi nelle due lingue (F4.14)
     ├── Runner/Runner.entitlements            App Group group.com.smp.fullfreezer
@@ -873,6 +875,7 @@ Da sovrascrivere in `main()`, altrimenti lanciano UnimplementedError: `appConfig
 | `notificationSyncProvider` | `Provider<void>` | tiene notifiche **e widget** allineati ai dati | scheduler, repository |
 | `notificationsEnabledProvider` | `NotifierProvider<NotificationsEnabled, bool>` | interruttore avvisi, **default spento** | settings, scheduler |
 | `digestFrequencyProvider` | `NotifierProvider<DigestFrequencyNotifier, String>` | `weekly` (default) \| `biweekly` \| `monthly` | settings, scheduler |
+| `voiceInputFactoryProvider` | `Provider<VoiceInput Function()>` | fabbrica `VoiceInput.new`: un microfono per foglio; i test la sostituiscono con un motore finto | |
 
 Altri provider fuori da questo file: `installIdProvider`, `purchaseGatewayProvider`,
 `entitlementProvider`, `isProProvider`, `featureGateProvider` (in `entitlement.dart`);
@@ -1266,22 +1269,52 @@ che Excel in italiano apre con un doppio clic, accenti compresi. Niente id, nien
 
 ### `voice_input.dart`
 
-`class VoiceInput` — `VoiceInput({SpeechToText? engine})`
+⚑ **Dettatura SOLO sul dispositivo** (decisione del proprietario del 2026-10-10, regola "dati
+solo sul telefono"): la voce non va ai server di Apple ne' di Google, **mai**, nemmeno come
+ripiego. Dove il telefono non sa riconoscere la lingua da solo, il microfono e' barrato e
+spiega di scrivere (la tastiera ha il suo microfono: e' una scelta dell'utente, fuori
+dall'app).
+
+`typedef OnDeviceProbe = Future<bool> Function(String localeId)` — chiede al sistema se il
+riconoscimento sul telefono c'e' per `"it_IT"`/`"en_US"`.
+
+`enum VoiceProblem { notOnDevice, unavailable }` — `notOnDevice`: niente riconoscimento sul
+telefono (o modello della lingua mancante) → testo `voice_notOnDevice`; `unavailable`:
+permesso negato o nessun riconoscitore → `voice_unavailable`.
+
+`class VoiceInput` — `VoiceInput({SpeechToText? engine, OnDeviceProbe? probe})` (default:
+`SpeechToText()`, singleton del plugin, e il canale `MethodChannel('full_freezer/voice')`,
+metodo `onDeviceAvailable` con argomento `{localeId}`, risposta `bool`)
 
 | Membro | Firma | |
 |---|---|---|
+| `notOnDeviceErrors` | `@visibleForTesting static const Set<String> notOnDeviceErrors` | `error_language_not_supported`, `error_language_unavailable` (Android), `error_assets_not_installed` (iOS 102) |
 | `isListening` | `bool get isListening` | |
-| `prepare` | `Future<bool> prepare({void Function(String status)? onStatus})` | chiede il permesso la prima volta; `false` se negato o senza riconoscitore (non lancia) |
-| `listen` | `Future<void> listen({required String languageTag, required void Function(String words, {required bool isFinal}) onWords})` | dettatura, risultati parziali, pausa 3 s, limite 15 s |
+| `onDeviceAvailable` | `Future<bool> onDeviceAvailable(String languageTag)` | chiede al probe con `localeIdFor`; **errore → `false`** (nel dubbio non si ascolta); nessun permesso chiesto |
+| `prepare` | `Future<VoiceProblem?> prepare({required String languageTag, void Function(String status)? onStatus, void Function(VoiceProblem problem)? onProblem})` | 1) `onDeviceAvailable`, se falso `notOnDevice` **senza** inizializzare il motore (niente richiesta di permesso); 2) `initialize`, falso/eccezione → `unavailable`; 3) **rilega** `statusListener`/`errorListener` del motore. `null` = si puo' ascoltare. `onProblem` riceve solo gli errori di `notOnDeviceErrors`; gli altri (silenzio, nessuna parola) restano nel log |
+| `listen` | `Future<VoiceProblem?> listen({required String languageTag, required void Function(String words, {required bool isFinal}) onWords})` | `listenOptionsFor(languageTag)`; `speech_to_text.ListenFailedException` (iOS `onDeviceError`) → `notOnDevice`, altra eccezione → `unavailable`; `null` = partito |
 | `stop` | `Future<void> stop()` | |
-| `cancel` | `Future<void> cancel()` | |
+| `cancel` | `Future<void> cancel()` | su un motore mai inizializzato non fa niente |
+| `listenOptionsFor` | `@visibleForTesting static SpeechListenOptions listenOptionsFor(String languageTag)` | **`onDevice: true`**, `dictation`, parziali, `cancelOnError`, pausa 3 s, limite 15 s |
 | `localeIdFor` | `@visibleForTesting static String localeIdFor(String languageTag)` | `it*` → `it_IT`, altro → `en_US` |
 
-⚑ Il riconoscimento lo fa **il telefono** (Google / Apple), non l'app: l'app non parla con
-nessun server, ma il motore di sistema puo' usare i server del produttore, e l'informativa
-privacy del sito deve dirlo. ⚑ Un oggetto per foglio, non un singleton: lo stato "sta
-ascoltando" deve morire con il foglio. ⚑ Pausa di 3 s: chi si ferma a pensare "due porzioni
-di… lasagne" non deve vedersi chiudere il microfono.
+**Come si comporta speech_to_text 7.5.0 con `onDevice: true`** (letto nel sorgente della pub
+cache il 2026-10-10) — il motivo del controllo nativo:
+
+| Piattaforma | Cosa fa il plugin | Rischio | Cosa fa l'app |
+|---|---|---|---|
+| Android API ≥ 31 | se `SpeechRecognizer.isOnDeviceRecognitionAvailable` → `createOnDeviceSpeechRecognizer`; **altrimenti, in silenzio, `createSpeechRecognizer`** (quello di rete) con `RecognizerIntent.EXTRA_PREFER_OFFLINE`, che e' solo una preferenza | ☠ audio ai server di Google senza che nessuno lo sappia | `MainActivity.onDeviceRecognitionAvailable()` fa **lo stesso controllo** prima; se falso Dart non chiama mai `listen` |
+| Android API < 31 | riconoscitore normale + `RecognizerIntent.EXTRA_PREFER_OFFLINE` | ☠ come sopra | il controllo nativo risponde `false` |
+| Android, modello della lingua non scaricato | il riconoscitore on-device risponde `SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE`/`SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED` | nessuno (non usa la rete) | `onProblem(notOnDevice)` → messaggio |
+| iOS | `requiresOnDeviceRecognition = true` (vincolo vero: senza modello fallisce, non usa i server); se `!supportsOnDeviceRecognition` risponde `onDeviceError`… **ma non fa `return`** e risponde una seconda volta al canale | ☠ percorso rotto (doppia risposta) | `AppDelegate.onDeviceRecognitionAvailable(localeId:)` = `SFSpeechRecognizer(locale:)?.supportsOnDeviceRecognition`, **per lingua**, prima |
+| tutte | `SpeechToTextPlatform.hasOnDeviceSupport` esiste nell'interfaccia 2.5.0 ma **non e' implementato** nel nativo 7.5.0 | `services.MissingPluginException` | canale nostro `full_freezer/voice` |
+
+⚑ Un oggetto per foglio (fabbrica `voiceInputFactoryProvider`): lo stato del foglio muore con
+il foglio. ☠ Il motore sotto e' pero' **un singleton** (`SpeechToText()` restituisce sempre
+la stessa istanza) e `initialize`, gia' riuscito, esce subito senza aggiornare i listener: dal
+secondo foglio stato ed errori andavano al primo, gia' chiuso, e il microfono restava "acceso"
+a vuoto. Per questo `prepare` rilega `statusListener` ed `errorListener`. ⚑ Pausa di 3 s: chi
+si ferma a pensare "due porzioni di… lasagne" non deve vedersi chiudere il microfono.
 
 ---
 
@@ -1355,8 +1388,16 @@ Percorso minimo: "+", nome, Salva = **3 interazioni**; con un suggerimento, 4. L
 `test/widget/quick_add_test.dart`. Ogni campo in piu' visibile qui e' un motivo per non usare
 l'app; microfono, foto e ingombro sono facoltativi e non aggiungono tocchi.
 
-Voce: `_toggleVoice` crea `VoiceInput` al **primo tocco** (chi non lo usa non vede la richiesta
-di permesso), mostra il testo provvisorio nel campo, e al risultato finale `_applyVoice`:
+Voce: il foglio prende un `VoiceInput` da `voiceInputFactoryProvider` e in
+`didChangeDependencies` (una volta, `_voiceProbed`) chiede `onDeviceAvailable(lingua)` → stato
+`bool? _onDeviceVoice`. Se `false` il microfono e' **barrato** (`Icons.mic_off_outlined`,
+tooltip `voice_notOnDeviceShort`) e il tocco mostra `voice_notOnDevice` ("scrivi il nome, puoi
+usare il microfono della tastiera") senza chiedere permessi ne' ascoltare: visibile e non
+disabilitato, perche' un bottone sparito non si capisce e uno disabilitato non spiega niente.
+Altrimenti `_toggleVoice` fa `prepare` (il permesso si chiede solo qui, al **primo tocco**),
+poi `listen`; ogni `VoiceProblem` passa da `_showVoiceProblem` (spegne l'ascolto, barra il
+microfono se `notOnDevice`, mostra lo snack). Mostra il testo provvisorio nel campo, e al
+risultato finale `_applyVoice`:
 `VoiceItemParser(locale: lingua).parse`, nome nel campo, quantita' e unita' cambiate **solo se
 la frase le dice entrambe**.
 
@@ -1768,7 +1809,7 @@ a pagamento, e l'assert di FeatureGate non scatta.
 | `storeFile`, `storePassword`, `keyAlias`, `keyPassword` | `android/key.properties` (non versionato) | assenti | senza, la release si firma in debug e Play la rifiuta; keystore **PKCS12** |
 | bundle iOS | `project.pbxproj` | `com.smp.fullfreezer` (+ `.FullFreezerWidget`) | |
 | App Group | entitlements + `FreezerWidget.iosGroup` + `Chiavi.gruppo` | `group.com.smp.fullfreezer` | |
-| `version` | `pubspec.yaml` | `1.0.0+1` | `appVersion` va tenuta uguale |
+| `version` | `pubspec.yaml` | `1.0.0+3` | `appVersion` va tenuta uguale. Il build number non si riusa: Play ha gia' visto il 2, App Store la build 1 |
 
 ### Preferenze (SettingsStore, namespace `full_freezer`: chiave salvata `full_freezer.<chiave>`)
 
@@ -1793,9 +1834,9 @@ a pagamento, e l'assert di FeatureGate non scatta.
 | Android | `com.android.vending.BILLING` | acquisti; dichiarato a mano perche' Play guarda il bundle, non le dipendenze |
 | Android | RECEIVE_BOOT_COMPLETED | riarmare notifiche e sveglia del widget dopo un riavvio |
 | Android | RECORD_AUDIO + `<queries>` `android.speech.RecognitionService` | voce; senza la query, da Android 11 il riconoscitore di sistema "non esiste" |
-| Android | (niente SCHEDULE_EXACT_ALARM, niente INTERNET, niente Bluetooth) | riepiloghi inesatti per scelta (ADR-009); la rete la usa il servizio di Google, non l'app |
+| Android | (niente SCHEDULE_EXACT_ALARM, niente INTERNET, niente Bluetooth) | riepiloghi inesatti per scelta (ADR-009); niente rete nemmeno per la voce: la dettatura e' solo sul dispositivo (`voice_input.dart`) |
 | iOS | NSCameraUsageDescription, NSPhotoLibraryUsageDescription | foto |
-| iOS | NSMicrophoneUsageDescription, NSSpeechRecognitionUsageDescription | voce (senza, iOS chiude l'app al primo tocco sul microfono) |
+| iOS | NSMicrophoneUsageDescription, NSSpeechRecognitionUsageDescription | voce (senza, iOS chiude l'app al primo tocco sul microfono). Il testo del riconoscimento dice che **avviene sul telefono** e la voce non va ad Apple ne' ad altri |
 
 I testi iOS stanno in inglese in `Info.plist` e in **`Runner/{en,it}.lproj/InfoPlist.strings`**
 (aggiunti con `tool/aggiungi_infoplist_strings.rb`): senza, un iPhone italiano mostrava la
@@ -1813,7 +1854,7 @@ sulla stessa riga; lo script scrive `app_en.arb` (con i segnaposto tipizzati da 
 `app_it.arb`. Un ARB modificato a mano viene **sovrascritto** al giro dopo.
 
 ```
-python tool/testi.py                    # dalla cartella dell'app: "249 chiavi scritte"
+python tool/testi.py                    # dalla cartella dell'app: "252 chiavi scritte"
 pwsh ../../tool/fl.ps1 gen-l10n         # rigenera lib/l10n/generated/
 ```
 
@@ -1860,7 +1901,7 @@ la catena supporta la 14.5.
 
 ## 12. Catalogo dei test
 
-**140 test** in `apps/full_freezer/` (il file del parser vocale ne genera 20 da una tabella).
+**150 test** in `apps/full_freezer/` (il file del parser vocale ne genera 20 da una tabella).
 
 | File | N. | Cosa dimostra |
 |---|---|---|
@@ -1877,9 +1918,10 @@ la catena supporta la 14.5.
 | `test/services/backup_csv_test.dart` | 3 | "sostituisci tutto" riporta freezer, scomparti, alimenti, **storico**, foto, e **rimappa `custom:<id>`** quando gli id si spostano (payload passato da JSON come nel file vero); "aggiungi" salta i freezer omonimi; CSV con una riga per alimento, giorni, freezer, scomparto, `;` nella nota senza spezzare la colonna |
 | `test/services/freezer_widget_test.dart` | 5 | i tre piu' vecchi con **data e non giorni**; promemoria dell'alimento sopra la categoria, vuoto senza nessuno, icona `other` di ripiego; icona della categoria personalizzata e a capo nel nome; modello dei giorni "{n} gg" / "{n} d"; le icone escono PNG |
 | `test/services/notification_plan_test.dart` | 14 | date del riepilogo (oggi compreso se domenica; 14 e 28 giorni); **il riepilogo conta chi sara' vecchio quel giorno, con i giorni di quel giorno**; chi invecchia entra nei successivi; il piu' vecchio e' quello con piu' giorni; niente di vecchio → niente riepilogo; quasi pieno subito; quasi vuoto il sabato alle 10 (anche sabato alle 9 e alle 11); `PendingAlert` codifica/decodifica con id stabile; `evaluateCapacity` con Pro mette in coda "quasi pieno", **senza Pro nessun avviso ma isteresi aggiornata**, freezer nuovo non manda "quasi vuoto"; **"quasi pieno" cita il piu' vecchio del freezer** (`capacityAlertBody`); **il riepilogo aggiunge una riga per i freezer pieni o quasi vuoti, non per quelli vuoti** (`digestCapacityLines`) |
+| `test/services/voice_input_test.dart` | 8 | **dettatura solo sul dispositivo** con un motore finto (classe di test MotoreFinto, via `noSuchMethod`; riusata da `quick_add_test.dart`): `listenOptionsFor` ha `onDevice: true` in it e en; `listen` passa al motore `onDevice: true` e `it_IT`; il probe riceve `it_IT`; **senza riconoscimento sul telefono `prepare` da' `notOnDevice` e il motore non viene nemmeno inizializzato** (niente permesso, niente ascolto); probe che fallisce → `false`, non si ascolta; permesso negato → `unavailable`; `speech_to_text.ListenFailedException` (iOS) → `notOnDevice`; `error_language_unavailable` durante l'ascolto → `onProblem(notOnDevice)`, `error_no_match` no |
 | `test/widget/app_smoke_test.dart` | 6 | primo avvio in italiano con il nome proposto; **in tedesco ripiega sull'inglese**; home con il piu' vecchio in "Da usare prima", etichette maiuscole, bollino, percentuale e litri in testata, ordine giusto; home vuota; tema dal blu dell'icona e dal font; l'inglese e' il primo delle lingue |
 | `test/widget/paywall_config_test.dart` | 6 | **ogni blocco e' nel paywall e il paywall non promette altro**; ogni chiave dichiarata; un freezer si', il secondo no (con Pro si'); foto, scomparti e widget gratis; notifiche, storico, statistiche, CSV, backup e categorie Pro |
-| `test/widget/quick_add_test.dart` | 3 | **il vincolo dell'app misurato**: "+", nome, Salva = 3 interazioni; con un suggerimento = 4; **senza Pro le pagine Pro aperte con un `push` diretto** (`/stats`, `/history`, `/categories`, `/freezers/new`) **mostrano il lucchetto** di `ProGate`. Repository finto (`_RepoFinto`); piano gratuito con override di `isProProvider` e `featureGateProvider` (`freezerFeatureLimits`, `isPro: false`) |
+| `test/widget/quick_add_test.dart` | 5 | **dettatura non disponibile sul telefono: microfono barrato, il tocco mostra il messaggio, il motore non e' inizializzato ne' ascolta, e il nome si scrive e si salva**; disponibile: il tocco ascolta con `onDevice: true` e `it_IT` (fabbrica `voiceInputFactoryProvider` sostituita, parametro `voce` di `avvia`); **il vincolo dell'app misurato**: "+", nome, Salva = 3 interazioni; con un suggerimento = 4; **senza Pro le pagine Pro aperte con un `push` diretto** (`/stats`, `/history`, `/categories`, `/freezers/new`) **mostrano il lucchetto** di `ProGate`. Repository finto (`_RepoFinto`); piano gratuito con override di `isProProvider` e `featureGateProvider` (`freezerFeatureLimits`, `isPro: false`) |
 
 `integration_test/flusso_test.dart` (1 test, sul dispositivo:
 `flutter test integration_test/flusso_test.dart -d <device>`): primo avvio con il modello,
@@ -1952,6 +1994,10 @@ Ognuna e' costata tempo almeno una volta. Sono qui perche' il sintomo non nomina
 | Icona iOS rifiutata a caricamento finito | canale alfa | icona fullbleed opaca + `remove_alpha_ios` |
 | Splash Android 12 con il disegno tagliato | ritaglio a cerchio dei due terzi centrali | `splash_android12.png` |
 | Fiocco "svuotato" nella splash | ritaglio automatico del disegno | ritaglio a mano del proprietario |
+| Con `onDevice: true` la voce va lo stesso ai server di Google | speech_to_text 7.5.0 su Android senza riconoscitore on-device (o API < 31) crea in silenzio quello di rete | controllo nativo prima di ascoltare: `MainActivity.onDeviceRecognitionAvailable` |
+| iOS: dettatura rotta (doppia risposta al canale) su una lingua senza modello locale | il plugin risponde `onDeviceError` senza `return` e poi risponde di nuovo | `AppDelegate.onDeviceRecognitionAvailable(localeId:)` prima di `listen` |
+| `hasOnDeviceSupport` lancia `services.MissingPluginException` | dichiarato nell'interfaccia 2.5.0, non implementato nel nativo 7.5.0 | canale nostro `full_freezer/voice` |
+| Dal secondo foglio il microfono resta rosso dopo la frase | `SpeechToText()` e' un singleton e `initialize` ripetuto non aggiorna i listener | `VoiceInput.prepare` rilega `statusListener`/`errorListener` |
 
 ### Regole non negoziabili
 
@@ -1979,6 +2025,11 @@ Ognuna e' costata tempo almeno una volta. Sono qui perche' il sintomo non nomina
 12. **Mai `Platform.isX`**: `defaultTargetPlatform` (si puo' simulare nei test).
 13. **Una modifica allo schema** incrementa `schemaVersion`, aggiunge il passo in
     `onUpgrade` **e** il suo test, prima di uscire.
+14. **Dati solo sul telefono, voce compresa** (2026-10-10): la dettatura usa solo il
+    riconoscimento sul dispositivo (`onDevice: true` **e** il controllo nativo prima di
+    ascoltare). Mai un ripiego automatico verso il riconoscimento online: dove non c'e', si
+    scrive. Aggiornando speech_to_text, rileggere come sceglie il riconoscitore
+    (`voice_input.dart`).
 
 ---
 
@@ -1988,7 +2039,11 @@ Ognuna e' costata tempo almeno una volta. Sono qui perche' il sintomo non nomina
 
 - **Nessuna prova su telefono vero**: tocco sul widget iOS (il simulatore headless chiede
   conferma a `simctl openurl`), voce vera (all'emulatore non si puo' parlare), acquisti,
-  notifiche su iPhone.
+  notifiche su iPhone. In particolare la **dettatura sul dispositivo su iPad** in italiano
+  (`supportsOnDeviceRecognition` vero o falso, prima e dopo il permesso) non e' provata.
+- **Nessun controllo della lingua lato Android prima di ascoltare**: si controlla solo che il
+  riconoscitore on-device esista; il modello della lingua mancante si scopre all'ascolto
+  (`error_language_unavailable` → messaggio). `checkRecognitionSupport` (API 33) non e' usato.
 - **Nessun App ID, App Group o prodotto Pro registrato sugli store**: `group.com.smp.fullfreezer`,
   l'App ID dell'estensione e `fullfreezer_pro_lifetime` vanno creati dal proprietario sul
   portale Apple, in App Store Connect e in Play Console (F4.17). Finche' non ci sono, il Pro
@@ -2019,7 +2074,7 @@ Ognuna e' costata tempo almeno una volta. Sono qui perche' il sintomo non nomina
 | **App ID, App Group, prodotto Pro da registrare sugli store** | richiedono gli account del proprietario | F4.17, prima della prima build firmata |
 | **Flaky test di entitlement in `micro_core`** | un test di `micro_core/test/entitlement` fallisce ogni tanto e passa al giro dopo; non e' di quest'app | alla prossima sessione su `micro_core` |
 | **Copia del codice sul Mac non-git** | sincronizzazione a mano con tar | se il lavoro iOS diventa frequente: un clone vero sul Mac |
-| **Informativa privacy del sito** | deve dire che il riconoscimento vocale lo fa il servizio del telefono (Google/Apple), che puo' usare i loro server | prima della pubblicazione |
+| **Informativa privacy del sito** | deve dire che la dettatura e' riconosciuta **sul telefono**, senza server (dal 2026-10-10 non e' piu' vero che possa usare i server di Google/Apple) | prima della pubblicazione |
 
 ### Differenze consapevoli dal piano (`develop_microapps.md` F4)
 

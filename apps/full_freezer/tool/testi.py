@@ -298,6 +298,11 @@ TESTI = {
     'voice_listening': ('Listening… e.g. “two portions of lasagne”', 'Ti ascolto… es. «due porzioni di lasagne»'),
     'voice_unavailable': ('Voice input isn’t available: check the microphone permission in the phone settings.',
                           'La voce non è disponibile: controlla il permesso del microfono nelle impostazioni del telefono.'),
+    # ⚑ La dettatura e' solo sul telefono (regola "dati solo sul telefono", 2026-10-10): se il
+    # telefono non sa riconoscere la lingua da solo, si scrive. La tastiera ha il suo microfono.
+    'voice_notOnDevice': ('Dictation on the phone isn’t available here: type the name (you can use the keyboard’s microphone).',
+                          'La dettatura sul telefono non è disponibile qui: scrivi il nome (puoi usare il microfono della tastiera).'),
+    'voice_notOnDeviceShort': ('Dictation on the phone isn’t available', 'Dettatura sul telefono non disponibile'),
 
     # ── Widget ──
     'widget_addTitle': ('Put the widget on the home screen', 'Metti il widget sulla schermata iniziale'),

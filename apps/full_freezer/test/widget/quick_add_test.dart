@@ -12,9 +12,12 @@ import 'package:full_freezer/app/routes.dart';
 import 'package:full_freezer/data/database.dart';
 import 'package:full_freezer/data/freezer_repository.dart';
 import 'package:full_freezer/features/home/home_page.dart';
+import 'package:full_freezer/services/voice_input.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micro_core/micro_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../services/voice_input_test.dart' show MotoreFinto;
 
 /// F4.13: il vincolo dell'app, **misurato**. Dall'apertura al prodotto salvato al massimo
 /// 4 interazioni (develop_microapps.md F4.5): se un giorno qualcuno aggiunge un campo
@@ -57,7 +60,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> avvia(WidgetTester tester) async {
+  Future<void> avvia(WidgetTester tester, {VoiceInput Function()? voce}) async {
     interazioni = 0;
     SharedPreferences.setMockInitialValues(<String, Object>{'full_freezer.${SettingKeys.onboardingDone}': true});
     final settings = await SettingsStore.create(namespace: 'full_freezer');
@@ -95,6 +98,7 @@ void main() {
           // Il piano gratuito, senza passare dallo store vero.
           isProProvider.overrideWithValue(false),
           featureGateProvider.overrideWithValue(const FeatureGate(limits: freezerFeatureLimits, isPro: false)),
+          if (voce != null) voiceInputFactoryProvider.overrideWithValue(voce),
         ],
         child: const FullFreezerApp(),
       ),
@@ -135,5 +139,38 @@ void main() {
       router.pop();
       await tester.pumpAndSettle();
     }
+  });
+
+  // Decisione del 2026-10-10 (regola "dati solo sul telefono"): la dettatura e' solo sul
+  // dispositivo. Dove non c'e', il microfono lo dice e il campo di testo resta li'.
+  testWidgets('dettatura sul telefono non disponibile: microfono barrato, spiega, non ascolta', (tester) async {
+    final motore = MotoreFinto();
+    await avvia(tester, voce: () => VoiceInput(engine: motore, probe: (_) async => false));
+    await tocca(tester, find.text('Metti nel freezer'));
+
+    expect(find.byIcon(Icons.mic_off_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.mic_none_outlined), findsNothing);
+    await tocca(tester, find.byIcon(Icons.mic_off_outlined));
+
+    expect(
+      find.text('La dettatura sul telefono non è disponibile qui: scrivi il nome (puoi usare il microfono della tastiera).'),
+      findsOneWidget,
+    );
+    expect(motore.inizializzazioni, 0, reason: 'niente permesso del microfono chiesto per niente');
+    expect(motore.ascolti, isEmpty, reason: 'mai un ripiego verso i server');
+    // Il campo di testo c'e' ancora e si usa come sempre.
+    await scrivi(tester, 'Spezzatino');
+    await tocca(tester, find.text('Salva'));
+    expect(repo.salvati.single.name, 'Spezzatino');
+  });
+
+  testWidgets('dettatura sul telefono disponibile: il microfono ascolta con onDevice', (tester) async {
+    final motore = MotoreFinto();
+    await avvia(tester, voce: () => VoiceInput(engine: motore, probe: (_) async => true));
+    await tocca(tester, find.text('Metti nel freezer'));
+
+    await tocca(tester, find.byIcon(Icons.mic_none_outlined));
+    expect(motore.ascolti.single.onDevice, isTrue);
+    expect(motore.ascolti.single.localeId, 'it_IT');
   });
 }

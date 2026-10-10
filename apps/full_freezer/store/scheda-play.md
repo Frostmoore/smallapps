@@ -225,7 +225,7 @@ dell'acquisto verso il License Server (`packages/micro_core/lib/src/entitlement/
 | L'utente puo' chiedere la cancellazione dei dati? | **Sì**, scrivendo a `info@smp-digital.it` |
 | Dati raccolti | **ID dispositivo o altri ID**: identificativo di installazione generato dall'app, non l'ID pubblicitario. Finalita': **gestione dell'account** (verifica dell'acquisto) e **prevenzione delle frodi**. Obbligatorio. Non condiviso con terzi. |
 | Foto | **Non raccolte**: restano nella cartella dell'app sul telefono (e nel backup, se l'utente lo crea e lo condivide lui) |
-| Audio (voce) | **Non raccolto dall'app**: il riconoscimento lo fa il servizio vocale di sistema del telefono; l'app riceve solo il testo e non lo invia a nessuno |
+| Audio (voce) | **Non raccolto**: il riconoscimento avviene **solo sul telefono** (riconoscitore sul dispositivo, mai i server di Google; dove non c'e', il microfono dice di scrivere — decisione del 2026-10-10); l'app riceve solo il testo e non lo invia a nessuno |
 | Acquisti in-app | Gestiti da Google Play. Non riceviamo dati di pagamento. |
 | Posizione, contatti, file, messaggi, salute, calendario | **Nessuno** |
 | Analisi d'uso, crash reporting, pubblicita' | **Nessuno**: niente Firebase, Crashlytics o SDK pubblicitari |

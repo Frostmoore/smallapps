@@ -11,6 +11,7 @@ import '../domain/home_view.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../services/freezer_scheduler.dart';
 import '../services/freezer_widget.dart';
+import '../services/voice_input.dart';
 import 'entitlement.dart';
 import 'locale_resolution.dart';
 
@@ -57,6 +58,11 @@ abstract final class FreezerSettingKeys {
   static const String lastCompartment = 'last_compartment';
   static const String lastUnit = 'last_unit';
 }
+
+/// Fabbrica del microfono dell'inserimento rapido: un `VoiceInput` nuovo per ogni foglio
+/// (vedi `VoiceInput`). Un provider solo perche' i test possano dare al foglio un motore
+/// finto (test/widget/quick_add_test.dart).
+final voiceInputFactoryProvider = Provider<VoiceInput Function()>((ref) => VoiceInput.new);
 
 /// "Oggi", in un provider: i test lo fissano e le pagine non leggono mai l'orologio da sole.
 ///

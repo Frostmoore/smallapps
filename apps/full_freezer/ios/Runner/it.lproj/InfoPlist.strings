@@ -4,4 +4,4 @@
 "NSCameraUsageDescription" = "Full Freezer usa la fotocamera solo quando scatti una foto di qualcosa che metti nel freezer, per riconoscerlo poi.";
 "NSPhotoLibraryUsageDescription" = "Full Freezer apre le tue foto solo quando ne scegli una per qualcosa nel freezer.";
 "NSMicrophoneUsageDescription" = "Full Freezer usa il microfono solo mentre tocchi il microfono per dire cosa metti nel freezer.";
-"NSSpeechRecognitionUsageDescription" = "Full Freezer trasforma quello che dici nel nome e nella quantità del prodotto, per esempio «due porzioni di lasagne».";
+"NSSpeechRecognitionUsageDescription" = "Full Freezer trasforma quello che dici nel nome e nella quantità del prodotto, per esempio «due porzioni di lasagne». Il riconoscimento avviene sul telefono: la tua voce non viene inviata ad Apple né ad altri.";

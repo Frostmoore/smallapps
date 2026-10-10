@@ -213,6 +213,8 @@
   "voice_stop": "Smetti di ascoltare",
   "voice_listening": "Ti ascolto… es. «due porzioni di lasagne»",
   "voice_unavailable": "La voce non è disponibile: controlla il permesso del microfono nelle impostazioni del telefono.",
+  "voice_notOnDevice": "La dettatura sul telefono non è disponibile qui: scrivi il nome (puoi usare il microfono della tastiera).",
+  "voice_notOnDeviceShort": "Dettatura sul telefono non disponibile",
   "widget_addTitle": "Metti il widget sulla schermata iniziale",
   "widget_addBody": "Le cose più vecchie nel freezer, senza aprire l’app.",
   "widget_addUnsupported": "Questo launcher non sa aggiungere widget da solo. Tieni premuto sulla schermata iniziale e cerca Full Freezer.",

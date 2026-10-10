@@ -77,19 +77,41 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
   bool _handedOff = false;
   late final AppPaths _paths = ref.read(appPathsProvider);
 
-  /// Il microfono (F4.12). Creato solo al primo tocco: chi non lo usa non paga
-  /// l'inizializzazione del riconoscitore, ne' vede la richiesta di permesso.
-  VoiceInput? _voice;
+  /// Il microfono (F4.12). Creato all'apertura solo per chiedere al sistema se il
+  /// riconoscimento sul telefono c'e' (nessun permesso, niente acceso): il motore si
+  /// inizializza, e il permesso si chiede, solo al primo tocco.
+  late final VoiceInput _voice = ref.read(voiceInputFactoryProvider)();
   bool _listening = false;
 
+  /// La dettatura sul telefono c'e'? `null` finche' il sistema non risponde.
+  ///
+  /// ⚑ Se no, il microfono resta visibile ma barrato, e il tocco spiega perche' e dice di
+  /// scrivere: un bottone sparito non si capisce, uno disabilitato non spiega niente.
+  bool? _onDeviceVoice;
+  bool _voiceProbed = false;
+
   ItemDraft get d => widget.draft;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_voiceProbed) return;
+    _voiceProbed = true;
+    final language = Localizations.localeOf(context).languageCode;
+    unawaited(
+      _voice.onDeviceAvailable(language).then((ok) {
+        if (mounted) setState(() => _onDeviceVoice = ok);
+      }),
+    );
+  }
 
   @override
   void dispose() {
     // Foglio chiuso senza salvare: la foto scattata non serve a nessuno.
     final photo = d.photoPath;
     if (!_handedOff && photo != null) unawaited(deleteItemPhoto(_paths, photo));
-    unawaited(_voice?.cancel());
+    // Su un motore mai inizializzato `cancel` non fa niente (speech_to_text 7.5.0).
+    unawaited(_voice.cancel());
     _name.dispose();
     super.dispose();
   }
@@ -114,27 +136,36 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
   }
 
   /// Tocco sul microfono: ascolta, mostra il testo man mano, poi lo interpreta.
+  ///
+  /// ⚑ Solo riconoscimento sul telefono (vedi `VoiceInput`): se non c'e' lo si dice e si
+  /// resta sul campo di testo. Nessun ripiego verso i server, nemmeno "per questa volta".
   Future<void> _toggleVoice() async {
-    final voice = _voice ??= VoiceInput();
+    final voice = _voice;
     if (_listening) {
       await voice.stop();
       return;
     }
-    final l = L.of(context);
-    final ready = await voice.prepare(
+    final language = Localizations.localeOf(context).languageCode;
+    final problem = await voice.prepare(
+      languageTag: language,
       onStatus: (status) {
         // "done"/"notListening": il motore ha chiuso da se' (pausa o limite di tempo).
         if (mounted && status != 'listening') setState(() => _listening = false);
       },
+      // Arriva mentre si ascolta: su Android il modello della lingua puo' mancare anche
+      // quando il riconoscitore sul telefono c'e'.
+      onProblem: _showVoiceProblem,
     );
     if (!mounted) return;
-    if (!ready) {
-      MicroSnack.show(context, l.voice_unavailable);
+    if (problem != null) {
+      _showVoiceProblem(problem);
       return;
     }
-    final language = Localizations.localeOf(context).languageCode;
-    setState(() => _listening = true);
-    await voice.listen(
+    setState(() {
+      _onDeviceVoice = true;
+      _listening = true;
+    });
+    final failed = await voice.listen(
       languageTag: language,
       onWords: (words, {required isFinal}) {
         if (!mounted) return;
@@ -147,6 +178,18 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
         _applyVoice(words, language);
       },
     );
+    if (failed != null && mounted) _showVoiceProblem(failed);
+  }
+
+  /// Spiega perche' la dettatura non va. Il campo di testo resta li', con la tastiera.
+  void _showVoiceProblem(VoiceProblem problem) {
+    if (!mounted) return;
+    final l = L.of(context);
+    setState(() {
+      _listening = false;
+      if (problem == VoiceProblem.notOnDevice) _onDeviceVoice = false;
+    });
+    MicroSnack.show(context, problem == VoiceProblem.notOnDevice ? l.voice_notOnDevice : l.voice_unavailable);
   }
 
   /// Mette nel foglio quello che si e' capito.
@@ -251,12 +294,20 @@ class _QuickAddSheetState extends ConsumerState<QuickAddSheet> {
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        tooltip: _listening ? l.voice_stop : l.voice_start,
-                        icon: Icon(_listening ? Icons.mic : Icons.mic_none_outlined),
-                        color: _listening ? scheme.error : null,
-                        onPressed: () => unawaited(_toggleVoice()),
-                      ),
+                      if (_onDeviceVoice == false)
+                        IconButton(
+                          tooltip: l.voice_notOnDeviceShort,
+                          icon: const Icon(Icons.mic_off_outlined),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          onPressed: () => _showVoiceProblem(VoiceProblem.notOnDevice),
+                        )
+                      else
+                        IconButton(
+                          tooltip: _listening ? l.voice_stop : l.voice_start,
+                          icon: Icon(_listening ? Icons.mic : Icons.mic_none_outlined),
+                          color: _listening ? scheme.error : null,
+                          onPressed: () => unawaited(_toggleVoice()),
+                        ),
                       if (d.photoPath == null)
                         IconButton(
                           tooltip: l.photo_add,
