@@ -5251,6 +5251,9 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   niente ML Kit; su iOS Vision e' locale, su Android serve un OCR che non mandi dati).
 - **Gratis/Pro e prezzo**: aperti («ci pensiamo dopo»).
 - **Cosa fa esattamente**: aperto, da decidere insieme partendo dall'idea sopra.
+- **2026-10-10, risposte del proprietario:** (1) «Spending Review» **in italiano e in inglese**;
+  (2) l'app **legge con la fotocamera i cartellini del prezzo e gli scontrini, con due tasti
+  diversi** (due flussi distinti, non uno «intelligente»). Proposte d'interfaccia in preparazione.
 
 ### F13 — Quanto dividiamo?
 
