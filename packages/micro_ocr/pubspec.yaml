@@ -1,0 +1,33 @@
+name: micro_ocr
+description: >-
+  OCR solo sul telefono per le MicroApps (F12.2b): iOS con Vision, Android con
+  PP-OCRv5 mobile latin su ONNX Runtime 1.28.0 (bloccata: dalla 1.29 c'e' la
+  telemetria). Una sola API Dart (OcrEngine), un FakeOcrEngine per i test delle app.
+version: 1.0.0
+publish_to: none
+
+# Plugin INTERNO, non federato: niente plugin_platform_interface (develop_microapps.md
+# F12.1.2). Nessuna dipendenza pub oltre a Flutter e meta.
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: ^1.16.0
+
+dev_dependencies:
+  crypto: ^3.0.6
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.smp.micro_ocr
+        pluginClass: MicroOcrPlugin
+      ios:
+        pluginClass: MicroOcrPlugin

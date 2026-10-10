@@ -34,6 +34,11 @@ function Get-DartProjects {
     if (Test-Path (Join-Path $share 'pubspec.yaml')) {
         $projects += [pscustomobject]@{ Name = 'micro_share'; Path = $share }
     }
+    # micro_ocr (F12.2b): OCR sul telefono (plugin Android ORT + iOS Vision), prima delle app.
+    $ocr = Join-Path $script:RepoRoot 'packages\micro_ocr'
+    if (Test-Path (Join-Path $ocr 'pubspec.yaml')) {
+        $projects += [pscustomobject]@{ Name = 'micro_ocr'; Path = $ocr }
+    }
     $appsDir = Join-Path $script:RepoRoot 'apps'
     if (Test-Path $appsDir) {
         Get-ChildItem $appsDir -Directory | Sort-Object Name | ForEach-Object {

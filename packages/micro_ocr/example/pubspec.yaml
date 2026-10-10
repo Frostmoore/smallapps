@@ -1,0 +1,26 @@
+name: micro_ocr_example
+description: >-
+  App di prova di micro_ocr (F12.2b): legge le immagini di una cartella con il motore
+  vero e mostra testo e tempi. Ospita anche i test sul dispositivo (integration_test).
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  micro_ocr:
+    path: ../
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

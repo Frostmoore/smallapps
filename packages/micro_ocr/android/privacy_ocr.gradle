@@ -1,0 +1,96 @@
+// Guardie di privacy di micro_ocr per l'APP che lo usa (develop_microapps.md F12.1.2, punti 1 e 2).
+//
+// Come si aggancia, in <app>/android/app/build.gradle.kts, DOPO il blocco android { }:
+//     apply(from = "../../../../packages/micro_ocr/android/privacy_ocr.gradle")
+// (percorso relativo a android/app/ di un'app in apps/<nome>/). Registra il task
+// `verificaPrivacyOcr` e lo lega a ogni build di release (finalizedBy di processReleaseMainManifest):
+// se fallisce, fallisce la build.
+//
+// ⚑ Script condiviso nel plugin e non copiato in ogni app: la regola e' una sola (nata dalla
+// telemetria di ORT 1.29) e cambia in un punto solo; le app future con OCR (F13) lo applicano
+// con una riga.
+// ☠ In GROOVY e non in Kotlin script: un `.gradle.kts` applicato con apply(from) fa andare in
+// crash `lintVitalAnalyzeRelease` (AGP 9.1, «findFirCompiledSymbol only works on compiled
+// declarations», provato il 2026-10-10). Il Groovy lint lo legge senza problemi.
+//
+// Fa fallire la build se:
+//  a. nel manifest unito di release compare `ai.onnxruntime.TelemetryInitializer` o un
+//     <provider> con `ai.onnxruntime` nel nome;
+//  b. il blocco `uses-permission#android.permission.INTERNET` del report di fusione ha una riga
+//     ADDED from / MERGED from che NON viene da `com.google.android.datatransport:transport-backend-cct`
+//     (Play Billing, eccezione del 2026-10-09) — idem per ACCESS_NETWORK_STATE;
+//     ⚑ si legge il REPORT e non il manifest: nel manifest i permessi sono deduplicati e non
+//     dicono CHI li ha portati;
+//  c. nelle dipendenze risolte di release `com.microsoft.onnxruntime` ha versione != 1.28.0, o
+//     compaiono com.google.mlkit, firebase-analytics, play-services-tflite*, com.google.ai.edge.litert.
+
+def versioneOrtAmmessa = '1.28.0'
+def fontiRetiAmmesse = ['com.google.android.datatransport:transport-backend-cct']
+def vietati = ['com.google.mlkit:', 'com.google.firebase:firebase-analytics',
+               'com.google.android.gms:play-services-tflite', 'com.google.ai.edge.litert:']
+
+tasks.register('verificaPrivacyOcr') {
+    group = 'verification'
+    description = "Guardie di privacy di micro_ocr (F12.1.2): telemetria ORT, INTERNET, versioni."
+    notCompatibleWithConfigurationCache('legge le dipendenze risolte del progetto')
+    def logs = layout.buildDirectory.dir('outputs/logs')
+    def intermedi = layout.buildDirectory.dir('intermediates/merged_manifest/release')
+    doLast {
+        def errori = []
+
+        // a. manifest unito di release
+        def manifesti = []
+        def radice = intermedi.get().asFile
+        if (radice.exists()) radice.eachFileRecurse { if (it.name == 'AndroidManifest.xml') manifesti << it }
+        if (manifesti.isEmpty()) errori << "manifest unito di release non trovato in ${radice}"
+        manifesti.each { m ->
+            def testo = m.text
+            if (testo.contains('ai.onnxruntime.TelemetryInitializer')) errori << "${m}: TelemetryInitializer di ONNX Runtime"
+            (testo =~ /<provider[^>]*ai\.onnxruntime[^>]*>/).each { errori << "${m}: provider ORT ${it.toString().take(120)}" }
+        }
+
+        // b. chi porta INTERNET / ACCESS_NETWORK_STATE
+        def report = logs.get().file('manifest-merger-release-report.txt').asFile
+        if (!report.exists()) {
+            errori << "report di fusione assente: ${report}"
+        } else {
+            def righe = report.readLines()
+            ['INTERNET', 'ACCESS_NETWORK_STATE'].each { permesso ->
+                def inizio = righe.findIndexOf { it.trim() == "uses-permission#android.permission.${permesso}" }
+                if (inizio < 0) return
+                def i = inizio + 1
+                while (i < righe.size() && (righe[i].startsWith('ADDED from') || righe[i].startsWith('MERGED from') ||
+                        righe[i].startsWith('INJECTED') || righe[i].startsWith('\t') || righe[i].startsWith(' '))) {
+                    def r = righe[i]
+                    if ((r.startsWith('ADDED from') || r.startsWith('MERGED from')) && !fontiRetiAmmesse.any { r.contains(it) }) {
+                        errori << "${permesso} portato da una fonte non ammessa: ${r.take(200)}"
+                    }
+                    i++
+                }
+            }
+        }
+
+        // c. dipendenze risolte di release
+        configurations.getByName('releaseRuntimeClasspath').incoming.resolutionResult.allComponents.each { c ->
+            def id = c.moduleVersion
+            if (id == null) return
+            def coord = "${id.group}:${id.name}:${id.version}".toString()
+            if (id.group == 'com.microsoft.onnxruntime' && id.version != versioneOrtAmmessa) {
+                errori << "ONNX Runtime ${coord}: ammessa solo ${versioneOrtAmmessa} (dalla 1.29 telemetria)"
+            }
+            if (vietati.any { coord.startsWith(it) }) errori << "dipendenza vietata (dati a terzi): ${coord}"
+        }
+
+        if (!errori.isEmpty()) {
+            throw new GradleException("verificaPrivacyOcr FALLITA (F12.1.2):\n  " + errori.join('\n  '))
+        }
+        logger.lifecycle("verificaPrivacyOcr: OK (ORT ${versioneOrtAmmessa}, nessuna telemetria, rete solo da Play Billing)")
+    }
+}
+
+tasks.matching { it.name == 'processReleaseMainManifest' }.configureEach {
+    finalizedBy('verificaPrivacyOcr')
+}
+tasks.named('verificaPrivacyOcr') {
+    mustRunAfter(tasks.matching { it.name == 'processReleaseMainManifest' })
+}

@@ -18,3 +18,9 @@
 *.otf       binary
 *.aab       binary
 *.apk       binary
+
+# Modelli OCR di micro_ocr (F12.2b): pesi binari, e il dizionario va preso byte per
+# byte (☠ un CRLF cambierebbe lo SHA-256 verificato da modelli_test.dart, e un "\r" in
+# coda a ogni simbolo sballerebbe il testo letto).
+*.onnx      binary
+packages/micro_ocr/android/src/main/assets/ppocrv5/latin_dict.txt  -text
