@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:micro_core/micro_core.dart';
+import 'package:micro_ocr/micro_ocr.dart';
 
 import '../data/database.dart';
 import '../data/spending_backup_source.dart';
 import '../data/spesa_repository.dart';
 import '../domain/spesa.dart';
+import '../domain/tastierino.dart';
+import '../services/aptica.dart';
+import '../services/csv_export.dart';
+import '../services/fotocamera.dart';
+import '../services/impostazioni_sistema.dart';
+import '../services/lettura_service.dart';
 import 'entitlement.dart' show appVersion, featureGateProvider;
 
 /// I provider radice dell'app (§8.T), stesso schema di QR Me.
@@ -13,8 +20,9 @@ import 'entitlement.dart' show appVersion, featureGateProvider;
 /// ⚑ Perche' tutto passa da qui e niente e' globale: un singleton in una variabile di modulo non si
 /// puo' sostituire nei test, e obbliga a inizializzare in `main` cose che servono solo a una
 /// schermata. Con i provider l'inizializzazione e' pigra e ogni test inietta il proprio doppio.
-/// ⚑ Bootstrap (F12.2c) + dati (F12.3): i provider dei servizi (OCR, fotocamera, aptica, CSV)
-/// arrivano con le schermate in F12.4.
+/// ⚑ Bootstrap (F12.2c), dati (F12.3), servizi e stato delle schermate (F12.4): ogni servizio con
+/// un lato nativo (OCR, fotocamera, selettore delle foto, impostazioni di sistema, vibrazione) ha
+/// il suo provider, cosi' i test di widget lo sostituiscono con un doppio finto.
 
 /// Sovrascritti in `main()`: senza, l'app non parte.
 final appConfigProvider = Provider<MicroAppConfig>(
@@ -104,6 +112,89 @@ final budgetMensileProvider = NotifierProvider<_MoneySetting, Money?>(
   () => _MoneySetting(SrSettingKeys.budgetMensile),
 );
 
+/// Un interruttore salvato nelle preferenze.
+class _BoolSetting extends Notifier<bool> {
+  _BoolSetting(this._chiave, {required this.predefinito});
+
+  final String _chiave;
+  final bool predefinito;
+
+  @override
+  bool build() => ref.watch(settingsProvider).getBool(_chiave, orElse: predefinito);
+
+  Future<void> set(bool valore) async {
+    state = valore;
+    await ref.read(settingsProvider).setBool(_chiave, valore);
+  }
+}
+
+/// Le vibrazioni brevi (default accese, F12.1.10).
+final vibrazioneProvider = NotifierProvider<_BoolSetting, bool>(
+  () => _BoolSetting(SrSettingKeys.vibrazione, predefinito: true),
+);
+
+/// Il suggerimento «Lo scritto a mano non lo leggo» del mirino, mostrato una volta.
+final suggerimentoMirinoVistoProvider = NotifierProvider<_BoolSetting, bool>(
+  () => _BoolSetting(SrSettingKeys.suggerimentoMirinoVisto, predefinito: false),
+);
+
+// ── Servizi (F12.1.13) ───────────────────────────────────────────────────────────────────────
+
+/// L'orologio: iniettabile (banner «Spesa iniziata ieri», date di chiusura) nei test.
+final oraProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+/// Il motore OCR vero: Vision su iOS, PP-OCRv5 su ORT 1.28.0 su Android (packages/micro_ocr).
+/// I test lo sostituiscono con `FakeOcrEngine`.
+final ocrEngineProvider = Provider<OcrEngine>((ref) => CanaleOcrEngine());
+
+final letturaServiceProvider = Provider<LetturaService>(
+  (ref) => LetturaService(motore: ref.watch(ocrEngineProvider), ora: ref.watch(oraProvider)),
+);
+
+/// Una fotocamera nuova per ogni pagina col mirino (la pagina la apre e la chiude).
+final obiettivoProvider = Provider<Obiettivo Function()>((ref) => ObiettivoCamera.new);
+
+/// Il ritaglio della foto al mirino (`Fotocamera.ritagliaAlMirino`, in un isolate). I test di
+/// widget lo sostituiscono: la fotocamera finta non produce un JPEG vero.
+typedef Ritaglio = Future<String> Function(String percorsoFoto, Rect mirino, {required Size anteprima});
+
+final ritaglioProvider = Provider<Ritaglio>(
+  (ref) => (foto, mirino, {required anteprima}) => Fotocamera.ritagliaAlMirino(foto, mirino, anteprima: anteprima),
+);
+
+/// «Da una foto».
+final scegliFotoProvider = Provider<ScegliFoto>((ref) => scegliFotoDiSistema);
+
+final impostazioniSistemaProvider = Provider<ImpostazioniSistema>((ref) => const ImpostazioniSistema());
+
+final apticaProvider = Provider<Aptica>((ref) => Aptica(attiva: ref.watch(vibrazioneProvider)));
+
+final csvExportProvider = Provider<CsvExport>((ref) => const CsvExport());
+
+// ── Stato delle schermate ────────────────────────────────────────────────────────────────────
+
+/// Il tastierino della spesa in corso. ⚑ Un provider e non lo stato della pagina: il «Batti a
+/// mano» del foglio del cartellino deve poterci scrivere il prezzo letto (F12.1.12), e il valore
+/// a meta' battitura sopravvive a un giro nello storico.
+class TastierinoNotifier extends Notifier<TastierinoState> {
+  @override
+  TastierinoState build() => const TastierinoState.vuoto();
+
+  /// Il tocco di un tasto: aggiorna il display e ritorna l'effetto (che applica la pagina).
+  EffettoTasto premi(TastoTastierino tasto) {
+    final (nuovo, effetto) = state.premi(tasto);
+    state = nuovo;
+    return effetto;
+  }
+
+  void svuota() => state = state.svuota();
+
+  /// «Batti a mano»: il prezzo letto nel display, da correggere o confermare con «+».
+  void precompila(Money prezzo) => state = TastierinoState.daPrezzo(prezzo);
+}
+
+final tastierinoProvider = NotifierProvider<TastierinoNotifier, TastierinoState>(TastierinoNotifier.new);
+
 // ── Dati ─────────────────────────────────────────────────────────────────────────────────────
 
 /// Il database, aperto alla prima lettura e chiuso con il `ProviderScope`.
@@ -128,6 +219,17 @@ final speseChiuseProvider = StreamProvider<List<Spesa>>((ref) {
   final limite = gate.isPro ? null : gate.freeLimitOf(FeatureKey.fullHistory);
   return ref.watch(spesaRepositoryProvider).osservaChiuse(limite: limite);
 });
+
+/// Tutte le spese chiuse, senza limite: statistiche e CSV (Pro), e il conto delle nascoste.
+/// ⚑ Separato da [speseChiuseProvider]: la lista dello storico gratis non deve caricare le
+/// righe di tutte le spese per mostrarne cinque.
+final tutteLeChiuseProvider = StreamProvider<List<Spesa>>((ref) => ref.watch(spesaRepositoryProvider).osservaChiuse());
+
+/// Quante spese chiuse ci sono sul telefono (anche quelle nascoste nel gratis).
+final numeroChiuseProvider = StreamProvider<int>((ref) => ref.watch(spesaRepositoryProvider).osservaNumeroChiuse());
+
+/// I negozi, per nome.
+final negoziProvider = StreamProvider<List<Negozio>>((ref) => ref.watch(spesaRepositoryProvider).osservaNegozi());
 
 /// Il backup (Pro) e il ripristino (gratis) di micro_core, con le cartelle e la versione dell'app.
 final backupServiceProvider = Provider<BackupService>(

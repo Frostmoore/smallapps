@@ -33,6 +33,12 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    // ⚑ I modelli PP-OCRv5 (12,7 MB, negli asset di micro_ocr) non compressi nell'APK: i pesi in
+    // virgola mobile si comprimono poco e decomprimerli a ogni avvio a freddo costa tempo
+    // (F12.1.2). ☠ Nel build.gradle del plugin non ha effetto: la compressione la decide il
+    // modulo app (micro_ocr/codebase_reference.md §8).
+    androidResources { noCompress += "onnx" }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -102,103 +108,23 @@ dependencies {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────
-// Guardia di privacy della release (develop_microapps.md F12.1.2, punti 1 e 2).
+// Guardia di privacy della release (develop_microapps.md F12.1.2, punti 1 e 2): lo script
+// CONDIVISO di micro_ocr, una riga (packages/micro_ocr/codebase_reference.md §8).
 //
 // ☠ Perche' esiste: ONNX Runtime dalla 1.29 contiene telemetria Microsoft accesa di default
 // (ContentProvider `ai.onnxruntime.TelemetryInitializer`, permesso INTERNET, invio a
 // mobile.events.data.microsoft.com). micro_ocr la blocca a 1.28.0 con `strictly`, ma un plugin
-// nuovo, un aggiornamento o un Dependabot possono portare altro: questo task fa FALLIRE la build
-// di release invece di pubblicare un'app che telefona.
-//
-// ⚑ INTERNET nel manifest c'e' comunque: lo porta Play Billing (`com.google.android.datatransport`,
-// eccezione del 2026-10-09). Il controllo quindi non guarda SE c'e', ma CHI lo porta, e per saperlo
-// legge il REPORT di fusione (il manifest unito deduplica i permessi e perde le fonti).
-// ⚑ `transport-runtime` oltre a `transport-backend-cct`: nel report di QR Me ACCESS_NETWORK_STATE
-// arriva da entrambi, tutti e due da Play Billing. Si ammette il GRUPPO datatransport.
-// ⚑ Si aggancia a processReleaseMainManifest (che scrive il report) e non al debug: il debug ha
-// INTERNET da src/debug per hot reload e DevTools, e lo deve avere.
-// Prova in negativo (F12.2c): un <uses-permission INTERNET> aggiunto per prova in src/main fa
+// nuovo, un aggiornamento o un Dependabot possono portare altro: il task `verificaPrivacyOcr` fa
+// FALLIRE la build di release invece di pubblicare un'app che telefona.
+// ⚑ INTERNET nel manifest c'e' comunque (Play Billing, gruppo `com.google.android.datatransport`,
+// eccezione del 2026-10-09): il controllo guarda CHI lo porta, leggendo il report di fusione.
+// ACCESS_NETWORK_STATE e' ammesso anche da `androidx.media3` (lo porta la fotocamera CameraX).
+// ⚑ Fino al 2026-10-11 qui c'era una copia in Kotlin script del controllo, scritta in F12.2c
+// perche' lo script condiviso ammetteva solo `transport-backend-cct`: allineato lo script
+// (F12.4), la copia e' stata tolta. Una regola sola, in un posto solo.
+// ☠ Groovy e non .kts: un .gradle.kts applicato con apply(from) fa cadere
+// lintVitalAnalyzeRelease su AGP 9.1 (micro_ocr, 2026-10-10).
+// Prova in negativo (F12.4): un <uses-permission INTERNET> aggiunto per prova in src/main fa
 // fallire `flutter build apk --release`; tolto, la build passa.
 // ─────────────────────────────────────────────────────────────────────────────────────────────
-
-/** Una riga «ADDED/MERGED/IMPLIED from ...» del report e' ammessa solo se viene da qui. */
-fun fonteAmmessa(riga: String): Boolean =
-    riga.contains("[com.google.android.datatransport:") ||
-        riga.contains("\\src\\debug\\") || riga.contains("/src/debug/")
-
-/**
- * Solo per ACCESS_NETWORK_STATE: anche `androidx.media3` (la porta la fotocamera:
- * camera_android_camerax → androidx.camera:camera-video → media3-container → media3-common).
- * ⚑ Trovato alla prima prova della guardia (F12.2c): e' un permesso «normale» che media3 dichiara
- * per sapere il tipo di rete durante lo streaming video, che qui non c'e'; senza INTERNET da fonti
- * non ammesse (controllo che resta stretto) non puo' mandare niente. Toglierlo con
- * tools:node="remove" toglierebbe il permesso anche a Play Billing (datatransport lo usa), con il
- * rischio di un SecurityException nel Pro. Stessa situazione, mai notata, in QR Me.
- */
-fun fonteAmmessaStatoRete(riga: String): Boolean = fonteAmmessa(riga) || riga.contains("[androidx.media3:")
-
-/** Le righe-fonte del blocco di un elemento del report (es. `uses-permission#...INTERNET`). */
-fun fontiDi(report: List<String>, elemento: String): List<String> {
-    val inizio = report.indexOfFirst { it.trim() == elemento }
-    if (inizio < 0) return emptyList()
-    return report.drop(inizio + 1)
-        .takeWhile { r -> listOf("ADDED from", "MERGED from", "IMPLIED from", "INJECTED from").any { r.startsWith(it) } }
-}
-
-val verificaPrivacyOcr by tasks.registering {
-    group = "verification"
-    description = "Fa fallire la release se ONNX Runtime non e' 1.28.0, se c'e' telemetria o se INTERNET arriva da fonti non ammesse (F12.1.2)."
-    val reportFile = layout.buildDirectory.file("outputs/logs/manifest-merger-release-report.txt")
-    val manifestiUniti = layout.buildDirectory.dir("intermediates/merged_manifest/release")
-    val classpath = configurations.named("releaseRuntimeClasspath")
-    doLast {
-        val errori = mutableListOf<String>()
-
-        // 1. Il report di fusione: chi porta INTERNET e ACCESS_NETWORK_STATE, e niente provider di ORT.
-        val report = reportFile.get().asFile
-        if (!report.exists()) throw GradleException("verificaPrivacyOcr: manca ${report.path}")
-        val righe = report.readLines()
-        fontiDi(righe, "uses-permission#android.permission.INTERNET")
-            .filterNot { fonteAmmessa(it) }
-            .forEach { errori += "INTERNET portato da una fonte non ammessa: $it" }
-        fontiDi(righe, "uses-permission#android.permission.ACCESS_NETWORK_STATE")
-            .filterNot { fonteAmmessaStatoRete(it) }
-            .forEach { errori += "ACCESS_NETWORK_STATE portato da una fonte non ammessa: $it" }
-        righe.filter { it.startsWith("provider#") && it.contains("ai.onnxruntime") }
-            .forEach { errori += "provider di ONNX Runtime nel manifest: $it" }
-
-        // 2. Il manifest unito, per scrupolo (la stessa stringa puo' arrivare da un meta-data).
-        manifestiUniti.get().asFile.walkTopDown()
-            .filter { it.name == "AndroidManifest.xml" }
-            .filter { it.readText().contains("ai.onnxruntime.TelemetryInitializer") }
-            .forEach { errori += "TelemetryInitializer in ${it.path}" }
-
-        // 3. Le dipendenze risolte della release.
-        classpath.get().incoming.resolutionResult.allComponents.forEach { c ->
-            val m = c.moduleVersion ?: return@forEach
-            val id = "${m.group}:${m.name}:${m.version}"
-            when {
-                m.group == "com.microsoft.onnxruntime" && m.version != "1.28.0" ->
-                    errori += "ONNX Runtime diversa da 1.28.0 (telemetria dalla 1.29): $id"
-                m.group.startsWith("com.google.mlkit") -> errori += "ML Kit (manda metriche a Google): $id"
-                m.group == "com.google.firebase" && m.name.startsWith("firebase-analytics") ->
-                    errori += "Firebase Analytics: $id"
-                m.group == "com.google.android.gms" && m.name.startsWith("play-services-tflite") ->
-                    errori += "LiteRT di Play Services: $id"
-                m.group == "com.google.ai.edge.litert" -> errori += "LiteRT 2.x (porta play-services): $id"
-            }
-        }
-
-        if (errori.isNotEmpty()) {
-            throw GradleException(
-                "verificaPrivacyOcr: la release NON rispetta la regola «dati solo sul telefono» " +
-                    "(develop_microapps.md F12.1.2):\n - " + errori.joinToString("\n - "),
-            )
-        }
-        logger.lifecycle("verificaPrivacyOcr: OK (INTERNET solo da Play Billing, niente telemetria di ORT)")
-    }
-}
-
-tasks.matching { it.name == "processReleaseMainManifest" }.configureEach {
-    finalizedBy(verificaPrivacyOcr)
-}
+apply(from = "../../../../packages/micro_ocr/android/privacy_ocr.gradle")

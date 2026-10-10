@@ -5,6 +5,7 @@ import 'package:micro_core/micro_core.dart';
 
 import 'app/app.dart';
 import 'app/app_config.dart';
+import 'app/licenze.dart';
 import 'app/providers.dart';
 import 'app/routes.dart';
 
@@ -32,6 +33,9 @@ Future<void> main() async {
     MicroLog.e('flutter', error: details.exception, stackTrace: details.stack);
     FlutterError.presentError(details);
   };
+
+  // Le licenze del motore OCR e dei font (lette pigramente, solo se si apre la pagina).
+  registraLicenze();
 
   final settings = await SettingsStore.create(namespace: config.appId);
   await _recordLaunch(settings);

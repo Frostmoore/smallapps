@@ -1151,9 +1151,9 @@ volta sola; nella fase di ciascuna app si spuntano.
     - [x] pubspec commentato (versioni di QR Me, `micro_ocr` per percorso), font OFL, `l10n.yaml`, `tool/testi.py` → ARB (45 chiavi), `app_config` (`spending_review`/`spendingreview`/`spendingreview_pro_lifetime`, seme `#4ADE80`, scuro), `entitlement` (finto a 2,99 €), `feature_limits`, `paywall_config` (5 righe), `providers` (`SrSettingKeys` con `budgetMensile` per D3, senza `preferisciPrezzoCarta` per D4), `routes`, `app`, `labels`, `sr_palette` (valori esatti di F12.1.12), `ProGate`, `main`; `/` per ora mostra solo il totale (pagine in F12.4)
     - [x] Manifest: CAMERA; RECORD_AUDIO, WRITE/READ_EXTERNAL_STORAGE e **POST_NOTIFICATIONS** tolti (`tools:node="remove"`); fotocamera non obbligatoria; `allowBackup=false`; deep link spento (anche iOS). iOS: `NSCameraUsageDescription` e `NSPhotoLibraryUsageDescription` it/en, esclusione di `Documents/` dal backup iCloud in `AppDelegate.swift`
     - [x] Icona e splash da `docs/specs/icona-spending-review.png` con `tool/genera_icone.py` (fondo scuro `#161B22`, sagoma monocromatica con righe ed euro «bucati»), anteprime guardate
-    - [x] `verificaPrivacyOcr` dentro `android/app/build.gradle.kts`: verde; **rosso** con un `INTERNET` aggiunto in `src/main` (provato e tolto). ⚑ Ammessa anche `androidx.media3` per il solo ACCESS_NETWORK_STATE (lo porta `camera_android_camerax` via `camera-video`), e tutto il gruppo `datatransport` (anche `transport-runtime`, Play Billing). ☠ Lo script condiviso `packages/micro_ocr/android/privacy_ocr.gradle` (F12.2b) ammette solo `transport-backend-cct`: applicato cosi' a Spending Review farebbe fallire la release; da allineare prima di sostituire il task interno con `apply(from = …)`
+    - [x] `verificaPrivacyOcr` dentro `android/app/build.gradle.kts`: verde; **rosso** con un `INTERNET` aggiunto in `src/main` (provato e tolto). ⚑ Ammessa anche `androidx.media3` per il solo ACCESS_NETWORK_STATE (lo porta `camera_android_camerax` via `camera-video`), e tutto il gruppo `datatransport` (anche `transport-runtime`, Play Billing). ☠ Lo script condiviso `packages/micro_ocr/android/privacy_ocr.gradle` (F12.2b) ammette solo `transport-backend-cct`: applicato cosi' a Spending Review farebbe fallire la release; da allineare prima di sostituire il task interno con `apply(from = …)` — **FATTO in F12.4** (2026-10-11): script allineato e task interno sostituito con `apply(from = …)`, verde e rosso riprovati
     - [x] `analyze` pulito, APK di debug compilato (con `micro_ocr`); anche `build apk --release` passa (lint, R8, guardia verde; APK universale 151 MB con ORT e modelli per 4 ABI: per Play si carica l'AAB, che divide per ABI)
-    - [ ] App avviata sull'emulatore e sul simulatore iPhone (va fatto con F12.4: oggi c'e' solo il totale)
+    - [x] App avviata sull'emulatore e sul simulatore iPhone — fatto con F12.4 (2026-10-11)
   - [x] **F12.3** Dominio e dati con i test: arrotondamenti, offerte, tastierino, parser con le fixture (33 libere nel repo, 27 fuori), banco con il cricchetto, confronto, statistiche, repository, schema dump — FATTO il 2026-10-10 (210 test verdi; commit e rituale ancora da fare)
     - [x] `lib/domain/`: `Arrotonda` (half-up intero), `Quantita`, `Offerta` (5 sottoclassi, JSON tollerante), `RigaSpesa`, `Spesa` (+ `totaleSalvato`, `livelloBudgetDi`), `TastierinoState` «alla cassa» (D2), `Nomi`
     - [x] `lib/domain/lettura/`: `NumeriOcr` (espliciti, spezzati, fusi; percentuali escluse), `RigheVisive` (fascia media), `CartellinoParser` (doppio prezzo carta come `DoppioPrezzoCarta` + `scegliCarta`, D4), `BilanciaParser`, `ScontrinoParser` (verifica del totale con subtotale e contanti − resto), `UnisciParti`, `TestoOcr`; `Confronto`; `StatisticheSpesa` (+ `BudgetMese`, D3)
@@ -1161,10 +1161,19 @@ volta sola; nella fase di ciascuna app si spuntano.
     - [x] Fixture: `tool/esporta_fixture_ocr.py` (RapidOCR 3.10, PP-OCRv5 mobile latin, cls acceso), 33 nel repo + `LICENZE.md`, 27 in `microapps-campioni/f12/fixture/ppocrv5/`; pagamento POS di s13 tagliato
     - [x] Banco con cricchetto (`soglie.json`): sui 33 totale scontrino 15/15, bilancia 2/2, prezzo cartellino 12/20; sui 60 totale scontrino 16/16, bilancia 9/9, prezzo cartellino 29/45; parser ≤ 5 ms
     - [x] Test: arrotonda, offerta, riga_spesa, spesa, tastierino, nomi, numeri_ocr, cartellino/bilancia/scontrino parser, unisci_parti, confronto, statistiche, banco, spesa_repository, backup, paywall_config, texts_glyphs
-    - [ ] Voce in `memory/decisioni.md` per gli scostamenti tecnici (vedi il resoconto di F12.2c/F12.3) e aggiornamento delle sezioni F12.1.4/F12.1.8/F12.1.10 con D3 e D4
-  - [ ] **F12.4** Interfaccia «C · Una mano» completa con i servizi, provata sull'emulatore con foto vere e sul simulatore
-  - [ ] **F12.5** Pro: limiti, paywall, `ProGate` sulle pagine, test di coerenza
-  - [ ] **F12.6** Grafica (gia' scelta): tema chiaro derivato e test dei contrasti, conferma del proprietario
+    - [x] Voce in `memory/decisioni.md` per gli scostamenti tecnici (2026-10-11 «scelte del bootstrap e del parser», + «scelte dell'interfaccia» di F12.4) e sezioni F12.1.4/F12.1.8/F12.1.10/F12.1.12/F12.1.14 aggiornate con D3 e D4 (in F12.4)
+  - [x] **F12.4** Interfaccia «C · Una mano» completa con i servizi, provata sull'emulatore con foto vere e sul simulatore — FATTO il 2026-10-11 (304 test verdi, `analyze` pulito; commit e rituale ancora da fare)
+    - [x] Servizi `lib/services/`: `LetturaService` (+ `RisultatoCartellino`, `ScontrinoLetto` con le giunzioni), `Fotocamera.ritagliaAlMirino` (isolate, EXIF, originale sempre cancellato) + `Obiettivo`/`ObiettivoCamera` (fotocamera sostituibile nei test), `scegliFotoDiSistema`, `CsvExport`, `Aptica`, `ImpostazioniSistema` (canale nostro su Android e iOS, niente plugin); provider per ognuno in `providers.dart`
+    - [x] Spesa (`/`): totale enorme (non scala col testo, 64 → 48 sotto i 700 dp), barra del budget verde/ambra/rossa, residuo, lista (piu' recente in alto, scorri = elimina con «Annulla» 5 s, tocco = `RigaSheet`), Cartellino e Scontrino (badge PRO, acquisto → si apre lo scontrino), tastierino sempre visibile (`GrigliaTasti` 4×4, tasti fissi a 48), vibrazioni (tasto, rifiuto, aggiunto, soglie 80/100% una volta per spesa), banner «Spesa iniziata ieri», `BudgetSheet` (+ «usalo anche per le prossime»)
+    - [x] Cartellino (`/cartellino`, `?modo=bilancia`): mirino 86% 4:3, velo 55%, interruttore Cartellino|Bilancia, bilancia riconosciuta da sola, torcia, «Da una foto», «Leggo…», suggerimento sullo scritto a mano una volta, permesso negato con «Apri le impostazioni»; fogli `ConfermaCartellinoSheet` (nome, prezzo grande modificabile con un tocco, barrato, €/kg, pillola dell'offerta, quantita' N con NxM, chip alternativi, «Aggiungi (ora 2)», **due bottoni con/senza carta, nessun default** — D4), `SceltaCartellinoSheet`, `PesoSheet` (grammi/kg, anteprima del conto, «Leggi l'etichetta della bilancia»), `ConfermaBilanciaSheet`
+    - [x] Scontrino (Pro): mirino verticale 88% 3:5, fino a 4 pezzi con miniature, «Da una foto» multipla, `ConfrontoPage` (card, differenza ambra o «Tutto torna», righe sospette con nota e dettaglio, «Righe che tornano», avvisi quadra/giunzione, scontrino salvato accanto alle contate), `RegistraScontrinoPage` (negozio, data, righe modificabili/eliminabili, stornate barrate)
+    - [x] `ChiusuraPage` (totale, esito del budget, fonte scontrino/contate, negozio con chip dei recenti + «Altro…», data, snack del gratis oltre le 5, «Butta via»), `StoricoPage` (per mese, pallino ambra/rosso, card delle nascoste), `DettaglioSpesaPage` (lucchetto per le nascoste, negozio/data modificabili, elimina), `StatistichePage` (mese, **budget del mese** con tetto — D3, 4 tessere, grafico 6 mesi `CustomPainter` con `Semantics`, tabella per negozio mese/12 mesi), `ImpostazioniPage` (budget abituale, vibrazione, negozi, tema, Pro, dati, informativa, licenze PaddleOCR/RapidOCR/ORT solo Android + font), `NegoziPage`, `OcrDevPage` (solo debug/SR_DEV)
+    - [x] Router completo (`buildRouter(devAttiva:)`, tutte le rotte figlie di `/`), `OcrEngine.prepara()` 3 s dopo il primo frame, licenze registrate in `main`; 283 chiavi di testo (`tool/testi_schermate.py`)
+    - [x] Guardia condivisa `privacy_ocr.gradle` allineata (gruppo datatransport, media3 solo per ACCESS_NETWORK_STATE, INTERNET stretto) e applicata con `apply(from = …)`: release verde, rossa con INTERNET di prova (tolto); `noCompress onnx` nel modulo app
+    - [x] Emulatore (Medium Phone API 35): tastierino (2,49; 3 × 1,50), mirino sulla scena virtuale (nessun prezzo, nessuna foto rimasta in cache), cartellino c11 dalla galleria («quale?» fra due proposte, al kg → peso 500 g = 0,95), bilancia b07 riconosciuta da sola (1,082 × 1,59 = 1,72), paywall 2,99 € e Pro finto, scontrino s06 dalla galleria → confronto → chiusura → storico → statistiche, tema chiaro al 130%; campioni cancellati dall'emulatore. Simulatore iPhone 18 Pro Max: build e avvio, schermata principale in italiano
+    - [x] Trovato e corretto sull'emulatore: «T*talE PARZIALE» (OCR) letto come articolo → `t.?tale\s*parziale` nel parser (test `scontrino_subtotale_test.dart`, banco invariato)
+  - [x] **F12.5** Pro: limiti, paywall, `ProGate` sulle pagine, test di coerenza — FATTO il 2026-10-11: `ProGate` sulle rotte `/scontrino` (+ confronto e registrazione) e `/statistiche`; spese nascoste col lucchetto anche da link diretto; badge PRO su Scontrino, Statistiche, backup, CSV (ripristino gratis); test `pro_gate_test.dart`, `storico_page_test.dart`, `paywall_config_test.dart` (esistente)
+  - [x] **F12.6** Grafica (gia' scelta, «C · Una mano», applicata in F12.4): tema chiaro derivato e `palette_contrast_test.dart` (AA in entrambi i temi) — FATTO il 2026-10-11; [ ] conferma del proprietario sugli scatti scuro/chiaro
   - [ ] **F12.7** Test, rifinitura, iOS su iPad via TestFlight, fixture di Vision, **taratura con le foto vere del proprietario**, misure di prestazione su un Android vero, controllo privacy sull'APK di release
   - [ ] **F12.8** Atlanti `apps/spending_review` e `packages/micro_ocr` (+ `micro_core` e cinque app per `documentScan`), `verify_atlas` 0 mancanti
   - [ ] **F12.9** Rituale di fine fase, card «In arrivo» in vetrina, StatusMicroApps con entrambi gli store, branch di versione nuovo
@@ -6861,10 +6870,12 @@ abstract final class NumeriOcr {
 }
 
 class CartellinoParser {
-  const CartellinoParser({this.preferisciPrezzoCarta = true});
-  final bool preferisciPrezzoCarta;           // impostazione «Ho la carta fedelta'»
+  const CartellinoParser();
   LetturaCartellino interpreta(List<RigaOcr> righe);
 }
+// ⚑ SUPERATO da D4 (2026-10-11, «chiedi ogni volta»): niente `preferisciPrezzoCarta`. Con due prezzi
+// la proposta porta `DoppioPrezzoCarta? carta` (conCarta, senzaCarta) e il foglio di conferma chiede
+// con DUE bottoni; `PropostaCartellino.scegliCarta({required bool conCarta})` applica la scelta.
 ```
 
 **Algoritmo di `CartellinoParser.interpreta`, nell'ordine:**
@@ -6901,8 +6912,9 @@ class CartellinoParser {
      **controllo formato** riuscito: se c'e' un `formato` nel nome e un prezzo unitario U, il
      candidato P per cui `|P × 1000 / formato.millesimi − U| ≤ max(2 cent, 0,5% di U)` vince (c14:
      1,99 / 0,200 kg = 9,95 = U; c16: 3,59 / 0,600 = 5,98 vs 5,99 stampato, dentro la tolleranza);
-   - prezzo **con carta** e prezzo normale presenti → si usa quello con carta se
-     `preferisciPrezzoCarta`, l'altro va in `OffertaPrezzoConCarta(senza)` e in `alternative`;
+   - prezzo **con carta** e prezzo normale presenti → **entrambi** nella proposta, marcati
+     (`DoppioPrezzoCarta`, D4): il parser non sceglie; sceglie l'utente nel foglio (con carta →
+     prezzo con carta e `OffertaPrezzoConCarta(senza)`; senza carta → prezzo normale, nessuna offerta);
    - se **non** resta nessun candidato ma c'e' un unitario → proposta `aMisura` (si apre il foglio
      del peso, F12.1.12).
 6. **Offerta e prezzo pieno**:
@@ -6955,7 +6967,7 @@ non copiati dai campioni):
 | `c02_palermo_offerta_ortofrutta` / `c03_borlotti_manoscritto_kg` | «ZUCCHINE», «1,48 €/kg» | `aMisura`, unitario 1,48/kg |
 | `c23_cartello_barrato_sconto_0` | «2,50», «0%» | prezzo 2,50, nessuna offerta |
 | `c04_friggitelli_manoscritto_kg` | sole lettere, nessuna cifra | lettura vuota |
-| (prezzo con carta) | «2,49», «con carta 1,99» | prezzo 1,99, `OffertaPrezzoConCarta(2,49)`; con `preferisciPrezzoCarta: false` → 2,49 |
+| (prezzo con carta) | «2,49», «con carta 1,99» | `carta: DoppioPrezzoCarta(conCarta: 1,99, senzaCarta: 2,49)`; `scegliCarta(conCarta: true)` → 1,99 + `OffertaPrezzoConCarta(2,49)`, `false` → 2,49 (D4) |
 
 #### F12.1.5 — Parser dell'etichetta della bilancia (`lib/domain/lettura/bilancia_parser.dart`)
 
@@ -7218,7 +7230,10 @@ abstract final class StatisticheSpesa {
   static List<VoceNegozio> perNegozio(List<Spesa> chiuse, Map<int, String> nomi, CivilDate da, CivilDate a);
   /// Spesa media nel periodo (Money.average: null se nessuna spesa) e sforamenti (totale > budget).
   static ({Money? media, int sforamenti, int conBudget}) riepilogo(List<Spesa> chiuse, CivilDate da, CivilDate a);
+  /// Il budget del MESE (D3, Pro): spese chiuse del mese + la spesa in corso se iniziata nel mese.
+  static BudgetMese budgetMese(List<Spesa> chiuse, Money tetto, int anno, int mese, {Spesa? inCorso});
 }
+@immutable final class BudgetMese { const BudgetMese({required this.anno, required this.mese, required this.tetto, required this.speso}); final int anno, mese; final Money tetto, speso; Money get residuo; LivelloBudget get livello; }
 ```
 ⚑ La media e' quella di `Money.average` (divisione intera, null su lista vuota: «nessun dato» non e'
 «zero», commento in `money.dart`). Test: dataset noto di 12 spese su 3 mesi e 3 negozi, mesi vuoti,
@@ -7472,9 +7487,16 @@ drift_schemas/` subito in F12.3: e' la base dei test di migrazione della v2 (§1
 cancella i dati»).
 
 Impostazioni (`SettingsStore` di `micro_core`, classe `SrSettingKeys` in `lib/app/providers.dart`):
-`budgetPredefinito` (int centesimi, assente = nessuno), `preferisciPrezzoCarta` (bool, default
-**true**: chi ha la carta la usa; chi non ce l'ha lo spegne una volta), `vibrazione` (bool, default
-true), `temaScuro` (gestito da `themeModeProvider`, default scuro), `suggerimentoMirinoVisto` (bool).
+`budgetPredefinito` (int centesimi, assente = nessuno), **`budgetMensile`** (int centesimi, il tetto
+del MESE, D3, Pro: una preferenza e non una tabella, un tetto uguale per tutti i mesi), `vibrazione`
+(bool, default true), `temaScuro` (gestito da `themeModeProvider`, default scuro),
+`suggerimentoMirinoVisto` (bool). ⚑ **Niente `preferisciPrezzoCarta`** (superato da D4: si chiede ogni
+volta).
+
+Metodi aggiunti a `SpesaRepository` in F12.4 (non nella firma sopra): `Future<int?> posizioneDi(int
+rigaId)` (per «Annulla» dopo l'eliminazione), `Stream<int> osservaNumeroChiuse()` (la card delle
+nascoste senza caricare tutte le righe), `Future<void> modificaChiusa(int id, {required CivilDate data,
+int? negozioId})` (dettaglio dello storico); `incrementaUltima()` ritorna `Future<bool>`.
 
 #### F12.1.11 — Rotte (`lib/app/routes.dart`)
 
@@ -7592,7 +7614,9 @@ alta 56), tasti 14 (alti 48), pannello del tastierino 22, card 18. Test `palette
 da sola):
 - In alto il **nome** (modificabile, campo a una riga) e sotto il **prezzo da pagare grande** (Space
   Grotesk 40); se c'e' un'offerta, una pillola: «3x2 · 1,26 cad. se ne prendi 3», «−30% alla cassa ·
-  0,69», «Anziche' 2,99 · risparmi 1,50», «Con carta · senza carta 2,49».
+  0,69», «Anziche' 2,99 · risparmi 1,50». ⚑ **Due prezzi con e senza carta (D4)**: al posto del
+  prezzo grande «Questo cartellino ha due prezzi: quale paghi?» e **due bottoni**, «Con la carta
+  fedelta': 1,99» e «Senza la carta: 2,49», ciascuno gia' l'«Aggiungi» di quel prezzo; nessun default.
 - Riga piccola: «9,95 €/kg» (prezzo unitario stampato) se c'e'.
 - **Quantita'** con − e + (default 1; con NxM il default e' N, ⚑ chi guarda un 3x2 di solito ne prende 3).
 - Se `affidabilita' < 0,6` o ci sono `alternative`: «Controlla il prezzo» in ambra e i **chip** dei
@@ -7658,14 +7682,15 @@ rivedi tutte, con le statistiche» → paywall (`highlight: fullHistory`). In al
 righe contate/dello scontrino» se ci sono entrambe, totale, budget, negozio e data modificabili,
 **Elimina** con conferma.
 
-**`StatistichePage`** (Pro): selettore del mese (frecce), quattro `MicroStatTile`: **Totale del mese**,
+**`StatistichePage`** (Pro): selettore del mese (frecce), la card del **budget del mese** (D3: «182,40
+€ su 400 €», barra coi colori del budget, residuo o sforamento, «Imposta»/«Cambia» il tetto con lo
+stesso foglio del budget), quattro `MicroStatTile`: **Totale del mese**,
 **Spese**, **Spesa media**, **Sforamenti** («2 su 5 con budget»); grafico a barre degli **ultimi 6
 mesi** (`CustomPainter`, come Film Tracker e Scorte Calore, con `Semantics` che legge i valori); tabella
 **per negozio** (nome, spese, totale, media) per il mese o per «Ultimi 12 mesi» (interruttore).
 
-**`ImpostazioniPage`**: **Budget abituale** (campo prezzo, «nessuno»); **Ho la carta fedelta'**
-(interruttore `preferisciPrezzoCarta`, con la spiegazione «Quando un cartellino ha il prezzo con la
-carta, uso quello»); **Vibrazione**; **Negozi** (→ `/impostazioni/negozi`: rinomina, elimina);
+**`ImpostazioniPage`**: **Budget abituale** (campo prezzo, «nessuno»); ~~Ho la carta fedelta'~~
+(tolto da D4: si chiede ogni volta); **Vibrazione**; **Negozi** (→ `/impostazioni/negozi`: rinomina, elimina);
 **Tema** (scuro / chiaro / come il telefono); **Pro** (stato, acquisto, ripristino acquisti);
 **I tuoi dati** (`data_section.dart` come Film Tracker: backup **Pro**, ripristino **gratis**, CSV
 **Pro**); **Informazioni** (versione, informativa privacy, **licenze**: `LicenseRegistry.addLicense`
@@ -7695,7 +7720,9 @@ class LetturaService {
   /// La foto (e il ritaglio) si CANCELLANO nel finally, letta o no.
   Future<RisultatoCartellino> cartellino(String percorso, {required bool forzaBilancia});
   /// Le parti in ordine; OCR modo scontrino per ognuna; UnisciParti; ScontrinoParser. Foto cancellate.
-  Future<LetturaScontrino> scontrino(List<String> percorsi);
+  /// ⚑ F12.4: ritorna `ScontrinoLetto(lettura, giunzioniTrovate)` (serve all'avviso delle giunzioni);
+  /// `ScontrinoLetto` e' anche l'`extra` di `/scontrino/confronto` e `/scontrino/registra`.
+  Future<ScontrinoLetto> scontrino(List<String> percorsi);
 }
 sealed class RisultatoCartellino { const RisultatoCartellino(); }
 final class LettoCartellino extends RisultatoCartellino { const LettoCartellino(this.lettura); final LetturaCartellino lettura; }

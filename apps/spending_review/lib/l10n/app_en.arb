@@ -58,5 +58,647 @@
   "settings_proActive": "Spending Review Pro is active",
   "settings_proCta": "Discover Spending Review Pro",
   "settings_restoreGoogle": "Bought Pro on another phone with the same Google account?",
-  "settings_restoreApple": "Bought Pro on another iPhone with the same Apple ID?"
+  "settings_restoreApple": "Bought Pro on another iPhone with the same Apple ID?",
+  "common_add": "Add",
+  "common_ok": "OK",
+  "common_close": "Close",
+  "spesa_vuota": "Key in a price or scan a price tag",
+  "spesa_prezzoAMano": "Price by hand",
+  "spesa_cartellino": "Price tag",
+  "spesa_scontrino": "Receipt",
+  "spesa_statoConBudget": "{n, plural, =1{1 item} other{{n} items}} · budget {budget} €",
+  "@spesa_statoConBudget": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "spesa_statoSenzaBudget": "{n, plural, =1{1 item} other{{n} items}} · set a budget",
+  "@spesa_statoSenzaBudget": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "spesa_eliminato": "Removed",
+  "spesa_iniziataIeri": "Shopping started yesterday at {ora}",
+  "@spesa_iniziataIeri": {
+    "placeholders": {
+      "ora": {
+        "type": "String"
+      }
+    }
+  },
+  "spesa_iniziataIl": "Shopping started on {giorno} at {ora}",
+  "@spesa_iniziataIl": {
+    "placeholders": {
+      "giorno": {
+        "type": "String"
+      },
+      "ora": {
+        "type": "String"
+      }
+    }
+  },
+  "spesa_chiudila": "Close it",
+  "spesa_continua": "Continue",
+  "semantica_euro": "{euro} euros and {cent}",
+  "@semantica_euro": {
+    "placeholders": {
+      "euro": {
+        "type": "int"
+      },
+      "cent": {
+        "type": "int"
+      }
+    }
+  },
+  "semantica_totale": "Total {totale}",
+  "@semantica_totale": {
+    "placeholders": {
+      "totale": {
+        "type": "String"
+      }
+    }
+  },
+  "semantica_totaleResiduo": "Total {totale}, {residuo} left in the budget",
+  "@semantica_totaleResiduo": {
+    "placeholders": {
+      "totale": {
+        "type": "String"
+      },
+      "residuo": {
+        "type": "String"
+      }
+    }
+  },
+  "semantica_totaleSforato": "Total {totale}, {sforo} over the budget",
+  "@semantica_totaleSforato": {
+    "placeholders": {
+      "totale": {
+        "type": "String"
+      },
+      "sforo": {
+        "type": "String"
+      }
+    }
+  },
+  "tasto_cancella": "delete",
+  "tasto_per": "times",
+  "tasto_meno": "minus",
+  "tasto_aggiungi": "add",
+  "tasto_virgola": "comma",
+  "tasto_doppioZero": "double zero",
+  "tasto_svuota": "clear",
+  "budget_titoloSpesa": "Budget for this shopping trip",
+  "budget_importo": "Amount",
+  "budget_usaAbituale": "Use it for the next shopping trips too",
+  "budget_nessuno": "No budget",
+  "riga_titolo": "Item",
+  "riga_nome": "Name",
+  "riga_prezzo": "Price",
+  "riga_prezzoAl": "Price per {unita}",
+  "@riga_prezzoAl": {
+    "placeholders": {
+      "unita": {
+        "type": "String"
+      }
+    }
+  },
+  "riga_importo": "Amount",
+  "riga_totaleStampato": "Total on the label",
+  "riga_quantita": "Quantity",
+  "riga_menoUno": "One less",
+  "riga_piuUno": "One more",
+  "riga_peso": "Weight",
+  "riga_ePrezzoAlKg": "It’s a price per kg",
+  "riga_offerta": "Offer",
+  "riga_offertaNessuna": "None",
+  "riga_totale": "Line total: {importo} €",
+  "@riga_totale": {
+    "placeholders": {
+      "importo": {
+        "type": "String"
+      }
+    }
+  },
+  "offerta_anziche": "instead of {prezzo}",
+  "@offerta_anziche": {
+    "placeholders": {
+      "prezzo": {
+        "type": "String"
+      }
+    }
+  },
+  "offerta_conCarta": "with card (without: {prezzo})",
+  "@offerta_conCarta": {
+    "placeholders": {
+      "prezzo": {
+        "type": "String"
+      }
+    }
+  },
+  "offerta_nxmLunga": "{offerta} · {effettivo} each if you take {prendi}",
+  "@offerta_nxmLunga": {
+    "placeholders": {
+      "offerta": {
+        "type": "String"
+      },
+      "effettivo": {
+        "type": "String"
+      },
+      "prendi": {
+        "type": "int"
+      }
+    }
+  },
+  "offerta_percentoLunga": "−{percento}% at the till · {scontato}",
+  "@offerta_percentoLunga": {
+    "placeholders": {
+      "percento": {
+        "type": "int"
+      },
+      "scontato": {
+        "type": "String"
+      }
+    }
+  },
+  "offerta_secondoLunga": "−{percento}% on the second one",
+  "@offerta_secondoLunga": {
+    "placeholders": {
+      "percento": {
+        "type": "int"
+      }
+    }
+  },
+  "offerta_barratoLunga": "Instead of {pieno} · you save {risparmio}",
+  "@offerta_barratoLunga": {
+    "placeholders": {
+      "pieno": {
+        "type": "String"
+      },
+      "risparmio": {
+        "type": "String"
+      }
+    }
+  },
+  "offerta_cartaLunga": "With card · without card {senza}",
+  "@offerta_cartaLunga": {
+    "placeholders": {
+      "senza": {
+        "type": "String"
+      }
+    }
+  },
+  "fotocamera_scatta": "Take photo",
+  "fotocamera_daFoto": "From a photo",
+  "fotocamera_torcia": "Torch",
+  "fotocamera_negataTitolo": "The camera is off",
+  "fotocamera_negataTesto": "Spending Review needs the camera to read price tags and receipts. You can still use the keypad, or pick a photo.",
+  "fotocamera_erroreTitolo": "The camera didn’t start",
+  "fotocamera_erroreTesto": "Try again, or pick a photo you already took.",
+  "fotocamera_apriImpostazioni": "Open settings",
+  "cartellino_titolo": "Price tag",
+  "cartellino_modoCartellino": "Price tag",
+  "cartellino_modoBilancia": "Scale",
+  "cartellino_inquadra": "Frame one price tag, up close",
+  "cartellino_scrittoAMano": "I can’t read handwriting: for that there’s the keypad",
+  "cartellino_leggo": "Reading…",
+  "cartellino_scattoFallito": "The photo didn’t work. Try again.",
+  "cartellino_ocrAssente": "This phone can’t read price tags: use the keypad",
+  "cartellino_nienteLetto": "I couldn’t find a price. Get closer, or use the keypad.",
+  "cartellino_forseAMano": "I read some text but no price: if it’s handwritten, use the keypad.",
+  "cartellino_conferma": "Price tag read",
+  "cartellino_prezzoSemantica": "Price {prezzo} euros, tap to change it",
+  "@cartellino_prezzoSemantica": {
+    "placeholders": {
+      "prezzo": {
+        "type": "String"
+      }
+    }
+  },
+  "cartellino_controlla": "Check the price",
+  "cartellino_cartaDomanda": "This price tag has two prices: which one do you pay?",
+  "cartellino_conCarta": "With the loyalty card: {prezzo}",
+  "@cartellino_conCarta": {
+    "placeholders": {
+      "prezzo": {
+        "type": "String"
+      }
+    }
+  },
+  "cartellino_senzaCarta": "Without the card: {prezzo}",
+  "@cartellino_senzaCarta": {
+    "placeholders": {
+      "prezzo": {
+        "type": "String"
+      }
+    }
+  },
+  "cartellino_aggiungiOra": "Add (now {n})",
+  "@cartellino_aggiungiOra": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "cartellino_battiAMano": "Key it in",
+  "cartellino_quale": "{n, plural, =1{I saw 1 price tag} other{I saw {n} price tags: which one?}}",
+  "@cartellino_quale": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "peso_titolo": "Weight",
+  "peso_etichetta": "Weight",
+  "peso_suggerimento": "Key in the weight in grams, or in kg with the comma",
+  "peso_cambiaUnita": "switch to {unita}",
+  "@peso_cambiaUnita": {
+    "placeholders": {
+      "unita": {
+        "type": "String"
+      }
+    }
+  },
+  "peso_aggiungiPrezzo": "Add · {importo} €",
+  "@peso_aggiungiPrezzo": {
+    "placeholders": {
+      "importo": {
+        "type": "String"
+      }
+    }
+  },
+  "peso_leggiBilancia": "Read the scale label",
+  "bilancia_titolo": "Scale label",
+  "bilancia_inquadra": "Frame the scale label, up close",
+  "bilancia_nonTorna": "Weight × price doesn’t add up: check",
+  "bilancia_peso": "Net weight",
+  "bilancia_alKg": "Price per kg",
+  "bilancia_totaleEtichetta": "Total on the label",
+  "scontrino_titolo": "Receipt",
+  "scontrino_titoloParti": "{n, plural, =1{Receipt · 1 photo} other{Receipt · {n} photos}}",
+  "@scontrino_titoloParti": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "scontrino_inquadra": "Frame the receipt straight, full width",
+  "scontrino_inquadraPezzo": "Part {n}: frame the next piece, overlapping a couple of lines",
+  "@scontrino_inquadraPezzo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "scontrino_leggi": "Read",
+  "scontrino_aggiungiPezzo": "Add a piece",
+  "scontrino_massimoPezzi": "At most {n} pieces",
+  "@scontrino_massimoPezzi": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "scontrino_togliPezzo": "Remove piece {n}",
+  "@scontrino_togliPezzo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "scontrino_nienteLetto": "I couldn’t read the receipt. Try again, closer and straight.",
+  "scontrino_ocrAssente": "This phone can’t read receipts.",
+  "confronto_titolo": "Receipt vs your count",
+  "confronto_scontrino": "Receipt",
+  "confronto_contato": "Counted",
+  "confronto_tuttoTorna": "It all adds up",
+  "confronto_daGuardare": "A difference to look at",
+  "confronto_sospette": "Lines to check",
+  "confronto_notaPrezzo": "price tag {cartellino} · receipt {scontrino}",
+  "@confronto_notaPrezzo": {
+    "placeholders": {
+      "cartellino": {
+        "type": "String"
+      },
+      "scontrino": {
+        "type": "String"
+      }
+    }
+  },
+  "confronto_notaSoloScontrino": "only on the receipt",
+  "confronto_notaNonScontrino": "counted but not on the receipt",
+  "confronto_notaDoppia": "on the receipt twice?",
+  "confronto_tornano": "{n, plural, =1{Lines that match (1)} other{Lines that match ({n})}}",
+  "@confronto_tornano": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "confronto_nonQuadra": "{n, plural, =0{The total read doesn’t match the sum of the lines} =1{The total read doesn’t match the sum of the lines: 1 line not read} other{The total read doesn’t match the sum of the lines: {n} lines not read}}",
+  "@confronto_nonQuadra": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "confronto_giunzione": "I joined {n} photos without finding where they overlap: some lines may be doubled or missing",
+  "@confronto_giunzione": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "confronto_rifotografa": "Photograph the receipt again",
+  "confronto_rigaContata": "Counted: {testo}",
+  "@confronto_rigaContata": {
+    "placeholders": {
+      "testo": {
+        "type": "String"
+      }
+    }
+  },
+  "confronto_rigaScontrino": "Receipt: {testo}",
+  "@confronto_rigaScontrino": {
+    "placeholders": {
+      "testo": {
+        "type": "String"
+      }
+    }
+  },
+  "registra_titolo": "Save from the receipt",
+  "registra_salva": "Save the shopping trip",
+  "registra_totaleStampato": "Total on the receipt",
+  "registra_sommaRighe": "Sum of the lines",
+  "registra_senzaTotale": "I didn’t find the TOTAL: I’ll save the sum of the lines",
+  "registra_nonQuadra": "{n, plural, =0{The lines add up to {somma}: check them} =1{The lines add up to {somma}: 1 line not read} other{The lines add up to {somma}: {n} lines not read}}",
+  "@registra_nonQuadra": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "somma": {
+        "type": "String"
+      }
+    }
+  },
+  "registra_righe": "{n, plural, =1{1 line} other{{n} lines}}",
+  "@registra_righe": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "registra_stornata": "cancelled at the till",
+  "chiusura_titolo": "Close the shopping trip",
+  "chiusura_niente": "There’s nothing to save.",
+  "chiusura_buttaVia": "Throw it away",
+  "chiusura_buttaViaTitolo": "Throw away this shopping trip?",
+  "chiusura_buttaViaTesto": "All its lines are deleted. It can’t be undone.",
+  "chiusura_dentro": "Within budget by {importo}",
+  "@chiusura_dentro": {
+    "placeholders": {
+      "importo": {
+        "type": "String"
+      }
+    }
+  },
+  "chiusura_sforato": "Over budget by {importo}",
+  "@chiusura_sforato": {
+    "placeholders": {
+      "importo": {
+        "type": "String"
+      }
+    }
+  },
+  "chiusura_quali": "Which lines to keep",
+  "chiusura_righeScontrino": "The receipt’s lines",
+  "chiusura_righeContate": "The lines you counted",
+  "chiusura_negozio": "Shop",
+  "chiusura_data": "Date",
+  "chiusura_salvata": "Saved.",
+  "chiusura_salvataGratis": "Saved. On the free plan you see the last 5: the others stay on your phone.",
+  "negozio_altro": "Other…",
+  "negozio_titolo": "Shop",
+  "negozio_nome": "Shop name",
+  "negozi_titolo": "Shops",
+  "negozi_rinomina": "Rename the shop",
+  "negozi_doppione": "There’s already a shop with that name.",
+  "negozi_eliminaTitolo": "Delete “{nome}”?",
+  "@negozi_eliminaTitolo": {
+    "placeholders": {
+      "nome": {
+        "type": "String"
+      }
+    }
+  },
+  "negozi_eliminaTesto": "Its shopping trips stay, without a shop.",
+  "negozi_vuotoTitolo": "No shops yet",
+  "negozi_vuotoTesto": "A shop is added when you choose it while closing a shopping trip.",
+  "storico_vuotoTitolo": "No shopping trips yet",
+  "storico_vuotoTesto": "When you close a shopping trip, it ends up here.",
+  "storico_mese": "{mese} · {n, plural, =1{1 trip} other{{n} trips}} · {totale} €",
+  "@storico_mese": {
+    "placeholders": {
+      "mese": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      },
+      "totale": {
+        "type": "String"
+      }
+    }
+  },
+  "storico_altre": "{n, plural, =1{1 more shopping trip is on your phone: with Pro you see them all, with statistics} other{{n} more shopping trips are on your phone: with Pro you see them all, with statistics}}",
+  "@storico_altre": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "storico_sforata": "over budget",
+  "storico_vicina": "close to the budget",
+  "dettaglio_titolo": "Shopping trip",
+  "dettaglio_nascosta": "This shopping trip is on your phone, but the free plan shows only the last 5. With Pro you see them all.",
+  "dettaglio_budgetDentro": "Budget {budget} · {residuo} left",
+  "@dettaglio_budgetDentro": {
+    "placeholders": {
+      "budget": {
+        "type": "String"
+      },
+      "residuo": {
+        "type": "String"
+      }
+    }
+  },
+  "dettaglio_budgetSforato": "Budget {budget} · over by {sforo}",
+  "@dettaglio_budgetSforato": {
+    "placeholders": {
+      "budget": {
+        "type": "String"
+      },
+      "sforo": {
+        "type": "String"
+      }
+    }
+  },
+  "dettaglio_righeContate": "Counted lines",
+  "dettaglio_righeScontrino": "Receipt lines",
+  "dettaglio_mostraContate": "Also show the counted lines",
+  "dettaglio_mostraScontrino": "Also show the receipt lines",
+  "dettaglio_nascondiAltre": "Hide the other lines",
+  "dettaglio_eliminaTitolo": "Delete this shopping trip?",
+  "dettaglio_eliminaTesto": "It disappears from history and statistics. It can’t be undone.",
+  "statistiche_mesePrima": "Previous month",
+  "statistiche_meseDopo": "Next month",
+  "statistiche_totaleMese": "Month total",
+  "statistiche_spese": "Trips",
+  "statistiche_media": "Average",
+  "statistiche_sforamenti": "Over budget",
+  "statistiche_sforamentiSu": "out of {n} with a budget",
+  "@statistiche_sforamentiSu": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statistiche_ultimiSei": "Last 6 months",
+  "statistiche_perNegozio": "By shop",
+  "statistiche_questoMese": "This month",
+  "statistiche_dodiciMesi": "Last 12 months",
+  "statistiche_negozio": "Shop",
+  "statistiche_totale": "Total",
+  "statistiche_nessunaSpesa": "No shopping trips in this period.",
+  "statistiche_budgetMese": "Monthly budget",
+  "statistiche_spesoSu": "{speso} € of {tetto} €",
+  "@statistiche_spesoSu": {
+    "placeholders": {
+      "speso": {
+        "type": "String"
+      },
+      "tetto": {
+        "type": "String"
+      }
+    }
+  },
+  "statistiche_tettoResiduo": "{importo} € left this month",
+  "@statistiche_tettoResiduo": {
+    "placeholders": {
+      "importo": {
+        "type": "String"
+      }
+    }
+  },
+  "statistiche_tettoSforato": "{importo} € over the monthly budget",
+  "@statistiche_tettoSforato": {
+    "placeholders": {
+      "importo": {
+        "type": "String"
+      }
+    }
+  },
+  "statistiche_tettoNessuno": "Set a ceiling for the whole month.",
+  "statistiche_tettoImposta": "Set",
+  "statistiche_tettoCambia": "Change",
+  "statistiche_tettoTitolo": "Monthly budget",
+  "grafico_titolo": "Monthly totals: {valori}",
+  "@grafico_titolo": {
+    "placeholders": {
+      "valori": {
+        "type": "String"
+      }
+    }
+  },
+  "grafico_mese": "{mese} {importo} euros",
+  "@grafico_mese": {
+    "placeholders": {
+      "mese": {
+        "type": "String"
+      },
+      "importo": {
+        "type": "String"
+      }
+    }
+  },
+  "impostazioni_spesa": "Shopping",
+  "impostazioni_budgetAbituale": "Usual budget",
+  "impostazioni_budgetNessuno": "None: each trip starts without a budget",
+  "impostazioni_vibrazione": "Vibration",
+  "impostazioni_vibrazioneTesto": "A short buzz on every key and when you pass the budget thresholds",
+  "impostazioni_pro": "Pro",
+  "impostazioni_informazioni": "About",
+  "impostazioni_privacy": "Privacy",
+  "impostazioni_privacyTesto": "Photos of price tags and receipts are read on your phone (on iPhone by Apple’s own system, on Android by an engine built into the app) and deleted right after reading. No photo and no shopping data leaves your phone. The only outside communication is buying the Pro version (Google Play / App Store) and, on Android, checking it on our server. Your shopping history is kept out of automatic cloud backups: you make a backup yourself, with Pro, in a file you can see.",
+  "impostazioni_licenze": "Licences",
+  "dati_titolo": "Your data",
+  "backup_crea": "Create a backup",
+  "backup_creaTesto": "All your shopping trips in one file, to keep or move to a new phone",
+  "backup_creaFallito": "The backup couldn’t be created.",
+  "backup_inCorso": "Creating the backup…",
+  "backup_oggetto": "Spending Review backup",
+  "backup_ripristina": "Restore a backup",
+  "backup_ripristinaTesto": "Free: bring back your shopping trips from a file",
+  "backup_ripristinaTitolo": "Restore this backup?",
+  "backup_riepilogo": "{spese, plural, =1{1 shopping trip} other{{spese} shopping trips}}, {negozi, plural, =1{1 shop} other{{negozi} shops}}",
+  "@backup_riepilogo": {
+    "placeholders": {
+      "spese": {
+        "type": "int"
+      },
+      "negozi": {
+        "type": "int"
+      }
+    }
+  },
+  "backup_modoSostituisci": "Replace everything",
+  "backup_modoSostituisciTesto": "What’s on the phone now is deleted",
+  "backup_modoUnisci": "Merge",
+  "backup_modoUnisciTesto": "Keeps what’s on the phone and adds the rest",
+  "backup_ripristinoInCorso": "Restoring…",
+  "backup_ripristinato": "Backup restored.",
+  "backup_fallito": "This file isn’t a Spending Review backup, or it can’t be read.",
+  "csv_titolo": "Export CSV",
+  "csv_testo": "Every item of every shopping trip, for a spreadsheet",
+  "csv_vuoto": "There are no closed shopping trips to export yet.",
+  "csv_fallito": "The CSV couldn’t be created.",
+  "csv_data": "Date",
+  "csv_negozio": "Shop",
+  "csv_spesa": "Trip no.",
+  "csv_articolo": "Item",
+  "csv_quantita": "Quantity",
+  "csv_unita": "Unit",
+  "csv_prezzoUnitario": "Unit price",
+  "csv_offerta": "Offer",
+  "csv_totaleRiga": "Line total",
+  "csv_totaleSpesa": "Trip total",
+  "csv_budget": "Budget",
+  "csv_origine": "Source",
+  "csv_pezzi": "pcs",
+  "origine_tastierino": "keypad",
+  "origine_cartellino": "price tag",
+  "origine_bilancia": "scale",
+  "origine_scontrino": "receipt",
+  "dev_titolo": "Developer tools: OCR",
+  "dev_esporta": "Export fixture"
 }

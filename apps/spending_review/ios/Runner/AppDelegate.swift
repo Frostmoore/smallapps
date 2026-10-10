@@ -15,6 +15,32 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    registraCanaleImpostazioni(engineBridge.pluginRegistry)
+  }
+
+  /// ⚑ Identico a `ImpostazioniSistema.canale` in lib/services/impostazioni_sistema.dart.
+  private static let canaleImpostazioni = "com.smp.spendingreview/impostazioni"
+
+  /// «Apri le impostazioni» dalla fotocamera negata (F12.1.12): la pagina di Spending Review
+  /// nell'app Impostazioni (`UIApplication.openSettingsURLString`).
+  /// ⚑ Codice nostro e non `url_launcher` (assente in questa app) ne' `permission_handler`: un
+  /// pulsante non vale una dipendenza. ☠ Risponde sempre true/false, mai un errore.
+  private func registraCanaleImpostazioni(_ registry: FlutterPluginRegistry) {
+    guard let messenger = registry.registrar(forPlugin: "SrImpostazioniSistema")?.messenger()
+    else { return }
+    let canale = FlutterMethodChannel(
+      name: AppDelegate.canaleImpostazioni, binaryMessenger: messenger)
+    canale.setMethodCallHandler { call, result in
+      guard call.method == "apri" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      guard let url = URL(string: UIApplication.openSettingsURLString) else {
+        result(false)
+        return
+      }
+      UIApplication.shared.open(url, options: [:]) { aperta in result(aperta) }
+    }
   }
 
   /// Toglie dal backup automatico di iCloud (e da quello sul computer) i dati di Spending Review

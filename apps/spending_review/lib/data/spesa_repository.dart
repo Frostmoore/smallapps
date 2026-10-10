@@ -89,6 +89,13 @@ class SpesaRepository {
 
   Future<void> eliminaRiga(int rigaId) => (_db.delete(_db.righe)..where((r) => r.id.equals(rigaId))).go();
 
+  /// La posizione di una riga, da leggere PRIMA di [eliminaRiga] per poterla rimettere al suo
+  /// posto con [ripristinaRiga] («Annulla»). null se la riga non c'e'.
+  /// ⚑ Metodo in piu' rispetto alla specsheet (F12.4): `RigaSpesa` non porta la posizione, e
+  /// l'indice nella lista non basta (le posizioni possono avere buchi dopo un'eliminazione).
+  Future<int?> posizioneDi(int rigaId) async =>
+      (await (_db.select(_db.righe)..where((r) => r.id.equals(rigaId))).getSingleOrNull())?.posizione;
+
   /// «Annulla» dopo l'eliminazione: la riga torna con il suo id e la sua posizione (le altre non si
   /// spostano: la posizione e' solo un ordine, i buchi non contano).
   Future<void> ripristinaRiga(RigaSpesa riga, {required int posizione}) => _db.transaction(() async {
@@ -206,6 +213,21 @@ class SpesaRepository {
         .watch()
         .asyncMap((_) async => [for (final row in await q.get()) await _spesa(row)]);
   }
+
+  /// Quante spese chiuse ci sono (anche quelle nascoste nel gratis), aggiornato a ogni scrittura.
+  /// ⚑ In piu' rispetto alla specsheet (F12.4): la card «Le altre N spese sono sul telefono»
+  /// dello storico gratis la legge senza caricare le righe di tutte le spese.
+  Stream<int> osservaNumeroChiuse() => _db
+      .customSelect("SELECT COUNT(*) AS n FROM spese WHERE stato = 'chiusa'", readsFrom: {_db.spese})
+      .watch()
+      .map((righe) => righe.isEmpty ? 0 : righe.first.read<int>('n'));
+
+  /// Cambia negozio e data di una spesa CHIUSA (dettaglio dello storico). ⚑ Il totale scritto
+  /// alla chiusura non si tocca: negozio e data non cambiano cosa si e' pagato.
+  Future<void> modificaChiusa(int id, {required CivilDate data, int? negozioId}) =>
+      (_db.update(_db.spese)..where((s) => s.id.equals(id) & s.stato.equals(_chiusa))).write(
+        SpeseCompanion(dataSpesa: Value(data.toIso()), negozioId: Value(negozioId)),
+      );
 
   Future<int> contaChiuse() async {
     final n = _db.spese.id.count();

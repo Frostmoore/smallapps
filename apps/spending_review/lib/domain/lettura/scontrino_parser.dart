@@ -110,7 +110,7 @@ class ScontrinoParser {
   static final RegExp _storno = RegExp(r'storno|annull|\breso\b|correzione');
   static final RegExp _ignorateMute = RegExp(
     r'subtot|sub\s*tot|di\s*cui\s*iva|totale\s*iva|n\.?\s*articoli|^\s*articoli|^\s*pezzi\b|^\s*descrizione|prezzo\s*\(?\s*(€|e)?\s*\)?\s*$|'
-    r'^\s*iva\b|^\s*euro\s*$|^\s*€?\s*$|^\s*\(?e\)?\s*$|totale\s*parziale',
+    r'^\s*iva\b|^\s*euro\s*$|^\s*€?\s*$|^\s*\(?e\)?\s*$|t.?tale\s*parziale',
   );
   static final RegExp _tokenIva = RegExp(r'(\s+(\d{1,2}\s*%|[abcd]|vi|\*))+\s*$', caseSensitive: false);
   static final RegExp _quantitaInTesta = RegExp(r'^(\d{1,2})\s+[a-z]');
@@ -356,7 +356,9 @@ class ScontrinoParser {
     return null;
   }
 
-  static final RegExp _subtotale = RegExp(r'sub\s*tot|\bsubt\b|totale\s*parziale');
+  // ⚑ `t.?tale`: un carattere letto male («T*talE PARZIALE» di s06 sull'emulatore, F12.4) non
+  // deve far diventare il subtotale un articolo.
+  static final RegExp _subtotale = RegExp(r'sub\s*tot|\bsubt\b|t.?tale\s*parziale');
   static final RegExp _pagato = RegExp(r'contant|\bcassa\b|pagat|pagamento|bancomat|carta\s*di');
   static final RegExp _resto = RegExp(r'\bresto\b');
 

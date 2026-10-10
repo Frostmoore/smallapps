@@ -83,6 +83,16 @@ flutter:
   uses-material-design: true
   generate: true
 
+  # Le licenze mostrate in Impostazioni > Informazioni > Licenze (lib/app/licenze.dart):
+  # PaddleOCR/RapidOCR (Apache-2.0, modelli PP-OCRv5 di micro_ocr) e ONNX Runtime (MIT), solo su
+  # Android dove sono dentro l'app; i due font (SIL OFL 1.1), ovunque.
+  # ⚑ Copie: l'originale di paddleocr-rapidocr.txt e' packages/micro_ocr/android/src/main/assets/
+  # ppocrv5/LICENSE-PaddleOCR.txt (negli asset NATIVI del plugin, che Flutter non vede).
+  assets:
+    - assets/licenses/
+    - assets/fonts/OFL-PlusJakartaSans.txt
+    - assets/fonts/OFL-SpaceGrotesk.txt
+
   # «C · Una mano» (F12.1.12): Space Grotesk 700 per il totale e i numeri, Plus Jakarta Sans
   # 500-800 per il resto. Entrambi VARIABILI, copiati da apps/qr_me/assets/fonts con le loro
   # licenze (SIL Open Font License 1.1, che ne consente l'uso in app commerciali purche' la

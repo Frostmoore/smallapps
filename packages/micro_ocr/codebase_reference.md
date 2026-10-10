@@ -339,6 +339,33 @@ android {
 // INTERNET/ACCESS_NETWORK_STATE da fonti diverse da Play Billing, ORT ≠ 1.28.0, ML Kit/LiteRT...
 apply(from = "../../../../packages/micro_ocr/android/privacy_ocr.gradle")
 ```
+
+**Cosa controlla `privacy_ocr.gradle`** (task `verificaPrivacyOcr`, `finalizedBy` di
+`processReleaseMainManifest`: gira a ogni build di release, mai in debug):
+
+| Controllo | Dove legge | Fallisce se |
+|---|---|---|
+| a. telemetria ORT | manifest unito di release (`intermediates/merged_manifest/release`) | `ai.onnxruntime.TelemetryInitializer` o un `<provider>` con `ai.onnxruntime` |
+| b. chi porta la rete | report di fusione `outputs/logs/manifest-merger-release-report.txt` | una riga `ADDED/MERGED/IMPLIED/INJECTED from` del blocco `uses-permission#…INTERNET` che non contenga `[com.google.android.datatransport:` ; del blocco `…ACCESS_NETWORK_STATE` che non contenga `[com.google.android.datatransport:` **ne'** `[androidx.media3:`; una riga `provider#…ai.onnxruntime` |
+| c. dipendenze | `releaseRuntimeClasspath` risolto | `com.microsoft.onnxruntime` ≠ 1.28.0; `com.google.mlkit:*`, `firebase-analytics`, `play-services-tflite*`, `com.google.ai.edge.litert:*` |
+
+⚑ **Fonti ammesse, allineate il 2026-10-11 (F12.4) a cio' che Spending Review porta davvero**:
+- gruppo **`com.google.android.datatransport`** intero (Play Billing porta sia `transport-backend-cct`
+  sia `transport-runtime`; fino al 2026-10-11 lo script ammetteva solo il primo e avrebbe fatto
+  fallire la release dell'app) per INTERNET e ACCESS_NETWORK_STATE;
+- **`androidx.media3`** solo per ACCESS_NETWORK_STATE: lo porta la fotocamera (`camera_android_camerax`
+  → `androidx.camera:camera-video` → `media3-container` → `media3-common`), e' un permesso «normale»
+  per lo streaming video, che qui non c'e'; senza INTERNET da altre fonti non puo' mandare niente.
+  Toglierlo con `tools:node="remove"` lo toglierebbe anche a Play Billing.
+- ☠ **INTERNET resta stretto**: nessuna eccezione per media3, nessuna per `src/debug` (il report e'
+  quello di release).
+- Il blocco di un elemento del report finisce alla prima riga che non inizia con un prefisso di fonte:
+  le righe indentate che seguono sono attributi (`android:name`), non fonti.
+
+**Prova (Spending Review, 2026-10-11)**: `flutter build apk --release` verde; con un
+`<uses-permission INTERNET>` aggiunto per prova in `src/main` rosso con
+«INTERNET portato da una fonte non ammessa: ADDED from …\src\main\AndroidManifest.xml:11:5-66»
+(riga tolta subito dopo).
 e dopo `flutter build apk --release`:
 `pwsh packages/micro_ocr/tool/verifica_privacy_android.ps1 -Apk <apk>` (esce con 1 se trova
 `events.data.microsoft.com`, `OneCollector`, `TelemetryInitializer`, o `1DS` nei `.so` di ORT; stampa
@@ -419,7 +446,6 @@ cartellini 0,2–4 s (tipico ~1 s), scontrini 0,9–3,3 s; simulatore 0,13–0,7
 - Le **fixture di Vision** (`test/fixtures/ocr/vision/`): F12.7.
 - `integration_test/ocr_parita_test.dart` che confronti da solo con le fixture (≥ 95%): oggi stampa e il
   confronto lo fa lo script del banco; le fixture nascono in F12.3.
-- L'app che aggancia davvero `privacy_ocr.gradle` (Spending Review, F12.2c).
 - Il «padding verticale» di RapidOCR per immagini larghissime (rapporto > 8) o basse ≤ 30 px.
 
 ## 12. Debito tecnico aperto

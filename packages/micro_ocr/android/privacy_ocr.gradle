@@ -15,17 +15,39 @@
 //
 // Fa fallire la build se:
 //  a. nel manifest unito di release compare `ai.onnxruntime.TelemetryInitializer` o un
-//     <provider> con `ai.onnxruntime` nel nome;
+//     <provider> con `ai.onnxruntime` nel nome (anche come riga `provider#` del report);
 //  b. il blocco `uses-permission#android.permission.INTERNET` del report di fusione ha una riga
-//     ADDED from / MERGED from che NON viene da `com.google.android.datatransport:transport-backend-cct`
-//     (Play Billing, eccezione del 2026-10-09) — idem per ACCESS_NETWORK_STATE;
+//     ADDED/MERGED/IMPLIED from che NON viene dal gruppo `com.google.android.datatransport`
+//     (Play Billing, eccezione del 2026-10-09: `transport-backend-cct` E `transport-runtime`,
+//     visti entrambi nel report di QR Me e di Spending Review);
+//     il blocco ACCESS_NETWORK_STATE ammette in piu' SOLO `androidx.media3` (vedi sotto);
 //     ⚑ si legge il REPORT e non il manifest: nel manifest i permessi sono deduplicati e non
 //     dicono CHI li ha portati;
 //  c. nelle dipendenze risolte di release `com.microsoft.onnxruntime` ha versione != 1.28.0, o
 //     compaiono com.google.mlkit, firebase-analytics, play-services-tflite*, com.google.ai.edge.litert.
+//
+// ⚑ Allineata il 2026-10-11 (F12.4) a quello che Spending Review porta davvero (prima ammetteva
+// solo `transport-backend-cct` e avrebbe fatto fallire la release dell'app):
+//  - gruppo `com.google.android.datatransport` intero, per INTERNET e ACCESS_NETWORK_STATE: e'
+//    Play Billing, l'unica comunicazione esterna ammessa (decisione del 2026-10-09);
+//  - `androidx.media3` SOLO per ACCESS_NETWORK_STATE: lo porta la fotocamera
+//    (camera_android_camerax → androidx.camera:camera-video → media3-container → media3-common),
+//    e' un permesso «normale» che media3 dichiara per lo streaming video, che qui non c'e'.
+//    Senza INTERNET da una fonte non ammessa non puo' mandare niente. Toglierlo con
+//    tools:node="remove" lo toglierebbe anche a Play Billing (datatransport lo usa).
+//  ☠ INTERNET resta STRETTO: nessuna eccezione per media3, nessuna per src/debug (il report e'
+//    quello di release, dove src/debug non entra).
+// ☠ Le righe-fonte di un blocco del report iniziano con ADDED from / MERGED from / IMPLIED from
+// (/ INJECTED from): il blocco finisce alla prima riga che non inizia cosi'. Le righe indentate
+// che seguono un elemento sono i suoi attributi (`android:name`...), non fonti: prima del
+// 2026-10-11 lo script le scorreva come parte del blocco, senza danni ma per caso.
 
 def versioneOrtAmmessa = '1.28.0'
-def fontiRetiAmmesse = ['com.google.android.datatransport:transport-backend-cct']
+// Le fonti ammesse, come compaiono fra parentesi quadre nelle righe del report
+// («MERGED from [com.google.android.datatransport:transport-runtime:3.1.8] ...»).
+def fontiInternet = ['[com.google.android.datatransport:']
+def fontiStatoRete = fontiInternet + ['[androidx.media3:']
+def prefissiFonte = ['ADDED from', 'MERGED from', 'IMPLIED from', 'INJECTED from']
 def vietati = ['com.google.mlkit:', 'com.google.firebase:firebase-analytics',
                'com.google.android.gms:play-services-tflite', 'com.google.ai.edge.litert:']
 
@@ -55,18 +77,20 @@ tasks.register('verificaPrivacyOcr') {
             errori << "report di fusione assente: ${report}"
         } else {
             def righe = report.readLines()
-            ['INTERNET', 'ACCESS_NETWORK_STATE'].each { permesso ->
+            [INTERNET: fontiInternet, ACCESS_NETWORK_STATE: fontiStatoRete].each { permesso, ammesse ->
                 def inizio = righe.findIndexOf { it.trim() == "uses-permission#android.permission.${permesso}" }
                 if (inizio < 0) return
                 def i = inizio + 1
-                while (i < righe.size() && (righe[i].startsWith('ADDED from') || righe[i].startsWith('MERGED from') ||
-                        righe[i].startsWith('INJECTED') || righe[i].startsWith('\t') || righe[i].startsWith(' '))) {
+                while (i < righe.size() && prefissiFonte.any { righe[i].startsWith(it) }) {
                     def r = righe[i]
-                    if ((r.startsWith('ADDED from') || r.startsWith('MERGED from')) && !fontiRetiAmmesse.any { r.contains(it) }) {
+                    if (!ammesse.any { r.contains(it) }) {
                         errori << "${permesso} portato da una fonte non ammessa: ${r.take(200)}"
                     }
                     i++
                 }
+            }
+            righe.findAll { it.startsWith('provider#') && it.contains('ai.onnxruntime') }.each {
+                errori << "provider di ONNX Runtime nel report: ${it.take(200)}"
             }
         }
 
@@ -84,7 +108,7 @@ tasks.register('verificaPrivacyOcr') {
         if (!errori.isEmpty()) {
             throw new GradleException("verificaPrivacyOcr FALLITA (F12.1.2):\n  " + errori.join('\n  '))
         }
-        logger.lifecycle("verificaPrivacyOcr: OK (ORT ${versioneOrtAmmessa}, nessuna telemetria, rete solo da Play Billing)")
+        logger.lifecycle("verificaPrivacyOcr: OK (ORT ${versioneOrtAmmessa}, nessuna telemetria, INTERNET solo da Play Billing)")
     }
 }
 
