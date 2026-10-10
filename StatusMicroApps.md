@@ -7,11 +7,11 @@
 > store e' fermo: si scrive perche' e' fermo, da quando, e cosa lo sblocca. Un'informazione
 > "in attesa" e' comunque un'informazione (indicazione del proprietario, 2026-10-08).
 >
-> Il sito segue questo file: un pulsante store si accende (`suPlay` / `suAppStore` in
-> `site/src/apps.php`) **solo** quando qui la riga dice «pubblicata» per quello store **e per
-> l'Italia**.
+> Il sito segue questo file: un'app diventa «Disponibile» sul sito appena qui risulta pubblicata
+> **in Italia** su almeno uno store (`suPlay` / `suAppStore` in `site/src/apps.php`); le pill
+> mostrano solo gli store dove c'e' (decisione del proprietario del 2026-10-10, sera).
 
-Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verificati via API la sera del 2026-10-08)
+Ultimo aggiornamento: **2026-10-11** (TrashCan 1.0.1 su entrambi gli store e widget provato su Android; Spending Review in revisione)
 
 ---
 
@@ -20,13 +20,13 @@ Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verifica
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
 | **TrashCan** | 1.0.1 (12) | 🟢 **pubblicata**; **1.0.1 (12) in produzione** il 2026-10-10 (widget corretto) | 🟢 **1.0.1 (12) in vendita** ovunque (2026-10-11, widget corretto) | 🟢 **accesi tutti e due** (2026-10-09); pill «Disponibile su iOS e Android» (2026-10-10) |
-| **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🔴 **respinta 2.1** il 2026-10-10 (domanda sull'AI): risposta pronta, in arrivo la 1.0.0 (3) con la dettatura solo sul telefono | card grigia «In arrivo» |
+| **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** di nuovo: respinta 2.1 il 2026-10-10 (domanda sull'AI), il proprietario ha risposto e reinviato con la build 1; dopo l'approvazione la 1.0.1 con la dettatura solo sul telefono | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | 🟢 **pagina e pulsante App Store** («Disponibile su iOS», 2026-10-10) |
 | **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | 🟢 **pagina e pulsante App Store** («Disponibile su iOS», 2026-10-10) |
 
-**App in programma** (decise il 2026-10-08, fasi F10–F19 di `develop_microapps.md` §1.6): non
-ancora iniziate, quindi ⚪ su **Google Play** e ⚪ su **App Store** per tutte e dieci; card in
-vetrina da aggiungere.
+**App nuove** (decise il 2026-10-08, fasi F10–F19 di `develop_microapps.md` §1.6): QR Me e Spending
+Review sono fatte e in revisione su App Store (card «In arrivo» nel sito); le altre otto non sono
+ancora iniziate.
 
 | App | Fase | Google Play | App Store |
 |---|---|---|---|
@@ -181,7 +181,7 @@ simulatore iPhone e dal proprietario su iPad (TestFlight).
 - [ ] Produzione con l'AAB 1.0.0 (2), o una build nuova se nel frattempo cambia qualcosa
 - [ ] Provare sul telefono vero la voce (sull'emulatore non si poteva)
 
-### App Store — 🔴 respinta (2.1, informazioni richieste)
+### App Store — 🟡 in revisione (reinviata dopo la risposta sulla 2.1)
 
 | Data | Evento |
 |---|---|
