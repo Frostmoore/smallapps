@@ -32,7 +32,7 @@ vetrina da aggiungere.
 |---|---|---|---|
 | Te l'ho prestato | F10 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove l'ho lasciato? | F11 | ⚪ non iniziata | ⚪ non iniziata |
-| Quanto sto spendendo? | F12 | ⚪ non iniziata | ⚪ non iniziata |
+| Quanto sto spendendo? | F12 | ⚪ non iniziata — **la prossima**, si parte il 2026-10-11 | ⚪ non iniziata |
 | Quanto dividiamo? | F13 | ⚪ non iniziata | ⚪ non iniziata |
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |

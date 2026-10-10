@@ -1131,7 +1131,7 @@ volta sola; nella fase di ciascuna app si spuntano.
 
 - [ ] **F10** Te l'ho prestato — `apps/prestato/` (nome della cartella da confermare in F10.0)
 - [ ] **F11** Dove l'ho lasciato? — posizione in primo piano + foto
-- [ ] **F12** Quanto sto spendendo? — contatore della spesa con budget
+- [ ] **F12** Quanto sto spendendo? — contatore della spesa con budget — ⚑ **LA PROSSIMA** (scelta del proprietario il 2026-10-10; si comincia il 2026-10-11 da F12.0: decisioni e specsheet insieme a lui)
 - [ ] **F13** Quanto dividiamo? — divisione del conto
 - [ ] **F14** Ricordamelo qui — promemoria per luogo (geofencing, permesso in background)
 - [ ] **F15** Quanti sono? — conteggio con la fotocamera (**decisione sull'AI prima di F15.0**)
