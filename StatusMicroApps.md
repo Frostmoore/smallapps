@@ -37,7 +37,7 @@ vetrina da aggiungere.
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
 | Riassumilo | F16 | ⚪ non iniziata | ⚪ non iniziata |
-| **QR Me** (ex Fammi un QR) | F17 | ⚪ codice Android completo (2026-10-09); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟠 scheda completa con la build 1.0.0 (2) collegata; mancano i ritocchi a mano al Pro e l'invio (proprietario) |
+| **QR Me** (ex Fammi un QR) | F17 | ⚪ codice Android completo (2026-10-09); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟡 **in revisione** (1.0.0 (2) + Pro, inviata il 2026-10-10) |
 | Leggimelo | F18 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove porta? | F19 | ⚪ non iniziata | ⚪ non iniziata |
 
@@ -292,7 +292,7 @@ backup) e sul simulatore iPhone. Card «In arrivo» pubblicata nel sito il 2026-
 - [ ] Data safety (nessun dato raccolto, salvo il server licenze per il Pro) e dichiarazione della fotocamera
 - [ ] Provare su un Android vero: fotocamera reale, condivisione da Chrome e da Galleria
 
-### App Store — 🟠 pronta per l'invio (mancano due ritocchi a mano al Pro)
+### App Store — 🟡 in revisione
 
 | Data | Evento |
 |---|---|
@@ -315,7 +315,7 @@ backup) e sul simulatore iPhone. Card «In arrivo» pubblicata nel sito il 2026-
 - [ ] **A mano (Apple non lo permette via API col Pro in READY_TO_SUBMIT, 409):** nel Pro `qrme_pro_lifetime` sostituire lo **screenshot di revisione** con `QRMe-paywall-revisione-it.png` (Scrivania del Mac, cartella QR Me) e la **descrizione** con «Moduli, stile e logo, immagine ed etichetta, backup» / «Forms, style and logo, image and label, backup»
 - [ ] **Provare su iPad**: condividere da Safari verso QR Me (l'estensione deve riaprire l'app); se iOS lo impedisce, ripiego deciso in F17.1.8 (QR mostrato dall'estensione stessa)
 - [x] Prodotto `qrme_pro_lifetime` a 1,99 €; eta' ed etichetta privacy (proprietario)
-- [ ] A mano: intestazione e risultati di ricerca (nuove, sulla Scrivania del Mac), spunta dell'acquisto in-app nella versione, prova della build 2 su iPad, invio in revisione (proprietario)
+- [x] **Inviata in revisione dal proprietario** (2026-10-10): versione 1.0.0 con build 2 e `qrme_pro_lifetime` in WAITING_FOR_REVIEW (verificato via API). I campi «Intestazione» e «Risultati della ricerca» in App Store Connect non c'erano piu' (sezione tolta o spostata da Apple, non dallo script)
 
 ---
 
