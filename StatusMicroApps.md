@@ -93,6 +93,9 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 | Link App Store | https://apps.apple.com/app/id6818986320 |
 | Link Play | https://play.google.com/store/apps/details?id=com.smp.trashcan |
 
+> ☠ **Bug aperto (2026-10-10):** il widget non si aggiorna da solo a mezzanotte, solo dopo aver
+> aperto l'app. Priorita' 1 per il 2026-10-11; servira' una build nuova su entrambi gli store.
+
 ### Google Play — 🟢 pubblicata
 
 | Data | Evento |
