@@ -5311,7 +5311,16 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   gli **angoli verdi da inquadratura** suggerisce la **lettura dello scontrino con la fotocamera**:
   domandarlo esplicitamente in F12.0 (OCR sul telefono, con la regola «dati solo sul telefono»:
   niente ML Kit; su iOS Vision e' locale, su Android serve un OCR che non mandi dati).
-- **Gratis/Pro e prezzo**: aperti («ci pensiamo dopo»).
+- **Gratis/Pro e prezzo** (proprietario, 2026-10-11): **«spesa gratis, revisione Pro»**, Pro **2,99 €**.
+  - **Gratis:** tastierino, budget, **lettura dei cartellini illimitata**, etichette della bilancia,
+    ultime **5 spese** salvate.
+  - **Pro:** **Scontrino** (controllo alla cassa **e** registrazione della spesa dallo scontrino),
+    **storico illimitato con statistiche** (per mese e per negozio, spesa media, sforamenti del
+    budget), **export CSV**, **backup**.
+- **Scontrino** (proprietario, 2026-10-11): serve **sia** a confrontare alla cassa il contato con lo
+  scontrino (differenza e righe sospette) **sia a registrare la spesa** dallo scontrino letto, anche
+  se durante la spesa non si e' contato niente (la spesa salvata nello storico prende righe e totale
+  dallo scontrino).
 - **Cosa fa esattamente**: aperto, da decidere insieme partendo dall'idea sopra.
 - **2026-10-10, risposte del proprietario:** (1) «Spending Review» **in italiano e in inglese**;
   (2) l'app **legge con la fotocamera i cartellini del prezzo e gli scontrini, con due tasti
