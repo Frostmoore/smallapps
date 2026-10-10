@@ -1,0 +1,25 @@
+# La schermata di avvio di Spending Review.
+#
+# Si rigenera con:  pwsh ../../tool/fl.ps1 pub run flutter_native_splash:create
+#
+# Il disegno dell'icona (splash_logo.png, da tool/genera_icone.py) sullo stesso fondo scuro
+# dell'icona e dell'app (#161B22, lo «sfondo» di «C · Una mano»): chi apre l'app vede continuare
+# l'icona e poi la pagina, senza un lampo bianco.
+# ⚑ Uguale nei due temi: l'app e' scura di default, e lo scontrino bianco si legge solo sullo scuro.
+flutter_native_splash:
+  color: "#161B22"
+  image: assets/icon/splash_logo.png
+  color_dark: "#161B22"
+  image_dark: assets/icon/splash_logo.png
+
+  android: true
+  ios: true
+  web: false
+
+  # ☠ Android 12+ ritaglia l'immagine a cerchio e tiene solo i due terzi centrali:
+  # splash_android12.png ha il disegno gia' dentro il cerchio sopravvissuto.
+  android_12:
+    color: "#161B22"
+    color_dark: "#161B22"
+    image: assets/icon/splash_android12.png
+    image_dark: assets/icon/splash_android12.png

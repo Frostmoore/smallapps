@@ -1,0 +1,7 @@
+/* Testi dei permessi in italiano (F12.1.15). Le chiavi sono quelle di Info.plist, dove restano
+   i testi inglesi di ripiego. ☠ Il file e' gia' nel gruppo di varianti InfoPlist.strings del
+   progetto Xcode (project.pbxproj copiato da Film Tracker, che lo ha): presente solo su disco,
+   iOS non lo leggerebbe e mostrerebbe l'inglese. */
+"CFBundleDisplayName" = "Spending Review";
+"NSCameraUsageDescription" = "Per leggere cartellini e scontrini con la fotocamera.";
+"NSPhotoLibraryUsageDescription" = "Per leggere un cartellino o uno scontrino da una foto che hai già scattato.";

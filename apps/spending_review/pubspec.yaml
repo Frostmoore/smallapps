@@ -1,0 +1,96 @@
+name: spending_review
+description: Spending Review, il conto della spesa con una mano sola, con cartellini e scontrini letti sul telefono.
+publish_to: none
+
+# versionName+versionCode. Il versionCode e' monotono crescente e non si riusa mai:
+# Play rifiuta un AAB con un numero gia' visto e quel numero non si libera.
+# Vedi develop_microapps.md §5.4.
+version: 1.0.0+1
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.35.0"
+
+# Le versioni delle dipendenze sono quelle gia' risolte da QR Me (develop_microapps.md F12.1.2,
+# «come QR Me»); una dipendenza NUOVA si aggiunge con "pwsh ../../tool/fl.ps1 pub add <pacchetto>",
+# mai a memoria: un vincolo inventato fa fallire la risoluzione (F17.2c, 2026-10-09).
+#
+# ☠ Prima di aggiungere QUALUNQUE dipendenza nativa: controllarne nel pubspec.lock e in
+# `gradlew :app:dependencies` le dipendenze Android/iOS (Firebase, datatransport fuori da
+# Billing, play-services-*, ML Kit, SDK di crash o analisi). Se ne porta una, non si usa
+# (regola «dati solo sul telefono», 2026-10-09). Il task Gradle verificaPrivacyOcr ne ferma
+# una parte in release, non tutte.
+# ⚑ NON si usano (F12.1.2): flutter_onnxruntime (porterebbe ORT anche su iPhone),
+# google_mlkit_* e ogni ML Kit, tflite_flutter/LiteRT 2.x, flutter_tesseract_ocr, mobile_scanner,
+# home_widget (niente widget), permission_handler (il permesso lo chiede `camera`),
+# speech_to_text (niente voce in v1), fl_chart (grafici con CustomPainter).
+dependencies:
+  # Anteprima con il NOSTRO mirino e takePicture() (F12.1.12). ⚑ Non la fotocamera di sistema via
+  # image_picker: serve il mirino per far inquadrare UN cartellino da vicino, il caso in cui l'OCR
+  # rende (f12-ocr.md §7). ☠ camera_android_camerax dichiara anche RECORD_AUDIO e
+  # WRITE_EXTERNAL_STORAGE: li toglie il nostro AndroidManifest.xml (tools:node="remove").
+  camera: ^0.12.1
+  # Senza, qualche widget di Material mostra quadrati vuoti nei menu di selezione del testo.
+  cupertino_icons: ^1.0.8
+  # Spese, righe, negozi (lib/data/, F12.1.10).
+  drift: ^2.35.2
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.2
+  # Il ritaglio della foto al mirino prima dell'OCR, in un isolate (F12.1.13). Dart puro.
+  image: ^4.10.1
+  # «Da una foto»: un cartellino o uno scontrino gia' fotografati (selettore di sistema, nessun
+  # permesso su Android 13+ e iOS; Info.plist vuole comunque NSPhotoLibraryUsageDescription).
+  # ⚑ Serve: lo scontrino lungo spesso lo si fotografa con calma a casa.
+  image_picker: ^1.2.4
+  intl: ^0.20.3
+  meta: ^1.19.0
+  micro_core:
+    path: ../../packages/micro_core
+  # L'OCR sul telefono (F12.1.9): Vision su iOS, PP-OCRv5 su ONNX Runtime 1.28.0 su Android.
+  # ⚑ Il dominio importa SOLO `package:micro_ocr/riga_ocr.dart` (libreria pura, niente Flutter):
+  # i parser e i loro test girano senza motore e senza piattaforma.
+  micro_ocr:
+    path: ../../packages/micro_ocr
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  # CSV e backup (Pro). ⚑ Lo stesso vincolo di micro_core: due vincoli diversi sullo stesso
+  # plugin finiscono prima o poi in un conflitto di risoluzione.
+  share_plus: ^13.3.0
+  sqlite3: ^3.7.0
+  sqlite3_flutter_libs: ^0.6.0+eol
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  drift_dev: ^2.35.1
+  build_runner: ^2.16.2
+  # ☠ Tetto all'analyzer usato da build_runner. Con analyzer 14.5.0 la generazione di Drift
+  # muore con "The setter 'contextFeatures' isn't defined for AnalysisOptionsImpl" (scoperto
+  # con Film Tracker il 2026-10-06). Si toglie quando la catena supporta la 14.5.
+  analyzer: ">=14.0.0 <14.4.0"
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
+  # Solo per i test: `SharedPreferences.setMockInitialValues` dietro SettingsStore.
+  shared_preferences: ^2.5.6
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  # «C · Una mano» (F12.1.12): Space Grotesk 700 per il totale e i numeri, Plus Jakarta Sans
+  # 500-800 per il resto. Entrambi VARIABILI, copiati da apps/qr_me/assets/fonts con le loro
+  # licenze (SIL Open Font License 1.1, che ne consente l'uso in app commerciali purche' la
+  # licenza sia inclusa: assets/fonts/OFL-*.txt). I pesi con FontVariation.
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Variable.ttf

@@ -1,0 +1,48 @@
+{
+ "campione": "c05_pomodori_vesuvio_manoscritto_kg.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 3.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10",
+ "creato": "2026-10-10",
+ "righe": [
+  {
+   "t": "VESUUIO",
+   "x": 0.2885,
+   "y": 0.4816,
+   "w": 0.232,
+   "h": 0.2716,
+   "c": 0.949
+  },
+  {
+   "t": "P",
+   "x": 0.2015,
+   "y": 0.6354,
+   "w": 0.059,
+   "h": 0.0795,
+   "c": 0.694
+  },
+  {
+   "t": ".00€",
+   "x": 0.3095,
+   "y": 0.6557,
+   "w": 0.1765,
+   "h": 0.2168,
+   "c": 0.938
+  },
+  {
+   "t": "ALIKC",
+   "x": 0.2915,
+   "y": 0.7502,
+   "w": 0.116,
+   "h": 0.1245,
+   "c": 0.705
+  }
+ ],
+ "verita": [
+  {
+   "nome": "VESUVIO",
+   "al_kg": "4,00",
+   "unita": "kg"
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "campione": "c24_iper_lavagna_formaggio_kg.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10",
+ "creato": "2026-10-10",
+ "righe": [
+  {
+   "t": "10.20",
+   "x": 0.6377,
+   "y": 0.1602,
+   "w": 0.1826,
+   "h": 0.1706,
+   "c": 0.964
+  },
+  {
+   "t": "PRINA LETWMA",
+   "x": 0.4365,
+   "y": 0.3802,
+   "w": 0.083,
+   "h": 0.0417,
+   "c": 0.736
+  },
+  {
+   "t": "FORMA",
+   "x": 0.4443,
+   "y": 0.4128,
+   "w": 0.0557,
+   "h": 0.043,
+   "c": 0.957
+  }
+ ],
+ "verita": [
+  {
+   "prezzo": "10,20",
+   "unita": "kg"
+  }
+ ]
+}

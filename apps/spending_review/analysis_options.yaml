@@ -1,0 +1,8 @@
+include: ../../analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "lib/l10n/generated/**"
+    - build/**
+    - android/**
+    - ios/**

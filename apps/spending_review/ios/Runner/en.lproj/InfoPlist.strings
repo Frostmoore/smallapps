@@ -1,0 +1,5 @@
+/* Permission texts in English: the same as Info.plist, kept here so that both languages
+   live in the same place (F12.1.15). */
+"CFBundleDisplayName" = "Spending Review";
+"NSCameraUsageDescription" = "To read price tags and receipts with the camera.";
+"NSPhotoLibraryUsageDescription" = "To read a price tag or a receipt from a photo you already took.";

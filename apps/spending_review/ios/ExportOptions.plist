@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Come xcodebuild deve esportare l'archivio.
+
+  ☠ Il Team ID NON sta qui dentro: lo passa `tool/build_ios.sh` da ~/.microapps-ios.env,
+     che vive fuori dal repo. Scriverlo qui significherebbe committarlo.
+
+  ⚑ `app-store-connect` e' il metodo giusto anche per TestFlight: TestFlight non e' un
+     canale separato, e' la stessa build caricata su App Store Connect, prima che venga
+     pubblicata. Con `ad-hoc` si otterrebbe un ipa installabile solo sui dispositivi
+     registrati a mano e non caricabile da nessuna parte.
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+
+	<!-- La firma la gestisce Apple a partire dalla chiave API: niente certificati da
+	     creare a mano, niente profili da rinnovare quando scadono. -->
+	<key>signingStyle</key>
+	<string>automatic</string>
+
+	<!-- I simboli di debug, perche' senza un crash report arriva come una lista di
+	     indirizzi di memoria invece che come nomi di funzione. -->
+	<key>uploadSymbols</key>
+	<true/>
+
+	<!-- ⚑ `export` e non `upload`: xcodebuild scrive l'ipa su disco e basta. A caricarlo
+	     e' `altool` nello script, che prima lo **valida**. Lasciando caricare xcodebuild,
+	     un'icona sbagliata o un permesso mancante si scoprirebbero dopo minuti di
+	     trasferimento, invece che subito. -->
+	<key>destination</key>
+	<string>export</string>
+</dict>
+</plist>

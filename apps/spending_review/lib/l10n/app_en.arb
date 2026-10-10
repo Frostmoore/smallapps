@@ -1,0 +1,62 @@
+{
+  "@@locale": "en",
+  "appTitle": "Spending Review",
+  "common_save": "Save",
+  "common_cancel": "Cancel",
+  "common_edit": "Edit",
+  "common_retry": "Try again",
+  "common_delete": "Delete",
+  "common_undo": "Undo",
+  "common_notFound": "This shopping trip doesn’t exist any more.",
+  "riga_senzaNome": "Item",
+  "riga_sconto": "Discount",
+  "negozio_nessuno": "No shop",
+  "spesa_title": "Shopping",
+  "storico_title": "Past shopping",
+  "statistiche_title": "Statistics",
+  "impostazioni_title": "Settings",
+  "paywall_headline": "Spending Review Pro",
+  "paywall_subhead": "Once only, for good. No subscription.",
+  "paywall_buy": "Unlock Pro",
+  "paywall_buyWithPrice": "Unlock Pro — {price}",
+  "@paywall_buyWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywall_restore": "Restore purchase",
+  "paywall_pending": "Payment is being processed. We’ll unlock Pro as soon as it goes through.",
+  "paywall_thanks": "Thank you. Pro is unlocked.",
+  "paywall_restoredNothing": "No previous purchase found on this account.",
+  "paywall_unavailable": "The store isn’t responding on this device. Check your connection and try again.",
+  "paywall_productUnavailable": "The Pro price hasn’t arrived from the store. Try again in a moment.",
+  "paywall_benefitReceiptTitle": "Receipt",
+  "paywall_benefitReceiptBody": "Check the till against what you counted, and record a shopping trip straight from the receipt.",
+  "paywall_benefitHistoryTitle": "Every shopping trip",
+  "paywall_benefitHistoryBody": "Not just the last 5: the older ones are already on your phone.",
+  "paywall_benefitStatsTitle": "Statistics and monthly budget",
+  "paywall_benefitStatsBody": "By month and by shop, average spend, budgets you went over, and a ceiling for the whole month.",
+  "paywall_benefitCsvTitle": "CSV export",
+  "paywall_benefitCsvBody": "Every item of every shopping trip, ready for a spreadsheet.",
+  "paywall_benefitBackupTitle": "Backup",
+  "paywall_benefitBackupBody": "Your shopping history in one file, to keep or move to a new phone.",
+  "pro_locked": "This is part of Spending Review Pro.",
+  "settings_theme": "Theme",
+  "theme_system": "Like the phone",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
+  "settings_version": "Spending Review {version}",
+  "@settings_version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_proActive": "Spending Review Pro is active",
+  "settings_proCta": "Discover Spending Review Pro",
+  "settings_restoreGoogle": "Bought Pro on another phone with the same Google account?",
+  "settings_restoreApple": "Bought Pro on another iPhone with the same Apple ID?"
+}

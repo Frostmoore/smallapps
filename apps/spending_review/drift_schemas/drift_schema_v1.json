@@ -1,0 +1,718 @@
+{
+  "_meta": {
+    "description": "This file contains a serialized version of schema entities for drift.",
+    "version": "1.3.0"
+  },
+  "options": {
+    "store_date_time_values_as_text": false
+  },
+  "entities": [
+    {
+      "id": 0,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "negozi",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "PRIMARY KEY AUTOINCREMENT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "PRIMARY KEY AUTOINCREMENT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "auto-increment"
+            ]
+          },
+          {
+            "name": "nome",
+            "getter_name": "nome",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL UNIQUE COLLATE NOCASE CHECK (length(nome) BETWEEN 1 AND 60)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique"
+            ]
+          },
+          {
+            "name": "creato_il",
+            "getter_name": "creatoIl",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 1,
+      "references": [
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "spese",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "PRIMARY KEY AUTOINCREMENT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "PRIMARY KEY AUTOINCREMENT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "auto-increment"
+            ]
+          },
+          {
+            "name": "stato",
+            "getter_name": "stato",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "stato",
+                        "tag": "stato"
+                      },
+                      ".isIn(const ['in_corso','chiusa'])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "negozio_id",
+            "getter_name": "negozioId",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES negozi (id) ON DELETE SET NULL",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES negozi (id) ON DELETE SET NULL"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "negozi",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "iniziata_il",
+            "getter_name": "iniziataIl",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "chiusa_il",
+            "getter_name": "chiusaIl",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "data_spesa",
+            "getter_name": "dataSpesa",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "budget_cents",
+            "getter_name": "budgetCents",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "budgetCents",
+                        "tag": "budgetCents"
+                      },
+                      ").isBiggerThanValue(0)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "totale_cents",
+            "getter_name": "totaleCents",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "totale_scontrino_cents",
+            "getter_name": "totaleScontrinoCents",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "fonte",
+            "getter_name": "fonte",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'contate\\'')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "fonte",
+                        "tag": "fonte"
+                      },
+                      ".isIn(const ['contate','scontrino'])"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "CHECK ((stato = 'chiusa') = (chiusa_il IS NOT NULL))",
+          "CHECK (stato <> 'chiusa' OR data_spesa IS NOT NULL)"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "references": [
+        1
+      ],
+      "type": "table",
+      "data": {
+        "name": "righe",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "PRIMARY KEY AUTOINCREMENT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "PRIMARY KEY AUTOINCREMENT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "auto-increment"
+            ]
+          },
+          {
+            "name": "spesa_id",
+            "getter_name": "spesaId",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES spese (id) ON DELETE CASCADE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES spese (id) ON DELETE CASCADE"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "spese",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "insieme",
+            "getter_name": "insieme",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "insieme",
+                        "tag": "insieme"
+                      },
+                      ".isIn(const ['contate','scontrino'])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "posizione",
+            "getter_name": "posizione",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "nome",
+            "getter_name": "nome",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'\\'')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "nome",
+                        "tag": "nome"
+                      },
+                      ".length).isSmallerOrEqualValue(80)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "pezzi",
+            "getter_name": "pezzi",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "pezzi",
+                        "tag": "pezzi"
+                      },
+                      ").isBetweenValues(1,999)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "millesimi",
+            "getter_name": "millesimi",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "millesimi",
+                        "tag": "millesimi"
+                      },
+                      ").isBetweenValues(1,99999)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "unita",
+            "getter_name": "unita",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "unita",
+                        "tag": "unita"
+                      },
+                      ".isIn(const ['kg','l'])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "prezzo_unitario_cents",
+            "getter_name": "prezzoUnitarioCents",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "BooleanExpressionOperators",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "prezzoUnitarioCents",
+                        "tag": "prezzoUnitarioCents"
+                      },
+                      ".equals(0)).not()"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "totale_cents",
+            "getter_name": "totaleCents",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "offerta_json",
+            "getter_name": "offertaJson",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "prezzo_rif_cents",
+            "getter_name": "prezzoRifCents",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "unita_rif",
+            "getter_name": "unitaRif",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "unitaRif",
+                        "tag": "unitaRif"
+                      },
+                      ".isIn(const ['kg','l'])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "totale_stampato_cents",
+            "getter_name": "totaleStampatoCents",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "origine",
+            "getter_name": "origine",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "origine",
+                        "tag": "origine"
+                      },
+                      ".isIn(const ['tastierino','cartellino','bilancia','scontrino'])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "stornata",
+            "getter_name": "stornata",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"stornata\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"stornata\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "creata_il",
+            "getter_name": "creataIl",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "CHECK ((pezzi IS NOT NULL AND millesimi IS NULL AND unita IS NULL) OR (pezzi IS NULL AND millesimi IS NOT NULL AND unita IS NOT NULL))"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "references": [
+        1
+      ],
+      "type": "index",
+      "data": {
+        "on": 1,
+        "name": "spese_una_in_corso",
+        "sql": "CREATE UNIQUE INDEX spese_una_in_corso ON spese (stato) WHERE stato = 'in_corso'",
+        "unique": true,
+        "columns": []
+      }
+    },
+    {
+      "id": 4,
+      "references": [
+        1
+      ],
+      "type": "index",
+      "data": {
+        "on": 1,
+        "name": "idx_spese_storico",
+        "sql": "CREATE INDEX idx_spese_storico ON spese (stato, data_spesa DESC, id DESC)",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 5,
+      "references": [
+        1
+      ],
+      "type": "index",
+      "data": {
+        "on": 1,
+        "name": "idx_spese_negozio",
+        "sql": "CREATE INDEX idx_spese_negozio ON spese (negozio_id)",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 6,
+      "references": [
+        2
+      ],
+      "type": "index",
+      "data": {
+        "on": 2,
+        "name": "idx_righe_spesa",
+        "sql": "CREATE INDEX idx_righe_spesa ON righe (spesa_id, insieme, posizione)",
+        "unique": false,
+        "columns": []
+      }
+    }
+  ],
+  "fixed_sql": [
+    {
+      "name": "negozi",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"negozi\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"nome\" TEXT NOT NULL UNIQUE COLLATE NOCASE CHECK (length(nome) BETWEEN 1 AND 60), \"creato_il\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "spese",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"spese\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"stato\" TEXT NOT NULL CHECK(\"stato\" IN ('in_corso', 'chiusa')), \"negozio_id\" INTEGER NULL REFERENCES negozi (id) ON DELETE SET NULL, \"iniziata_il\" INTEGER NOT NULL, \"chiusa_il\" INTEGER NULL, \"data_spesa\" TEXT NULL, \"budget_cents\" INTEGER NULL CHECK(\"budget_cents\" > 0), \"totale_cents\" INTEGER NOT NULL DEFAULT 0, \"totale_scontrino_cents\" INTEGER NULL, \"fonte\" TEXT NOT NULL DEFAULT 'contate' CHECK(\"fonte\" IN ('contate', 'scontrino')), CHECK ((stato = 'chiusa') = (chiusa_il IS NOT NULL)), CHECK (stato <> 'chiusa' OR data_spesa IS NOT NULL));"
+        }
+      ]
+    },
+    {
+      "name": "righe",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"righe\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"spesa_id\" INTEGER NOT NULL REFERENCES spese (id) ON DELETE CASCADE, \"insieme\" TEXT NOT NULL CHECK(\"insieme\" IN ('contate', 'scontrino')), \"posizione\" INTEGER NOT NULL, \"nome\" TEXT NOT NULL DEFAULT '' CHECK(LENGTH(\"nome\") <= 80), \"pezzi\" INTEGER NULL CHECK(\"pezzi\" BETWEEN 1 AND 999), \"millesimi\" INTEGER NULL CHECK(\"millesimi\" BETWEEN 1 AND 99999), \"unita\" TEXT NULL CHECK(\"unita\" IN ('kg', 'l')), \"prezzo_unitario_cents\" INTEGER NOT NULL CHECK(NOT (\"prezzo_unitario_cents\" = 0)), \"totale_cents\" INTEGER NOT NULL, \"offerta_json\" TEXT NULL, \"prezzo_rif_cents\" INTEGER NULL, \"unita_rif\" TEXT NULL CHECK(\"unita_rif\" IN ('kg', 'l')), \"totale_stampato_cents\" INTEGER NULL, \"origine\" TEXT NOT NULL CHECK(\"origine\" IN ('tastierino', 'cartellino', 'bilancia', 'scontrino')), \"stornata\" INTEGER NOT NULL DEFAULT 0 CHECK (\"stornata\" IN (0, 1)), \"creata_il\" INTEGER NOT NULL, CHECK ((pezzi IS NOT NULL AND millesimi IS NULL AND unita IS NULL) OR (pezzi IS NULL AND millesimi IS NOT NULL AND unita IS NOT NULL)));"
+        }
+      ]
+    },
+    {
+      "name": "spese_una_in_corso",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX spese_una_in_corso ON spese (stato) WHERE stato = 'in_corso'"
+        }
+      ]
+    },
+    {
+      "name": "idx_spese_storico",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_spese_storico ON spese (stato, data_spesa DESC, id DESC)"
+        }
+      ]
+    },
+    {
+      "name": "idx_spese_negozio",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_spese_negozio ON spese (negozio_id)"
+        }
+      ]
+    },
+    {
+      "name": "idx_righe_spesa",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_righe_spesa ON righe (spesa_id, insieme, posizione)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Gli acquisti in-app: dichiarato qui e non solo dalla libreria, perche' Play Console guarda
+         il pacchetto caricato per sbloccare la creazione del prodotto Pro (vedi Full Freezer). -->
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <!-- La fotocamera per leggere cartellini e scontrini (plugin camera, CameraX): si chiede al
+         primo tocco su Cartellino o Scontrino (F12.1.15). ⚑ Dichiarata da noi anche se
+         camera_android_camerax la dichiara gia': il permesso e' del prodotto, non deve dipendere
+         da cosa porta un plugin. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- ☠ camera_android_camerax dichiara anche microfono e scrittura su storage (servono a chi
+         registra video). Noi apriamo la fotocamera con enableAudio: false e non salviamo nulla
+         fuori dalla cartella temporanea: tolti dal manifest fuso (come QR Me, F17.1.10). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- ☠ Il fusore la "deduce" da WRITE_EXTERNAL_STORAGE del plugin (IMPLIED nel report di
+         fusione) anche dopo averla tolta: va rimossa esplicitamente (visto in QR Me il 2026-10-09). -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+    <!-- ☠ Niente notifiche in Spending Review (F12.0 punto 3): POST_NOTIFICATIONS lo porta
+         flutter_local_notifications di micro_core, che qui non pianifica nulla. Tolto, cosi' Play
+         e l'utente non vedono un permesso che l'app non usa. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" tools:node="remove"/>
+    <!-- ☠ NIENTE INTERNET dichiarato da noi: lo porta solo Play Billing (datatransport), e il task
+         Gradle verificaPrivacyOcr (app/build.gradle.kts) fa fallire la release se arriva da altre
+         fonti (F12.1.2, telemetria di ONNX Runtime dalla 1.29). -->
+    <!-- ⚑ La fotocamera non e' obbligatoria: il tastierino funziona senza, e Play non deve
+         nascondere l'app ai dispositivi senza fotocamera (il plugin la dichiara richiesta). -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="false"
+        tools:replace="android:required"/>
+
+    <!-- ⚑ allowBackup="false": nel database c'e' la cronologia della spesa (dove, quando, quanto).
+         Il backup automatico di Android la porterebbe sul Drive dell'utente senza che l'abbia
+         scelto (regola «dati solo sul telefono»); il backup lo fa solo l'utente, col Pro, in un
+         file che vede (F12.1.15). -->
+    <application
+        android:label="Spending Review"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <!-- ☠ Deep link di Flutter spento (pagato con Full Freezer, 2026-10-07; F12.0 punto 11):
+                 l'app non riceve link, ma acceso Flutter passerebbe a go_router qualunque intent
+                 con dati e go_router mostrerebbe "Non trovato". -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>
