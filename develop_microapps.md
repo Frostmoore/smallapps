@@ -1134,7 +1134,7 @@ volta sola; nella fase di ciascuna app si spuntano.
 - [ ] **F11** Dove l'ho lasciato? — posizione in primo piano + foto
 - [~] **F12** Spending Review (ex «Quanto sto spendendo?») — contatore della spesa con budget, cartellini e scontrini letti sul telefono — ⚑ **LA PROSSIMA** (scelta del proprietario il 2026-10-10). Specsheet in §8 «F12 — Spending Review»
   - [x] **F12.0** Decisioni di partenza con il proprietario — FATTO il 2026-10-10/11 (§8 F12.0): nome «Spending Review» in it ed en, `com.smp.spendingreview`, Android e iPhone, nessun widget, interfaccia «C · Una mano», due tasti Cartellino e Scontrino, cartellino interpretato, peso a mano e bilancia, «spesa gratis, revisione Pro» a **2,99 €**, OCR Vision su iOS e PP-OCRv5 su ONNX Runtime **1.28.0 bloccata** su Android
-  - [x] **F12.1** Specsheet — SCRITTA il 2026-10-11 (§8 F12.1.1–F12.1.18): file, dipendenze e guardie di privacy in build, dominio (centesimi, arrotondamenti half-up, offerte, tastierino), parser di cartellino/bilancia/scontrino sui riquadri, confronto, statistiche, `packages/micro_ocr`, dati, rotte, schermate, servizi, Pro (`FeatureKey.documentScan` nuova), permessi e privacy, trappole, test con il banco di regressione, prestazioni. ☐ Da far rileggere al proprietario con le **domande aperte D1–D4** (§8 F12.10)
+  - [x] **F12.1** Specsheet — SCRITTA il 2026-10-11 (§8 F12.1.1–F12.1.18): file, dipendenze e guardie di privacy in build, dominio (centesimi, arrotondamenti half-up, offerte, tastierino), parser di cartellino/bilancia/scontrino sui riquadri, confronto, statistiche, `packages/micro_ocr`, dati, rotte, schermate, servizi, Pro (`FeatureKey.documentScan` nuova), permessi e privacy, trappole, test con il banco di regressione, prestazioni. domande D1–D4 **risposte dal proprietario il 2026-10-11** (§8 F12.10: nascoste, tastierino alla cassa, budget mensile Pro, carta fedelta' chiesta ogni volta)
   - [ ] **F12.2a** `FeatureKey.documentScan` in `micro_core` + una riga `open()` nelle cinque app; test di tutte verdi
   - [ ] **F12.2b** `packages/micro_ocr/`: Vision (iOS), PP-OCRv5 su ORT 1.28.0 in Kotlin (Android), modelli nel repo con SHA-256, test JVM, test sul dispositivo, **parita' con RapidOCR ≥ 95%**, verifica 16 KB, atlante
   - [ ] **F12.2c** Bootstrap `apps/spending_review` (§8.T), icona e splash, manifest, task Gradle `verificaPrivacyOcr` provato in negativo
@@ -7992,6 +7992,20 @@ con cui si sviluppa se la risposta non arriva prima della sottofase indicata; ca
   abituale» che si precompila). Se servisse anche un tetto del mese, va nelle statistiche Pro.
 - **D4 — Prezzo con la carta fedelta' di default?** Proposta: **si'** (interruttore «Ho la carta
   fedelta'» acceso). Nessun campione lo copre ancora: la regola si tara con le foto vere.
+
+**RISPOSTE DEL PROPRIETARIO (2026-10-11) — vincono sulle proposte sopra:**
+- **D1 → nascoste**: oltre le 5 le spese restano sul telefono e non si vedono; il Pro le ritrova
+  tutte con le statistiche gia' piene. Nessuna potatura.
+- **D2 → tastierino «alla cassa»**: `2 4 9` = 2,49, virgola facoltativa, quantita' con `×`
+  (`3 × 2 4 9`); `3 +` = 0,03 € (visibile sul display prima del «+»).
+- **D3 → budget mensile si', nel Pro**: oltre al budget della singola spesa (gratis), un **budget del
+  mese** (speso nel mese / tetto) nelle statistiche Pro. Da aggiungere in F12.1.8 statistiche, F12.1.10
+  dati (preferenza o tabella del budget mensile), F12.1.12 schermate (riga nello storico/statistiche e
+  impostazione del tetto) e F12.1.14 Pro (`FeatureKey.statistics`).
+- **D4 → chiedi ogni volta**: quando il cartellino ha due prezzi (con e senza carta fedelta'), il foglio
+  di conferma **mostra entrambi e l'utente sceglie** con un tocco; nessun interruttore «Ho la carta»,
+  nessun default. Da riflettere in F12.1.4 (il parser restituisce entrambi i prezzi, marcati) e
+  F12.1.12 (foglio di conferma con due bottoni).
 
 ---
 
