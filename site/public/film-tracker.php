@@ -18,6 +18,11 @@ require_once __DIR__ . '/../src/pagina_app.php';
 pagina_app(
     'film-tracker',
     ['01-rullini', '02-rullino', '03-archivio', '04-etichetta', '05-statistiche', '06-pro'],
-    // Le promozionali, quando ci saranno: vedi scorte-calore.php.
-    []
+    // Le promozionali fatte dal proprietario con ChatGPT (2026-10-10): testo italiano dentro
+    // l'immagine, quindi si vedono solo sulla pagina italiana. La n. 1 ripete il titolo: fuori.
+    [
+        'quadre' => ['02-in-macchina', '03-provini', '04-qr'],
+        'larghe' => ['05-pellicole', '06-tirato', '07-nessun-account'],
+        'verticali' => ['08-costi', '09-pdf', '10-stampa'],
+    ]
 );

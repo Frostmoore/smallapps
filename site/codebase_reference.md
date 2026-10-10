@@ -849,3 +849,15 @@ uno** store, e la pill dice dove.
 - Provato in locale con user agent iPhone (anche il browser di Facebook), iPad/Mac, Android (browser
   di Facebook), Windows, per tutte le app e uno slug inesistente.
 
+## Aggiornamento 2026-10-10 (notte) — promozionali di Scorte Calore e Film Tracker
+
+- Le 10 grafiche fatte dal proprietario con ChatGPT (prompt nel messaggio del 2026-10-10) convertite in
+  WebP: `public/assets/img/<slug>/promo-it-NN-nome.webp` (quadre 640 px, larghe 900 px, verticali
+  640x1137 — ChatGPT le ha fatte 9:16 invece di 4:5), ~60–90 KB l'una.
+- **La n. 1 di ogni app e' fuori**: ripete il titolo dell'hero (come su TrashCan). Restano 3 righe da 3:
+  quadre 02–04, larghe 05–07, verticali 08–10. Elenco nel terzo argomento di `pagina_app()` in
+  `public/scorte-calore.php` e `public/film-tracker.php`; alt in `<slug>.promo.NN-nome` (it ed en).
+- Solo sulla pagina italiana (il testo e' dentro l'immagine): `pagina_app()` mostra la sezione solo se i
+  file della lingua esistono.
+- Originali in `C:/Users/Pixel/Downloads/{Scorte Calore,Film Tracker}/` (non nel repo).
+

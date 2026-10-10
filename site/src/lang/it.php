@@ -271,6 +271,15 @@ return [
     'trashcan.promo.10-mai-piu'        => 'Mai più raccolta dimenticata.',
 
     // ── Pagina Scorte Calore ─────────────────────────────────────────────────
+    'scorte-calore.promo.02-riordina' => 'Riordina prima di restare al freddo: la data giusta, con l\'anticipo che scegli tu.',
+    'scorte-calore.promo.03-widget' => 'Il widget che conta i giorni, sulla schermata iniziale.',
+    'scorte-calore.promo.04-gpl' => 'Anche il bombolone del GPL: leggi il manometro e l\'app lo trasforma in litri.',
+    'scorte-calore.promo.05-misure' => 'Sacchi, chili, litri: misuri come vuoi, quando capita.',
+    'scorte-calore.promo.06-consumo' => 'Impara il tuo consumo e riconosce da sola i rifornimenti.',
+    'scorte-calore.promo.07-nessun-account' => 'Nessun account, zero pubblicità: i tuoi dati restano sul telefono.',
+    'scorte-calore.promo.08-costi' => 'Quanto spendi ogni inverno: acquisti, costi e prezzo medio (Pro).',
+    'scorte-calore.promo.09-fonti' => 'La stufa e il bombolone insieme: tutte le fonti di calore (Pro).',
+    'scorte-calore.promo.10-mai-piu' => 'Mai più al freddo: la scorta sempre sotto controllo.',
     'scorte-calore.titolo'             => 'Scorte Calore, quanti giorni di riscaldamento ti restano',
     'scorte-calore.descrizione'        => 'Scorte Calore calcola quanti giorni di pellet, GPL, gasolio o legna ti restano ed entro quando riordinare. Gratis, Pro a 2,99 € una tantum.',
     'scorte-calore.hero.titolo'        => 'Quanti giorni<br>ti restano?',
@@ -311,6 +320,15 @@ return [
     'scorte-calore.privacy.testo'      => 'Scorte Calore non ha account, non chiede registrazione e non raccoglie statistiche d\'uso. Fonti, misure e acquisti vivono nella memoria del telefono e non vengono inviati da nessuna parte. Se aggiungi la data di riordino al calendario, l\'evento finisce nel calendario del telefono che scegli tu, e da lì segue quel calendario. L\'unica cosa che esce dal dispositivo è la verifica dell\'acquisto, perché la fa lo store.',
 
     // ── Pagina Film Tracker ──────────────────────────────────────────────────
+    'film-tracker.promo.02-in-macchina' => 'Cosa c\'è in macchina? In macchina, in laboratorio, in archivio.',
+    'film-tracker.promo.03-provini' => 'Il foglio provini di ogni rullino, con lo zoom.',
+    'film-tracker.promo.04-qr' => 'Un QR sul barattolo: inquadri e si apre il rullino giusto.',
+    'film-tracker.promo.05-pellicole' => 'Tutte le pellicole, più le tue: dal catalogo o aggiunte da te.',
+    'film-tracker.promo.06-tirato' => 'Tirato o trattenuto: l\'ISO a cui hai esposto, accanto a quello nominale.',
+    'film-tracker.promo.07-nessun-account' => 'Nessun account, zero pubblicità: i tuoi rullini restano sul telefono.',
+    'film-tracker.promo.08-costi' => 'Quanto ti costa ogni rullino: pellicola, sviluppo, scansioni e stampe (Pro).',
+    'film-tracker.promo.09-pdf' => 'Il tuo anno in un PDF da stampare, con le foto (Pro).',
+    'film-tracker.promo.10-stampa' => 'Dallo scatto alla stampa: sviluppo in laboratorio o in casa.',
     'film-tracker.titolo'              => 'Film Tracker, il diario dei tuoi rullini analogici',
     'film-tracker.descrizione'         => 'Film Tracker segue ogni rullino dalla macchina al provino: pellicola, sviluppo, stampe, costi e foto, con un\'etichetta QR per il barattolo. Gratis, Pro a 4,99 € una tantum.',
     'film-tracker.hero.titolo'         => 'Cosa c\'è<br>in macchina?',

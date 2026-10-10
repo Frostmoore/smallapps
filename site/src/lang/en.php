@@ -262,6 +262,15 @@ return [
     'trashcan.promo.10-mai-piu'        => 'Never miss a collection again.',
 
     // ── Pagina Scorte Calore ─────────────────────────────────────────────────
+    'scorte-calore.promo.02-riordina' => 'Reorder before you run cold, with the lead time you choose.',
+    'scorte-calore.promo.03-widget' => 'The widget that counts the days, on your home screen.',
+    'scorte-calore.promo.04-gpl' => 'LPG tanks too: read the gauge and the app turns it into litres.',
+    'scorte-calore.promo.05-misure' => 'Bags, kilos, litres: measure your way, whenever.',
+    'scorte-calore.promo.06-consumo' => 'It learns your usage and spots refills on its own.',
+    'scorte-calore.promo.07-nessun-account' => 'No account, no ads: your data stays on your phone.',
+    'scorte-calore.promo.08-costi' => 'What you spend each winter: purchases, costs and average price (Pro).',
+    'scorte-calore.promo.09-fonti' => 'Stove and LPG tank together: every heat source (Pro).',
+    'scorte-calore.promo.10-mai-piu' => 'Never cold again: your stock always under control.',
     'scorte-calore.titolo'             => 'Scorte Calore, how many days of heating you have left',
     'scorte-calore.descrizione'        => 'Scorte Calore works out how many days of pellets, LPG, heating oil or firewood you have left and when to reorder. Free, Pro €2.99 one-off.',
     'scorte-calore.hero.titolo'        => 'How many days<br>are left?',
@@ -302,6 +311,15 @@ return [
     'scorte-calore.privacy.testo'      => 'Scorte Calore has no account, asks for no sign-up and collects no usage statistics. Heat sources, readings and purchases live in your phone\'s storage and are not sent anywhere. If you add the reorder date to your calendar, the event goes into the phone calendar you choose, and from there it follows that calendar. The only thing that leaves the device is the purchase check, because the store does it.',
 
     // ── Pagina Film Tracker ──────────────────────────────────────────────────
+    'film-tracker.promo.02-in-macchina' => 'What\'s in the camera? In the camera, at the lab, in the archive.',
+    'film-tracker.promo.03-provini' => 'A contact sheet for every roll, with zoom.',
+    'film-tracker.promo.04-qr' => 'A QR code on the canister: scan it and the right roll opens.',
+    'film-tracker.promo.05-pellicole' => 'Every film stock, plus your own.',
+    'film-tracker.promo.06-tirato' => 'Pushed or pulled: the ISO you shot at, next to box speed.',
+    'film-tracker.promo.07-nessun-account' => 'No account, no ads: your rolls stay on your phone.',
+    'film-tracker.promo.08-costi' => 'What each roll costs you: film, developing, scans and prints (Pro).',
+    'film-tracker.promo.09-pdf' => 'Your year in a printable PDF, with photos (Pro).',
+    'film-tracker.promo.10-stampa' => 'From shot to print: lab or home developing.',
     'film-tracker.titolo'              => 'Film Tracker, the diary of your film rolls',
     'film-tracker.descrizione'         => 'Film Tracker follows every roll from the camera to the contact sheet: film, developing, prints, costs and photos, with a QR label for the canister. Free, Pro €4.99 one-off.',
     'film-tracker.hero.titolo'         => 'What\'s in<br>the camera?',
