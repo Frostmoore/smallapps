@@ -224,6 +224,16 @@ HTML,
 </p>
 
 <p>
+  Scorte Calore, nella versione Pro, può scrivere la data di riordino come <strong>evento nel
+  calendario del telefono</strong>, e solo quando lo chiedi tu. Il permesso di accedere al
+  calendario viene chiesto in quel momento, e l'evento (il combustibile, il nome che hai dato alla
+  fonte di calore e la data stimata) va nel calendario che scegli tu fra quelli presenti sul
+  telefono. Noi non lo riceviamo. Se quel calendario è sincronizzato con un account, per esempio
+  iCloud o Google, l'evento segue la sincronizzazione di quel servizio, secondo la sua informativa.
+  L'app lo sposta o lo toglie solo su tua richiesta.
+</p>
+
+<p>
   Full Freezer permette di <strong>dettare</strong> cosa metti nel congelatore. Il microfono si
   attiva solo mentre stai dettando, e noi non riceviamo mai né la voce né il testo. Dalla
   <strong>versione 1.0.1</strong> il riconoscimento della voce avviene <strong>esclusivamente sul

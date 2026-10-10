@@ -70,7 +70,7 @@ pagina_inizio('home.titolo', 'home.descrizione', '/');
           <?php endif; ?>
 
           <span class="tag <?= $app['pubblicata'] ? 'tag--live' : '' ?>">
-            <?= $app['pubblicata'] ? t('comune.disponibile') : t('comune.in_arrivo') ?>
+            <?= $app['pubblicata'] ? etichetta_disponibilita($app) : t('comune.in_arrivo') ?>
           </span>
 
           <h3 class="card__name"><?= e($app['nome']) ?></h3>

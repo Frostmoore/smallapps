@@ -230,6 +230,15 @@ HTML,
 </p>
 
 <p>
+  Scorte Calore, in the Pro version, can write the reorder date as an <strong>event in your
+  phone's calendar</strong>, and only when you ask it to. Permission to access the calendar is
+  requested at that moment, and the event (the fuel, the name you gave the heat source and the
+  estimated date) goes into the calendar you choose among those on the phone. We never receive it.
+  If that calendar is synced with an account, for example iCloud or Google, the event follows that
+  service's sync, under its own privacy policy. The app moves or removes it only when you ask.
+</p>
+
+<p>
   Full Freezer lets you <strong>dictate</strong> what you put in the freezer. The microphone is on
   only while you are dictating, and we never receive your voice or the text. From
   <strong>version 1.0.1</strong> speech is recognised <strong>on the phone only</strong>, using the

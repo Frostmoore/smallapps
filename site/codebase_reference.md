@@ -3,7 +3,8 @@
 > Atlante del **sito vetrina** delle MicroApps.
 > **Obiettivo**: capire il sito, trovare ciò che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-09-11 · **Stato**: online su <https://smpmicroapps.it>
+> **Aggiornato al**: 2026-10-10 · **Stato**: online su <https://smpmicroapps.it> (le modifiche del 2026-10-10 su
+> Scorte Calore e Film Tracker sono **in locale**, da pubblicare)
 > **Stack**: PHP 8.3 su php-fpm, nginx, zero dipendenze, zero build step
 > **Lingue**: italiano alla radice, inglese sotto `/en` (vedi §3bis)
 > **Repo**: dentro il monorepo `microapps`, cartella `site/` (Gitea + mirror GitHub)
@@ -25,6 +26,10 @@
 | Tutto il CSS | `public/assets/style.css` |
 | La home con la griglia delle card | `public/index.php` |
 | La pagina di TrashCan | `public/trashcan.php` |
+| Le pagine di Scorte Calore e Film Tracker | `public/scorte-calore.php`, `public/film-tracker.php` (una chiamata ciascuna) |
+| Il modello condiviso delle pagine app (hero, schermate, problema, funzioni, promo, prezzi, privacy, bug) | `src/pagina_app.php`, `pagina_app()` |
+| La pill «Disponibile su iOS / Android / iOS e Android» | `etichetta_disponibilita()` in `src/layout.php` |
+| Testate e screenshot di Scorte Calore e Film Tracker | `public/assets/img/scorte-calore/`, `public/assets/img/film-tracker/` |
 | Testata, screenshot e promozionali di TrashCan | `public/assets/img/trashcan/` (WebP, §Aggiornamento 2026-10-09) |
 | Il CSS delle immagini di una pagina app (`.hero__grid`, `.shots`, `.promo`) | in fondo a `public/assets/style.css` |
 | La testata in cima alla card di un'app in home | chiave `testata` in `src/apps.php`, `.card__testata` in `style.css` |
@@ -53,13 +58,16 @@ site/
 │   │   ├── en.php              interfaccia e testi commerciali, inglese
 │   │   └── en.legale.php       i corpi delle cinque pagine legali, inglese
 │   ├── apps.php                il catalogo: catalogo(), app_per_slug(), link_play(), link_app_store()
-│   ├── layout.php              pagina_inizio(), pagina_fine(), intestazione_legale()
+│   ├── layout.php              pagina_inizio(), pagina_fine(), intestazione_legale(), etichetta_disponibilita()
+│   ├── pagina_app.php          pagina_app(): il modello delle pagine di Scorte Calore e Film Tracker
 │   ├── contact.php             validazione, CSRF, trappola, limite, archivio, notifica
 │   └── mailer.php              client SMTP minimo (classi Mailer, SmtpError)
 ├── public/                     ← LA DOCUMENT ROOT. Tutto il resto sta fuori.
 │   ├── index.php               home: titolo grande, griglia delle app, tre principi
 │   ├── trashcan.php            vetrina di TrashCan: hero con testata, schermate, problema, funzioni,
 │   │                           promozionali (solo it), prezzi, privacy
+│   ├── scorte-calore.php       vetrina di Scorte Calore: chiama pagina_app() con i 5 screenshot
+│   ├── film-tracker.php        vetrina di Film Tracker: chiama pagina_app() con i 6 screenshot
 │   ├── contatti.php            i tre canali + il modulo
 │   ├── sitemap.php             servita come /sitemap.xml
 │   ├── robots.txt
@@ -80,6 +88,12 @@ site/
 │           ├── flag-it.svg     il tricolore
 │           ├── flag-gb.svg     la Union Jack
 │           ├── trashcan.png    256x256, derivata dal logo dell'app
+│           ├── scorte-calore.png  256x256, dal logo dell'app (assets/icons/scortecalore_logo.png), 256 colori
+│           ├── film-tracker.png   256x256, dal logo dell'app (assets/icons/filmtracker_logo.png), 256 colori
+│           ├── scorte-calore/  12 WebP: testata-{it,en}.webp (1024x500) + screen-{it,en}-0N-<nome>.webp
+│           │                   (480x1043: 01-home, 02-aggiorna, 03-storico, 04-costi, 05-pro)
+│           ├── film-tracker/   14 WebP: testata-{it,en}.webp + screen-{it,en}-0N-<nome>.webp
+│           │                   (01-rullini, 02-rullino, 03-archivio, 04-etichetta, 05-statistiche, 06-pro)
 │           └── trashcan/       23 WebP generati da apps/trashcan/store e dal Desktop (vedi sotto)
 │               ├── testata-{it,en}.webp          1024x500, la testata Play per lingua
 │               ├── screen-{it,en}-0N-<nome>.webp 480x1043, gli screenshot iOS (01-home … 06-pro)
@@ -243,7 +257,7 @@ pagina inglese, e non la segnala nessuno.
 ### Cosa c'è nella barra
 
 Logo, nome, tre voci e il selettore di lingua. La prima voce, **Le app**, ha un sottomenù con
-le app **pubblicate**: oggi solo TrashCan. Quelle non ancora fatte non ci sono, perché nel
+le app **pubblicate**: dal 2026-10-10 TrashCan, Scorte Calore e Film Tracker. Quelle non ancora fatte non ci sono, perché nel
 sottomenù non avrebbe senso una voce grigia che non porta da nessuna parte: in home la card
 comunica qualcosa, qui sarebbe solo una riga morta.
 
@@ -392,6 +406,18 @@ Campi di una voce del catalogo:
 | `suPlay` | bool | `false` finché l'app non è davvero pubblicata: il bottone resta spento |
 | `appStoreId` | string, facoltativa | L'id numerico di App Store Connect (TrashCan: `6818986320`), da cui si costruisce l'indirizzo App Store |
 | `suAppStore` | bool, facoltativa | Come `suPlay`, per App Store. Finché **tutti e due** sono `false` la pagina mostra un solo bottone spento, `comune.presto_store` |
+| `testata` | ?string | Percorso della testata con `{lingua}`, o `null` (vedi «La testata sulla card in home») |
+
+Stato al 2026-10-10:
+
+| slug | `pubblicata` | `suPlay` | `suAppStore` | `appStoreId` | pill |
+|---|---|---|---|---|---|
+| `trashcan` | true | true | true | `6818986320` | Disponibile su iOS e Android |
+| `full-freezer` | false | false | — | — | In arrivo |
+| `scorte-calore` | true | **false** | true | `6820405604` | Disponibile su iOS |
+| `film-tracker` | true | **false** | true | `6820633385` | Disponibile su iOS |
+| `qr-me` | false | false | — | — | In arrivo |
+| `spending-review` | false | false | — | — | In arrivo |
 
 ☠ Nel catalogo non c'è **nessun testo visibile** oltre al nome: claim, sommario e prezzo
 stanno nei dizionari sotto `app.<slug>.*`, perché vanno tradotti. Rimetterli qui darebbe un
@@ -399,17 +425,32 @@ catalogo che resta italiano anche sulle pagine inglesi, senza che niente lo segn
 
 ### `src/layout.php`
 
-| Funzione | Firma |
-|---|---|
-| `pagina_inizio` | `pagina_inizio(string $titolo, string $descrizione, string $canonical = '/'): void` |
-| `pagina_fine` | `pagina_fine(): void` |
-| `intestazione_legale` | `intestazione_legale(string $titolo, string $aggiornata, string $sommario): void` |
+| Funzione | Firma | Cosa fa |
+|---|---|---|
+| `parametri_pagina` | `parametri_pagina(): array` | I segnaposto dei testi: dati azienda + `url_*` nella lingua corrente |
+| `etichetta_disponibilita` | `etichetta_disponibilita(array $app): string` | La pill di un'app pubblicata, dai flag `suAppStore`/`suPlay`: `comune.disponibile_ios_android`, `comune.disponibile_ios`, `comune.disponibile_android`, o `comune.disponibile` se nessuno dei due. Usata dalla card in home e dall'eyebrow delle pagine app (`Nome · pill`). Sta qui e non in `apps.php` perché usa `t()` |
+| `pagina_inizio` | `pagina_inizio(string $chiaveTitolo, string $chiaveDescrizione, string $canonical = '/'): void` | `<head>`, barra, menu. Prende **chiavi**, non testi |
+| `selettore_lingua` | `selettore_lingua(): void` | Le due bandierine |
+| `pagina_fine` | `pagina_fine(): void` | Piè di pagina |
+| `intestazione_legale` | `intestazione_legale(string $chiaveTitolo, string $chiaveSommario): void` | Il riquadro in cima alle pagine legali |
+| `pagina_legale` | `pagina_legale(string $nome): void` | Una pagina legale intera |
+
+### `src/pagina_app.php`
+
+| Funzione | Firma | Cosa fa |
+|---|---|---|
+| `pagina_app` | `pagina_app(string $slug, array $schermate, array $promo = []): void` | La pagina vetrina intera di un'app. `$schermate` = `list<string>` di nomi `0N-nome` (file `assets/img/<slug>/screen-<lingua>-<nome>.webp`, didascalia `<slug>.schermate.<n>`); `$promo` = `array<forma, list<nome>>` (file `promo-<lingua>-<nome>.webp`, alt `<slug>.promo.<nome>`). Se lo slug non c'è o non è pubblicato risponde 404 |
+
+Sezioni nell'ordine: hero (eyebrow `Nome · pill`, titolo, lede, bottoni degli store **solo per gli store veri**, «Cosa sa fare», riga discreta `comune.android_in_arrivo` / `comune.ios_in_arrivo` quando l'app è su uno store solo, testata a destra) → «Com'è fatta» → problema (3) → funzioni (6, `id="funzioni"`) → «In due parole» (**solo se** esiste almeno un file promo della lingua della pagina) → prezzi (`app.<slug>.prezzo`) → privacy → bug.
+
+⚑ TrashCan **non** usa `pagina_app()`: ha il suo file con chiavi `trashcan.*` e le nove promozionali senza lingua nel nome. È il modello da cui la funzione è nata; riscriverlo non portava niente al visitatore.
 
 ### `src/contact.php`
 
 | Funzione | Firma | Cosa fa |
 |---|---|---|
 | `argomenti_contatto` | `argomenti_contatto(): array` | Le cinque voci del selettore. |
+| `argomenti_notifica` | `argomenti_notifica(): array` | Le stesse voci sempre in italiano, per la mail di notifica al titolare. |
 | `sessione` | `sessione(): void` | Avvia la sessione con cookie `HttpOnly`, `SameSite=Lax`, `Secure` su HTTPS. Idempotente. |
 | `csrf_token` | `csrf_token(): string` | 32 byte casuali in esadecimale, per sessione. |
 | `valida_contatto` | `valida_contatto(array $post): list<string>` | Gli errori. Vuoto = va bene. `['__bot__']` = trappola scattata. |
@@ -436,6 +477,8 @@ Supporta porta 465 (TLS implicito) e 587 (STARTTLS), autenticazione `AUTH LOGIN`
 |---|---|---|
 | `/` | `public/index.php` | Via `index index.php` |
 | `/trashcan` | `public/trashcan.php` | Via `@php` |
+| `/scorte-calore` | `public/scorte-calore.php` | Via `@php`, come `/trashcan`: nessuna modifica a nginx o al router |
+| `/film-tracker` | `public/film-tracker.php` | Idem |
 | `/contatti` | `public/contatti.php` | Accetta GET e POST |
 | `/legale/note-legali` | `public/legale/note-legali.php` | |
 | `/legale/privacy` | `public/legale/privacy.php` | |
@@ -553,8 +596,11 @@ php -S 127.0.0.1:8099 -t public deploy/router.php
 
 - **Nessun pannello di amministrazione**: i messaggi ricevuti si leggono con
   `sudo cat /var/www/smpmicroapps/var/contatti.jsonl`.
-- **Nessuna pagina di dettaglio** per Full Freezer, Scorte Calore, Film Tracker e QR Me: le card
-  ci sono ma non sono link. La pagina si crea alla chiusura della fase che costruisce l'app.
+- **Nessuna pagina di dettaglio** per Full Freezer, QR Me e Spending Review: le card ci sono ma non
+  sono link. Scorte Calore e Film Tracker ce l'hanno dal 2026-10-10.
+- **Nessuna promozionale** di Scorte Calore e Film Tracker: la sezione «In due parole» non compare
+  finché non ci sono i file (§Aggiornamento 2026-10-10 sera).
+- **Nessun pulsante Play** per Scorte Calore e Film Tracker: non sono ancora su Play (`suPlay => false`).
 - **Nessuna terza lingua**: solo italiano e inglese. Aggiungerne una vuol dire un nuovo codice in `LINGUE`, due file di dizionario e una bandiera.
 - **Nessun blog, nessuna newsletter, nessun analytics.**
 - **Nessun test automatico sulle pagine**: l'unico controllo automatico è
@@ -605,7 +651,9 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 | Cosa | Perché è rimandato | Quando |
 |---|---|---|
 | **SMTP non configurato** | serve una casella vera con le sue credenziali, che deve fornire il proprietario. Fino ad allora i messaggi si salvano e non arrivano notifiche | appena ci sono le credenziali di `info@smp-digital.it` |
-| **Nessuna pagina per le altre tre app** | non esistono ancora | alla chiusura di F4, F5, F6. **Servono anche le chiavi `app.<slug>.*` in entrambi i dizionari** |
+| **Nessuna pagina per Full Freezer, QR Me, Spending Review** | non sono ancora su nessuno store | quando arrivano su almeno uno store: `pubblicata => true`, il flag dello store, un file `public/<slug>.php` che chiama `pagina_app()`, le chiavi `<slug>.*` e `app.<slug>.prezzo` in entrambi i dizionari, le immagini in `public/assets/img/<slug>/` |
+| **Scorte Calore e Film Tracker non sono su Play** | pubblicazione Android non ancora fatta | quando ci sono: `suPlay => true` in `src/apps.php` e basta (pill, bottone e riga «in arrivo» si aggiornano da soli) |
+| **Promozionali di Scorte Calore e Film Tracker** | le fa il proprietario con ChatGPT | WebP in `public/assets/img/<slug>/promo-<lingua>-NN-nome.webp`, i nomi nell'array `$promo` del file della pagina, le chiavi `<slug>.promo.NN-nome` (alt) in entrambi i dizionari |
 | **Le pagine legali inglesi sono una traduzione** | l'originale italiano fa fede e le pagine lo dichiarano. Una revisione da parte di un legale madrelingua non è stata fatta | se e quando ci saranno clienti fuori dall'Italia |
 | **Numero REA assente** | non fornito. Se c'è iscrizione al Registro delle Imprese va indicato (art. 2250 c.c.) | va riempita `AZIENDA['rea']` in `src/config.php` |
 | ~~**Nessuna schermata delle app**~~ | **chiuso il 2026-10-09**: TrashCan ha testata, schermate e promozionali | per le app successive: stessa struttura, `public/assets/img/<slug>/` |
@@ -694,3 +742,75 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 - **Pubblicata il 2026-10-10** col via del proprietario (siti critici a 200 prima e dopo, pagine a 200,
   file riservati 404).
 
+
+## Aggiornamento 2026-10-10 (sera) — Scorte Calore e Film Tracker disponibili, pill per piattaforma
+
+**Decisione del proprietario (2026-10-10):** un'app è «Disponibile» sul sito appena è su **almeno
+uno** store, e la pill dice dove.
+
+- **Pill per piattaforma** (`etichetta_disponibilita()` in `src/layout.php`): «Disponibile su iOS e
+  Android» / «Disponibile su iOS» / «Disponibile su Android» (en «Available on …»), calcolata da
+  `suAppStore`/`suPlay`. La usano la card in home (`public/index.php`) e l'eyebrow delle pagine app
+  (`Nome · pill`). ⚑ L'eyebrow di TrashCan ora è calcolato anche lui: la chiave `trashcan.eyebrow`
+  («TrashCan · Android e iPhone») **non esiste più** in nessuno dei due dizionari.
+  ⚑ Nella card di TrashCan, su desktop a quattro colonne, la pill lunga va a capo su due righe:
+  accettato, il riquadro arrotondato resta leggibile.
+- **Catalogo**: `scorte-calore` e `film-tracker` con `pubblicata => true`, `suAppStore => true`,
+  `appStoreId` (`6820405604`, `6820633385`), `suPlay => false`, `logo` e `testata`. Compaiono da sole
+  nel sottomenù «Le app», nel piè di pagina e nella sitemap (`/scorte-calore`, `/film-tracker`, anche
+  `/en/…`). Il conteggio in home dice «3 sono già scaricabili».
+- ☠ **Nessun pulsante Play e nessun «Presto su Google Play»** per le due app: un bottone spento
+  sembra una promessa con una data. Al suo posto, sotto i bottoni dell'hero, una riga `.meta
+  .hero__nota` «Su Android in arrivo.» (`comune.android_in_arrivo`). Simmetrica: se un giorno un'app
+  fosse solo su Play, compare «Su iPhone in arrivo.» (`comune.ios_in_arrivo`).
+- **Pagine nuove** `public/scorte-calore.php` e `public/film-tracker.php`, una chiamata ciascuna a
+  `pagina_app()` (`src/pagina_app.php`, §4). Le rotte non hanno richiesto modifiche: nginx e
+  `deploy/router.php` servono già `/<nome>` → `<nome>.php`.
+- **Testi** (fonte: `apps/<app>/store/scheda-app-store.md`, `lib/app/feature_limits.dart`, i
+  benefici del paywall in `lib/l10n/app_it.arb`, gli atlanti delle app):
+  - chiavi `scorte-calore.*` e `film-tracker.*` (titolo, descrizione, hero, img.testata, schermate.N,
+    problema, funzioni 1-6, prezzi.{titolo,lede,base.lista,pro.lista}, privacy);
+  - `app.scorte-calore.prezzo` **2,99 € / €2.99**, `app.film-tracker.prezzo` **4,99 € / €4.99**;
+  - comuni nuove, riusabili dalle prossime pagine: `comune.disponibile_{ios_android,ios,android}`,
+    `comune.{android,ios}_in_arrivo`, `comune.cosa_sa_fare`, `comune.schermate.{titolo,lede}`,
+    `comune.promo.{titolo,lede}`, `comune.piano.{base,gratis,pro,unatantum}`, `comune.privacy.link`,
+    `comune.bug.{titolo,testo,bottone}`;
+  - ☠ `app.film-tracker.sommario` corretto: diceva «Pellicole, scatti, **tempi e diaframmi**», ma
+    l'app non registra tempi né diaframmi. Ora: «Ogni rullino dalla macchina al provino: pellicola,
+    sviluppo, stampe, costi e foto. E un'etichetta QR per il barattolo.»
+  - Gratis/Pro come in `feature_limits.dart`. Scorte Calore: gratis una fonte, misure illimitate,
+    stima, data di riordino, 90 giorni di storico, widget, ripristino; Pro notifiche, tutte le fonti,
+    storico completo e grafici, acquisti e costi, evento nel calendario, CSV e backup. Film Tracker:
+    gratis rullini illimitati, una macchina, catalogo, sviluppo e stampe, **tutte le foto**, QR,
+    ripristino; Pro tutte le macchine, statistiche dell'anno, PDF dell'anno, CSV, backup con le foto.
+  - ⚑ Il lede dei prezzi dice «lo ripristini dallo store, con lo stesso account» e non «dal tuo ID
+    Apple»: resta vero il giorno in cui arriva Play, senza riscriverlo.
+- **Immagini** (PIL, WebP qualità 85 la testata e 82 gli screenshot, metodo 6; circa 370 KB per app):
+  testate da `apps/<app>/store/grafiche/testata-1024x500-<l>.png`, screenshot da
+  `store/screenshots/ios/<l>/*.png` (1320x2868) ridotti a 480x1043. Scelti: Scorte Calore `home-pro`,
+  `aggiornamento`, `storico`, `costi`, `paywall-revisione` (la `home` senza Pro è identica a parte
+  l'etichetta; il widget di `grafiche/sorgenti/` è orizzontale e non sta nella striscia dei telefoni);
+  Film Tracker `home`, `dettaglio`, `provino`, `qr`, `statistiche`, `paywall-revisione` (fuori `foto`,
+  una foto a tutto schermo che non racconta l'app). Loghi 256x256 per il sottomenù da
+  `assets/icons/<app>_logo.png`, ritagliati, quantizzati a 256 colori (~25 KB).
+- ⚑ **Film Tracker** ha la grafica scura «C · Provino»: la pagina resta nello stile del sito, la
+  grafica dell'app si vede nella testata e negli screenshot.
+- **«In due parole» pronta ma assente**: `pagina_app()` mostra la sezione solo se esiste almeno un
+  `promo-<lingua>-<nome>.webp` elencato nell'array `$promo` del file della pagina (oggi `[]`). La
+  lingua è nel nome del file: una pagina inglese non mostra mai le promozionali italiane. Provato in
+  locale con un file finto (poi tolto): la sezione compare in italiano e non in inglese.
+- **Informativa privacy** (`it.legale.php`/`en.legale.php`, §4 «Le applicazioni»): aggiunto il
+  paragrafo sull'**evento di Scorte Calore nel calendario del telefono** (solo Pro, solo su richiesta,
+  permesso chiesto in quel momento; contenuto: combustibile, nome della fonte, data stimata; va nel
+  calendario scelto dall'utente e, se quel calendario è sincronizzato con iCloud o Google, segue quel
+  servizio). Le foto di Film Tracker erano già coperte dal paragrafo sulla fotocamera. Nient'altro
+  cambiato. `comune.data_legale` → **10 ottobre 2026**.
+- `style.css`: `.hero__nota { margin-top: 1rem; }`; `layout.php` carica `style.css?v=6`.
+- **Verificato in locale**: `php -l` su tutti i file toccati, `verifica_lingue.php` allineato (290
+  chiavi), `/`, `/trashcan`, `/scorte-calore`, `/film-tracker`, `/legale/privacy`, `/contatti` e le
+  versioni `/en/…` a 200 senza sorgente esposto, nessuna immagine a 404, link App Store
+  `https://apps.apple.com/app/id6820405604` e `…/id6820633385`, nessun link Play sulle due pagine,
+  sitemap con le due pagine nuove in entrambe le lingue; screenshot Edge a 1400 px e in iframe da
+  390 px. ☠ Edge headless lanciato in serie dalla stessa sessione non scriveva i file: va lanciato
+  con `Start-Process -Wait` e un `--user-data-dir` diverso per ogni cattura.
+- **Non ancora pubblicato** su clawserver.

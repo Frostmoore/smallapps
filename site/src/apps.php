@@ -65,20 +65,29 @@ function catalogo(): array
         'scorte-calore' => [
             'nome'      => 'Scorte Calore',
             'accento'   => '#A6503A',
-            'logo'      => null,
-            'testata'   => null,
-            'pubblicata' => false,
+            'logo'      => '/assets/img/scorte-calore.png',
+            'testata'   => '/assets/img/scorte-calore/testata-{lingua}.webp',
+            // Disponibile dal 2026-10-10 (decisione del proprietario: un'app e' «Disponibile»
+            // appena e' su almeno uno store, e la pill dice quale).
+            'pubblicata' => true,
             'packageId' => 'com.smp.scortecalore',
+            // ☠ Su Play non c'e' ancora: false = nessun pulsante Play, mai un «presto» che
+            // promette una data. Quando arriva basta true, e la pill diventa «iOS e Android».
             'suPlay'    => false,
+            'appStoreId' => '6820405604',
+            'suAppStore' => true,
         ],
         'film-tracker' => [
             'nome'      => 'Film Tracker',
             'accento'   => '#4A5560',
-            'logo'      => null,
-            'testata'   => null,
-            'pubblicata' => false,
+            'logo'      => '/assets/img/film-tracker.png',
+            'testata'   => '/assets/img/film-tracker/testata-{lingua}.webp',
+            // Disponibile dal 2026-10-10, solo su App Store (vedi Scorte Calore).
+            'pubblicata' => true,
             'packageId' => 'com.smp.filmtracker',
             'suPlay'    => false,
+            'appStoreId' => '6820633385',
+            'suAppStore' => true,
         ],
         // F17, in sviluppo dal 2026-10-09: la prima delle dieci app nuove (F10-F19). Il verde e'
         // quello dell'icona (grafica «A · Neon»), scurito per stare sul bianco della card.

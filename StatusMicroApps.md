@@ -19,10 +19,10 @@ Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verifica
 
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
-| **TrashCan** | 1.0.1 (12) | 🟢 **pubblicata**; **1.0.1 (12) in produzione** il 2026-10-10 (widget corretto) | 🟢 1.0.0 in vendita ovunque; 🟡 **1.0.1 (12) in revisione** (inviata il 2026-10-10) | 🟢 **accesi tutti e due** (2026-10-09) |
+| **TrashCan** | 1.0.1 (12) | 🟢 **pubblicata**; **1.0.1 (12) in produzione** il 2026-10-10 (widget corretto) | 🟢 1.0.0 in vendita ovunque; 🟡 **1.0.1 (12) in revisione** (inviata il 2026-10-10) | 🟢 **accesi tutti e due** (2026-10-09); pill «Disponibile su iOS e Android» (2026-10-10) |
 | **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🔴 **respinta 2.1** il 2026-10-10 (domanda sull'AI): risposta pronta, in arrivo la 1.0.0 (3) con la dettatura solo sul telefono | card grigia «In arrivo» |
-| **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | card grigia «In arrivo»: pulsanti solo quando e' pubblicata su **entrambi** gli store |
-| **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | card grigia «In arrivo»: pulsanti solo con **entrambi** gli store |
+| **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | 🟢 **pagina e pulsante App Store** («Disponibile su iOS», 2026-10-10) |
+| **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | 🟢 **pagina e pulsante App Store** («Disponibile su iOS», 2026-10-10) |
 
 **App in programma** (decise il 2026-10-08, fasi F10–F19 di `develop_microapps.md` §1.6): non
 ancora iniziate, quindi ⚪ su **Google Play** e ⚪ su **App Store** per tutte e dieci; card in
@@ -246,8 +246,8 @@ compreso.
 | 2026-10-08 | **Inviata alla revisione**: versione 1.0.0 e Pro in WAITING_FOR_REVIEW (verificato via API, anche la sera) |
 | 2026-10-10 | **Approvata e in vendita**: versione 1.0.0 READY_FOR_SALE, Pro APPROVED (verificato via API) |
 
-**Sito:** pulsante App Store **non** acceso: decisione del proprietario (2026-10-10) i pulsanti di
-un'app si accendono solo quando e' pubblicata su **entrambi** gli store. Scorte Calore aspetta Play.
+**Sito:** pagina `/scorte-calore` e pulsante App Store **pubblicati il 2026-10-10** con la pill
+«Disponibile su iOS» (decisione del proprietario della sera: un'app si accende appena e' su uno store).
 
 ---
 
@@ -291,7 +291,7 @@ proprietario su iPad (TestFlight: «mi pare che funzioni tutto»).
 | 2026-10-08 | Build **1.0.0 (1)** su TestFlight e collegata alla versione; gruppo «Sviluppatore» col proprietario, invito mandato |
 | 2026-10-08 | Fatti a mano dal proprietario: Intestazione e Risultati della ricerca, etichetta privacy, classificazione per eta', acquisto in-app spuntato; provata su iPad |
 | 2026-10-08 | **Inviata alla revisione**: versione 1.0.0 e Pro in WAITING_FOR_REVIEW (verificato via API) |
-| 2026-10-10 | **Approvata e in vendita**: versione 1.0.0 READY_FOR_SALE, Pro APPROVED (verificato via API). Sito: pulsanti non accesi, si aspetta Play |
+| 2026-10-10 | **Approvata e in vendita**: versione 1.0.0 READY_FOR_SALE, Pro APPROVED (verificato via API). Sito: pagina `/film-tracker` e pulsante App Store pubblicati il 2026-10-10 («Disponibile su iOS») |
 
 ## QR Me
 

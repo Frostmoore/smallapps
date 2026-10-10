@@ -52,6 +52,33 @@ function parametri_pagina(): array
 }
 
 /**
+ * La pill di una app pubblicata: dice **su quali store** si scarica.
+ *
+ * ⚑ Decisione del proprietario (2026-10-10): un'app e' «Disponibile» appena e' su almeno
+ * uno store, e la pill dice dove. Si calcola dai flag `suPlay`/`suAppStore` del catalogo,
+ * cosi' il giorno in cui un'app arriva sul secondo store basta cambiare un booleano e la
+ * pill si corregge da sola in home e sulla pagina dell'app.
+ *
+ * Sta qui e non in `src/apps.php` perche' usa `t()`: il catalogo resta senza testi.
+ *
+ * @return string il testo gia' tradotto (puo' contenere HTML, come ogni valore di `t()`)
+ */
+function etichetta_disponibilita(array $app): string
+{
+    $ios = (bool) ($app['suAppStore'] ?? false);
+    $android = (bool) ($app['suPlay'] ?? false);
+
+    return match (true) {
+        $ios && $android => t('comune.disponibile_ios_android'),
+        $ios             => t('comune.disponibile_ios'),
+        $android         => t('comune.disponibile_android'),
+        // Pubblicata ma ancora su nessuno store: non dovrebbe succedere, ma la pill generica
+        // e' meglio di una pill che nomina uno store sbagliato.
+        default          => t('comune.disponibile'),
+    };
+}
+
+/**
  * Apre la pagina.
  *
  * @param string $chiaveTitolo      chiave del titolo del browser, senza il nome del sito
@@ -91,7 +118,7 @@ function pagina_inizio(string $chiaveTitolo, string $chiaveDescrizione, string $
 <link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/assets/img/favicon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/style.css?v=5">
+<link rel="stylesheet" href="/assets/style.css?v=6">
 
 <?php
 // ⚑ Uno script di due righe, inline e nel `<head>`, che marca il documento come "con

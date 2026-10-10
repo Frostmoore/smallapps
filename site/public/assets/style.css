@@ -930,3 +930,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   .promo img { flex: 0 0 78%; width: 78%; scroll-snap-align: start; }
   .promo--larghe img { flex-basis: 88%; width: 88%; }
 }
+
+/* La riga discreta sotto i bottoni dell'hero quando l'app e' su un solo store
+   («Su Android in arrivo.»): testo, non un bottone spento che sembrerebbe una promessa. */
+.hero__nota { margin-top: 1rem; }

@@ -23,7 +23,7 @@ pagina_inizio('trashcan.titolo', 'trashcan.descrizione', '/trashcan');
 <section class="hero">
   <div class="wrap hero__grid">
     <div>
-    <p class="eyebrow"><?= t('trashcan.eyebrow') ?></p>
+    <p class="eyebrow"><?= e($app['nome']) ?> · <?= etichetta_disponibilita($app) ?></p>
     <h1 class="display"><?= t('trashcan.hero.titolo') ?></h1>
     <p class="lede"><?= t('trashcan.hero.lede') ?></p>
     <div class="hero__actions">
