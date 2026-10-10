@@ -5446,6 +5446,24 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   va detto. Dominio puro, testato come le statistiche di Film Tracker.
 - Leggere lo scontrino con la fotocamera e' OCR: §1.4 lo esclude dall'MVP. Si parte a mano.
 
+
+#### F13.0 — Prime decisioni del proprietario (2026-10-11), il resto il 2026-10-12
+
+- **Come si divide: lo sceglie l'utente** (parti uguali, quote, per voce, mancia… da definire in F13.0).
+- **Lo scontrino si legge come in Spending Review**: `packages/micro_ocr` + il parser dello scontrino
+  (da estrarre in un punto comune riusabile invece di copiarlo).
+- **Niente widget. Niente notifiche.**
+- **Gruppi di spese nel tempo** (es. un viaggio, una casa condivisa): piu' spese tenute insieme anche
+  per molto tempo, con il saldo di chi deve cosa. ☐ **Nome da trovare** («Viaggio» non piace al
+  proprietario).
+- **Immagine di riepilogo da mandare agli amici (Pro)**: quanto si e' speso e quanto deve mettere
+  ciascuno, per la singola spesa e per l'intero gruppo («un'immagine figa»).
+- **Membri dai contatti** del telefono, per mandare a ciascuno **un SMS o, se c'e', un WhatsApp** gia'
+  scritto con quanto deve. ☠ Selettore dei contatti di sistema senza permesso (come QR Me); l'invio
+  apre l'app dei messaggi o WhatsApp con il testo pronto: l'app non manda nulla da sola e non usa
+  servizi di terzi (regola «dati solo sul telefono»).
+- **Gratis/Pro e prezzo**: si decidono dopo aver fissato tutte le funzioni.
+
 ### F14 — Geo Note (ex «Ricordamelo qui»)
 
 > Un sistema di promemoria basati sulla posizione invece che sull'orario. L'utente può chiedere
