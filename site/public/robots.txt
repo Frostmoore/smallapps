@@ -5,4 +5,7 @@ Allow: /
 # di invii per indirizzo IP.
 Disallow: /contatti?
 
+# I link «scarica» sono solo rimandi agli store (per le sponsorizzate): niente da indicizzare.
+Disallow: /scarica/
+
 Sitemap: https://smpmicroapps.it/sitemap.xml

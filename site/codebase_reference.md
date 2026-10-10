@@ -828,3 +828,24 @@ uno** store, e la pill dice dove.
 - Richiesta del proprietario: «non mi piace la pill gigante con scritto disponibile su... Mettici
   proprio due pills una con l'icona di apple e una con l'icona del play store». CSS `style.css?v=7`.
 
+## Aggiornamento 2026-10-10 (notte) — link «scarica» per le sponsorizzate
+
+- **`/scarica/<slug>`** (es. `https://smpmicroapps.it/scarica/trashcan`): un link per app che manda il
+  visitatore allo **store del suo sistema**, per le sponsorizzate su Facebook (richiesta del
+  proprietario). File: `src/scarica.php` (funzioni) + `public/scarica/<slug>.php` (una riga per app:
+  `scarica('<slug>')`; nginx ci arriva gia' con `try_files` → `@php`, nessuna modifica al vhost).
+- Funzioni: `e_apple(string $userAgent): bool` (iPhone, iPad, iPod, Macintosh/Mac OS X),
+  `destinazione_scarica(string $slug, string $userAgent, string $lingua): string`,
+  `scarica(string $slug): never` (302, `Cache-Control: no-store, private`, `Vary: User-Agent`).
+- Regole: Apple → `link_app_store()`; tutti gli altri → `link_play()`. Se lo store del suo sistema
+  non ha l'app → la **pagina dell'app** sul sito (che dice «Su Android in arrivo»); se l'app non ha
+  ancora una pagina → la home `#app`; slug inesistente → 404 (nessun file).
+- ☠ **iPadOS manda lo user agent di macOS** (`Macintosh; Intel Mac OS X`): per questo «Macintosh» vale
+  come Apple; il proprietario vuole anche i Mac sull'App Store, quindi i casi coincidono.
+- ⚑ 302 e non 301 (la destinazione cambia con il dispositivo e quando un'app arriva su un altro
+  store); niente cookie, contatori o parametri passati avanti (zero tracciamento).
+- `robots.txt`: `Disallow: /scarica/`.
+- ☠ **App nuova sul sito** = aggiungere anche `public/scarica/<slug>.php`.
+- Provato in locale con user agent iPhone (anche il browser di Facebook), iPad/Mac, Android (browser
+  di Facebook), Windows, per tutte le app e uno slug inesistente.
+
