@@ -22,12 +22,30 @@ struct Fornitore: TimelineProvider {
     /// rendono la cosa gratuita: la timeline si costruisce senza far girare Dart.
     ///
     /// ⚑ Una settimana per volta, non tutti i 3650 giorni: WidgetKit tiene in memoria le
-    /// voci che gli si danno, e un decennio sarebbe uno spreco senza vantaggi. Con `.atEnd`
-    /// il sistema richiama questo metodo quando le ha consumate.
+    /// voci che gli si danno, e un decennio sarebbe uno spreco senza vantaggi.
+    ///
+    /// ☠ **La timeline si richiede a ogni mezzanotte, non quando la settimana finisce**
+    /// (revisione del 2026-10-10, dopo il difetto di Android «alle 00:00 deve cambiare da
+    /// solo»). Prima era `.atEnd`. Le voci sono istanti **assoluti**, calcolati nel fuso del
+    /// momento in cui WidgetKit ha chiesto la timeline: chi cambia fuso (un viaggio, o
+    /// l'iPad che lo ricava dalla posizione) si ritrovava il cambio di giorno all'ora della
+    /// mezzanotte vecchia, per fino a sette giorni. Lo stesso vale per un orologio spostato
+    /// a mano. Con `.after(prossima mezzanotte)` ogni giorno la timeline si ricostruisce
+    /// con il fuso e la data di quel momento.
+    ///
+    /// ⚑ Le sette voci restano. `.after` è una richiesta, non una garanzia: se WidgetKit
+    /// rimanda il ricaricamento (budget, risparmio energetico) il widget continua a
+    /// scorrere le voci già consegnate, e cambia giorno lo stesso. Un ricaricamento al
+    /// giorno sta largamente nel budget, che è di decine al giorno.
+    ///
+    /// ⚑ `startOfDay` e `date(byAdding: .day)` lavorano sui giorni del calendario, non su
+    /// blocchi di 24 ore: il 25 ottobre, che in Italia dura 25 ore, la voce del 26 cade
+    /// comunque alla mezzanotte del 26.
     func getTimeline(in context: Context, completion: @escaping (Timeline<StatoGiorno>) -> Void) {
         let deposito = Deposito.condiviso
         let calendario = Calendar.current
-        let oggi = calendario.startOfDay(for: Date())
+        let adesso = Date()
+        let oggi = calendario.startOfDay(for: adesso)
 
         let voci: [StatoGiorno] = (0..<7).compactMap { scarto in
             guard let giorno = calendario.date(byAdding: .day, value: scarto, to: oggi) else {
@@ -36,7 +54,17 @@ struct Fornitore: TimelineProvider {
             return deposito.stato(per: giorno) ?? deposito.statoAssente(al: giorno)
         }
 
-        completion(Timeline(entries: voci, policy: .atEnd))
+        // Cinque secondi dopo la mezzanotte, per cadere sicuramente nel giorno nuovo: è la
+        // stessa regola degli allarmi di Android (`TrashcanWidget.secondiDopoMezzanotte`).
+        // Se il calcolo fallisse, si ripiega sul comportamento di prima.
+        let criterio: TimelineReloadPolicy
+        if let domani = calendario.date(byAdding: .day, value: 1, to: oggi) {
+            criterio = .after(domani.addingTimeInterval(5))
+        } else {
+            criterio = .atEnd
+        }
+
+        completion(Timeline(entries: voci, policy: criterio))
     }
 }
 

@@ -11,10 +11,22 @@
   ma come "non ha caricato". Due righe bastano per l'intestazione piu' un paio di giorni, e
   chi ne vuole vedere tre allarga il widget: resizeMode lo consente.
 
-  updatePeriodMillis resta 0: il sistema ignora comunque valori sotto i 30 minuti, e gli
-  aggiornamenti veri li pilota l'app (a ogni modifica dei dati) piu' un allarme alle 00:05.
-  Lasciarlo diverso da zero significherebbe svegliare il telefono per ridisegnare qualcosa
-  che non e' cambiato.
+  updatePeriodMillis e' 1800000, mezz'ora, il minimo che il sistema accetta. Fino al
+  2026-10-10 era 0, con la motivazione che gli aggiornamenti veri li pilotavano l'app e un
+  allarme alle 00:05, e che svegliare il telefono per ridisegnare la stessa cosa era uno
+  spreco. Ma quell'allarme, senza il permesso degli allarmi esatti che Android 14+ non
+  concede piu' di default, aveva una finestra di un'ora consegnata alla fine (misurato su
+  Android 15), e il widget restava sul giorno prima almeno fino all'una di notte.
+
+  ⚑ Il ridisegno periodico e' la rete che non dipende da nessun permesso: lo pilota il
+  servizio dei widget di sistema, non l'app, quindi regge anche sui telefoni che bloccano
+  gli allarmi e le trasmissioni delle app in background. Il provider sceglie la riga dalla
+  data del momento, quindi il primo giro dopo mezzanotte corregge il widget. Costa una
+  ricerca di sottostringa ogni mezz'ora, e il sistema la accoda ai risvegli che fa comunque
+  (e' un allarme inesatto ripetuto).
+
+  La puntualita' alle 00:00 non viene da qui: viene dai preavvisi tarati sulla finestra
+  degli allarmi inesatti, vedi TrashcanWidget.istantiDiRisveglio in Dart.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="110dp"
@@ -23,7 +35,7 @@
     android:targetCellHeight="2"
     android:minResizeWidth="110dp"
     android:minResizeHeight="110dp"
-    android:updatePeriodMillis="0"
+    android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/trashcan_widget"
     android:previewLayout="@layout/trashcan_widget"
     android:description="@string/widget_description"

@@ -37,6 +37,8 @@
 | Il contenuto del widget di sistema | `lib/services/trashcan_widget.dart` |
 | Export, import, backup | `lib/services/trashcan_backup_source.dart` |
 | Il disegno del widget | `android/app/src/main/kotlin/com/smp/trashcan/TrashcanWidgetProvider.kt` |
+| Quando il widget cambia giorno (allarmi, preavviso, reti) | `TrashcanWidget.istantiDiRisveglio` in `lib/services/trashcan_widget.dart`, `TrashcanWidgetProvider.onReceive`/`riarmaMezzanotti`, `res/xml/trashcan_widget_info.xml` (`updatePeriodMillis`) |
+| La timeline del widget iOS | `ios/TrashcanWidget/TrashcanWidget.swift`, `Fornitore.getTimeline` |
 | Permessi, receiver, widget nel manifest | `android/app/src/main/AndroidManifest.xml` |
 | La firma di release | `android/app/build.gradle.kts` + `android/key.properties` (non versionato) |
 | Le stringhe tradotte | `lib/l10n/app_en.arb` (template) e `app_it.arb` |
@@ -201,7 +203,7 @@ vera dei dati, questa riga va rivista**: è una dichiarazione legale, non un'imp
 
 | Pezzo | Stato | Perché |
 |---|---|---|
-| Widget di casa | **assente** | è un `AppWidgetProvider` in Kotlin. Su iOS serve un'estensione WidgetKit in Swift, che è un bersaglio Xcode suo. `TrashcanWidget.disponibile` è `false` e tutto il percorso si spegne |
+| Widget di casa | **presente** | estensione WidgetKit in `ios/TrashcanWidget/` (`TrashcanWidget.swift`, `VistaTrashcan.swift`), che legge le stesse righe precalcolate dal gruppo `group.com.smp.trashcan`. La timeline ha 7 voci a `startOfDay` e, dal 2026-10-10, il criterio `.after(prossima mezzanotte + 5 s)` invece di `.atEnd`: le voci sono istanti assoluti, e senza un ricaricamento quotidiano un cambio di fuso o d'ora spostava il cambio di giorno per fino a sette giorni |
 | Acquisti | da verificare sul dispositivo | il gateway è neutro (`StorePurchaseGateway`), ma i prodotti vanno creati in App Store Connect e il simulatore non compra |
 | Notifiche | codice pronto, da provare | `micro_core` inizializza ora anche il lato Darwin e chiede il permesso. Il simulatore le consegna, un dispositivo vero è un'altra cosa |
 
@@ -612,7 +614,13 @@ percorso interno di `go_router`.
 | `giorniElencati` | `static const int = 3`, quanti giorni elenca la fascia inferiore. **Uguale per tutti** |
 | `publish` | `static Future<void> publish({required AppDatabase db, required int? calendarId, required bool pro})` |
 | `renderIcon` | `static Future<Uint8List> renderIcon(IconData icon)` — `@visibleForTesting` |
-| `scheduleDailyRefresh` | `static Future<void> scheduleDailyRefresh()` |
+| `scheduleDailyRefresh` | `static Future<void> scheduleDailyRefresh()` — consegna al plugin `istantiDiRisveglio(DateTime.now())`. Solo Android |
+| `secondiDopoMezzanotte` | `static const int = 5`, il risveglio **finale** di ogni giorno cade alle 00:00:05. Uguale a `SECONDI_DOPO_MEZZANOTTE` in Kotlin |
+| `secondiFineFinestra` | `static const int = 30`, la finestra del **preavviso** finisce alle 00:00:30. Uguale a `SECONDI_FINE_FINESTRA` in Kotlin |
+| `finestraMassima` | `static const Duration = Duration(hours: 1)`, il tetto della finestra di un allarme inesatto (`INTERVAL_HOUR` in `AlarmManagerService.maxTriggerTime`) |
+| `quotaFinestra` | `static const double = 0.75`, la finestra inesatta è il 75% del preavviso |
+| `istantiDiRisveglio` | `static List<DateTime> istantiDiRisveglio(DateTime adesso, {int giorni = giorniPrecalcolati})` — `@visibleForTesting`. Due istanti per giorno, in ordine: preavviso e finale. Il primo giorno può non avere il preavviso |
+| `preavvisoArmatoAlle` | `static DateTime? preavvisoArmatoAlle(DateTime adesso, DateTime fineFinestra)` — `@visibleForTesting`. L'istante da chiedere armando adesso perché la finestra finisca in `fineFinestra`; `null` sotto un minuto |
 
 Le chiavi **devono** coincidere con le costanti in `TrashcanWidgetProvider.kt`: sono scritte
 a mano in due linguaggi diversi, e una divergenza produce un campo vuoto nel widget senza
@@ -630,9 +638,69 @@ widget. Il parametro resta nella firma perché il chiamante lo ha già e perché
 cui il widget tornerà a distinguere qualcosa fra gratuito e Pro — per esempio la scelta del
 calendario — servirà di nuovo.
 
-`scheduleDailyRefresh` programma un aggiornamento alle 00:05 per i sette giorni successivi.
-Senza, alle 00:01 il widget continua a dire "stasera: organico" riferendosi alla sera
-precedente, cioè proprio la mattina, quando lo si guarda uscendo di casa.
+`scheduleDailyRefresh` programma i risvegli del widget per tutto l'orizzonte (vedi la
+sezione qui sotto, «Come il widget cambia giorno a mezzanotte»). Senza, dopo mezzanotte il
+widget continua a dire "stasera: organico" riferendosi alla sera precedente, cioè proprio la
+mattina, quando lo si guarda uscendo di casa.
+
+#### Come il widget cambia giorno a mezzanotte (correzione del 2026-10-10)
+
+☠ **Il difetto.** Il proprietario: «alle 00:00 deve cambiare da solo», e invece il widget
+cambiava solo aprendo l'app. Misurato sull'emulatore `Medium_Phone_API_35` (Android 15,
+targetSdk 36), con l'app chiusa:
+
+| Misura | Valore | Cosa vuol dire |
+|---|---|---|
+| `dumpsys alarm`, allarme del plugin | `origWhen=… 00:05:00 window=+1h0m0s flags=0x20` | alle 00:05, **inesatto** (`0x20` = `ALLOW_WHILE_IDLE_COMPAT`, cioè `setAndAllowWhileIdle`) |
+| `dumpsys package`, permessi | `SCHEDULE_EXACT_ALARM` richiesto, **non concesso** | da Android 14 non è concesso di default, quindi `canScheduleExactAlarms()` è falso |
+| consegna in Doze forzato | finestra di 59 s → arrivato a **fine finestra** | il «lazy batching» di Android 14+: gli inesatti si consegnano alla fine |
+| consegna con lo schermo riacceso a metà finestra | finestra 92 s, schermo acceso alle 00:00:30, arrivato alle **00:01:37** | riaccendere il telefono **non** anticipa niente |
+| cambio di fuso GMT → Europe/Rome | l'allarme delle 00:05 GMT è diventato quello delle **02:05** | gli istanti sono assoluti, calcolati nel fuso di quando l'app era aperta |
+| schermata alle 00:01, app chiusa | il widget mostrava ancora il giorno prima | difetto riprodotto |
+
+Quindi: la finestra di un allarme inesatto è il **75% del preavviso** con cui lo si arma,
+**al massimo un'ora** (`AlarmManagerService.maxTriggerTime`), e Android 14+ lo consegna alla
+**fine** della finestra. Un allarme per le 00:00:05 armato il giorno prima arriva verso
+**l'una**, ogni notte, con lo schermo acceso o spento.
+
+⚑ **La correzione usa la stessa regola a favore.** `istantiDiRisveglio` mette, per ogni
+giorno, un **preavviso** alle 23:00:30 (finestra piena di un'ora → consegna alle 00:00:30) e
+un risveglio **finale** alle 00:00:05. Il plugin arma un allarme per volta e il successivo
+quando scatta il precedente, cioè quasi un giorno prima: finestra sempre piena.
+
+| Sistema | Cosa succede |
+|---|---|
+| Android 14+, senza permesso esatto | il preavviso arriva alle 00:00:30 e ridisegna il giorno nuovo; il finale delle 00:00:05 è già passato e il plugin lo scarta. **Misurato in Doze profondo con l'app uccisa: consegna alle 00:00:29**, widget giusto, prossimo preavviso armato a 23:00:30 `+1h` |
+| Android 13 e precedenti (consegna a inizio finestra), o permesso esatto concesso | il preavviso scatta alle 23:00:30 e ridisegna lo stesso giorno (innocuo); il finale arriva alle 00:00:05. Con il permesso: `window=0 exactAllowReason=permission`, misurato |
+
+Il **primo** preavviso viene armato quando si apre l'app, non un giorno prima: se mancano
+meno di due ore e venti, `preavvisoArmatoAlle` risolve `T + 0,75·(T − adesso) = 00:00:30` e
+la consegna resta giusta (aprire l'app alle 22:30 non deve far scattare il preavviso alle
+23:23). Misurato: con l'orologio alle 23:57 l'allarme è stato armato alle 23:59:00 con
+finestra di 89 s, consegnato alle 00:00:29.
+
+Le **reti di sicurezza**, se gli allarmi non arrivano (produttori che li bloccano, permesso
+revocato):
+
+- `updatePeriodMillis="1800000"` in `trashcan_widget_info.xml`: lo pilota il servizio dei
+  widget di sistema, non l'app; il ridisegno sceglie la riga dalla data del momento, quindi il
+  primo giro dopo mezzanotte corregge il widget. Prima era `0`.
+- `TrashcanWidgetProvider.onReceive` ascolta `TIME_SET`, `TIMEZONE_CHANGED` e
+  `MY_PACKAGE_REPLACED` (trasmissioni esenti dai limiti in background, verificato con l'app
+  chiusa): ridisegna e **ricalcola gli istanti** nel fuso nuovo con
+  `riarmaMezzanotti`, la stessa regola di Dart ripetuta in Kotlin.
+- `TrashcanWidgetProvider.onEnabled` ricalcola gli istanti quando si aggiunge il primo widget.
+
+☠ **`DATE_CHANGED` è stata provata e scartata.** Sembrava perfetta (la mezzanotte annunciata
+dal sistema, senza permessi), ma non è fra le trasmissioni esenti: `dumpsys activity
+broadcasts` mostrava *"skipped by policy at enqueue: Background execution not allowed"* per
+il receiver del manifest.
+
+☠ **`USE_EXACT_ALARM` non si usa**: Play lo riserva a sveglie e calendari come funzione
+principale, e il manifest spiega già perché non regge per un'app di promemoria domestici. Il
+permesso esatto (`SCHEDULE_EXACT_ALARM`) resta quello che l'utente può concedere dalla pagina
+dei promemoria: se lo concede, anche il widget diventa esatto. Nessuna richiesta in più solo
+per il widget: il preavviso basta.
 
 #### Perché il widget contiene dieci anni, e non il giorno di oggi
 
@@ -646,7 +714,7 @@ aggiornare il widget».
 Erano **due** difetti sovrapposti, ed è il motivo per cui la prima correzione plausibile
 («manca l'allarme») non avrebbe risolto niente:
 
-1. `HomeWidgetScheduledUpdateReceiver` non era dichiarato nel manifest. L'allarme delle 00:05
+1. `HomeWidgetScheduledUpdateReceiver` non era dichiarato nel manifest. L'allarme di mezzanotte
    veniva armato, scattava, e la trasmissione cadeva nel vuoto. Il plugin lascia la
    dichiarazione all'app di proposito, così chi non pianifica aggiornamenti non eredita il
    permesso di avvio al boot. Nessun errore, da nessuna parte.
@@ -697,7 +765,7 @@ Tre costi, guardati prima di scegliere il numero. Il proprietario aveva chiesto 
 |---|---|---|
 | Spazio | **420 KB misurati** in `HomeWidgetPreferences.xml` | una preferenza, riscritta una volta per pubblicazione. Sono piu' dei ~330 KB delle righe: le preferenze sono XML, e ogni separatore di controllo ci finisce scritto come `&#31;`, cinque caratteri invece di uno |
 | Lettura | una ricerca di sottostringa | il formato a righe: non dipende dal numero di giorni |
-| Sveglie | 3650 istanti in un `JSONArray` di ~50 KB | il plugin arma **un allarme per volta** e riarma il successivo a ogni scatto; il sistema ne vede sempre uno |
+| Sveglie | 7300 istanti (preavviso e finale per giorno) in un `JSONArray` di ~100 KB | il plugin arma **un allarme per volta** e riarma il successivo a ogni scatto; il sistema ne vede sempre uno |
 | Calcolo | 3650 giri di ciclo | vedi sotto: era il costo vero, ed è stato tolto |
 
 ⚑ **Il calcolo era il costo vero, e stava in `DateFormat`.** `publish` gira a ogni avvio e a
@@ -754,6 +822,28 @@ release, o imbarca il font intero.
 ☠ `ui.TextDirection.ltr` e non `TextDirection.ltr`: `package:intl`, importato nello stesso
 file, esporta una classe omonima con costanti diverse, e senza prefisso vince quella.
 
+### `class TrashcanWidgetProvider : HomeWidgetProvider()` (Kotlin)
+
+File: `android/app/src/main/kotlin/com/smp/trashcan/TrashcanWidgetProvider.kt`.
+
+| Metodo | Firma | Effetto |
+|---|---|---|
+| `onReceive` | `override fun onReceive(context: Context, intent: Intent)` | `super` per primo; per `TIME_SET`, `TIMEZONE_CHANGED`, `MY_PACKAGE_REPLACED` (`AZIONI_OROLOGIO`) ricalcola gli istanti e ridisegna. Tutto in un `try` |
+| `onEnabled` | `override fun onEnabled(context: Context)` | `super` (il plugin riarma dagli istanti salvati), poi `riarmaMezzanotti` |
+| `onUpdate` | `override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, widgetData: SharedPreferences)` | ridisegna ogni istanza con la riga di oggi; tutto in un `try` |
+| `ridisegnaTutti` | `private fun ridisegnaTutti(context: Context)` | trova le istanze e chiama `onUpdate` con `HomeWidgetPlugin.getData` |
+| `riarmaMezzanotti` | `private fun riarmaMezzanotti(context: Context)` | la regola di `istantiDiRisveglio` nel fuso di adesso, consegnata a `HomeWidgetScheduler.schedule` |
+| `preavvisoArmatoAlle` | `private fun preavvisoArmatoAlle(adesso: Long, fineFinestra: Long): Long?` | come l'omonimo Dart, in millisecondi |
+| `update` | `private fun update(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, widgetData: SharedPreferences)` | costruisce le `RemoteViews` |
+| `statoDiOggi` | `private fun statoDiOggi(widgetData: SharedPreferences): Stato` | cerca `"\n" + LocalDate.now() + FIELD` nelle righe |
+
+Costanti del `companion object`: `TAG`, `SECONDI_DOPO_MEZZANOTTE = 5L`,
+`SECONDI_FINE_FINESTRA = 30L`, `FINESTRA_MASSIMA_MS = 3_600_000L`, `QUOTA_FINESTRA = 0.75`,
+`GIORNI_DI_RISVEGLI = 3650`, `AZIONI_OROLOGIO`, le chiavi (`KEY_*`, `ICON_PREFIX`), i
+separatori `FIELD`/`LINE`, `NEUTRAL`, e le funzioni `fun isDark(color: Int): Boolean` e
+`fun translucent(color: Int): Int`. Le prime cinque numeriche devono restare uguali alle
+costanti Dart omonime.
+
 ### `class TrashcanBackupSource implements BackupSource`
 
 `const TrashcanBackupSource(AppDatabase db, {int? onlyCalendarId})`
@@ -794,7 +884,7 @@ un'interruzione fuori transazione cancellerebbe i dati senza rimpiazzarli.
 | `test/widget/home_page_test.dart` | 6 | la home nei tre stati (niente / uno / tre tipi), lo stato vuoto, la prossima raccolta con la sera giusta, il nome del calendario nel titolo |
 | `test/widget/paywall_config_test.dart` | 6 | **ogni funzione bloccata è venduta**; i calendari stanno per primi; nessun duplicato; nessun testo vuoto; il bottone regge un prezzo assente |
 | `test/services/trashcan_widget_icon_test.dart` | 5 | tutte e ventidue le icone si disegnano e non escono vuote; il glifo non riempie il riquadro (sarebbe il "tofu" del font mancante); esce bianco, perche' a tingerlo e' il provider; una chiave sconosciuta ripiega su un'icona vera; ogni preset del wizard punta a una chiave che esiste |
-| `test/services/trashcan_widget_giorni_test.dart` | 5 | il contratto del formato che Kotlin rilegge: i separatori sono caratteri di controllo, sono tre e diversi fra loro; l'orizzonte e' un decennio e copre i giorni elencati; il prefisso delle icone non collide con nessuna chiave fissa |
+| `test/services/trashcan_widget_giorni_test.dart` | 13 | il contratto del formato che Kotlin rilegge: i separatori sono caratteri di controllo, sono tre e diversi fra loro; l'orizzonte e' un decennio e copre i giorni elencati; il prefisso delle icone non collide con nessuna chiave fissa. **Gruppo «istanti di risveglio»** (2026-10-10): due istanti per giorno (preavviso 23:00:30, finale 00:00:05) per tutto l'orizzonte, in ordine e senza doppioni; il finale non e' mai piu' alle 00:05; un preavviso armato un giorno prima, con la finestra calcolata come `AlarmManagerService.maxTriggerTime`, viene consegnato 30 s dopo mezzanotte; il primo preavviso, armato alle 8, alle 21:40:30, alle 22:30, alle 23:50 o alle 23:58:30, viene consegnato sempre fra 29 e 31 s dopo mezzanotte; sotto un minuto il preavviso sparisce; 800 giorni di finali consecutivi senza buchi; il 25 ottobre 2026 dura 25 ore a Roma e la mezzanotte del 26 resta a mezzanotte |
 | `test/widget/palette_contrast_test.dart` | 6 | ogni colore della tavolozza **e ogni preset** regge 4.5:1 col testo che ci va sopra; i preset usano colori della tavolozza; nessun duplicato |
 
 `test/widget/harness.dart` non contiene test: è l'impalcatura che monta una pagina
@@ -932,7 +1022,10 @@ causa.
 | "È sbagliato il widget": la metà inferiore mostra una riga sola e sembra non aver caricato | era il gate `advancedWidget`, `pro ? 3 : 1`. Il difetto non è tecnico ma di lettura: uno spazio bianco con una riga dentro non comunica "a pagamento". L'ha segnalato il proprietario, non un utente, il che vuol dire che un utente l'avrebbe scritto in una recensione | `advancedWidget` è passato a `open()` e `TrashcanWidget.giorniElencati` vale 3 per tutti |
 | I promemoria non arrivano, e l'app non chiede mai il permesso di notificare | in `NotificationsPage` l'avviso che porta a chiedere il permesso compariva `if (_permissionGranted == false)`, ma quel campo partiva a `null` e lo scriveva **solo** la funzione che il banner avrebbe dovuto lanciare. `_refreshPermissions` aggiornava l'altro permesso e non questo. Cerchio chiuso: nessuno leggeva lo stato, quindi l'avviso non appariva, quindi il permesso non si chiedeva. Valeva su **tutte e due** le piattaforme; su Android non si vedeva perche' chi provava l'app il permesso ce l'aveva gia'. Trovato dal proprietario su un iPad, il 2026-10-04 | `NotificationService.hasPermission()` legge lo stato senza chiederlo, `_refreshPermissions` lo scrive, e il permesso si chiede quando si accendono i promemoria |
 | Il widget resta fermo al giorno prima, e si aggiorna solo aprendo l'app | due difetti insieme. `HomeWidgetScheduledUpdateReceiver` non era dichiarato nel manifest, quindi l'allarme delle 00:05 scattava e non arrivava a nessuno; e anche arrivando, il ridisegno rileggeva le stesse stringhe, perche' a calcolarle e' Dart, che gira solo con l'app aperta | receiver dichiarato nel manifest, e Dart precalcola 3650 giorni fra cui il provider sceglie la riga di oggi (vedi la sezione qui sopra) |
-| L'elenco delle sveglie era piu' corto dell'orizzonte | sette sveglie contro i giorni che il widget sapeva gia' raccontare: dall'ottavo giorno senza aprire l'app il risveglio smetteva di arrivare pur avendo i dati pronti sotto. E' lo stesso difetto, spostato in avanti | `scheduleDailyRefresh` genera esattamente `giorniPrecalcolati` istanti |
+| Il widget cambia giorno verso l'una di notte, o solo aprendo l'app (2026-10-10) | l'allarme era alle 00:05 e **inesatto**: Android 14+ non concede piu' `SCHEDULE_EXACT_ALARM` di default, la finestra di un inesatto e' il 75% del preavviso fino a un'ora, e Android 14+ consegna **alla fine** della finestra. Armato un giorno prima: consegna verso l'01:00 | `TrashcanWidget.istantiDiRisveglio`: un preavviso alle 23:00:30, la cui finestra finisce alle 00:00:30, piu' il finale alle 00:00:05; `updatePeriodMillis` a 30 min come rete. Vedi «Come il widget cambia giorno a mezzanotte» |
+| Dopo un cambio di fuso il widget cambia giorno all'ora sbagliata | gli istanti consegnati al plugin sono assoluti: misurato, GMT → Europe/Rome sposta le 00:05 alle 02:05 | `TrashcanWidgetProvider.onReceive` su `TIME_SET`/`TIMEZONE_CHANGED` ricalcola con `riarmaMezzanotti` |
+| Si dichiara `DATE_CHANGED` nel manifest e non arriva mai | non e' esente dai limiti delle trasmissioni implicite di Android 8: «Background execution not allowed» | non si usa; vedi il commento nel manifest |
+| L'elenco delle sveglie era piu' corto dell'orizzonte | sette sveglie contro i giorni che il widget sapeva gia' raccontare: dall'ottavo giorno senza aprire l'app il risveglio smetteva di arrivare pur avendo i dati pronti sotto. E' lo stesso difetto, spostato in avanti | `scheduleDailyRefresh` copre esattamente `giorniPrecalcolati` giorni (due istanti per giorno) |
 | Cinque test dello scheduler falliscono tutti insieme, senza che il codice sia cambiato | `setWeeklyRule` fa partire la regola da `CivilDate.today()`, cioe' dall'orologio vero: i test usavano una data fissa e passavano finche' la macchina stava prima di quella data. Dal giorno dopo, tutte le attese spostate avanti di una settimana esatta | il fixture passa `startDate: inizioRegole`, una data esplicita |
 | Il widget e' squadrato sopra e tondo sotto | `setBackgroundColor` su una view sostituisce il drawable, e con lui gli angoli arrotondati. Il colore si applica tingendo con `setColorFilter` un `ImageView` di sfondo | `TrashcanWidgetProvider.kt` + `widget_header_background.xml` |
 | Il widget resta un rettangolo colorato e vuoto | il receiver crollava leggendo il colore: vedi la riga seguente | `TrashcanWidgetProvider.kt` |
@@ -959,6 +1052,9 @@ causa.
 5. **Ogni colore nuovo nella tavolozza va verificato** dal test del contrasto.
 6. **`android/key.properties` non si committa**, e il keystore non entra mai nel repository.
 7. **`applicationId` e `proSku` sono immutabili** dopo il primo upload su Play.
+8. **La regola dei risvegli del widget vive in due posti**, `TrashcanWidget.istantiDiRisveglio`
+   (Dart, testata) e `TrashcanWidgetProvider.riarmaMezzanotti` (Kotlin, per i cambi di fuso):
+   costanti e formula vanno cambiate insieme.
 
 ---
 
@@ -994,9 +1090,8 @@ Per non farlo cercare invano.
 - **Nessuna esportazione in CSV.** `FeatureKey.csvExport` è dichiarata `open()` proprio per
   dire che non è una funzione di quest'app.
 - **Nessun golden test.** Scelta deliberata: vedi §12.
-- **Nessun widget su iOS.** Serve un'estensione WidgetKit in Swift, che è un bersaglio Xcode
-  separato. Il calcolo delle righe in `TrashcanWidget.publish` va bene per entrambe le
-  piattaforme: quando ci sarà, cambia il modo di consegnare i dati, non il calcolo.
+- **Nessuna prova del ricaricamento a mezzanotte del widget iOS** (`.after`, 2026-10-10):
+  scritto da Windows, da compilare e provare sul Mac.
 - **Nessun prodotto in App Store Connect.** Il Pro su iOS non è comprabile finché non c'è.
 - **Nessuna prova su un iPhone vero.** Finora solo simulatore: notifiche e acquisti sono
   proprio le due cose che un simulatore non dimostra.
@@ -1025,6 +1120,8 @@ Per non farlo cercare invano.
 | **Testo ingrandito al 200%** | verificato a occhio, non misurato. Il blocco "Stasera" usa `displaySmall` e può traboccare | in F7 (hardening), con un widget test a scala del testo alta |
 | **`Semantics` sulle card** | le pagine sono navigabili con TalkBack perché usano widget standard, ma il blocco "Stasera" non ha un'etichetta unica che lo legga come una frase | in F7 |
 | **Limite Pro aggirabile via import** | importare un backup con più calendari li crea anche senza Pro. Il backup completo è già dietro al paywall, quindi serve il file di qualcun altro | prima della pubblicazione, se si vuole chiudere il buco |
+| **Permesso esatto revocato: allarme del widget perso** | revocando `SCHEDULE_EXACT_ALARM`, Android cancella gli allarmi esatti e non manda nessuna trasmissione (verificato: dopo la revoca `dumpsys alarm` non mostra piu' l'allarme). Si riarma alla prossima apertura dell'app; nel frattempo resta `updatePeriodMillis`. Riarmare in `onUpdate` rovinerebbe la finestra del preavviso, che dipende da **quando** lo si arma | se qualcuno lo segnala |
+| **Puntualita' del widget su telefoni con risparmio energetico aggressivo** | verificata solo sull'emulatore (Android 15, Doze forzato). Alcuni produttori ritardano o bloccano gli allarmi delle app in background a prescindere | prova sul telefono vero del proprietario, una notte con l'app chiusa |
 | **Il widget non sceglie il calendario** | mostra sempre quello attivo nell'app. Il piano prevedeva la scelta del calendario come funzione Pro | quando qualcuno avrà davvero due calendari e lo chiederà |
 
 ---

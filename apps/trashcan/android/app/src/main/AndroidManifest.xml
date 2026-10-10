@@ -50,20 +50,32 @@
         <!-- Il widget della schermata iniziale. Vedi TrashcanWidgetProvider.kt.
              exported="true" e' obbligatorio: chi manda APPWIDGET_UPDATE e' il sistema,
              che e' un'altra applicazione. Con false il widget si puo' aggiungere ma non
-             si aggiorna mai, e non compare nessun errore. -->
+             si aggiorna mai, e non compare nessun errore.
+
+             ☠ Le tre azioni dopo APPWIDGET_UPDATE vengono dalla correzione del 2026-10-10
+             («alle 00:00 deve cambiare da solo»): TIME_SET e TIMEZONE_CHANGED spostano
+             "oggi" e rendono sbagliati gli istanti assoluti degli allarmi, MY_PACKAGE_REPLACED
+             li riallinea dopo un aggiornamento. Il provider ridisegna e li ricalcola.
+
+             ☠ NON aggiungere DATE_CHANGED: provato, il sistema non la consegna ai receiver del
+             manifest ("Background execution not allowed"). Vedi TrashcanWidgetProvider.onReceive.
+             Un'azione tolta da qui non arriva piu', anche se il codice Kotlin la aspetta. -->
         <receiver
             android:name=".TrashcanWidgetProvider"
             android:exported="true"
             android:label="@string/widget_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/trashcan_widget_info" />
         </receiver>
 
-        <!-- ☠ Senza questo receiver l'allarme delle 00:05 del widget non arriva a nessuno.
+        <!-- ☠ Senza questo receiver l'allarme di mezzanotte del widget non arriva a nessuno.
              `HomeWidget.scheduleWidgetUpdates` arma l'allarme e non da' errore, il sistema
              lo fa scattare, e la trasmissione cade nel vuoto: il plugin **non dichiara**
              questo receiver nel proprio manifest, lo lascia fare all'app, cosi' chi non

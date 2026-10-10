@@ -432,31 +432,6 @@ abstract final class TrashcanWidget {
     }
   }
 
-  /// Programma il risveglio quotidiano del widget, poco dopo la mezzanotte.
-  ///
-  /// ☠ Senza questo, alle 00:01 il widget continua a mostrare il giorno precedente finché
-  /// qualcosa non apre l'app. È il momento in cui il widget è più letto e più sbagliato: la
-  /// mattina, uscendo di casa.
-  ///
-  /// ☠ E senza il receiver `HomeWidgetScheduledUpdateReceiver` dichiarato nel manifest,
-  /// **questo metodo non serve a niente**: l'allarme viene armato, scatta, e la trasmissione
-  /// non trova nessuno. Il plugin lascia la dichiarazione all'app di proposito, così chi non
-  /// pianifica aggiornamenti non eredita il permesso di avvio. È rimasto fuori per giorni e
-  /// non l'ha segnalato nessun errore.
-  ///
-  /// Le 00:05 e non le 00:00: il sistema raggruppa gli allarmi della mezzanotte esatta e li
-  /// fa slittare, e cinque minuti di margine costano niente.
-  ///
-  /// ⚑ **Tanti risvegli quanti sono i giorni precalcolati, e non uno di meno.** Prima erano
-  /// sette, cioè meno dei giorni che il widget sapeva già raccontare: dall'ottavo giorno
-  /// senza aprire l'app il risveglio smetteva di arrivare pur avendo i dati pronti sotto.
-  /// Un elenco più corto dell'orizzonte rimette esattamente il difetto che l'orizzonte
-  /// serve a togliere, solo più in là nel tempo.
-  ///
-  /// Il plugin arma **un solo** allarme per volta e riarma il successivo a ogni scatto
-  /// (`HomeWidgetScheduler.pruneAndArmNext`), quindi un decennio non è un decennio di
-  /// allarmi di sistema: è un elenco di numeri in una preferenza, una cinquantina di
-  /// kilobyte, riscritto una volta al giorno. Il sistema ne vede sempre e solo uno.
   /// Dichiara al plugin il gruppo condiviso, una volta per avvio.
   ///
   /// ⚑ Su Android non serve e non fa niente di dannoso, ma chiamarlo comunque
@@ -466,25 +441,143 @@ abstract final class TrashcanWidget {
     await HomeWidget.setAppGroupId(gruppoIos);
   }
 
-  /// Programma i risvegli di mezzanotte. **Solo Android.**
+  /// Quanti secondi dopo la mezzanotte scatta il risveglio **finale** di ogni giorno.
   ///
-  /// ⚑ Su iOS non servono sveglie, ed è la differenza piu' bella fra le due
-  /// piattaforme: WidgetKit chiede lui i prossimi giorni e cambia schermata all'ora
-  /// giusta, leggendo la timeline che l'estensione costruisce dalle righe già pronte.
-  /// Niente allarmi, niente permessi, niente da riarmare dopo un riavvio.
+  /// ☠ **Deve coincidere con `SECONDI_DOPO_MEZZANOTTE` in `TrashcanWidgetProvider.kt`**, che
+  /// ricalcola gli stessi istanti quando l'utente cambia fuso o ora, perché in quel momento
+  /// Dart non gira. Due regole diverse darebbero due risvegli in due momenti diversi, e
+  /// nessuno se ne accorgerebbe.
+  static const int secondiDopoMezzanotte = 5;
+
+  /// Quanti secondi dopo la mezzanotte deve **finire la finestra** del preavviso. Vedi
+  /// [istantiDiRisveglio]. Uguale a `SECONDI_FINE_FINESTRA` in `TrashcanWidgetProvider.kt`.
+  static const int secondiFineFinestra = 30;
+
+  /// La finestra massima che Android concede a un allarme inesatto. Vedi
+  /// [istantiDiRisveglio]. È `INTERVAL_HOUR` in `AlarmManagerService.maxTriggerTime`.
+  static const Duration finestraMassima = Duration(hours: 1);
+
+  /// La finestra di un allarme inesatto è questa frazione del preavviso con cui lo si arma,
+  /// fino a [finestraMassima]. È lo `0.75` di `AlarmManagerService.maxTriggerTime`.
+  static const double quotaFinestra = 0.75;
+
+  /// Gli istanti in cui svegliare il widget: per ognuno dei prossimi [giorni] giorni un
+  /// **preavviso** calcolato perché la sua finestra finisca a mezzanotte e
+  /// [secondiFineFinestra] secondi, e un risveglio **finale** a mezzanotte e
+  /// [secondiDopoMezzanotte] secondi.
+  ///
+  /// ☠ **Il perché del preavviso è il difetto del 2026-10-10** («alle 00:00 deve cambiare da
+  /// solo»). Misurato sull'emulatore, Android 15, senza il permesso degli allarmi esatti
+  /// (da Android 14 non è concesso di default):
+  ///
+  /// - il plugin arma un allarme **inesatto** (`setAndAllowWhileIdle`);
+  /// - un allarme inesatto ha una finestra pari al 75% del preavviso con cui è stato armato,
+  ///   con un tetto di un'ora: armato un giorno prima, `dumpsys alarm` diceva
+  ///   `window=+1h0m0s`;
+  /// - e da Android 14 il sistema lo consegna **alla fine** della finestra (il «lazy
+  ///   batching»), anche a schermo acceso: un allarme per le 00:00:05 con 92 secondi di
+  ///   finestra è arrivato alle 00:01:37, benché lo schermo fosse stato riacceso alle
+  ///   00:00:30.
+  ///
+  /// Quindi l'allarme di mezzanotte faceva cambiare il widget verso **l'una di notte**, ogni
+  /// notte. Il preavviso usa la stessa regola a nostro favore: armato con più di due ore e venti
+  /// di anticipo, ha la finestra piena di un'ora (0,75 · 1 h 20 min = 1 h), e piazzandolo alle 23:00:30 la
+  /// finestra finisce alle 00:00:30. Su Android 14+ il widget cambia alle 00:00:30 senza
+  /// nessun permesso. Il risveglio finale resta per i sistemi che consegnano all'inizio della
+  /// finestra (Android 13 e precedenti, o con il permesso concesso): lì il preavviso scatta
+  /// alle 23:00:30, ridisegna lo stesso giorno, e alle 00:00:05 arriva il finale. Dove il
+  /// preavviso arriva dopo le 00:00:05, il plugin scarta il finale come già passato.
+  ///
+  /// ⚑ **Il primo giorno è diverso**: il preavviso viene armato adesso, e non un giorno prima.
+  /// Se mancano meno di due ore e venti alla fine voluta, la finestra sarebbe più corta di
+  /// un'ora e finirebbe prima di mezzanotte: si sceglie allora l'istante `T` tale che
+  /// `T + 0,75·(T − adesso)` cada proprio alle 00:00:30. I giorni successivi il plugin arma
+  /// ogni allarme quando scatta il precedente, cioè intorno alla mezzanotte prima: quasi un
+  /// giorno di anticipo, finestra piena.
+  ///
+  /// ⚑ **Si costruisce con i campi del calendario, non sommando 24 ore.** `DateTime(a, m,
+  /// g + n)` è "il giorno n-esimo a mezzanotte, ora locale", e Dart normalizza da solo il
+  /// giorno 32 e i cambi d'ora. Sommando `Duration(days: 1)`, dal 25 ottobre 2026 (che in
+  /// Italia dura 25 ore) tutti gli istanti cadrebbero un'ora prima, per tutto l'inverno.
+  ///
+  /// ☠ Consegnati al plugin, gli istanti diventano **assoluti**. Misurato: passando da GMT
+  /// a Europe/Rome l'allarme delle 00:05 è diventato quello delle 02:05. Per questo il
+  /// provider Kotlin li ricalcola, con questa stessa regola, su `TIMEZONE_CHANGED` e
+  /// `TIME_SET`.
+  @visibleForTesting
+  static List<DateTime> istantiDiRisveglio(
+    DateTime adesso, {
+    int giorni = giorniPrecalcolati,
+  }) {
+    final istanti = <DateTime>[];
+    for (var giorno = 1; giorno <= giorni; giorno++) {
+      final mezzanotte = DateTime(adesso.year, adesso.month, adesso.day + giorno);
+      final fineFinestra = mezzanotte.add(const Duration(seconds: secondiFineFinestra));
+      final preavviso = giorno == 1
+          ? preavvisoArmatoAlle(adesso, fineFinestra)
+          : fineFinestra.subtract(finestraMassima);
+      if (preavviso != null) istanti.add(preavviso);
+      istanti.add(mezzanotte.add(const Duration(seconds: secondiDopoMezzanotte)));
+    }
+    return istanti;
+  }
+
+  /// L'istante da chiedere ad Android, armando **adesso**, perché un allarme inesatto
+  /// arrivi alla fine della finestra in [fineFinestra]. `null` se manca troppo poco perché
+  /// un preavviso serva: basta il risveglio finale.
+  ///
+  /// La finestra vale `quotaFinestra · (T − adesso)`, fino a [finestraMassima]. Con molto
+  /// anticipo il tetto vince e `T = fine − 1 h`; con poco, si risolve
+  /// `T + 0,75·(T − adesso) = fine`, cioè `T = adesso + (fine − adesso) / 1,75`.
+  @visibleForTesting
+  static DateTime? preavvisoArmatoAlle(DateTime adesso, DateTime fineFinestra) {
+    final mancano = fineFinestra.difference(adesso);
+    if (mancano < const Duration(minutes: 1)) return null;
+    final conTetto = fineFinestra.subtract(finestraMassima);
+    final anticipoPerTetto = finestraMassima * (1 + 1 / quotaFinestra);
+    if (mancano >= anticipoPerTetto) return conTetto;
+    return adesso.add(mancano * (1 / (1 + quotaFinestra)));
+  }
+
+  /// Programma il risveglio del widget a ogni mezzanotte. **Solo Android.**
+  ///
+  /// ☠ Senza un risveglio, dopo mezzanotte il widget continua a mostrare il giorno
+  /// precedente finché qualcosa non apre l'app. È il momento in cui il widget è più letto e
+  /// più sbagliato: la mattina, uscendo di casa.
+  ///
+  /// ☠ **Il difetto del 2026-10-10 stava qui.** Gli istanti erano alle 00:05 e, senza il
+  /// permesso degli allarmi esatti, Android 14+ li consegnava alla fine di una finestra di
+  /// un'ora: il widget cambiava verso l'una. Adesso ogni giorno ha un preavviso tarato perché
+  /// la consegna cada alle 00:00:30. Vedi [istantiDiRisveglio]; le reti di sicurezza
+  /// (`updatePeriodMillis`, i cambi di fuso e d'ora) sono in `TrashcanWidgetProvider.kt` e in
+  /// `trashcan_widget_info.xml`.
+  ///
+  /// ☠ E senza il receiver `HomeWidgetScheduledUpdateReceiver` dichiarato nel manifest,
+  /// **questo metodo non serve a niente**: l'allarme viene armato, scatta, e la trasmissione
+  /// non trova nessuno. Il plugin lascia la dichiarazione all'app di proposito.
+  ///
+  /// ⚑ **Tanti risvegli quanti sono i giorni precalcolati, e non uno di meno.** Un elenco
+  /// più corto dell'orizzonte rimette il difetto che l'orizzonte serve a togliere, solo più
+  /// in là nel tempo. Il plugin arma **un solo** allarme per volta e riarma il successivo a
+  /// ogni scatto (`HomeWidgetScheduler.pruneAndArmNext`): il sistema ne vede sempre uno, e
+  /// l'elenco è una preferenza di una cinquantina di kilobyte.
+  ///
+  /// ⚑ Gli istanti si salvano **anche se il widget non c'è ancora** (verificato: l'allarme
+  /// compare in `dumpsys alarm` prima di aggiungere il widget). Chi lo aggiunge dopo l'ultima
+  /// apertura dell'app è coperto, e `onEnabled` del provider li ricalcola comunque.
+  ///
+  /// ⚑ Su iOS non servono sveglie: WidgetKit cambia schermata all'ora giusta leggendo la
+  /// timeline che l'estensione costruisce dalle righe già pronte.
   static Future<void> scheduleDailyRefresh() async {
     if (defaultTargetPlatform != TargetPlatform.android) return;
 
-    final now = DateTime.now();
-    final times = <DateTime>[
-      for (var day = 1; day <= giorniPrecalcolati; day++)
-        DateTime(now.year, now.month, now.day + day, 0, 5),
-    ];
+    final times = istantiDiRisveglio(DateTime.now());
     try {
       await HomeWidget.scheduleWidgetUpdates(times, qualifiedAndroidName: qualifiedName);
     } on Exception catch (error) {
-      // Il plugin lancia se non trova nessun provider: succede quando l'utente non ha
-      // messo il widget sulla schermata. Non e' un difetto, ed e' il caso normale.
+      // Il plugin lancia solo se non trova la classe del provider (nome sbagliato): con il
+      // nome qualificato giusto non succede, ma un widget mancante non deve far cadere
+      // l'avvio dell'app.
       MicroLog.d('aggiornamenti del widget non programmati: $error');
     }
   }

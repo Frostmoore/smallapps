@@ -1178,6 +1178,56 @@ mezzanotte senza l'app (iOS: timeline WidgetKit con una voce alle 00:00 di ogni 
 spostando l'orologio del dispositivo oltre la mezzanotte con l'app chiusa. Poi build nuova su entrambi
 gli store.
 
+  **Indagine e correzione del 2026-10-10 (Android corretto e misurato sull'emulatore; iOS
+  rivisto ma da compilare sul Mac; versione dell'app NON alzata):**
+  - [x] **Misurato** su `Medium_Phone_API_35` (Android 15, targetSdk 36), con TrashCan debug,
+    onboarding fatto, widget aggiunto dalle impostazioni e l'app chiusa. L'allarme c'era, ma
+    era alle **00:05**, **inesatto** (`dumpsys alarm`: `window=+1h0m0s flags=0x20`, cioe'
+    `setAndAllowWhileIdle`) perche' `SCHEDULE_EXACT_ALARM` da Android 14 **non e' concesso di
+    default**, e gli istanti erano **assoluti** (cambiando fuso GMT → Europe/Rome l'allarme
+    delle 00:05 e' passato alle 02:05). Orologio portato a 23:58 con `cmd alarm set-time`:
+    alle 00:01 il widget mostrava ancora il giorno prima (difetto riprodotto).
+  - [x] **Causa trovata**: Android 14+ consegna gli allarmi inesatti **alla fine** della
+    finestra («lazy batching»), e la finestra e' il 75% del preavviso fino a un'ora. Misurato:
+    in Doze, finestra di 59 s → consegna a fine finestra; con lo schermo riacceso alle
+    00:00:30, finestra di 92 s → consegna alle 00:01:37. Un allarme armato il giorno prima
+    per le 00:05 arriva quindi verso **l'01:05**, ogni notte, che lo schermo sia acceso o no.
+    Ipotesi 2 vera; ipotesi 1 vera ma secondaria; ipotesi 3 falsa (l'allarme viene armato
+    anche prima che il widget esista, verificato); ipotesi 4 in parte (aggiornando l'app gli
+    istanti vecchi restano, e un cambio di fuso li sfasa).
+  - [x] **Correzione, senza nessun permesso nuovo**: `TrashcanWidget.istantiDiRisveglio` mette per
+    ogni giorno un **preavviso** alle 23:00:30 (finestra piena di un'ora → consegna alle
+    00:00:30) e un **finale** alle 00:00:05 (per Android ≤ 13 e per chi ha concesso il
+    permesso esatto). Il primo preavviso e' tarato su quando si apre l'app
+    (`preavvisoArmatoAlle`). **Misurato dopo la correzione, in Doze profondo con l'app
+    uccisa: consegna alle 00:00:29, widget sul giorno nuovo**, prossimo preavviso armato a
+    23:00:30 `+1h`; aprendo l'app di giorno si arma 23:00:30 `+1h`; con il permesso esatto
+    concesso diventa `window=0`.
+  - [x] **Reti di sicurezza**: `updatePeriodMillis` da 0 a **1800000** (ridisegno ogni mezz'ora
+    pilotato dal sistema); `TrashcanWidgetProvider.onReceive` su `TIME_SET`,
+    `TIMEZONE_CHANGED`, `MY_PACKAGE_REPLACED` ridisegna e ricalcola gli istanti
+    (`riarmaMezzanotti`, verificato con l'app chiusa); `onEnabled` li ricalcola quando si
+    aggiunge il widget. ☠ `DATE_CHANGED` **provata e scartata**: il sistema non la consegna ai
+    receiver del manifest («Background execution not allowed»). `USE_EXACT_ALARM` non usato
+    (Play lo limita); nessuna riga nuova nelle impostazioni per il permesso esatto, il
+    preavviso basta.
+  - [x] **iOS** (`TrashcanWidget.swift`): nessun difetto nel calcolo (`startOfDay` e
+    `date(byAdding: .day)` reggono il 25 ottobre, la chiave della data usa il fuso corrente,
+    la voce di oggi con data passata si mostra subito); ma con `.atEnd` un cambio di fuso o
+    d'ora spostava il cambio di giorno per fino a sette giorni. Ora `policy:
+    .after(prossima mezzanotte + 5 s)`, le sette voci restano come rete.
+  - [x] Test: +8 nel gruppo «istanti di risveglio» di `trashcan_widget_giorni_test.dart` (anche
+    il 25 ottobre 2026, 25 ore a Roma). **138 test verdi**, `analyze` pulito, `build apk
+    --debug` ok. Atlante `apps/trashcan/codebase_reference.md` aggiornato («Come il widget
+    cambia giorno a mezzanotte», trappole, regola 8, debito, provider Kotlin).
+  - [ ] **Da provare su un telefono vero**: una notte con l'app chiusa e il telefono fermo,
+    guardare il widget poco dopo mezzanotte (atteso: giorno nuovo dalle 00:00:30). Su telefoni
+    con risparmio energetico aggressivo (Xiaomi, Huawei, Samsung «app in sospensione») il
+    produttore puo' ritardare gli allarmi a prescindere: in quel caso resta la rete di mezz'ora.
+  - [ ] **iOS**: compilare sul Mac l'estensione (`TrashcanWidget.swift` toccato da Windows) e
+    provare il passaggio di mezzanotte sul simulatore/iPad.
+  - [ ] Build nuova su entrambi gli store (versione da alzare a cura del proprietario).
+
 **Ripresa F17 (stato al 2026-10-09, sera).** Il codice di QR Me e' completo: 182 test, analisi pulita, provato sull'emulatore Android (condivisione di testo e di immagini con QR veri, «Da immagine», moduli, stile con verifica di leggibilita', PNG, backup e ripristino, testo al 130%, tema chiaro) e sul simulatore iPhone (build con l'estensione di condivisione e ZXing, esclusione dal backup iCloud verificata). Lettura dei QR con **ZXing** su entrambe le piattaforme: ML Kit tolto per la regola «dati solo sul telefono». Restano:
   1. **Proprietario:** App ID `com.smp.qrme.ShareExtension` con App Groups → `group.com.smp.qrme` (fatti gia' `com.smp.qrme` e il gruppo). Poi profili via API e build su TestFlight.
   2. **Su iPad via TestFlight:** la condivisione da Safari deve riaprire l'app (se iOS lo impedisce: ripiego di F17.1.8, QR mostrato dall'estensione); lettura dal vivo con la fotocamera; eventuale avviso ITMS-90683 sul microfono al primo caricamento.

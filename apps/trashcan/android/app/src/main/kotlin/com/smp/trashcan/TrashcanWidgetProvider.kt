@@ -2,6 +2,7 @@ package com.smp.trashcan
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -10,8 +11,11 @@ import android.graphics.Color
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
+import es.antonborri.home_widget.HomeWidgetScheduler
 import java.time.LocalDate
+import java.time.ZoneId
 
 /**
  * Il widget della schermata iniziale di TrashCan.
@@ -24,8 +28,9 @@ import java.time.LocalDate
  * decisione che gli compete, e basta un confronto fra stringhe: niente calendari, niente
  * ricorrenze, niente lingue. Tutta la logica resta in Dart, dove e' testabile.
  *
- * ⚑ **Perche' gli stati sono precalcolati.** Il widget si ridisegna a mezzanotte e cinque
- * grazie a un allarme, ma il ridisegno non puo' far girare Flutter: un widget Android vive
+ * ⚑ **Perche' gli stati sono precalcolati.** Il widget si ridisegna dopo mezzanotte grazie
+ * agli allarmi programmati da Dart (vedi `TrashcanWidget.istantiDiRisveglio`) e a
+ * `updatePeriodMillis`, ma il ridisegno non puo' far girare Flutter: un widget Android vive
  * in un processo di sistema e Dart gira solo quando l'app e' aperta. Prima di questa
  * riscrittura il risveglio notturno rileggeva le stesse stringhe del giorno prima, e il
  * widget continuava a dire "stasera: organico" riferendosi alla sera passata finche'
@@ -36,6 +41,116 @@ import java.time.LocalDate
  * disegna affatto, senza nessun errore in logcat.
  */
 class TrashcanWidgetProvider : HomeWidgetProvider() {
+
+    /**
+     * Le trasmissioni di sistema che cambiano **quale giorno e' oggi**, oltre a quelle del
+     * widget: `TIME_SET`, `TIMEZONE_CHANGED` e l'aggiornamento dell'app. Ridisegnano subito e
+     * ricalcolano gli istanti dei risvegli, vedi [riarmaMezzanotti].
+     *
+     * ☠ **Contesto: la correzione del 2026-10-10** («alle 00:00 deve cambiare da solo»).
+     * Misurato sull'emulatore (Android 15, targetSdk 36):
+     *
+     * 1. l'allarme era alle **00:05**;
+     * 2. era **inesatto**: da Android 14 `SCHEDULE_EXACT_ALARM` non e' piu' concesso di
+     *    default, e il plugin ripiega su `setAndAllowWhileIdle`, con una finestra di un'ora
+     *    (`dumpsys alarm`: `window=+1h0m0s flags=0x20`) **consegnata alla fine**: il widget
+     *    cambiava verso l'una di notte. Il rimedio, un preavviso tarato sulla finestra, e' in
+     *    `TrashcanWidget.istantiDiRisveglio` (Dart);
+     * 3. gli istanti sono **assoluti**, calcolati nel fuso di quando l'app era aperta:
+     *    passando da GMT a Europe/Rome l'allarme delle 00:05 e' diventato quello delle 02:05.
+     *    E' il motivo di questo metodo.
+     *
+     * ☠ **`DATE_CHANGED` NON si usa, ed e' stato provato.** Sembrava la soluzione perfetta:
+     * la mezzanotte annunciata dal sistema, senza permessi. Ma non e' fra le trasmissioni
+     * esenti dai limiti in background di Android 8: dichiarata nel manifest, `dumpsys
+     * activity broadcasts` mostrava "skipped by policy at enqueue: Background execution not
+     * allowed" per questo receiver. `TIME_SET` e `TIMEZONE_CHANGED` invece sono esenti, e
+     * arrivano (verificato: "ridisegno per android.intent.action.TIME_SET" con l'app chiusa).
+     *
+     * ☠ `super.onReceive` per primo e sempre: e' li' che `AppWidgetProvider` smista
+     * `APPWIDGET_UPDATE`, `APPWIDGET_ENABLED` e gli altri. Le azioni di qui non le conosce e
+     * le ignora.
+     */
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        val azione = intent.action ?: return
+        if (azione !in AZIONI_OROLOGIO) return
+
+        // Stesso principio di onUpdate: un'eccezione in un receiver fa cadere il processo.
+        try {
+            Log.i(TAG, "ridisegno per $azione")
+            riarmaMezzanotti(context)
+            ridisegnaTutti(context)
+        } catch (error: Exception) {
+            Log.e(TAG, "ridisegno per $azione fallito", error)
+        }
+    }
+
+    /**
+     * Il primo widget e' stato appena aggiunto.
+     *
+     * ⚑ Il plugin, in `super`, riarma l'allarme dagli istanti salvati. Qui li si
+     * **ricalcola**: chi aggiunge il widget dopo un aggiornamento dell'app senza averla
+     * riaperta avrebbe ancora gli istanti vecchi (le 00:05) o, con un fuso cambiato nel
+     * frattempo, istanti sfasati. Il ridisegno iniziale lo fa gia' il sistema.
+     */
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        try {
+            riarmaMezzanotti(context)
+        } catch (error: Exception) {
+            Log.e(TAG, "risvegli non riarmati", error)
+        }
+    }
+
+    private fun ridisegnaTutti(context: Context) {
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, TrashcanWidgetProvider::class.java))
+        if (ids.isEmpty()) return
+        onUpdate(context, manager, ids, HomeWidgetPlugin.getData(context))
+    }
+
+    /**
+     * Ricalcola gli istanti del plugin nel fuso **di adesso**: per ognuno dei prossimi
+     * [GIORNI_DI_RISVEGLI] giorni un preavviso tarato perche' la finestra dell'allarme
+     * inesatto finisca a mezzanotte e [SECONDI_FINE_FINESTRA] secondi, e un risveglio finale
+     * a mezzanotte e [SECONDI_DOPO_MEZZANOTTE] secondi.
+     *
+     * ☠ E' **la stessa regola** di `TrashcanWidget.istantiDiRisveglio` in Dart, dove e'
+     * spiegata e testata, ripetuta qui perche' quando cambia il fuso Dart non gira. Le
+     * costanti devono restare uguali a quelle Dart con lo stesso significato.
+     *
+     * ⚑ `atStartOfDay(zona)` e non "mezzanotte di ieri piu' 24 ore": il 25 ottobre in Italia
+     * dura 25 ore, e sommando ore tutti i risvegli dell'inverno cadrebbero alle 23:00.
+     */
+    private fun riarmaMezzanotti(context: Context) {
+        val zona = ZoneId.systemDefault()
+        val adesso = System.currentTimeMillis()
+        val oggi = LocalDate.now(zona)
+        val istanti = mutableListOf<Long>()
+        for (giorno in 1..GIORNI_DI_RISVEGLI) {
+            val mezzanotte =
+                oggi.plusDays(giorno.toLong()).atStartOfDay(zona).toInstant().toEpochMilli()
+            val fineFinestra = mezzanotte + SECONDI_FINE_FINESTRA * 1000
+            val preavviso = if (giorno == 1) {
+                preavvisoArmatoAlle(adesso, fineFinestra)
+            } else {
+                fineFinestra - FINESTRA_MASSIMA_MS
+            }
+            if (preavviso != null) istanti.add(preavviso)
+            istanti.add(mezzanotte + SECONDI_DOPO_MEZZANOTTE * 1000)
+        }
+        HomeWidgetScheduler.schedule(context, TrashcanWidgetProvider::class.java.name, istanti)
+    }
+
+    /** Come `TrashcanWidget.preavvisoArmatoAlle` in Dart. */
+    private fun preavvisoArmatoAlle(adesso: Long, fineFinestra: Long): Long? {
+        val mancano = fineFinestra - adesso
+        if (mancano < 60_000L) return null
+        val anticipoPerTetto = (FINESTRA_MASSIMA_MS * (1 + 1 / QUOTA_FINESTRA)).toLong()
+        if (mancano >= anticipoPerTetto) return fineFinestra - FINESTRA_MASSIMA_MS
+        return adesso + (mancano / (1 + QUOTA_FINESTRA)).toLong()
+    }
 
     override fun onUpdate(
         context: Context,
@@ -50,7 +165,7 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
         try {
             update(context, appWidgetManager, appWidgetIds, widgetData)
         } catch (error: Exception) {
-            Log.e("TrashcanWidget", "aggiornamento del widget fallito", error)
+            Log.e(TAG, "aggiornamento del widget fallito", error)
         }
     }
 
@@ -213,6 +328,33 @@ class TrashcanWidgetProvider : HomeWidgetProvider() {
     )
 
     private companion object {
+        const val TAG = "TrashcanWidget"
+
+        /** Uguale a `TrashcanWidget.secondiDopoMezzanotte` in Dart. */
+        const val SECONDI_DOPO_MEZZANOTTE = 5L
+
+        /** Uguale a `TrashcanWidget.secondiFineFinestra` in Dart. */
+        const val SECONDI_FINE_FINESTRA = 30L
+
+        /** Uguale a `TrashcanWidget.finestraMassima` in Dart: un'ora. */
+        const val FINESTRA_MASSIMA_MS = 3_600_000L
+
+        /** Uguale a `TrashcanWidget.quotaFinestra` in Dart. */
+        const val QUOTA_FINESTRA = 0.75
+
+        /** Uguale a `TrashcanWidget.giorniPrecalcolati` in Dart. */
+        const val GIORNI_DI_RISVEGLI = 3650
+
+        /**
+         * Le azioni che spostano "oggi". Devono comparire anche nell'intent-filter del
+         * receiver nel manifest, altrimenti non arrivano.
+         */
+        val AZIONI_OROLOGIO = setOf(
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED,
+            Intent.ACTION_MY_PACKAGE_REPLACED,
+        )
+
         // Devono coincidere con le costanti in lib/services/trashcan_widget.dart.
         const val KEY_DAYS = "days"
         const val KEY_LABEL = "tonight_label"
