@@ -197,7 +197,7 @@ simulatore iPhone e dal proprietario su iPad (TestFlight).
 **Prossimi passi App Store:**
 - [x] Risposta ad Apple e reinvio (proprietario, 2026-10-10)
 - [ ] Dopo l'approvazione: **1.0.1** con la dettatura solo sul dispositivo (il codice e' quello della build 3; serve `1.0.1+4` perche' la 1.0.0 pubblicata non accetta build nuove)
-- [ ] Insieme alla 1.0.1: pubblicare sul sito il paragrafo dell'informativa sulla dettatura (gia' scritto in `site/src/lang/*.legale.php`, **non ancora pubblicato**)
+- [x] Informativa del sito: paragrafo sulla dettatura **pubblicato** il 2026-10-10 (dalla 1.0.1 solo sul telefono; nella 1.0.0 il servizio del sistema puo' usare i server di Apple/Google)
 
 Grafiche in `apps/full_freezer/store/grafiche/` (testata 1024x500, 6 schede 1320x2868 per App
 Store e 1080x2160 per Play, it/en). ☠ Firma: Xcode 27 non crea piu' profili nuovi con la chiave
