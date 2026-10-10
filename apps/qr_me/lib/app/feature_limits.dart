@@ -31,6 +31,8 @@ const FeatureLimits qrFeatureLimits = <FeatureKey, FeatureLimit>{
 
   // Condividere il QR come PNG (chiave nata con QR Me, F17.2a).
   FeatureKey.imageExport: FeatureLimit.locked(),
+  // Nessuna lettura di documenti in questa app (chiave nata con Spending Review, F12.2a).
+  FeatureKey.documentScan: FeatureLimit.open(),
 
   // Il backup e' Pro; il ripristino resta gratis, come nelle altre app.
   FeatureKey.backupRestore: FeatureLimit.locked(),
