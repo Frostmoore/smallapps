@@ -25,21 +25,21 @@ Ultimo aggiornamento: **2026-10-11** (TrashCan 1.0.1 su entrambi gli store e wid
 | **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | 🟢 **pagina e pulsante App Store** («Disponibile su iOS», 2026-10-10) |
 
 **App nuove** (decise il 2026-10-08, fasi F10–F19 di `develop_microapps.md` §1.6): QR Me e Spending
-Review sono fatte e in revisione su App Store (card «In arrivo» nel sito); le altre otto non sono
-ancora iniziate.
+Review sono fatte e in revisione su App Store (card «In arrivo» nel sito); le altre sei non sono ancora
+iniziate (nomi definitivi del 2026-10-11) e «Quanti sono?» e' annullata.
 
 | App | Fase | Google Play | App Store |
 |---|---|---|---|
-| Te l'ho prestato | F10 | ⚪ non iniziata | ⚪ non iniziata |
-| Dove l'ho lasciato? | F11 | ⚪ non iniziata | ⚪ non iniziata |
+| Boomerang (ex Te l'ho prestato) | F10 | ⚪ non iniziata | ⚪ non iniziata |
+| Pin Drop (ex Dove l'ho lasciato?) | F11 | ⚪ non iniziata | ⚪ non iniziata |
 | **Spending Review** (ex Quanto sto spendendo?) | F12 | ⚪ codice Android completo (2026-10-10); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata dal proprietario il 2026-10-10) |
-| Quanto dividiamo? | F13 | ⚪ non iniziata | ⚪ non iniziata |
-| Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
-| Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
-| Riassumilo | F16 | ⚪ non iniziata | ⚪ non iniziata |
+| **Fair Share** (ex Quanto dividiamo?) | F13 | ⚪ non iniziata — **la prossima**, si parte il 2026-10-12 | ⚪ non iniziata |
+| Geo Note (ex Ricordamelo qui) | F14 | ⚪ non iniziata | ⚪ non iniziata |
+| ~~Quanti sono?~~ | F15 | ❌ annullata il 2026-10-11 | ❌ annullata |
+| TLDR (ex Riassumilo) | F16 | ⚪ non iniziata | ⚪ non iniziata |
 | **QR Me** (ex Fammi un QR) | F17 | ⚪ codice Android completo (2026-10-09); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟡 **in revisione** (1.0.0 (2) + Pro, inviata il 2026-10-10) |
-| Leggimelo | F18 | ⚪ non iniziata | ⚪ non iniziata |
-| Dove porta? | F19 | ⚪ non iniziata | ⚪ non iniziata |
+| Read Aloud (ex Leggimelo) | F18 | ⚪ non iniziata | ⚪ non iniziata |
+| Link Peek (ex Dove porta?) | F19 | ⚪ non iniziata | ⚪ non iniziata |
 
 Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in revisione ·
 🟠 pubblicata in parte · 🟢 pubblicata · 🔴 respinta

@@ -185,16 +185,33 @@ specsheet completa in §8**, come per F3–F6.
 
 | Fase | App | Problema risolto | applicationId (provvisorio) | Cosa pesa davvero |
 |---|---|---|---|---|
-| F10 | **Te l'ho prestato** | Chi ha cosa e da quanto: oggetti prestati e presi in prestito | `com.smp.prestato` | Nulla di critico: dati locali, notifiche di promemoria (gia' in `micro_core`) |
-| F11 | **Dove l'ho lasciato?** | Dove ho lasciato auto, bici, ombrellone, armadietto: posizione + foto + nota | `com.smp.dovelholasciato` | Posizione **in primo piano** (permesso), mappa o bussola senza servizi a pagamento, foto (come Film Tracker) |
-| F12 | **Quanto sto spendendo?** | Il totale del carrello mentre si fa la spesa, contro un budget | `com.smp.quantospendo` | Inserimento rapidissimo (tastierino, voce come Full Freezer); nessun permesso |
-| F13 | **Quanto dividiamo?** | Dividere un conto: in parti uguali, a quote, per voce, con sconti e mancia | `com.smp.quantodividiamo` | Aritmetica in centesimi con arrotondamenti onesti (`Money`); lettura dello scontrino = OCR (§1.4: fuori dall'MVP salvo decisione) |
-| F14 | **Ricordamelo qui** | Promemoria quando si arriva o si esce da un luogo | `com.smp.ricordamelo` | **Geofencing**: posizione **in background**, permesso sensibile su Play (dichiarazione e video) e su iOS; limiti dei sistemi sul numero di aree |
-| F15 | **Quanti sono?** | Contare oggetti ripetuti con la fotocamera | `com.smp.quantisono` | **Visione on-device** (sperimentale per il proprietario stesso); §1.4 esclude l'AI dall'MVP: serve una decisione |
-| F16 | **Riassumilo** | Riassunto breve di un link o testo condiviso (Share Sheet) | `com.smp.riassumilo` | **Modello di linguaggio** on-device o remoto: costi, privacy, qualita'; §1.4 esclude l'AI dall'MVP: serve una decisione. Estensione di condivisione iOS |
+| F10 | **Boomerang** (ex «Te l'ho prestato», nome del 2026-10-11) | Chi ha cosa e da quanto: oggetti prestati e presi in prestito | `com.smp.prestato` | Nulla di critico: dati locali, notifiche di promemoria (gia' in `micro_core`) |
+| F11 | **Pin Drop** (ex «Dove l'ho lasciato?», nome del 2026-10-11) | Dove ho lasciato auto, bici, ombrellone, armadietto: posizione + foto + nota | `com.smp.dovelholasciato` | Posizione **in primo piano** (permesso), mappa o bussola senza servizi a pagamento, foto (come Film Tracker) |
+| F12 | **Spending Review** (ex «Quanto sto spendendo?», nome del 2026-10-10) | Il totale del carrello mentre si fa la spesa, contro un budget | `com.smp.quantospendo` | Inserimento rapidissimo (tastierino, voce come Full Freezer); nessun permesso |
+| F13 | **Fair Share** (ex «Quanto dividiamo?», nome del 2026-10-11) | Dividere un conto: in parti uguali, a quote, per voce, con sconti e mancia | `com.smp.quantodividiamo` | Aritmetica in centesimi con arrotondamenti onesti (`Money`); lettura dello scontrino = OCR (§1.4: fuori dall'MVP salvo decisione) |
+| F14 | **Geo Note** (ex «Ricordamelo qui», nome del 2026-10-11) | Promemoria quando si arriva o si esce da un luogo | `com.smp.ricordamelo` | **Geofencing**: posizione **in background**, permesso sensibile su Play (dichiarazione e video) e su iOS; limiti dei sistemi sul numero di aree |
+| F15 | ~~**Quanti sono?**~~ **ANNULLATA il 2026-10-11** | Contare oggetti ripetuti con la fotocamera | `com.smp.quantisono` | **Visione on-device** (sperimentale per il proprietario stesso); §1.4 esclude l'AI dall'MVP: serve una decisione |
+| F16 | **TLDR** (ex «Riassumilo», nome del 2026-10-11) | Riassunto breve di un link o testo condiviso (Share Sheet) | `com.smp.riassumilo` | **Modello di linguaggio** on-device o remoto: costi, privacy, qualita'; §1.4 esclude l'AI dall'MVP: serve una decisione. Estensione di condivisione iOS |
 | F17 | **QR Me** (ex «Fammi un QR», rinominata il 2026-10-09) | QR a tutto schermo da qualunque cosa condivisa, e lettura dei QR | `com.smp.qrme` (definitivo, F17.0) | Ricezione da Share Sheet (intent `SEND` su Android, **Share Extension** su iOS) in `packages/micro_share/`; scanner `flutter_zxing` (ZXing via FFI, dal 2026-10-09 al posto di `mobile_scanner`/ML Kit); stile con colori e logo |
-| F18 | **Leggimelo** | Un articolo condiviso letto ad alta voce | `com.smp.leggimelo` | Estrazione del testo principale da una pagina (rete) + sintesi vocale del sistema; Share Extension |
-| F19 | **Dove porta?** | Dove porta davvero un link abbreviato o sospetto, prima di aprirlo | `com.smp.doveporta` | Segue i redirect via rete **senza aprire la pagina**; segnali sospetti (punycode, domini strani); cambia l'informativa privacy ("l'app non parla con nessun server" non vale piu') |
+| F18 | **Read Aloud** (ex «Leggimelo», nome del 2026-10-11) | Un articolo condiviso letto ad alta voce | `com.smp.leggimelo` | Estrazione del testo principale da una pagina (rete) + sintesi vocale del sistema; Share Extension |
+| F19 | **Link Peek** (ex «Dove porta?», nome del 2026-10-11) | Dove porta davvero un link abbreviato o sospetto, prima di aprirlo | `com.smp.doveporta` | Segue i redirect via rete **senza aprire la pagina**; segnali sospetti (punycode, domini strani); cambia l'informativa privacy ("l'app non parla con nessun server" non vale piu') |
+
+⚑ **Nomi definitivi (proprietario, 2026-10-11)**: nome sotto l'icona = la prima parte; nome nella scheda
+dello store come scritto qui (il trattino e' un trattino semplice, «TLDR» senza punto e virgola):
+
+| Fase | Sotto l'icona | Scheda store (it) | Scheda store (en) |
+|---|---|---|---|
+| F10 | Boomerang | Boomerang | Boomerang |
+| F11 | Pin Drop | Pin Drop - Dov'è? | Pin Drop - Where is it? |
+| F13 | Fair Share | Fair Share - Split Payments | Fair Share - Split Payments |
+| F14 | Geo Note | Geo Note - Note Geografiche | Geo Note - Note Geografiche |
+| F16 | TLDR | TLDR - Riassumilo | TLDR - Riassumilo |
+| F18 | Read Aloud | Read Aloud - Leggimelo | Read Aloud - Leggimelo |
+| F19 | Link Peek | Link Peek | Link Peek |
+
+La disponibilita' dei nomi si verifica solo creando l'app negli store (409 se presi): in quel caso si
+chiede al proprietario. **F15 «Quanti sono?» e' annullata.** **La prossima e' F13 Fair Share**
+(scelta del 2026-10-11, si comincia il 2026-10-12 da F13.0).
 
 ⚑ **Il numero di fase non e' l'ordine di sviluppo.** Le fasi seguono l'ordine del file del
 proprietario; quale si fa per prima lo decide lui. Proposta, dal meno al piu' rischioso:
@@ -1130,8 +1147,8 @@ volta sola; nella fase di ciascuna app si spuntano.
 | **Fx.8** | Atlante `apps/<nome>/codebase_reference.md` con `verify_atlas` | 0 simboli mancanti |
 | **Fx.9** | Rituale di fine fase **e card «In arrivo» nella vetrina** (poi pagina dedicata all'uscita) | branch di versione nuova |
 
-- [ ] **F10** Te l'ho prestato — `apps/prestato/` (nome della cartella da confermare in F10.0)
-- [ ] **F11** Dove l'ho lasciato? — posizione in primo piano + foto
+- [ ] **F10** Boomerang (ex «Te l'ho prestato») — `apps/prestato/` (nome della cartella da confermare in F10.0)
+- [ ] **F11** Pin Drop (ex «Dove l'ho lasciato?») — posizione in primo piano + foto
 - [x] **F12** Spending Review (ex «Quanto sto spendendo?») — CHIUSA il 2026-10-10 → `v10.0.0` (codice completo Android e iPhone, 339 test; store da fare: serve l'App ID del proprietario). Specsheet in §8 «F12 — Spending Review»
   - [x] **F12.0** Decisioni di partenza con il proprietario — FATTO il 2026-10-10/11 (§8 F12.0): nome «Spending Review» in it ed en, `com.smp.spendingreview`, Android e iPhone, nessun widget, interfaccia «C · Una mano», due tasti Cartellino e Scontrino, cartellino interpretato, peso a mano e bilancia, «spesa gratis, revisione Pro» a **2,99 €**, OCR Vision su iOS e PP-OCRv5 su ONNX Runtime **1.28.0 bloccata** su Android
   - [x] **F12.1** Specsheet — SCRITTA il 2026-10-10 (§8 F12.1.1–F12.1.18): file, dipendenze e guardie di privacy in build, dominio (centesimi, arrotondamenti half-up, offerte, tastierino), parser di cartellino/bilancia/scontrino sui riquadri, confronto, statistiche, `packages/micro_ocr`, dati, rotte, schermate, servizi, Pro (`FeatureKey.documentScan` nuova), permessi e privacy, trappole, test con il banco di regressione, prestazioni. domande D1–D4 **risposte dal proprietario il 2026-10-10** (§8 F12.10: nascoste, tastierino alla cassa, budget mensile Pro, carta fedelta' chiesta ogni volta)
@@ -1200,10 +1217,10 @@ volta sola; nella fase di ciascuna app si spuntano.
   3. **Foto vere** del proprietario (bilance italiane, catene mancanti: `microapps-campioni/f12/LEGGIMI.md`) per tarare il parser; misure su un Android vero di fascia media.
   4. Play: dopo il D-U-N-S, come le altre app; riga `spendingreview` nel License Server.
   5. Debito minore (atlante §debito): copie del selettore nello scontrino, `catch` nei `_salva`, log e preferenze fuori dall'esclusione iCloud, gli 11 simboli non documentati nell'atlante di TrashCan.
-- [ ] **F13** Quanto dividiamo? — divisione del conto
-- [ ] **F14** Ricordamelo qui — promemoria per luogo (geofencing, permesso in background)
-- [ ] **F15** Quanti sono? — conteggio con la fotocamera (**decisione sull'AI prima di F15.0**)
-- [ ] **F16** Riassumilo — riassunto da Share Sheet (**decisione sull'AI prima di F16.0**)
+- [ ] **F13** Fair Share (ex «Quanto dividiamo?») — divisione del conto
+- [ ] **F14** Geo Note (ex «Ricordamelo qui») — promemoria per luogo (geofencing, permesso in background)
+- [-] **F15** ~~Quanti sono?~~ — **ANNULLATA il 2026-10-11** dal proprietario: «non la facciamo proprio, sarebbe troppo inaffidabile senza ai seria»
+- [ ] **F16** TLDR (ex «Riassumilo») — riassunto da Share Sheet (**decisione sull'AI prima di F16.0**)
 - [x] **F17** QR Me (ex «Fammi un QR») — CHIUSA il 2026-10-09 → `v9.0.0` (codice completo Android e iPhone, 182 test; store da fare, vedi la ripresa sotto)
   - [x] **F17.0** Decisioni di partenza con il proprietario — FATTO il 2026-10-09 (§8 F17.0): nome «QR Me» in it ed en, `com.smp.qrme`, Android e iPhone, moduli Wi-Fi/contatto/email/SMS/telefono, **lettura dei QR gratis**, stile con colori e logo (foto, icone, emoji/testo), base generosa con Pro **1,99 €**, cronologia 5 gratis e spegnibile, 1 preferito gratis, nessun widget, icona dal proprietario
   - [x] **F17.1** Specsheet — FATTO il 2026-10-09 (§8 F17.1): file, dipendenze, dominio con codifiche esatte, tabella, rotte, schermate, servizi, `micro_share`, Pro, permessi, trappole, test
@@ -1303,8 +1320,8 @@ gli store.
   4. **Decisione del proprietario aperta:** la libreria di Google Play per gli acquisti (`billing` 8.0.0, Pro su Android, **tutte** le app) porta i servizi `com.google.android.datatransport` e `firebase-encoders`. E' il canale d'acquisto di Play, obbligatorio per vendere il Pro su Play; va deciso se la regola «dati solo sul telefono» lo ammette (come il server licenze) e scritto in `memory/decisioni.md`, poi rivisto il testo dell'informativa prima di pubblicare su Play.
   5. **Store:** scheda, screenshot e grafiche (`store/` non esiste ancora), App Store Connect, Play dopo il D-U-N-S, riga `qrme` nel License Server.
   6. Debito minore (atlante §14): commento di `locale_resolution.dart` sbagliato anche nelle altre quattro app; `finalizeDsl { compileSdk = 36 }` da ripetere in ogni app con `micro_share`.
-- [ ] **F18** Leggimelo — lettura ad alta voce di un articolo condiviso
-- [ ] **F19** Dove porta? — destinazione reale di un link, prima di aprirlo
+- [ ] **F18** Read Aloud (ex «Leggimelo») — lettura ad alta voce di un articolo condiviso
+- [ ] **F19** Link Peek (ex «Dove porta?») — destinazione reale di un link, prima di aprirlo
 - [ ] **Card «In arrivo»** delle dieci app nella vetrina `smpmicroapps.it` (regola: ogni microapp
   ha la sua card, anche prima di esistere; la pubblicazione del sito la decide il proprietario)
 
@@ -5332,7 +5349,7 @@ la prima settimana, e una versione correttiva pronta.
 Testo del proprietario (`docs/specs/idee-2026-10.md`) e, sotto, quello che gia' si sa dal lato
 tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decisioni `Fx.0`.
 
-### F10 — Te l'ho prestato
+### F10 — Boomerang (ex «Te l'ho prestato»)
 
 > Una micro-app per tenere traccia degli oggetti prestati o presi in prestito. L'utente registra
 > rapidamente oggetto, persona e data, così da sapere sempre chi ha cosa e da quanto tempo.
@@ -5343,7 +5360,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   evitare). Foto dell'oggetto: come Film Tracker.
 - Pro possibile: promemoria, foto, storico, backup (da decidere in F10.0).
 
-### F11 — Dove l'ho lasciato?
+### F11 — Pin Drop (ex «Dove l'ho lasciato?»)
 
 > Una memoria temporanea basata su posizione, foto e nota. Serve per ricordare dove si è lasciata
 > l'auto, la bici, un ombrellone, una tenda, un armadietto o qualsiasi altra cosa legata a un
@@ -5419,7 +5436,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   qui sopra restano come traccia: dove differiscono (es. «Tesseract via FFI», «Widget possibile»), vince
   la sezione F12.
 
-### F13 — Quanto dividiamo?
+### F13 — Fair Share (ex «Quanto dividiamo?»)
 
 > Una utility per dividere velocemente un conto tra più persone. Può gestire divisione uguale,
 > quote diverse, singole voci dello scontrino, sconti e mancia, mostrando subito quanto deve
@@ -5429,7 +5446,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   va detto. Dominio puro, testato come le statistiche di Film Tracker.
 - Leggere lo scontrino con la fotocamera e' OCR: §1.4 lo esclude dall'MVP. Si parte a mano.
 
-### F14 — Ricordamelo qui
+### F14 — Geo Note (ex «Ricordamelo qui»)
 
 > Un sistema di promemoria basati sulla posizione invece che sull'orario. L'utente può chiedere
 > di ricevere un avviso quando arriva o esce da un determinato luogo, ad esempio casa, ufficio,
@@ -5441,7 +5458,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
 - "Supermercato" generico (qualunque supermercato) richiederebbe un servizio di luoghi: fuori,
   salvo decisione; si parte da luoghi scelti dall'utente.
 
-### F15 — Quanti sono?
+### F15 — Quanti sono? — ANNULLATA il 2026-10-11
 
 > Una utility che usa la fotocamera per contare automaticamente oggetti visibili in una scena.
 > Potrebbe essere utile per scatole, bottiglie, componenti, monete o altri elementi ripetuti. Da
@@ -5453,7 +5470,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
 - Mitigazione da progettare: conteggio assistito (l'utente tocca per aggiungere o togliere i
   punti trovati), mai un numero dato per certo.
 
-### F16 — Riassumilo
+### F16 — TLDR (ex «Riassumilo»)
 
 > Una utility da Share Sheet: si condivide un link, un articolo o del testo e l'app restituisce un
 > riassunto breve e leggibile. È un'idea forte, ma richiede un sistema di summarization
@@ -5473,7 +5490,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
 - **Decisa e specificata il 2026-10-09**: vedi la sezione **«F17 — QR Me»** qui sotto (F17.0
   decisioni, F17.1 specsheet). Questa scheda resta come traccia dell'idea originale.
 
-### F18 — Leggimelo
+### F18 — Read Aloud (ex «Leggimelo»)
 
 > Una utility che riceve un articolo o una pagina tramite Share Sheet, ne estrae il contenuto
 > principale e lo legge con il text-to-speech del dispositivo. L'obiettivo è trasformare qualsiasi
@@ -5483,7 +5500,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   dall'app; pagine con paywall o caricate da JavaScript non si leggono.
 - Sintesi vocale del sistema, con lettura in background e controlli dalla schermata di blocco.
 
-### F19 — Dove porta?
+### F19 — Link Peek (ex «Dove porta?»)
 
 > Si condivide un link abbreviato o sospetto e l'app mostra la destinazione finale prima di
 > aprirlo. Può seguire la catena dei redirect, mostrare il dominio effettivo ed evidenziare

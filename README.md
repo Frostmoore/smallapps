@@ -39,7 +39,7 @@ il monorepo e' la base per tutte le microapp che verranno.
 | F8 | Deploy e pubblicazione | da fare |
 | **F17** | **QR Me** (ex Fammi un QR), Android e iPhone | **completa**, 182 test (2026-10-09); store dopo il D-U-N-S (Play) e gli App ID con App Group (Apple) |
 | **F12** | **Spending Review** (ex Quanto sto spendendo?), Android e iPhone | **completa**, 339 test (2026-10-10); store da fare |
-| F10–F19 | **Altre otto app nuove** (Te l'ho prestato, Dove l'ho lasciato?, Quanto dividiamo?, Ricordamelo qui, Quanti sono?, Riassumilo, Leggimelo, Dove porta?) | da fare, decise il 2026-10-08 (`develop_microapps.md` §1.6) |
+| F10–F19 | **Altre sei app nuove** (Boomerang, Pin Drop, Fair Share, Geo Note, TLDR, Read Aloud, Link Peek; «Quanti sono?» annullata) | da fare, decise il 2026-10-08 (`develop_microapps.md` §1.6) |
 
 TrashCan e' pubblicata su Google Play e su App Store in tutti i paesi, Unione Europea compresa
 (2026-10-09). Lo stato aggiornato delle build e delle
