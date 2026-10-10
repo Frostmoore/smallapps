@@ -22,7 +22,7 @@ Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verifica
 | **TrashCan** | 1.0.1 (12) | 🟢 **pubblicata**; **1.0.1 (12) in produzione** il 2026-10-10 (widget corretto) | 🟢 1.0.0 in vendita ovunque; 🟡 **1.0.1 (12) in revisione** (inviata il 2026-10-10) | 🟢 **accesi tutti e due** (2026-10-09) |
 | **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🔴 **respinta 2.1** il 2026-10-10 (domanda sull'AI): risposta pronta, in arrivo la 1.0.0 (3) con la dettatura solo sul telefono | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | card grigia «In arrivo»: pulsanti solo quando e' pubblicata su **entrambi** gli store |
-| **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
+| **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | card grigia «In arrivo»: pulsanti solo con **entrambi** gli store |
 
 **App in programma** (decise il 2026-10-08, fasi F10–F19 di `develop_microapps.md` §1.6): non
 ancora iniziate, quindi ⚪ su **Google Play** e ⚪ su **App Store** per tutte e dieci; card in
@@ -281,7 +281,7 @@ proprietario su iPad (TestFlight: «mi pare che funzioni tutto»).
 - [ ] Moduli «Contenuti dell'app» e produzione
 - [ ] Provare su un Android vero: foto HEIC dalla galleria, QR letto dalla fotocamera di sistema
 
-### App Store — 🟡 in revisione
+### App Store — 🟢 in vendita
 
 | Data | Evento |
 |---|---|
@@ -291,6 +291,7 @@ proprietario su iPad (TestFlight: «mi pare che funzioni tutto»).
 | 2026-10-08 | Build **1.0.0 (1)** su TestFlight e collegata alla versione; gruppo «Sviluppatore» col proprietario, invito mandato |
 | 2026-10-08 | Fatti a mano dal proprietario: Intestazione e Risultati della ricerca, etichetta privacy, classificazione per eta', acquisto in-app spuntato; provata su iPad |
 | 2026-10-08 | **Inviata alla revisione**: versione 1.0.0 e Pro in WAITING_FOR_REVIEW (verificato via API) |
+| 2026-10-10 | **Approvata e in vendita**: versione 1.0.0 READY_FOR_SALE, Pro APPROVED (verificato via API). Sito: pulsanti non accesi, si aspetta Play |
 
 ## QR Me
 
@@ -363,7 +364,7 @@ backup) e sul simulatore iPhone. Card «In arrivo» pubblicata nel sito il 2026-
 
 Codice completo il 2026-10-10 (F12.0–F12.9): 339 test, provata sull'emulatore Android e sul simulatore
 iPhone (spesa, cartellino, bilancia, scontrino col Pro finto, storico, statistiche). Card «In arrivo»
-nel sito pronta, **non ancora pubblicata**.
+pubblicata nel sito il 2026-10-10.
 
 ### Google Play — ⚪ non ancora creata, bloccata dall'account
 

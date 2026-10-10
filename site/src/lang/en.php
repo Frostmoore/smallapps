@@ -81,6 +81,10 @@ return [
     'app.qr-me.sommario' => 'A link, some text or your home Wi-Fi become a big, bright QR code '
                           . 'for someone to scan. It reads QR codes too.',
 
+    'app.spending-review.claim'    => 'What you\'re spending, while you shop.',
+    'app.spending-review.sommario' => 'Point at the price tag and it adds up, with your budget always '
+                                    . 'in sight. At the till, it checks the receipt.',
+
     // ── Home ────────────────────────────────────────────────────────────────
     'home.titolo'      => 'Small Android and iPhone apps that do one thing',
     'home.descrizione' => 'SMP MicroApps: lightweight Android and iPhone apps with no accounts and no '

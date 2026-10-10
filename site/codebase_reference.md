@@ -685,3 +685,12 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 - **Pubblicata il 2026-10-09** su clawserver con il via del proprietario (siti critici a 200 prima e
   dopo, pagine a 200 in entrambe le lingue, file riservati 404). Il sito vivo ha cinque card.
 
+## Aggiornamento 2026-10-10 — card «In arrivo» di Spending Review
+
+- `catalogo()`: voce **`spending-review`** (`nome` «Spending Review», `accento` `#16A34A`, `pubblicata`
+  false, `packageId` `com.smp.spendingreview`, `suPlay` false, `testata` null); sesta card, dopo QR Me.
+- Dizionari: `app.spending-review.claim` («Quanto stai spendendo, mentre fai la spesa.» / «What you're
+  spending, while you shop.») e `app.spending-review.sommario`, in entrambi (allineati).
+- **Pubblicata il 2026-10-10** col via del proprietario (siti critici a 200 prima e dopo, pagine a 200,
+  file riservati 404).
+

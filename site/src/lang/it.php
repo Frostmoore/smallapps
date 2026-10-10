@@ -85,6 +85,10 @@ return [
     'app.qr-me.sommario' => 'Un link, un testo o il Wi-Fi di casa diventano un QR grande e '
                           . 'luminoso, da far inquadrare. E i QR li legge anche.',
 
+    'app.spending-review.claim'    => 'Quanto stai spendendo, mentre fai la spesa.',
+    'app.spending-review.sommario' => 'Inquadri il cartellino e il prezzo si aggiunge al totale, '
+                                    . 'col budget sempre davanti. Alla cassa controlla lo scontrino.',
+
     // ── Home ────────────────────────────────────────────────────────────────
     'home.titolo'      => 'App piccole per Android e iPhone, che fanno una cosa sola',
     'home.descrizione' => 'SMP MicroApps: applicazioni Android e iPhone leggere, senza account e '

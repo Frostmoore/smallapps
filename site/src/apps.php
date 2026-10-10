@@ -91,6 +91,16 @@ function catalogo(): array
             'packageId' => 'com.smp.qrme',
             'suPlay'    => false,
         ],
+        // F12, in sviluppo dal 2026-10-10. Verde della grafica «C · Una mano» scurito per il bianco.
+        'spending-review' => [
+            'nome'      => 'Spending Review',
+            'accento'   => '#16A34A',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.spendingreview',
+            'suPlay'    => false,
+        ],
     ];
 }
 
