@@ -19,9 +19,9 @@ Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verifica
 
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
-| **TrashCan** | 1.0.0 (11) | 🟢 **pubblicata** (2026-10-08) | 🟢 **pubblicata ovunque**, UE compresa (2026-10-09) | 🟢 **accesi tutti e due** (2026-10-09) |
-| **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 + Pro, inviata il 2026-10-07) | card grigia «In arrivo» |
-| **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
+| **TrashCan** | 1.0.1 (12) | 🟢 **pubblicata**; **1.0.1 (12) in produzione** il 2026-10-10 (widget corretto) | 🟢 1.0.0 in vendita ovunque; 🟡 **1.0.1 (12) in revisione** (inviata il 2026-10-10) | 🟢 **accesi tutti e due** (2026-10-09) |
+| **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🔴 **respinta 2.1** il 2026-10-10 (domanda sull'AI): risposta pronta, in arrivo la 1.0.0 (3) con la dettatura solo sul telefono | card grigia «In arrivo» |
+| **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | card grigia «In arrivo»: pulsanti solo quando e' pubblicata su **entrambi** gli store |
 | **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata il 2026-10-08) | card grigia «In arrivo» |
 
 **App in programma** (decise il 2026-10-08, fasi F10–F19 di `develop_microapps.md` §1.6): non
@@ -103,9 +103,9 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 >   it/en-GB (2026-10-10); profili «MicroApps AppStore» di TrashCan creati (prima firmava col portachiavi
 >   di sistema, che da ssh e' chiuso: `errSecInternalComponent`). ☠ La 1.0.0 pubblicata non accetta
 >   build nuove (90186): ogni correzione dopo l'uscita richiede una versione nuova.
-> - [ ] **Proprietario:** inviare la 1.0.1 in revisione su App Store.
-> - [ ] **Proprietario:** caricare `apps/trashcan/store/trashcan-1.0.1-12.aab` in produzione su Play,
->   con la nota «Il widget ora cambia giorno da solo a mezzanotte».
+> - [x] **Proprietario:** 1.0.1 inviata in revisione su App Store (2026-10-10): WAITING_FOR_REVIEW, verificato via API.
+>   Possibile chiedere la revisione accelerata (correzione di un difetto di una funzione centrale).
+> - [x] **Proprietario:** `trashcan-1.0.1-12.aab` caricato e **pubblicato** su Play (2026-10-10).
 > - [ ] Prova di una notte su un telefono Android vero e su iPad.
 
 ### Google Play — 🟢 pubblicata
@@ -116,6 +116,7 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 | entro 2026-10-06 | Inviata in **produzione** con la **build 11** (confermato dal proprietario) |
 | 2026-10-06 | Stato: **in revisione** |
 | 2026-10-08 | **Pubblicata, disponibile su Google Play** (comunicato dal proprietario; scheda raggiungibile dall'Italia, HTTP 200) |
+| 2026-10-10 | **1.0.1 (12)** con il widget corretto: caricata dal proprietario, **aggiornata e pubblicata** |
 
 **Sito:** pulsante Play acceso il 2026-10-09, **insieme** a quello App Store come deciso il
 2026-10-08 (vedi `memory/decisioni.md`).
@@ -175,7 +176,7 @@ simulatore iPhone e dal proprietario su iPad (TestFlight).
 - [ ] Produzione con l'AAB 1.0.0 (2), o una build nuova se nel frattempo cambia qualcosa
 - [ ] Provare sul telefono vero la voce (sull'emulatore non si poteva)
 
-### App Store — 🟡 in revisione
+### App Store — 🔴 respinta (2.1, informazioni richieste)
 
 | Data | Evento |
 |---|---|
@@ -186,6 +187,12 @@ simulatore iPhone e dal proprietario su iPad (TestFlight).
 | 2026-10-07 | Scheda caricata via API (`apps/full_freezer/tool/scheda_app_store.py`); nome inglese **«Full Freezer – Freezer Tracker»** perche' «Full Freezer» in inglese e' gia' di un altro sviluppatore; intestazione e risultato di ricerca caricati a mano |
 | 2026-10-07 | **Inviata per la verifica**: versione 1.0.0 e Pro in **WAITING_FOR_REVIEW** |
 | 2026-10-08 | Ricontrollato via API: ancora WAITING_FOR_REVIEW |
+| 2026-10-10 | In revisione (IN_REVIEW), poi **REJECTED, Guideline 2.1 — Information Needed** (iPad Air 11" M3): «Does the app send data to a third-party AI system? Does the AI feature send user data outside the device?». Risposta preparata: nessuna AI, categoria da un elenco di parole nell'app, voce con lo Speech framework di Apple e interpretazione con regole locali |
+| 2026-10-10 | Verificando la risposta: la dettatura **non** era limitata al telefono (`onDevice` assente, iOS/Android potevano usare i server di Apple/Google). Decisione del proprietario: **dettatura solo sul dispositivo** → build **1.0.0 (3)** in preparazione |
+
+**Prossimi passi App Store:**
+- [ ] Build 1.0.0 (3) (dettatura on-device) caricata e collegata alla versione 1.0.0
+- [ ] **Proprietario:** rispondere ad Apple in App Store Connect (testo nel messaggio del 2026-10-10, da adattare: «speech recognition runs on the device only») e reinviare
 
 Grafiche in `apps/full_freezer/store/grafiche/` (testata 1024x500, 6 schede 1320x2868 per App
 Store e 1080x2160 per Play, it/en). ☠ Firma: Xcode 27 non crea piu' profili nuovi con la chiave
@@ -222,7 +229,7 @@ compreso.
 - [ ] ☠ Dichiarazione dei permessi: **giustificare `READ_CALENDAR` e `WRITE_CALENDAR`** (funzione Pro facoltativa: la data di riordino nel calendario); notifiche e allarmi del widget
 - [ ] Moduli «Contenuti dell'app» (sulla falsariga di Full Freezer) e produzione
 
-### App Store — 🟡 in revisione
+### App Store — 🟢 in vendita
 
 | Data | Evento |
 |---|---|
@@ -232,6 +239,10 @@ compreso.
 | 2026-10-08 | Build **1.0.0 (1)** su TestFlight; gruppo interno «Sviluppatore» col proprietario, invito mandato a parte (aggiungere al gruppo non basta) |
 | 2026-10-08 | Fatti a mano dal proprietario: Intestazione e Risultati della ricerca, etichetta privacy, classificazione per eta', acquisto in-app spuntato; build collegata alla versione via API |
 | 2026-10-08 | **Inviata alla revisione**: versione 1.0.0 e Pro in WAITING_FOR_REVIEW (verificato via API, anche la sera) |
+| 2026-10-10 | **Approvata e in vendita**: versione 1.0.0 READY_FOR_SALE, Pro APPROVED (verificato via API) |
+
+**Sito:** pulsante App Store **non** acceso: decisione del proprietario (2026-10-10) i pulsanti di
+un'app si accendono solo quando e' pubblicata su **entrambi** gli store. Scorte Calore aspetta Play.
 
 ---
 
