@@ -80,12 +80,22 @@ final class LetturaScontrino {
   /// Righe articolo non stornate (confrontabile con «righe» della verita' dei campioni).
   int get articoli => righe.where((r) => r.tipo == TipoRigaScontrino.articolo && !r.stornata).length;
 
-  /// Il nome senza «S.R.L.», «S.P.A.», «S.A.S.», «SNC» in fondo (F12.1.6 punto 3).
+  /// Il nome senza «S.R.L.», «S.P.A.», «S.A.S.», «SNC» in fondo (F12.1.6 punto 3) e senza la
+  /// punteggiatura finale.
+  /// ⚑ F12.7: «EMME Piu Supermercati.» (s06 sull'emulatore) finiva col punto nel campo del negozio
+  /// della chiusura e poi nella lista dei negozi, dove non combaciava con lo stesso negozio scritto
+  /// a mano. Si toglie anche il trattino o i due punti rimasti in coda.
   String? get negozioMostrato {
     final n = negozio;
     if (n == null) return null;
-    final s = n.replaceAll(RegExp(r'[\s,.-]*\b(s\.?\s?r\.?\s?l|s\.?\s?p\.?\s?a|s\.?\s?a\.?\s?s|s\.?\s?n\.?\s?c)\.?\s*$', caseSensitive: false), '');
-    return s.trim().isEmpty ? n : s.trim();
+    // Prima la coda («S.N.C. -» → «S.N.C»), poi la forma societaria, poi di nuovo la coda.
+    final coda = RegExp(r'[\s.,;:\-–]+$');
+    final s = n
+        .replaceAll(coda, '')
+        .replaceAll(RegExp(r'[\s,.-]*\b(s\.?\s?r\.?\s?l|s\.?\s?p\.?\s?a|s\.?\s?a\.?\s?s|s\.?\s?n\.?\s?c)\.?\s*$', caseSensitive: false), '')
+        .replaceAll(coda, '')
+        .trim();
+    return s.isEmpty ? n : s;
   }
 }
 
@@ -133,6 +143,11 @@ class ScontrinoParser {
     var rigaTotale = -1;
     var complessivo = false;
     Money? totale;
+    // ⚑ F12.7 (Vision su s01: «TOTALE COMPLESSIVO» letto, il suo 11,85 no): una riga totale senza
+    // importo chiude comunque il corpo se non ce n'e' una con l'importo, cosi' «Pagamento
+    // elettronico 11,85» sotto non diventa un articolo e il totale si ricava da «pagato − resto»
+    // e dalla somma delle righe (`_verificaTotale`), che devono concordare.
+    var totaleSenzaImporto = -1;
     for (var i = inizioCorpo; i < visive.length; i++) {
       final m = _totale.firstMatch(chiavi[i]);
       if (m == null) continue;
@@ -141,12 +156,15 @@ class ScontrinoParser {
       final eComplessivo = (m[1] ?? '').contains('complessivo');
       if (complessivo && !eComplessivo) continue;
       final importo = _importoTotale(visive, testi, i);
-      if (importo == null) continue;
+      if (importo == null) {
+        if (totaleSenzaImporto < 0) totaleSenzaImporto = i;
+        continue;
+      }
       rigaTotale = i;
       complessivo = eComplessivo;
       totale = importo;
     }
-    final fineCorpo = rigaTotale >= 0 ? rigaTotale : visive.length;
+    final fineCorpo = rigaTotale >= 0 ? rigaTotale : (totaleSenzaImporto >= 0 ? totaleSenzaImporto : visive.length);
 
     // 3. Negozio: la prima riga buona della testata.
     // ⚑ La prima e non quella con «S.R.L.»: e' l'insegna (INTERSPAR, IPERSIDIS), cioe' il nome con
@@ -441,6 +459,9 @@ class ScontrinoParser {
   static String _pulisciDescrizione(String s) {
     var d = s.replaceAll(RegExp(r'[-−]\s*$'), '').trim();
     d = d.replaceAll(_tokenIva, '').trim();
+    // ⚑ F12.7: gli asterischi in coda («NUTELLA GR200 ****», s06: la cassa segna cosi' gli articoli
+    // in promozione) finivano nel confronto e nella registrazione. Si tolgono solo in coda.
+    d = d.replaceAll(RegExp(r'[\s*]+$'), '');
     d = d.replaceAll(RegExp(r'\s+'), ' ');
     return d;
   }

@@ -1,0 +1,46 @@
+{
+ "campione": "c12_esl_lcd_germania.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 103,
+ "ritaglio": {
+  "verita": 1,
+  "cx": 0.49,
+  "cy": 0.59,
+  "w": 0.26
+ },
+ "righe": [
+  {
+   "t": "099",
+   "x": 0.5385,
+   "y": 0.3077,
+   "w": 0.2885,
+   "h": 0.3077,
+   "c": 1.0
+  },
+  {
+   "t": "236",
+   "x": 0.2596,
+   "y": 0.359,
+   "w": 0.1154,
+   "h": 0.1154,
+   "c": 1.0
+  },
+  {
+   "t": "NERTHER S MINI-BOX O.Z. 42G",
+   "x": 0.1058,
+   "y": 0.641,
+   "w": 0.6058,
+   "h": 0.0769,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "WERTHER'S MINI-BOX O.Z. 42G",
+   "prezzo": "0,99"
+  }
+ ]
+}

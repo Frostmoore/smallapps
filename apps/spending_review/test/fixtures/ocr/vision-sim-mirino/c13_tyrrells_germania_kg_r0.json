@@ -1,0 +1,23 @@
+{
+ "campione": "c13_tyrrells_germania_kg.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 4.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 71,
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.267,
+  "cy": 0.91,
+  "w": 0.1
+ },
+ "righe": [],
+ "verita": [
+  {
+   "nome": "Tyrrell's Kartoffelchips Sweet Chili & Red Pepper 150g",
+   "prezzo": "2,49",
+   "al_kg": "16,60",
+   "unita": "kg"
+  }
+ ]
+}

@@ -1,0 +1,64 @@
+{
+ "campione": "c23_cartello_barrato_sconto_0.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 374,
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.5,
+  "cy": 0.64,
+  "w": 1.0
+ },
+ "righe": [
+  {
+   "t": "sC.c-maniglie",
+   "x": 0.1152,
+   "y": -0.0045,
+   "w": 0.676,
+   "h": 0.1482,
+   "c": 1.0
+  },
+  {
+   "t": "fantas.a",
+   "x": 0.1044,
+   "y": 0.1745,
+   "w": 0.4275,
+   "h": 0.1456,
+   "c": 1.0
+  },
+  {
+   "t": "€2,50",
+   "x": 0.1176,
+   "y": 0.5241,
+   "w": 0.27,
+   "h": 0.101,
+   "c": 1.0
+  },
+  {
+   "t": "2,50",
+   "x": 0.3847,
+   "y": 0.7178,
+   "w": 0.5193,
+   "h": 0.2936,
+   "c": 1.0
+  },
+  {
+   "t": "€",
+   "x": 0.1102,
+   "y": 0.8242,
+   "w": 0.0799,
+   "h": 0.1172,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "sc.c-maniglie fantas.a",
+   "prezzo": "2,50",
+   "prezzo_pieno": "2,50",
+   "sconto": "0%"
+  }
+ ]
+}

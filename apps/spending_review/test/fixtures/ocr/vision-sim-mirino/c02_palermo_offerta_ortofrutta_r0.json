@@ -1,0 +1,64 @@
+{
+ "campione": "c02_palermo_offerta_ortofrutta.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 117,
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.58,
+  "cy": 0.17,
+  "w": 0.19
+ },
+ "righe": [
+  {
+   "t": "OFFERTA",
+   "x": 0.2106,
+   "y": 0.1636,
+   "w": 0.495,
+   "h": 0.1916,
+   "c": 1.0
+  },
+  {
+   "t": "ZUCCHINE NAPOLI",
+   "x": 0.1243,
+   "y": 0.3854,
+   "w": 0.4249,
+   "h": 0.0928,
+   "c": 1.0
+  },
+  {
+   "t": "AL KG",
+   "x": 0.1236,
+   "y": 0.498,
+   "w": 0.09,
+   "h": 0.0586,
+   "c": 1.0
+  },
+  {
+   "t": "1,48",
+   "x": 0.2737,
+   "y": 0.5105,
+   "w": 0.4053,
+   "h": 0.4336,
+   "c": 1.0
+  },
+  {
+   "t": "euro",
+   "x": 0.6895,
+   "y": 0.5455,
+   "w": 0.1316,
+   "h": 0.0629,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "ZUCCHINE NAPOLI",
+   "al_kg": "1,48",
+   "unita": "kg",
+   "offerta": "OFFERTA"
+  }
+ ]
+}

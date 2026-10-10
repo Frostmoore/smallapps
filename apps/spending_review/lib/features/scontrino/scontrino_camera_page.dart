@@ -337,33 +337,39 @@ class _Pezzi extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.file(
-                        File(f),
-                        key: ValueKey('scontrino_pezzo_$i'),
-                        fit: BoxFit.contain,
-                        cacheWidth: 400,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: 160,
-                          color: Colors.white10,
-                          alignment: Alignment.center,
-                          child: Text('${i + 1}', style: const TextStyle(color: Colors.white, fontSize: 28)),
+                // ⚑ F12.7: il Center allenta la larghezza imposta da Expanded, cosi' lo Stack prende
+                // la misura della FOTO (contain, stretta e alta per uno scontrino) e non della
+                // cella: prima la X stava nell'angolo della cella, lontana dalla foto stretta.
+                child: Center(
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          File(f),
+                          key: ValueKey('scontrino_pezzo_$i'),
+                          fit: BoxFit.contain,
+                          cacheWidth: 400,
+                          errorBuilder: (_, __, ___) => Container(
+                            height: 160,
+                            color: Colors.white10,
+                            alignment: Alignment.center,
+                            child: Text('${i + 1}', style: const TextStyle(color: Colors.white, fontSize: 28)),
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: IconButton.filledTonal(
-                        tooltip: l.scontrino_togliPezzo(i + 1),
-                        onPressed: () => onTogli(i),
-                        icon: const Icon(Icons.close, size: 18),
+                      Positioned(
+                        // Dentro la foto, non a cavallo del bordo: fuori dallo Stack il tocco non arriva.
+                        top: 0,
+                        right: 0,
+                        child: IconButton.filledTonal(
+                          tooltip: l.scontrino_togliPezzo(i + 1),
+                          onPressed: () => onTogli(i),
+                          icon: const Icon(Icons.close, size: 18),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

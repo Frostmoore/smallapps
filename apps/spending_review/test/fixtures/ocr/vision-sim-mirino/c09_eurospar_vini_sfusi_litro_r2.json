@@ -1,0 +1,79 @@
+{
+ "campione": "c09_eurospar_vini_sfusi_litro.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 4.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 164,
+ "ritaglio": {
+  "verita": 2,
+  "cx": 0.81,
+  "cy": 0.45,
+  "w": 0.16
+ },
+ "righe": [
+  {
+   "t": "€ 2,10 L",
+   "x": 0.4672,
+   "y": 0.1527,
+   "w": 0.2407,
+   "h": 0.1362,
+   "c": 1.0
+  },
+  {
+   "t": "BINES",
+   "x": 0.3562,
+   "y": 0.2583,
+   "w": 0.0813,
+   "h": 0.0333,
+   "c": 0.3
+  },
+  {
+   "t": "ILE VIOLE",
+   "x": 0.3056,
+   "y": 0.3137,
+   "w": 0.3825,
+   "h": 0.156,
+   "c": 1.0
+  },
+  {
+   "t": "vino rosso",
+   "x": 0.3375,
+   "y": 0.4917,
+   "w": 0.325,
+   "h": 0.05,
+   "c": 1.0
+  },
+  {
+   "t": "del ciente e idorei al corteto con lguid",
+   "x": 0.3625,
+   "y": 0.6417,
+   "w": 0.2812,
+   "h": 0.05,
+   "c": 1.0
+  },
+  {
+   "t": "almertad, confomi al D.M. 21 Marzo 1573 e",
+   "x": 0.3563,
+   "y": 0.6833,
+   "w": 0.3062,
+   "h": 0.0417,
+   "c": 1.0
+  },
+  {
+   "t": "12,50 % vol. -",
+   "x": 0.3858,
+   "y": 0.7853,
+   "w": 0.2536,
+   "h": 0.0922,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "LE VIOLE",
+   "al_kg": "2,10",
+   "unita": "l"
+  }
+ ]
+}

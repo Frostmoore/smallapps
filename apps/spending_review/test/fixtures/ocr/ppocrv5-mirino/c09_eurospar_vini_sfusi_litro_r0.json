@@ -1,0 +1,110 @@
+{
+ "campione": "c09_eurospar_vini_sfusi_litro.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 4.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10 (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.595,
+  "cy": 0.45,
+  "w": 0.16
+ },
+ "righe": [
+  {
+   "t": "€ 1,85 L.",
+   "x": 0.4688,
+   "y": 0.1583,
+   "w": 0.225,
+   "h": 0.1542,
+   "c": 0.987
+  },
+  {
+   "t": "ELICEN",
+   "x": 0.3594,
+   "y": 0.2792,
+   "w": 0.0781,
+   "h": 0.0375,
+   "c": 0.753
+  },
+  {
+   "t": "LROSSO DELLA RE\"",
+   "x": 0.3406,
+   "y": 0.3167,
+   "w": 0.3469,
+   "h": 0.175,
+   "c": 0.78
+  },
+  {
+   "t": "vino",
+   "x": 0.3344,
+   "y": 0.4917,
+   "w": 0.1469,
+   "h": 0.0625,
+   "c": 1.0
+  },
+  {
+   "t": "rosso",
+   "x": 0.4875,
+   "y": 0.5,
+   "w": 0.1812,
+   "h": 0.05,
+   "c": 0.998
+  },
+  {
+   "t": "In questo locale si riempiono",
+   "x": 0.4,
+   "y": 0.5875,
+   "w": 0.2094,
+   "h": 0.0417,
+   "c": 0.919
+  },
+  {
+   "t": "sdo rcperti puti d popretà del diente e",
+   "x": 0.3438,
+   "y": 0.625,
+   "w": 0.3187,
+   "h": 0.0542,
+   "c": 0.773
+  },
+  {
+   "t": "idonei al contutto con liquid alimentar,",
+   "x": 0.3625,
+   "y": 0.6667,
+   "w": 0.2812,
+   "h": 0.05,
+   "c": 0.917
+  },
+  {
+   "t": "confomi al D.M. 21 Maro 1973 e sucoessive",
+   "x": 0.3375,
+   "y": 0.7083,
+   "w": 0.3281,
+   "h": 0.05,
+   "c": 0.887
+  },
+  {
+   "t": "disposizioni nazional e comuniarie.",
+   "x": 0.375,
+   "y": 0.75,
+   "w": 0.2594,
+   "h": 0.05,
+   "c": 0.926
+  },
+  {
+   "t": "12,00 % vol.",
+   "x": 0.4,
+   "y": 0.8042,
+   "w": 0.225,
+   "h": 0.1,
+   "c": 0.98
+  }
+ ],
+ "verita": [
+  {
+   "nome": "IL ROSSO DELLA PRE'",
+   "al_kg": "1,85",
+   "unita": "l"
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{
+ "campione": "c10_despar_ortofrutta.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 3.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 87,
+ "ritaglio": {
+  "verita": 3,
+  "cx": 0.57,
+  "cy": 0.54,
+  "w": 0.09
+ },
+ "righe": [
+  {
+   "t": "OFPERTA",
+   "x": 0.2245,
+   "y": 0.0859,
+   "w": 0.368,
+   "h": 0.407,
+   "c": 1.0
+  },
+  {
+   "t": "1,29",
+   "x": 0.4356,
+   "y": 0.4347,
+   "w": 0.2933,
+   "h": 0.3571,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "offerta": "OFFERTA",
+   "prezzo": "1,29"
+  }
+ ]
+}

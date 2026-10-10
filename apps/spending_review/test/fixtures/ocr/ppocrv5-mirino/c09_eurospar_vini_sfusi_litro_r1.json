@@ -1,0 +1,102 @@
+{
+ "campione": "c09_eurospar_vini_sfusi_litro.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 4.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10 (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ritaglio": {
+  "verita": 1,
+  "cx": 0.7,
+  "cy": 0.45,
+  "w": 0.16
+ },
+ "righe": [
+  {
+   "t": "€ 2,10",
+   "x": 0.45,
+   "y": 0.1542,
+   "w": 0.175,
+   "h": 0.1417,
+   "c": 0.958
+  },
+  {
+   "t": "CHARDONNAY",
+   "x": 0.3,
+   "y": 0.3083,
+   "w": 0.3719,
+   "h": 0.1542,
+   "c": 0.991
+  },
+  {
+   "t": "varietale",
+   "x": 0.3063,
+   "y": 0.4375,
+   "w": 0.3594,
+   "h": 0.1,
+   "c": 0.997
+  },
+  {
+   "t": "In questo iocaie si fempiono",
+   "x": 0.375,
+   "y": 0.5625,
+   "w": 0.2125,
+   "h": 0.05,
+   "c": 0.919
+  },
+  {
+   "t": "solo redpienti pulti di propriet del diente e",
+   "x": 0.3219,
+   "y": 0.6042,
+   "w": 0.3187,
+   "h": 0.05,
+   "c": 0.835
+  },
+  {
+   "t": "idonei al contatto con Iqud alimentar.",
+   "x": 0.3375,
+   "y": 0.6458,
+   "w": 0.2875,
+   "h": 0.05,
+   "c": 0.902
+  },
+  {
+   "t": "1973 e sucoessive",
+   "x": 0.5031,
+   "y": 0.6917,
+   "w": 0.1375,
+   "h": 0.0417,
+   "c": 0.95
+  },
+  {
+   "t": "disposizioni nazional",
+   "x": 0.35,
+   "y": 0.7292,
+   "w": 0.1594,
+   "h": 0.05,
+   "c": 0.926
+  },
+  {
+   "t": "il e conuntarie.",
+   "x": 0.4938,
+   "y": 0.7292,
+   "w": 0.1156,
+   "h": 0.0458,
+   "c": 0.824
+  },
+  {
+   "t": "11,50 % vol.",
+   "x": 0.3812,
+   "y": 0.7833,
+   "w": 0.2031,
+   "h": 0.1042,
+   "c": 0.995
+  }
+ ],
+ "verita": [
+  {
+   "nome": "CHARDONNAY varietale",
+   "al_kg": "2,10",
+   "unita": "l"
+  }
+ ]
+}

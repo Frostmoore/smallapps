@@ -1,0 +1,85 @@
+{
+ "nota": "Ritagli dei cartellini come li farebbe il mirino dell'app (4:3 orizzontale, F12.1.12): per ogni campione, un ritaglio per cartellino della verita'. cx, cy = centro, w = larghezza, tutto in frazioni 0..1 dell'immagine DOPO la rotazione EXIF; l'altezza e' w * larghezza * 3/4 in pixel. Se esce dall'immagine si sposta dentro; se e' piu' alto dell'immagine si riduce tenendo il 4:3. Fatti a mano guardando le foto con una griglia (F12.7, 2026-10-10). Le immagini restano fuori dal repo: qui solo i numeri. Usati da tool/esporta_fixture_ocr.py --ritagli.",
+ "esclusi_scritti_a_mano": {
+  "c03_borlotti_manoscritto_kg.jpg": "scritto a mano: non supportato",
+  "c04_friggitelli_manoscritto_kg.jpg": "scritto a mano: non supportato",
+  "c05_pomodori_vesuvio_manoscritto_kg.jpg": "scritto a mano: non supportato",
+  "c06_bolzano_ravanelli_mazzo.jpg": "scritto a mano: non supportato",
+  "c09_eurospar_vini_sfusi_litro.jpg#3-5": "i tre cartelli di sinistra hanno il prezzo scritto a mano",
+  "c24_iper_lavagna_formaggio_kg.jpg": "lavagna scritta col gesso",
+  "c25_pescheria_pesce_spada_manoscritto.jpg": "corsivo scritto a mano"
+ },
+ "ritagli": {
+  "c01_tigros_3x1_anziche.jpg": [{"verita": 0, "cx": 0.52, "cy": 0.56, "w": 0.68}],
+  "c02_palermo_offerta_ortofrutta.jpg": [
+   {"verita": 0, "cx": 0.58, "cy": 0.17, "w": 0.19},
+   {"verita": 1, "cx": 0.22, "cy": 0.185, "w": 0.14},
+   {"verita": 2, "cx": 0.065, "cy": 0.20, "w": 0.12}
+  ],
+  "c07_banco_pollo_spiedo_esl.jpg": [{"verita": 0, "cx": 0.165, "cy": 0.22, "w": 0.22}],
+  "c08_gin_prezzi_adesivi.jpg": [
+   {"verita": 0, "cx": 0.31, "cy": 0.42, "w": 0.15},
+   {"verita": 1, "cx": 0.575, "cy": 0.55, "w": 0.14}
+  ],
+  "c09_eurospar_vini_sfusi_litro.jpg": [
+   {"verita": 0, "cx": 0.595, "cy": 0.45, "w": 0.16},
+   {"verita": 1, "cx": 0.70, "cy": 0.45, "w": 0.16},
+   {"verita": 2, "cx": 0.81, "cy": 0.45, "w": 0.16}
+  ],
+  "c10_despar_ortofrutta.jpg": [
+   {"verita": 0, "cx": 0.08, "cy": 0.67, "w": 0.14},
+   {"verita": 1, "cx": 0.16, "cy": 0.675, "w": 0.13},
+   {"verita": 2, "cx": 0.33, "cy": 0.86, "w": 0.12},
+   {"verita": 3, "cx": 0.57, "cy": 0.54, "w": 0.09}
+  ],
+  "c11_carrefour_fr_2piu1.jpg": [{"verita": 0, "cx": 0.555, "cy": 0.44, "w": 0.48}],
+  "c12_esl_lcd_germania.jpg": [
+   {"verita": 0, "cx": 0.185, "cy": 0.60, "w": 0.26},
+   {"verita": 1, "cx": 0.49, "cy": 0.59, "w": 0.26},
+   {"verita": 2, "cx": 0.825, "cy": 0.58, "w": 0.26}
+  ],
+  "c13_tyrrells_germania_kg.jpg": [{"verita": 0, "cx": 0.267, "cy": 0.91, "w": 0.10}],
+  "c14_esselunga_borotalco.jpg": [{"verita": 0, "cx": 0.48, "cy": 0.915, "w": 0.45}],
+  "c15_esselunga_caffe.jpg": [{"verita": 0, "cx": 0.615, "cy": 0.90, "w": 0.45}],
+  "c16_esselunga_nutkao.jpg": [{"verita": 0, "cx": 0.445, "cy": 0.91, "w": 0.50}],
+  "c17_esselunga_cocacola.jpg": [{"verita": 0, "cx": 0.50, "cy": 0.805, "w": 0.30}],
+  "c18_esselunga_limoncetta_litro.jpg": [
+   {"verita": 0, "cx": 0.51, "cy": 0.10, "w": 0.32},
+   {"verita": 1, "cx": 0.10, "cy": 0.815, "w": 0.30},
+   {"verita": 2, "cx": 0.70, "cy": 0.815, "w": 0.30}
+  ],
+  "c19_esselunga_distillato_litro.jpg": [{"verita": 0, "cx": 0.615, "cy": 0.90, "w": 0.45}],
+  "c20_esselunga_tonica_litro.jpg": [{"verita": 0, "cx": 0.82, "cy": 0.875, "w": 0.38}],
+  "c21_esselunga_virtual_kg.jpg": [{"verita": 0, "cx": 0.645, "cy": 0.845, "w": 0.40}],
+  "c22_esselunga_farine_due_cartellini.jpg": [
+   {"verita": 0, "cx": 0.36, "cy": 0.065, "w": 0.45},
+   {"verita": 1, "cx": 0.495, "cy": 0.80, "w": 0.42}
+  ],
+  "c23_cartello_barrato_sconto_0.jpg": [{"verita": 0, "cx": 0.50, "cy": 0.64, "w": 1.0}],
+  "c26_peck_carciofini_kg.jpg": [
+   {"verita": 0, "cx": 0.17, "cy": 0.86, "w": 0.34},
+   {"verita": 1, "cx": 0.80, "cy": 0.86, "w": 0.32}
+  ],
+  "c27_peck_porcini_kg.jpg": [
+   {"verita": 0, "cx": 0.245, "cy": 0.905, "w": 0.30},
+   {"verita": 1, "cx": 0.815, "cy": 0.905, "w": 0.28}
+  ],
+  "c28_esselunga_misticanza_sconto40.jpg": [{"verita": 0, "cx": 0.62, "cy": 0.50, "w": 0.73}],
+  "c29_last_minute_barrato_50.jpg": [{"verita": 0, "cx": 0.47, "cy": 0.50, "w": 0.80}],
+  "c30_pam_rucola_sconto30.jpg": [{"verita": 0, "cx": 0.66, "cy": 0.62, "w": 0.55}],
+  "c31_bollino_antispreco_30.jpg": [{"verita": 0, "cx": 0.49, "cy": 0.57, "w": 0.80}],
+  "c32_bollino_scadenza_30.jpg": [{"verita": 0, "cx": 0.50, "cy": 0.52, "w": 0.75}],
+  "c33_iper_esl_prezzo_dinamico.jpg": [
+   {"verita": 0, "cx": 0.17, "cy": 0.12, "w": 0.32},
+   {"verita": 1, "cx": 0.80, "cy": 0.12, "w": 0.32}
+  ],
+  "c34_dutyfree_sancarlo.jpg": [
+   {"verita": 0, "cx": 0.225, "cy": 0.68, "w": 0.24},
+   {"verita": 1, "cx": 0.70, "cy": 0.68, "w": 0.32}
+  ],
+  "c35_dutyfree_ferrarini.jpg": [
+   {"verita": 0, "cx": 0.27, "cy": 0.885, "w": 0.32},
+   {"verita": 1, "cx": 0.775, "cy": 0.90, "w": 0.30}
+  ]
+ }
+}

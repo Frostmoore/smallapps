@@ -1,0 +1,29 @@
+{
+ "campione": "c10_despar_ortofrutta.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 3.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 85,
+ "ritaglio": {
+  "verita": 1,
+  "cx": 0.16,
+  "cy": 0.675,
+  "w": 0.13
+ },
+ "righe": [
+  {
+   "t": "1,98",
+   "x": 0.347,
+   "y": 0.5071,
+   "w": 0.3382,
+   "h": 0.312,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "prezzo": "1,98"
+  }
+ ]
+}

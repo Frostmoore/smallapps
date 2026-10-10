@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:meta/meta.dart';
 import 'package:micro_core/micro_core.dart';
 import 'package:micro_ocr/riga_ocr.dart';
@@ -115,7 +117,7 @@ class BilanciaParser {
         (Arrotonda.perMisura(alKg.valore, peso.millesimi).cents - totale.valore.cents).abs() <= 1;
 
     return LetturaBilancia(
-      prodotto: _prodotto(visive),
+      prodotto: _prodotto(righe),
       pesoNetto: peso == null ? null : AMisura(peso.millesimi, UnitaMisura.kg),
       alKg: alKg?.valore,
       totale: totale.valore,
@@ -157,16 +159,53 @@ class BilanciaParser {
     return altri.firstOrNull;
   }
 
-  /// 5. La riga di lettere piu' in alto che non e' un'etichetta.
-  static String? _prodotto(List<RigaVisiva> visive) {
-    for (final v in visive) {
-      final t = v.testo.trim();
-      if (TestoOcr.lettere(t) < 3) continue;
+  /// L'insegna stampata in testa all'etichetta («PANORAMA», «Pam», «ESSELUNGA®», «REWE Center»):
+  /// e' il negozio, non il prodotto.
+  static final RegExp _insegna = RegExp(
+    r'^\W*(pam|panorama|pam panorama|esselunga|coop|ipercoop|conad|carrefour|lidl|eurospin|despar|interspar|'
+    r'eurospar|iper|bennet|md|penny|aldi|tigros|famila|crai|sigma|simply|auchan|unes|rewe|waitrose|il gigante|'
+    r'naturasi)(\s+center)?\W*$',
+  );
+
+  /// Diciture d'offerta e istruzioni che non sono il prodotto (oltre a [_nonProdotto]).
+  static final RegExp _nonProdottoAncora = RegExp(
+    r'offert|offre|speciale|sconto|scontat|ribasso|approfitta|servare|frigorifer|cottura|origine|allevato|macellato|'
+    r'\buse\s*by\b|\bkeep\b|refrigerat|gewicht|preis|betrag',
+  );
+
+  /// 5. Il nome del prodotto: fra le righe OCR di lettere (almeno 4) che non sono etichette,
+  /// insegne, diciture o codici, quella scritta PIU' GRANDE (a parita', entro il 10%, la piu' in
+  /// alto), unita alle altre buone della stessa riga visiva alte almeno l'80% («NEKTARINEN» +
+  /// «GELB», b07).
+  /// ⚑ F12.7: prima era «la prima riga visiva di lettere dall'alto», che su quasi tutte le
+  /// etichette e' l'insegna del negozio («PANORAMA» su b01, visto sul simulatore iOS) o il bollino
+  /// dell'offerta («OFFRE SPECIALE», b09). Il nome del prodotto e' quasi sempre la scritta piu'
+  /// grande dopo il prezzo. ⚑ Sulle righe OCR e non sulle righe visive: una riga visiva unisce il
+  /// nome all'insegna accanto («WR MULL KINTYRE CHDR» + «Waitrose», b08) o al prezzo (b09).
+  /// ⚑ Esclusi: frasi oltre 40 caratteri (ingredienti, istruzioni) e codici con piu' di un terzo
+  /// di cifre («E4954 G.03», b06).
+  static String? _prodotto(List<RigaOcr> righe) {
+    bool buona(RigaOcr r) {
+      final t = TestoOcr.latino(r.testo).trim();
+      final lettere = TestoOcr.lettere(t);
+      if (lettere < 4 || t.length > 40) return false;
+      if (RegExp(r'\d').allMatches(t).length * 2 > lettere) return false;
       final k = TestoOcr.chiave(t);
-      if (_nonProdotto.hasMatch(k) || TestoOcr.data.hasMatch(t)) continue;
-      if (RegExp(r'\d[.,]\d{2}').hasMatch(t)) continue;
-      return t.length > 60 ? t.substring(0, 60).trimRight() : t;
+      if (_nonProdotto.hasMatch(k) || _nonProdottoAncora.hasMatch(k) || _insegna.hasMatch(k)) return false;
+      return !TestoOcr.data.hasMatch(t) && !RegExp(r'\d[.,]\d{2}').hasMatch(t);
     }
-    return null;
+
+    final buone = righe.where(buona).toList()..sort((a, b) => a.riquadro.alto.compareTo(b.riquadro.alto));
+    if (buone.isEmpty) return null;
+    final massima = buone.map((r) => r.riquadro.altezza).reduce(math.max);
+    final scelta = buone.firstWhere((r) => r.riquadro.altezza >= 0.9 * massima);
+    final riga = [
+      for (final r in buone)
+        if (identical(r, scelta) ||
+            (r.riquadro.sovrapposizioneVerticale(scelta.riquadro) >= 0.5 && r.riquadro.altezza >= 0.8 * scelta.riquadro.altezza))
+          r,
+    ]..sort((a, b) => a.riquadro.sinistra.compareTo(b.riquadro.sinistra));
+    final nome = riga.map((r) => TestoOcr.latino(r.testo).trim()).join(' ');
+    return nome.length > 60 ? nome.substring(0, 60).trimRight() : nome;
   }
 }

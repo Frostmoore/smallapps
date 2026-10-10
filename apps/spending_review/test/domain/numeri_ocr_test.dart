@@ -23,6 +23,10 @@ void main() {
       expect(NumeriOcr.pulisci('EUR 3,19'), '3,19');
       expect(NumeriOcr.pulisci('TOTALE EURO 6,15'), 'TOTALE EURO 6,15');
     });
+    test('F12.7: punto fra una lettera e un prezzo («AILC.12,80», c18) → spazio; «GR.600» resta', () {
+      expect(NumeriOcr.pulisci('AILC.12,80'), 'AILC 12,80');
+      expect(NumeriOcr.pulisci('CREMA GR.600'), 'CREMA GR.600');
+    });
   });
 
   group('espliciti', () {

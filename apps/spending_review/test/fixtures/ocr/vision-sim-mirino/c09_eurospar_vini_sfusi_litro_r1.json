@@ -1,0 +1,95 @@
+{
+ "campione": "c09_eurospar_vini_sfusi_litro.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 4.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 142,
+ "ritaglio": {
+  "verita": 1,
+  "cx": 0.7,
+  "cy": 0.45,
+  "w": 0.16
+ },
+ "righe": [
+  {
+   "t": "€ 2,10 L.",
+   "x": 0.4562,
+   "y": 0.1667,
+   "w": 0.2063,
+   "h": 0.1083,
+   "c": 1.0
+  },
+  {
+   "t": "CHARDONNAY",
+   "x": 0.2997,
+   "y": 0.323,
+   "w": 0.3757,
+   "h": 0.1207,
+   "c": 1.0
+  },
+  {
+   "t": "varietale",
+   "x": 0.3062,
+   "y": 0.4583,
+   "w": 0.35,
+   "h": 0.075,
+   "c": 1.0
+  },
+  {
+   "t": "In quest locale si tempiono",
+   "x": 0.3687,
+   "y": 0.5667,
+   "w": 0.2187,
+   "h": 0.0417,
+   "c": 1.0
+  },
+  {
+   "t": "solo neopieni pulf di proprietà ded cientie e",
+   "x": 0.325,
+   "y": 0.6083,
+   "w": 0.325,
+   "h": 0.05,
+   "c": 1.0
+  },
+  {
+   "t": "idonei al contatto con fouid almertart.",
+   "x": 0.3375,
+   "y": 0.65,
+   "w": 0.2875,
+   "h": 0.0417,
+   "c": 1.0
+  },
+  {
+   "t": "confomi ai D.ML 21Marzo 1573 e sucoessive",
+   "x": 0.3187,
+   "y": 0.6917,
+   "w": 0.325,
+   "h": 0.0417,
+   "c": 1.0
+  },
+  {
+   "t": "Senceinoni navional e comuntane",
+   "x": 0.3563,
+   "y": 0.7417,
+   "w": 0.25,
+   "h": 0.025,
+   "c": 1.0
+  },
+  {
+   "t": "11,50 % vol.",
+   "x": 0.3813,
+   "y": 0.8,
+   "w": 0.1938,
+   "h": 0.0833,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "CHARDONNAY varietale",
+   "al_kg": "2,10",
+   "unita": "l"
+  }
+ ]
+}

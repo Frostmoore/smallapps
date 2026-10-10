@@ -111,4 +111,23 @@ void main() {
     expect(parser.interpreta([r('SOLO TESTO', 0.1, 0.1, 0.5, 0.1)]), isNull);
     expect(parser.interpreta(const []), isNull);
   });
+
+  test('F12.7: il prodotto e\' la scritta piu\' grande, non l\'insegna in testa ne\' il bollino dell\'offerta', () {
+    final l = parser.interpreta([
+      r('PANORAMA', 0.30, 0.02, 0.30, 0.03),
+      r('OFFERTA SPECIALE', 0.10, 0.06, 0.60, 0.05),
+      r('ORATA', 0.10, 0.12, 0.30, 0.07),
+      r('FRESCA', 0.45, 0.12, 0.30, 0.07),
+      r('CONSERVARE TRA 0 E 4 GRADI', 0.10, 0.20, 0.60, 0.03),
+      r('E4954 G.03', 0.10, 0.25, 0.30, 0.09),
+      r('PESO NETTO kg', 0.10, 0.40, 0.30, 0.05),
+      r('0,258', 0.10, 0.46, 0.20, 0.06),
+      r('€/kg', 0.45, 0.40, 0.15, 0.05),
+      r('29,90', 0.45, 0.46, 0.20, 0.06),
+      r('IMPORTO €', 0.70, 0.40, 0.20, 0.05),
+      r('7,71', 0.70, 0.46, 0.25, 0.08),
+    ])!;
+    expect(l.prodotto, 'ORATA FRESCA'); // le due parole sulla stessa riga, unite
+    expect(l.totale, e(771));
+  });
 }

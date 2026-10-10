@@ -1,0 +1,33 @@
+{
+ "campione": "c25_pescheria_pesce_spada_manoscritto.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim",
+ "creato": "2026-10-10",
+ "ms": 346,
+ "righe": [
+  {
+   "t": "Tưcc Srg",
+   "x": 0.0264,
+   "y": 0.2742,
+   "w": 0.3299,
+   "h": 0.0963,
+   "c": 0.3
+  },
+  {
+   "t": "15(c)",
+   "x": 0.1182,
+   "y": 0.3642,
+   "w": 0.2485,
+   "h": 0.0991,
+   "c": 0.3
+  }
+ ],
+ "verita": [
+  {
+   "nome": "PESCE SPADA",
+   "al_kg": "15,00",
+   "unita": "kg"
+  }
+ ]
+}

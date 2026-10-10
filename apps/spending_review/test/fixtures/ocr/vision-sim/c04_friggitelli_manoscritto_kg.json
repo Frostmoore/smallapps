@@ -1,0 +1,49 @@
+{
+ "campione": "c04_friggitelli_manoscritto_kg.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 3.0",
+ "motore": "vision-sim",
+ "creato": "2026-10-10",
+ "ms": 374,
+ "righe": [
+  {
+   "t": "FRIGGITELLI",
+   "x": 0.5996,
+   "y": 0.1849,
+   "w": 0.2532,
+   "h": 0.2211,
+   "c": 1.0
+  },
+  {
+   "t": "4.00€",
+   "x": 0.6464,
+   "y": 0.2532,
+   "w": 0.2284,
+   "h": 0.2166,
+   "c": 1.0
+  },
+  {
+   "t": "ALKG",
+   "x": 0.7013,
+   "y": 0.3505,
+   "w": 0.1326,
+   "h": 0.1358,
+   "c": 1.0
+  },
+  {
+   "t": "ITALIA",
+   "x": 0.6812,
+   "y": 0.4141,
+   "w": 0.1727,
+   "h": 0.1455,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "FRIGGITELLI",
+   "al_kg": "4,00",
+   "unita": "kg"
+  }
+ ]
+}

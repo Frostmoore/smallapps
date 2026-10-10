@@ -2,13 +2,43 @@
   "ppocrv5": {
     "bilancia.al_kg": 2,
     "bilancia.peso_kg": 2,
+    "bilancia.prodotto": 1,
     "bilancia.totale": 2,
-    "cartellino.al_kg": 3,
-    "cartellino.offerta": 1,
-    "cartellino.prezzo": 12,
-    "cartellino.prezzo_pieno": 2,
+    "cartellino.al_kg": 4,
+    "cartellino.nome": 4,
+    "cartellino.offerta": 2,
+    "cartellino.prezzo": 13,
+    "cartellino.prezzo_pieno": 3,
     "scontrino.negozio": 6,
     "scontrino.righe": 12,
     "scontrino.totale": 15
+  },
+  "ppocrv5-mirino": {
+    "cartellino.al_kg": 5,
+    "cartellino.nome": 8,
+    "cartellino.offerta": 3,
+    "cartellino.prezzo": 11,
+    "cartellino.prezzo_pieno": 3
+  },
+  "vision-sim": {
+    "bilancia.al_kg": 1,
+    "bilancia.peso_kg": 1,
+    "bilancia.prodotto": 1,
+    "bilancia.totale": 1,
+    "cartellino.al_kg": 3,
+    "cartellino.nome": 5,
+    "cartellino.offerta": 3,
+    "cartellino.prezzo": 10,
+    "cartellino.prezzo_pieno": 2,
+    "scontrino.negozio": 4,
+    "scontrino.righe": 12,
+    "scontrino.totale": 13
+  },
+  "vision-sim-mirino": {
+    "cartellino.al_kg": 5,
+    "cartellino.nome": 10,
+    "cartellino.offerta": 3,
+    "cartellino.prezzo": 9,
+    "cartellino.prezzo_pieno": 2
   }
 }

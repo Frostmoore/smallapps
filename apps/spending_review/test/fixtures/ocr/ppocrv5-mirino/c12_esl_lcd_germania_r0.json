@@ -1,0 +1,53 @@
+{
+ "campione": "c12_esl_lcd_germania.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10 (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.185,
+  "cy": 0.6,
+  "w": 0.26
+ },
+ "righe": [
+  {
+   "t": "055",
+   "x": 0.5337,
+   "y": 0.2692,
+   "w": 0.274,
+   "h": 0.25,
+   "c": 0.867
+  },
+  {
+   "t": "38",
+   "x": 0.2788,
+   "y": 0.3462,
+   "w": 0.0962,
+   "h": 0.109,
+   "c": 0.963
+  },
+  {
+   "t": "1ER/40G",
+   "x": 0.5433,
+   "y": 0.6154,
+   "w": 0.1779,
+   "h": 0.0833,
+   "c": 0.939
+  },
+  {
+   "t": "SNARTIES+GOLDBAER",
+   "x": 0.1058,
+   "y": 0.6218,
+   "w": 0.4038,
+   "h": 0.0769,
+   "c": 0.964
+  }
+ ],
+ "verita": [
+  {
+   "nome": "SMARTIES+GOLDBAER",
+   "prezzo": "0,55"
+  }
+ ]
+}

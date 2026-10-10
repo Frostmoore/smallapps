@@ -26,6 +26,12 @@ import 'package:spending_review/domain/quantita.dart';
 /// Le 27 fixture a licenza non libera stanno FUORI dal repo; con `SR_CAMPIONI` che punta alla
 /// cartella che contiene `ppocrv5/` (es. `E:/coding/XAMPP/htdocs/microapps-campioni/f12/fixture`)
 /// il banco le legge e stampa anche i numeri sui 60 (senza cricchetto: non tutti le hanno).
+///
+/// ⚑ Ogni sottocartella di `test/fixtures/ocr/` e' un «motore» col suo cricchetto (F12.7):
+/// `ppocrv5` = foto intere (spesso larghe, piu' cartellini), `ppocrv5-mirino` = un ritaglio per
+/// cartellino come lo fa il mirino dell'app (`ritagli_mirino.json`, il caso d'uso vero),
+/// `vision-sim` e `vision-sim-mirino` = le stesse immagini lette da Vision sul simulatore iPhone.
+/// Nei «-mirino» ogni fixture ha UNA verita': conta solo la prima proposta.
 void main() {
   final cartella = Directory('test/fixtures/ocr');
   final soglie = (jsonDecode(File('${cartella.path}/soglie.json').readAsStringSync()) as Map<String, Object?>)
@@ -45,7 +51,9 @@ void main() {
       final esito = _Banco.misura(fixture);
 
       test('nessun dato di carta nelle fixture del repo', () {
-        final carta = RegExp(r'\*{4}\d{4}');
+        // ⚑ Asterischi (RapidOCR) o «x» (Vision, F12.7: «673703xxxxxxxxx7034» in s13) davanti alle
+        // ultime 4 cifre: un PAN mascherato non deve mai finire nel repo.
+        final carta = RegExp(r'(\*{4}|[xX]{4,})\d{4}');
         for (final f in fixture) {
           for (final r in f.righe) {
             expect(carta.hasMatch(r.testo), isFalse, reason: '${f.campione}: "${r.testo}"');
@@ -71,7 +79,9 @@ void main() {
         }
       });
 
-      test('sempre giusti: i totali di bilance e scontrini (il lettore li legge al 100%)', () {
+      // ⚑ Solo PP-OCRv5: e' RapidOCR che legge al 100% i totali (f12-ocr.md §7). Vision sul
+      // simulatore ne perde alcuni gia' nell'OCR (F12.7): li tiene il suo cricchetto.
+      test('sempre giusti: i totali di bilance e scontrini (il lettore li legge al 100%)', skip: !nomeMotore.startsWith('ppocrv5'), () {
         expect(esito.sbagliati['bilancia.totale'] ?? const <String>[], isEmpty);
         expect(esito.sbagliati['scontrino.totale'] ?? const <String>[], isEmpty);
       });
@@ -82,15 +92,20 @@ void main() {
     });
   }
 
+  // ⚑ Le private si leggono per OGNI cartella di motore del repo (`ppocrv5` = foto intere,
+  // `ppocrv5-mirino` = ritagli del mirino, F12.7): `SR_CAMPIONI/<motore>/`.
   final privati = Platform.environment['SR_CAMPIONI'];
   test('fixture private (SR_CAMPIONI)', () {
     if (privati == null || !Directory('$privati/ppocrv5').existsSync()) {
       // ignore: avoid_print
-      print('27 fixture private non trovate (SR_CAMPIONI non impostata): solo le 33 del repo');
+      print('fixture private non trovate (SR_CAMPIONI non impostata): solo quelle del repo');
       return;
     }
-    final tutte = [..._carica(Directory('${cartella.path}/ppocrv5')), ..._carica(Directory('$privati/ppocrv5'))];
-    _Banco.misura(tutte).stampa('tutti i ${tutte.length} campioni, ppocrv5');
+    for (final motore in motori) {
+      final nome = motore.uri.pathSegments.where((s) => s.isNotEmpty).last;
+      final tutte = [..._carica(motore), ..._carica(Directory('$privati/$nome'))];
+      _Banco.misura(tutte).stampa('tutti i ${tutte.length} campioni, $nome');
+    }
   });
 }
 
@@ -202,6 +217,11 @@ final class _Banco {
         final u = unita == 'l' ? UnitaMisura.l : UnitaMisura.kg;
         _conta('cartellino.al_kg', proposte.any((p) => p.unitario?.valore.cents == alKg && p.unitario?.unita == u), chi);
       }
+      // ⚑ F12.7: il nome, solo dove la verita' lo ha (vedi [_nomeOk]).
+      final nome = v['nome'];
+      if (nome != null && f.verita.length == 1) {
+        _conta('cartellino.nome', proposte.isNotEmpty && _nomeOk(proposte.first.nome, nome), '$chi letto "${proposte.firstOrNull?.nome}"');
+      }
       final attesa = _offertaAttesa(v);
       if (attesa != null) {
         _conta('cartellino.offerta', proposte.any((p) => attesa(p.offerta)), chi);
@@ -231,6 +251,9 @@ final class _Banco {
     _conta('bilancia.totale', l?.totale?.cents == _cents(v['totale']), f.campione);
     _conta('bilancia.peso_kg', l?.pesoNetto?.millesimi == _cents(v['peso_kg']), f.campione);
     _conta('bilancia.al_kg', l?.alKg?.cents == _cents(v['al_kg']), f.campione);
+    // ⚑ F12.7: il nome del prodotto (col criterio del negozio: simile ≥ 0,8 o parole iniziali).
+    final prodotto = v['prodotto'];
+    if (prodotto != null) _conta('bilancia.prodotto', _negozioOk(l?.prodotto, prodotto), '${f.campione} letto "${l?.prodotto}"');
   }
 
   void _scontrino(_Fixture f, LetturaScontrino l) {
@@ -264,6 +287,17 @@ final class _Banco {
       if (!(x == y || (x.length >= 3 && y.startsWith(x)) || (y.length >= 3 && x.startsWith(y)))) return false;
     }
     return true;
+  }
+
+  /// Il nome del cartellino e' «preso» se almeno meta' delle sue parole significative (4+
+  /// caratteri) sta nella verita' (uguale o con lo stesso inizio di 4 lettere), e almeno una. ⚑ Largo
+  /// apposta: il nome nel foglio di conferma si corregge con un tocco, serve che sia QUEL prodotto.
+  static bool _nomeOk(String letto, String atteso) {
+    List<String> parole(String s) => Nomi.normalizza(s).split(' ').where((p) => p.length >= 4).toList();
+    final l = parole(letto), a = parole(atteso);
+    if (l.isEmpty || a.isEmpty) return false;
+    final buone = l.where((x) => a.any((y) => x == y || (x.substring(0, 4) == y.substring(0, 4)))).length;
+    return buone >= 1 && buone * 2 >= l.length;
   }
 
   void stampa(String titolo) {

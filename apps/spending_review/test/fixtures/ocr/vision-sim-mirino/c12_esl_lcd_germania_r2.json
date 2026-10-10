@@ -1,0 +1,30 @@
+{
+ "campione": "c12_esl_lcd_germania.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 108,
+ "ritaglio": {
+  "verita": 2,
+  "cx": 0.825,
+  "cy": 0.58,
+  "w": 0.26
+ },
+ "righe": [
+  {
+   "t": "STORCK NIMM2 MINI-B0X 0.Z.42G",
+   "x": 0.1325,
+   "y": 0.6112,
+   "w": 0.6192,
+   "h": 0.1084,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "STORCK NIMM2 MINI-BOX O.Z. 42G",
+   "prezzo": "0,99"
+  }
+ ]
+}

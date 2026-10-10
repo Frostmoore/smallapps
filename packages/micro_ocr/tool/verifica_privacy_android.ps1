@@ -55,6 +55,16 @@ try {
     # li' si cercano solo le stringhe lunghe; nel .so di ORT si cercano tutte.
     $daCercare = if ($voce.FullName -match '\.so$') { $vietate } else { $vietate | Where-Object { $_.Length -gt 5 } }
     foreach ($s in $daCercare) {
+      if ($s.Length -le 5) {
+        # ☠ F12.7: nel .so di ORT per armeabi-v7a «1DS» compare 20 volte DENTRO il codice macchina
+        # (istruzioni Thumb: «\x03 1DSDS \xf8»), mentre gli indirizzi veri della telemetria non ci
+        # sono in nessuna ABI. Una stringa corta conta solo dentro una stringa STAMPABILE di almeno
+        # 8 caratteri, come fa `strings` (una stringa del programma, non byte di codice). Le stringhe
+        # lunghe si cercano ancora ovunque, in Latin1 e in UTF-16.
+        $stampabili = @([regex]::Matches($testo, '[\x20-\x7E]{8,}') | Where-Object { $_.Value.Contains($s) })
+        if ($stampabili.Count -gt 0) { $trovate += "$($voce.FullName): '$s' in '$($stampabili[0].Value)'" }
+        continue
+      }
       if ($testo.Contains($s) -or $testo16.Contains($s)) { $trovate += "$($voce.FullName): '$s'" }
     }
   }

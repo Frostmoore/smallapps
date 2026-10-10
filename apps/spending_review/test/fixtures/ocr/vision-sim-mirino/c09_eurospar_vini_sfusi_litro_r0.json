@@ -1,0 +1,95 @@
+{
+ "campione": "c09_eurospar_vini_sfusi_litro.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 4.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 142,
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.595,
+  "cy": 0.45,
+  "w": 0.16
+ },
+ "righe": [
+  {
+   "t": "€ 1,85 L.",
+   "x": 0.474,
+   "y": 0.1782,
+   "w": 0.2086,
+   "h": 0.1216,
+   "c": 1.0
+  },
+  {
+   "t": "IL ROSSO DELLA PRE",
+   "x": 0.3041,
+   "y": 0.3225,
+   "w": 0.3924,
+   "h": 0.1664,
+   "c": 1.0
+  },
+  {
+   "t": "vino rosso",
+   "x": 0.3375,
+   "y": 0.5,
+   "w": 0.3312,
+   "h": 0.05,
+   "c": 1.0
+  },
+  {
+   "t": "In questo locale si tempione",
+   "x": 0.3937,
+   "y": 0.5917,
+   "w": 0.2125,
+   "h": 0.0417,
+   "c": 1.0
+  },
+  {
+   "t": "solo necpeni puli d proprietà del dierte e",
+   "x": 0.3438,
+   "y": 0.625,
+   "w": 0.3187,
+   "h": 0.05,
+   "c": 1.0
+  },
+  {
+   "t": "idonei ai contato coe lould almertar.,",
+   "x": 0.3562,
+   "y": 0.675,
+   "w": 0.2875,
+   "h": 0.0417,
+   "c": 1.0
+  },
+  {
+   "t": "contomi al DJM. 21 Marzo 1973 e successive",
+   "x": 0.3437,
+   "y": 0.7167,
+   "w": 0.325,
+   "h": 0.0417,
+   "c": 1.0
+  },
+  {
+   "t": "cicooscsoni nazonal è boniufilane",
+   "x": 0.375,
+   "y": 0.7667,
+   "w": 0.25,
+   "h": 0.025,
+   "c": 0.5
+  },
+  {
+   "t": "12,00 % vol.-",
+   "x": 0.4,
+   "y": 0.8167,
+   "w": 0.25,
+   "h": 0.0833,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "IL ROSSO DELLA PRE'",
+   "al_kg": "1,85",
+   "unita": "l"
+  }
+ ]
+}

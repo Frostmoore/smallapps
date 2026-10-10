@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 import 'package:micro_core/micro_core.dart';
 import 'package:micro_ocr/riga_ocr.dart';
 
+import 'testo_ocr.dart';
+
 /// Come e' stato trovato un numero: scritto per intero («2,49»), spezzato in due riquadri
 /// (euro grandi + centesimi in apice), fuso senza separatore («229»), o un peso a 3 decimali.
 enum FormaNumero { esplicito, spezzato, fuso, peso }
@@ -48,8 +50,12 @@ abstract final class NumeriOcr {
   /// ⚑ «Fra cifre» e non «accanto a una cifra»: «0,5l» (mezzo litro) non deve diventare «0,51».
   /// ⚑ «EURO» resta: e' una parola chiave dello scontrino («TOTALE EURO»).
   static String pulisci(String testo) {
-    var s = testo.replaceAll('€', ' ').replaceAll(RegExp(r'\bEUR\b', caseSensitive: false), ' ');
+    var s = TestoOcr.latino(testo).replaceAll('€', ' ').replaceAll(RegExp(r'\bEUR\b', caseSensitive: false), ' ');
     s = s.replaceAllMapped(RegExp(r'(\d)\s*[.,]{2,}\s*(\d)'), (m) => '${m[1]},${m[2]}');
+    // ⚑ F12.7 (c18 nel mirino, «AILC.12,80»): un punto fra una lettera e un prezzo e' rumore
+    // dell'OCR (il «€» letto «C.»), e col punto attaccato il lookbehind dei numeri non trova piu'
+    // il 12,80. Solo davanti a un prezzo con i decimali: «GR.600» resta com'e' (formato).
+    s = s.replaceAllMapped(RegExp(r'([A-Za-z])\.(\d{1,4}[.,]\d{2})(?!\d)'), (m) => '${m[1]} ${m[2]}');
     s = s.replaceAllMapped(RegExp(r'(\d)\s+([.,])(\d)'), (m) => '${m[1]}${m[2]}${m[3]}');
     s = s.replaceAllMapped(RegExp(r'(\d)([.,])\s+(\d{2})(?!\d)'), (m) => '${m[1]}${m[2]}${m[3]}');
     final c = s.split('');

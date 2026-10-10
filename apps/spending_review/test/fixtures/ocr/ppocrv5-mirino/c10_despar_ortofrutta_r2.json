@@ -1,0 +1,45 @@
+{
+ "campione": "c10_despar_ortofrutta.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 3.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10 (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ritaglio": {
+  "verita": 2,
+  "cx": 0.33,
+  "cy": 0.86,
+  "w": 0.12
+ },
+ "righe": [
+  {
+   "t": "1001",
+   "x": 0.5917,
+   "y": 0.0889,
+   "w": 0.1083,
+   "h": 0.1278,
+   "c": 0.787
+  },
+  {
+   "t": "PATATE NOVELLE KG2",
+   "x": 0.1583,
+   "y": 0.2,
+   "w": 0.3958,
+   "h": 0.35,
+   "c": 0.909
+  },
+  {
+   "t": "3,40",
+   "x": 0.3583,
+   "y": 0.4056,
+   "w": 0.3375,
+   "h": 0.3833,
+   "c": 0.996
+  }
+ ],
+ "verita": [
+  {
+   "nome": "PATATE NOVELLE KG2",
+   "prezzo": "3,40"
+  }
+ ]
+}

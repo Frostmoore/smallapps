@@ -8,6 +8,10 @@ sotto e si distribuiscono con la **stessa licenza** della fotografia (CC BY-SA: 
 CC BY: con attribuzione). Le immagini restano fuori dal repo
 (`microapps-campioni/f12/`, vedi `LEGGIMI.md` dei campioni).
 
+Le fixture in `ppocrv5-mirino/` (`<nome>_r<k>.json`) sono la lettura di un **ritaglio** della
+stessa fotografia (il cartellino come lo inquadra il mirino, coordinate in `ritagli_mirino.json`):
+stessa fonte, stesso autore, stessa licenza della riga qui sotto con lo stesso nome.
+
 | Fixture | Autore | Licenza | Fonte |
 |---|---|---|---|
 | `c01_tigros_3x1_anziche.json` | Alexmar983 | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Sales_promotion_3x1_Tigros.JPG |

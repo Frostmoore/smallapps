@@ -1,0 +1,55 @@
+{
+ "campione": "c02_palermo_offerta_ortofrutta.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 106,
+ "ritaglio": {
+  "verita": 1,
+  "cx": 0.22,
+  "cy": 0.185,
+  "w": 0.14
+ },
+ "righe": [
+  {
+   "t": "OFFERTA",
+   "x": 0.1903,
+   "y": 0.1052,
+   "w": 0.4492,
+   "h": 0.2338,
+   "c": 1.0
+  },
+  {
+   "t": "HELENZANINE IN VASSOIO",
+   "x": 0.1457,
+   "y": 0.3284,
+   "w": 0.5524,
+   "h": 0.1487,
+   "c": 1.0
+  },
+  {
+   "t": "338.",
+   "x": 0.1542,
+   "y": 0.442,
+   "w": 0.5105,
+   "h": 0.578,
+   "c": 1.0
+  },
+  {
+   "t": "euro",
+   "x": 0.6429,
+   "y": 0.5238,
+   "w": 0.1286,
+   "h": 0.0762,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "MELANZANINE IN VASSOIO",
+   "prezzo": "3,38",
+   "offerta": "OFFERTA"
+  }
+ ]
+}

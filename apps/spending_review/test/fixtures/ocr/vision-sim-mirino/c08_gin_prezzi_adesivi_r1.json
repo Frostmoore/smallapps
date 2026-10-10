@@ -1,0 +1,29 @@
+{
+ "campione": "c08_gin_prezzi_adesivi.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 93,
+ "ritaglio": {
+  "verita": 1,
+  "cx": 0.575,
+  "cy": 0.55,
+  "w": 0.14
+ },
+ "righe": [
+  {
+   "t": "€16..50",
+   "x": 0.1822,
+   "y": 0.3799,
+   "w": 0.5631,
+   "h": 0.499,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "prezzo": "16,50"
+  }
+ ]
+}

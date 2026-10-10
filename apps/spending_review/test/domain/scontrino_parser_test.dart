@@ -52,6 +52,43 @@ void main() {
     expect(l.negozioMostrato, 'SUPERMERCATO ESEMPIO');
   });
 
+  test('F12.7 (Vision su s01): «TOTALE COMPLESSIVO» senza importo chiude il corpo; il totale da pagato = somma', () {
+    final l = parser.interpreta(
+      [
+        ...rigaScontrino(0, 'DOCUMENTO COMMERCIALE'),
+        ...rigaScontrino(2, 'ACQUA NATURALE', '1,32'),
+        ...rigaScontrino(3, 'BISCOTTI', '2,85'),
+        ...rigaScontrino(5, 'TOTALE COMPLESSIVO'),
+        ...rigaScontrino(7, 'Pagamento elettronico', '4,17'),
+        ...rigaScontrino(8, 'Importo pagato', '4,17'),
+      ],
+      oggi: oggi,
+    );
+    expect(l.articoli, 2);
+    expect(l.totale, e(417));
+  });
+
+  test('F12.7: asterischi in coda alla descrizione tolti («CREMA GR200 ****», s06)', () {
+    final l = parser.interpreta(
+      [
+        ...rigaScontrino(0, 'DOCUMENTO COMMERCIALE'),
+        ...rigaScontrino(2, 'CREMA GR200 ****', '2,19'),
+        ...rigaScontrino(3, 'BISCOTTI****', '1,29'),
+        ...rigaScontrino(4, 'TOTALE EURO', '3,48'),
+      ],
+      oggi: oggi,
+    );
+    expect([for (final r in l.righe) r.descrizione], ['CREMA GR200', 'BISCOTTI']);
+  });
+
+  test('F12.7: negozioMostrato senza la punteggiatura finale («EMME Piu Supermercati.», s06)', () {
+    String? mostrato(String n) => LetturaScontrino(negozio: n, righe: const [], righeIgnorate: 0).negozioMostrato;
+    expect(mostrato('ESEMPIO Piu Supermercati.'), 'ESEMPIO Piu Supermercati');
+    expect(mostrato('BOTTEGA ESEMPIO S.N.C. -'), 'BOTTEGA ESEMPIO');
+    expect(mostrato("SUPER 'S'"), "SUPER 'S'");
+    expect(mostrato('.'), '.'); // tutto punteggiatura: meglio il testo com'e' che niente
+  });
+
   test('s03: 4 righe pesate, totale 7,39 che quadra', () {
     final l = parser.interpreta(
       scontrino([

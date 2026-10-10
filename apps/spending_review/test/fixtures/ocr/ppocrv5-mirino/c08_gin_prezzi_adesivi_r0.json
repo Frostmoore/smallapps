@@ -1,0 +1,36 @@
+{
+ "campione": "c08_gin_prezzi_adesivi.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10 (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.31,
+  "cy": 0.42,
+  "w": 0.15
+ },
+ "righe": [
+  {
+   "t": "€13.60",
+   "x": 0.2467,
+   "y": 0.44,
+   "w": 0.43,
+   "h": 0.4178,
+   "c": 0.991
+  },
+  {
+   "t": "EEF",
+   "x": 0.0833,
+   "y": 0.5422,
+   "w": 0.4267,
+   "h": 0.4444,
+   "c": 0.75
+  }
+ ],
+ "verita": [
+  {
+   "prezzo": "13,60"
+  }
+ ]
+}

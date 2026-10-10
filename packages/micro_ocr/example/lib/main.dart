@@ -52,7 +52,13 @@ Future<List<Lettura>> leggiCartella(OcrEngine motore, String cartella) async {
       'ms': sw.elapsedMilliseconds,
       'righe': [for (final r in righe) r.toJson()],
     });
-    debugPrint('MICRO_OCR|$json', wrapWidth: 1 << 20);
+    // ☠ F12.7: `print` e non `debugPrint`. debugPrint e' «throttled» (accoda e scrive un po' alla
+    // volta): il test d'integrazione finiva prima che la coda si svuotasse e le ultime righe
+    // sparivano dal log (sul simulatore iOS s15 e s16, gli ultimi due file in ordine alfabetico).
+    // Con wrapWidth enorme debugPrint faceva comunque un solo print per riga: niente cambia nel
+    // formato.
+    // ignore: avoid_print
+    print('MICRO_OCR|$json');
   }
   return out;
 }

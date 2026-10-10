@@ -1,0 +1,37 @@
+{
+ "campione": "c08_gin_prezzi_adesivi.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 90,
+ "ritaglio": {
+  "verita": 0,
+  "cx": 0.31,
+  "cy": 0.42,
+  "w": 0.15
+ },
+ "righe": [
+  {
+   "t": "E13.+60",
+   "x": 0.2772,
+   "y": 0.4967,
+   "w": 0.3774,
+   "h": 0.3163,
+   "c": 1.0
+  },
+  {
+   "t": "AAPE",
+   "x": 0.0959,
+   "y": 0.5299,
+   "w": 0.4444,
+   "h": 0.455,
+   "c": 0.3
+  }
+ ],
+ "verita": [
+  {
+   "prezzo": "13,60"
+  }
+ ]
+}

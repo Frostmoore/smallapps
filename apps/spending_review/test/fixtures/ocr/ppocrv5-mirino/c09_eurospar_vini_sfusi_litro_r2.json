@@ -1,0 +1,118 @@
+{
+ "campione": "c09_eurospar_vini_sfusi_litro.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY-SA 4.0",
+ "motore": "ppocrv5-mobile-latin/rapidocr-3.10 (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ritaglio": {
+  "verita": 2,
+  "cx": 0.81,
+  "cy": 0.45,
+  "w": 0.16
+ },
+ "righe": [
+  {
+   "t": "€ 2,10 L.",
+   "x": 0.4625,
+   "y": 0.1333,
+   "w": 0.225,
+   "h": 0.1542,
+   "c": 0.911
+  },
+  {
+   "t": "ELINE",
+   "x": 0.3625,
+   "y": 0.2583,
+   "w": 0.0688,
+   "h": 0.0333,
+   "c": 0.625
+  },
+  {
+   "t": "LE VIOLE",
+   "x": 0.3156,
+   "y": 0.2833,
+   "w": 0.375,
+   "h": 0.2,
+   "c": 1.0
+  },
+  {
+   "t": "vino",
+   "x": 0.3344,
+   "y": 0.4833,
+   "w": 0.1406,
+   "h": 0.0583,
+   "c": 1.0
+  },
+  {
+   "t": "rosso",
+   "x": 0.4813,
+   "y": 0.4875,
+   "w": 0.1781,
+   "h": 0.05,
+   "c": 0.998
+  },
+  {
+   "t": "In questo locale si riempionio",
+   "x": 0.4031,
+   "y": 0.5583,
+   "w": 0.2031,
+   "h": 0.0417,
+   "c": 0.941
+  },
+  {
+   "t": "soo reoipierti pull di propreti",
+   "x": 0.3937,
+   "y": 0.5958,
+   "w": 0.2188,
+   "h": 0.05,
+   "c": 0.779
+  },
+  {
+   "t": "del dierte e done al orbao con liquid",
+   "x": 0.3594,
+   "y": 0.6375,
+   "w": 0.2812,
+   "h": 0.05,
+   "c": 0.779
+  },
+  {
+   "t": "alimentart, confomi al D.M. 21 Maro 1873 e",
+   "x": 0.35,
+   "y": 0.6792,
+   "w": 0.3094,
+   "h": 0.05,
+   "c": 0.83
+  },
+  {
+   "t": "disposizioni nazional e comuntarie",
+   "x": 0.4156,
+   "y": 0.725,
+   "w": 0.2437,
+   "h": 0.0417,
+   "c": 0.842
+  },
+  {
+   "t": "UECISSIve",
+   "x": 0.35,
+   "y": 0.7375,
+   "w": 0.075,
+   "h": 0.0292,
+   "c": 0.618
+  },
+  {
+   "t": "12,50 % vol.",
+   "x": 0.3844,
+   "y": 0.7792,
+   "w": 0.225,
+   "h": 0.1,
+   "c": 0.994
+  }
+ ],
+ "verita": [
+  {
+   "nome": "LE VIOLE",
+   "al_kg": "2,10",
+   "unita": "l"
+  }
+ ]
+}

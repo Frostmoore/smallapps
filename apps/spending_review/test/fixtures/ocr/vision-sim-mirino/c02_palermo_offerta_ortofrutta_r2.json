@@ -1,0 +1,63 @@
+{
+ "campione": "c02_palermo_offerta_ortofrutta.jpg",
+ "tipo": "cartellino",
+ "licenza": "CC BY 2.0",
+ "motore": "vision-sim (ritaglio del mirino)",
+ "creato": "2026-10-10",
+ "ms": 99,
+ "ritaglio": {
+  "verita": 2,
+  "cx": 0.065,
+  "cy": 0.2,
+  "w": 0.12
+ },
+ "righe": [
+  {
+   "t": "OFFERTA",
+   "x": 0.2328,
+   "y": 0.1346,
+   "w": 0.4253,
+   "h": 0.2189,
+   "c": 1.0
+  },
+  {
+   "t": "PIRROCCRIE",
+   "x": 0.1893,
+   "y": 0.3988,
+   "w": 0.2624,
+   "h": 0.0929,
+   "c": 1.0
+  },
+  {
+   "t": "euro",
+   "x": 0.675,
+   "y": 0.5444,
+   "w": 0.1167,
+   "h": 0.0667,
+   "c": 1.0
+  },
+  {
+   "t": "0 68 offer",
+   "x": 0.3571,
+   "y": 0.6175,
+   "w": 0.6472,
+   "h": 0.3741,
+   "c": 1.0
+  },
+  {
+   "t": "CO",
+   "x": 0.0667,
+   "y": 0.7111,
+   "w": 0.1167,
+   "h": 0.1,
+   "c": 1.0
+  }
+ ],
+ "verita": [
+  {
+   "nome": "PANNOCCHIE",
+   "prezzo": "0,68",
+   "offerta": "OFFERTA"
+  }
+ ]
+}
