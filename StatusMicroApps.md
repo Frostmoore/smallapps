@@ -107,7 +107,8 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 >   Possibile chiedere la revisione accelerata (correzione di un difetto di una funzione centrale).
 > - [x] **Proprietario:** `trashcan-1.0.1-12.aab` caricato e **pubblicato** su Play (2026-10-10).
 > - [x] **App Store: 1.0.1 approvata e in vendita** (2026-10-11, READY_FOR_SALE verificato via API).
-> - [ ] Prova di una notte su un telefono Android vero e su iPad.
+> - [x] **Provato dal proprietario su Android vero** (notte fra il 10 e l'11 ottobre 2026): a mezzanotte il widget ha cambiato rifiuto da solo.
+> - [ ] Stessa prova su iPad.
 
 ### Google Play — 🟢 pubblicata
 
