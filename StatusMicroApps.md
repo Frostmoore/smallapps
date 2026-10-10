@@ -32,7 +32,7 @@ vetrina da aggiungere.
 |---|---|---|---|
 | Te l'ho prestato | F10 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove l'ho lasciato? | F11 | ⚪ non iniziata | ⚪ non iniziata |
-| **Spending Review** (ex Quanto sto spendendo?) | F12 | ⚪ codice Android completo (2026-10-10); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟠 **scheda completa via API**, build 1.0.0 (1) su TestFlight (invito mandato); invio in revisione dal proprietario dopo la prova su iPad |
+| **Spending Review** (ex Quanto sto spendendo?) | F12 | ⚪ codice Android completo (2026-10-10); app non creata su Play Console, bloccata dall'account (D-U-N-S) | 🟡 **in revisione** (1.0.0 (1) + Pro, inviata dal proprietario il 2026-10-10) |
 | Quanto dividiamo? | F13 | ⚪ non iniziata | ⚪ non iniziata |
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
@@ -382,7 +382,7 @@ pubblicata nel sito il 2026-10-10.
 - [ ] Data safety: nessun dato raccolto salvo l'acquisto del Pro (Play Billing); fotocamera dichiarata
 - [ ] Prova su un Android vero di fascia media (tempi dell'OCR, cartellini veri)
 
-### App Store — 🟠 scheda completa, pronta per l'invio
+### App Store — 🟡 in revisione
 
 | Data | Evento |
 |---|---|
@@ -398,7 +398,7 @@ pubblicata nel sito il 2026-10-10.
 - [x] Profilo via API, build su TestFlight, invito, scheda completa via API (2026-10-10)
 - [ ] **Proprietario, a mano:** etichetta privacy «Dati non raccolti»; intestazione e ricerca se richieste; spunta dell'acquisto in-app nella versione
 - [ ] Sull'iPad: prova di cartellini e scontrini veri (e misura di Vision sul banco)
-- [ ] Revisione (proprietario, dopo la prova su iPad)
+- [x] **Inviata in revisione** dal proprietario: versione 1.0.0 e Pro in WAITING_FOR_REVIEW (verificato via API il 2026-10-11)
 
 ---
 
