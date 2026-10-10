@@ -5266,6 +5266,13 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   tipo **3x2 / 2x1 / -30%**, centesimi scritti piccoli. Se c'e' ambiguita' l'app propone e l'utente
   conferma con un tocco. Da definire il 2026-10-11 nella specsheet: quali formati (cartellini dei
   supermercati italiani), cosa fare con i prodotti a peso.
+- **Prodotti a peso** (proprietario, 2026-10-10: «entrambe le cose»): **sia** peso scritto a mano
+  dopo il cartellino al kg, **sia** lettura dell'etichetta della bilancia (che porta gia' il totale).
+- **Campioni per tarare l'OCR**: raccolti dal web (preferenza a licenze libere, es. Wikimedia
+  Commons), tenuti **fuori dal repo** in `E:/coding/XAMPP/htdocs/microapps-campioni/f12/` (il repo e'
+  pubblico su GitHub e le foto non sono nostre), con un `campioni.csv`: file, fonte, licenza, tipo
+  (cartellino/scontrino/bilancia) e la **verita'** trascritta a mano (nome, prezzo, offerta, prezzo al
+  kg, totale). Servono a misurare la precisione dell'OCR prima di promettere l'interpretazione.
 - ☠ **OCR solo sul telefono** (regola «dati solo sul telefono»): su iOS **Vision** (locale); su
   Android **niente ML Kit** → valutare un OCR che giri tutto nell'app (es. Tesseract via FFI) e la
   sua precisione sui cartellini; e' il punto tecnico piu' rischioso di F12.
