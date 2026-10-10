@@ -356,7 +356,7 @@ if __name__ == "__main__":
 - LiteRT: https://dl.google.com/android/maven2/com/google/ai/edge/litert/ (POM `litert-api` 2.3.0 → `ai-delivery`) ; https://developers.google.com/edge/litert/android/play_services ; `tflite_flutter` usa `litert:1.4.0`: https://github.com/tensorflow/flutter-tflite
 - Pacchetti scartati: https://pub.dev/packages/pdf_ocr_ondevice , https://pub.dev/packages/thrivexai_paddle_ocr_precompiled , https://pub.dev/documentation/flutter_paddle_ocr/latest/
 
-## 7. Prima misura sui campioni veri (2026-10-11)
+## 7. Prima misura sui campioni veri (2026-10-10)
 
 60 campioni raccolti dal web (35 cartellini, 16 scontrini, 9 etichette della bilancia; cartella
 `E:/coding/XAMPP/htdocs/microapps-campioni/f12/`, fuori dal repo), 80 righe di verita' (una per

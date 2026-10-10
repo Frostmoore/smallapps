@@ -32,7 +32,7 @@ vetrina da aggiungere.
 |---|---|---|---|
 | Te l'ho prestato | F10 | ⚪ non iniziata | ⚪ non iniziata |
 | Dove l'ho lasciato? | F11 | ⚪ non iniziata | ⚪ non iniziata |
-| Quanto sto spendendo? | F12 | ⚪ non iniziata — **la prossima**, si parte il 2026-10-11 | ⚪ non iniziata |
+| **Spending Review** (ex Quanto sto spendendo?) | F12 | ⚪ codice Android completo (2026-10-10); app non creata su Play Console, bloccata dall'account (D-U-N-S) | ⚪ codice iOS completo, gira sul simulatore; servono App ID e app su App Store Connect dal proprietario |
 | Quanto dividiamo? | F13 | ⚪ non iniziata | ⚪ non iniziata |
 | Ricordamelo qui | F14 | ⚪ non iniziata | ⚪ non iniziata |
 | Quanti sono? | F15 | ⚪ non iniziata | ⚪ non iniziata |
@@ -347,6 +347,48 @@ backup) e sul simulatore iPhone. Card «In arrivo» pubblicata nel sito il 2026-
 - [ ] **Provare su iPad**: condividere da Safari verso QR Me (l'estensione deve riaprire l'app); se iOS lo impedisce, ripiego deciso in F17.1.8 (QR mostrato dall'estensione stessa)
 - [x] Prodotto `qrme_pro_lifetime` a 1,99 €; eta' ed etichetta privacy (proprietario)
 - [x] **Inviata in revisione dal proprietario** (2026-10-10): versione 1.0.0 con build 2 e `qrme_pro_lifetime` in WAITING_FOR_REVIEW (verificato via API). I campi «Intestazione» e «Risultati della ricerca» in App Store Connect non c'erano piu' (sezione tolta o spostata da Apple, non dallo script)
+
+---
+
+## Spending Review
+
+| Dato | Valore |
+|---|---|
+| Pacchetto / bundle | `com.smp.spendingreview` (nessun widget, nessuna estensione, nessun App Group) |
+| Prodotto Pro | `spendingreview_pro_lifetime`, non consumabile, **2,99 €** (Play: base 2,45 EUR senza IVA) |
+| Nome | «Spending Review» in italiano e in inglese (ripieghi se preso: «Spending Review – Conto spesa» / «Spending Review – Cart Total») |
+| Piattaforme | Android e solo iPhone |
+| Grafica | «C · Una mano» (scura, verde `#4ADE80`, tastierino sempre visibile) |
+| Lettura | cartellini, scontrini, etichette della bilancia **sul telefono**: Vision su iOS, PP-OCRv5 su ONNX Runtime 1.28.0 bloccata su Android (niente telemetria) |
+
+Codice completo il 2026-10-10 (F12.0–F12.9): 339 test, provata sull'emulatore Android e sul simulatore
+iPhone (spesa, cartellino, bilancia, scontrino col Pro finto, storico, statistiche). Card «In arrivo»
+nel sito pronta, **non ancora pubblicata**.
+
+### Google Play — ⚪ non ancora creata, bloccata dall'account
+
+| Data | Evento |
+|---|---|
+| 2026-10-10 | Codice Android completo, release firmata compilata con le guardie di privacy verdi; **app non ancora creata su Play Console** |
+| 2026-10-10 | Fermo come le altre: account personale, si aspetta il D-U-N-S |
+
+**Prossimi passi Play:**
+- [ ] License Server: riga `spendingreview` in `apps` e segreto in `APP_SECRETS`
+- [ ] App su Play Console, AAB in test interno, prodotto a 2,45 EUR senza IVA, scheda e grafiche
+- [ ] Data safety: nessun dato raccolto salvo l'acquisto del Pro (Play Billing); fotocamera dichiarata
+- [ ] Prova su un Android vero di fascia media (tempi dell'OCR, cartellini veri)
+
+### App Store — ⚪ non ancora creata
+
+| Data | Evento |
+|---|---|
+| 2026-10-10 | Codice iOS completo; build e avvio sul simulatore iPhone; esclusione di database e dati dal backup iCloud verificata |
+
+**Prossimi passi App Store:**
+- [ ] **Proprietario:** App ID `com.smp.spendingreview` nel portale (niente App Group) e app «Spending Review» su App Store Connect
+- [ ] Profilo via API, build su TestFlight, invito, scheda completa via API (testi, screenshot, video, Pro, revisione)
+- [ ] Sull'iPad: misura di Vision sul banco; prova di cartellini e scontrini veri
+- [ ] Revisione (proprietario)
 
 ---
 

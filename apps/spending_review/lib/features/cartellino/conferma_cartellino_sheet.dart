@@ -53,7 +53,7 @@ final class CartellinoBattiAMano extends EsitoCartellino {
 ///   solito ne prende 3).
 /// - Affidabilita' < 0,6 o prezzi alternativi: «Controlla il prezzo» in ambra e i chip.
 /// - **Due prezzi (con e senza carta fedelta')**: due bottoni, uno per prezzo, e nessun default
-///   (risposta D4 del proprietario, 2026-10-11: «chiedi ogni volta»). ⚑ Ogni bottone e' gia'
+///   (risposta D4 del proprietario, 2026-10-10: «chiedi ogni volta»). ⚑ Ogni bottone e' gia'
 ///   l'«Aggiungi» di quel prezzo: un tocco solo, come per gli altri cartellini.
 /// - Prodotto gia' nella spesa (stesso nome normalizzato, stesso prezzo): «Aggiungi (ora 2)»
 ///   incrementa la riga esistente (⚑ cosi' un 3x2 scattato tre volte fa scattare l'offerta).

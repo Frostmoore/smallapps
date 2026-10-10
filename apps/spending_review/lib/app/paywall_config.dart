@@ -9,7 +9,7 @@ import 'entitlement.dart';
 ///
 /// ⚑ **Cinque righe, una per chiave limitata, in quest'ordine**: prima lo Scontrino (e' la cosa
 /// che si vede alla cassa, ed e' l'unica che il gratis non ha in nessuna forma), poi tutte le
-/// spese, le statistiche (con il budget del MESE: risposta D3 del proprietario, 2026-10-11), il
+/// spese, le statistiche (con il budget del MESE: risposta D3 del proprietario, 2026-10-10), il
 /// CSV, il backup.
 ///
 /// ☠ Ogni beneficio corrisponde a una chiave limitata in `srFeatureLimits`

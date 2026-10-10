@@ -174,7 +174,7 @@ apps/qr_me/
 │   │   ├── app.dart                      buildRouter() (anche /scan/wifi, /label, /me), formKindOf, QrMeApp (router, tema Neon, ShareIntake, pruneOrphanLogos dopo 3 s)
 │   │   ├── app_config.dart               licenseAppId, buildQrConfig(): qr_me, «QR Me», qrme_pro_lifetime, #3BD13B, PlusJakartaSans, scuro
 │   │   ├── entitlement.dart              appVersion, installIdProvider, purchaseGatewayProvider (finto a 1,99 €), EntitlementView/Notifier, isProProvider, featureGateProvider
-│   │   ├── feature_limits.dart           qrFeatureLimits (tutte le 15 FeatureKey)
+│   │   ├── feature_limits.dart           qrFeatureLimits (tutte le 16 FeatureKey)
 │   │   ├── labels.dart                   kindName, kindIcon, plainText, kMaskedPassword, rowMeta
 │   │   ├── locale_resolution.dart        kSupportedLocales, resolveAppLocale
 │   │   ├── paywall_config.dart           buildQrPaywall (6 benefici), showQrPaywall
@@ -1013,7 +1013,7 @@ Copia di `apps/film_tracker/lib/app/entitlement.dart` con i valori di QR Me.
 
 ### `feature_limits.dart`
 
-`const FeatureLimits qrFeatureLimits` — **tutte le 15 chiavi** di `FeatureKey.values` (il test di
+`const FeatureLimits qrFeatureLimits` — **tutte le 16 chiavi** di `FeatureKey.values` (il test di
 coerenza le vuole tutte):
 
 | Chiave | Limite | Cosa copre |
@@ -1024,6 +1024,7 @@ coerenza le vuole tutte):
 | `FeatureKey.themeCustomization` | `locked()` | colori, forme, logo |
 | `FeatureKey.imageExport` | `locked()` | condividere il QR come PNG (chiave nata con QR Me, F17.2a) **e «Genera etichetta»** (`/label`, F17.10: stessa famiglia, il QR che esce dall'app) |
 | `FeatureKey.backupRestore` | `locked()` | **creare** il backup (il ripristino e' gratis) |
+| `FeatureKey.documentScan` | `open()` | QR Me non la vende: e' lo Scontrino di Spending Review (aggiunta il 2026-10-10, F12.2a; riga verificata in F12.8) |
 | `secondaryEntities`, `photos`, `statistics`, `csvExport`, `pdfReport`, `advancedWidget`, `notifications`, `multipleNotifications`, `calendarSync` | `open()` | QR Me non le vende |
 
 ⚑ Un QR **letto** con un modulo speciale (un Wi-Fi inquadrato) si mostra e si ri-mostra **gratis**:

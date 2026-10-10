@@ -85,4 +85,19 @@ void main() {
     expect(find.byType(ConfermaCartellinoSheet), findsOneWidget);
     expect(copia.existsSync(), isFalse);
   });
+
+  // F12.8: prima l'errore usciva da un `unawaited` (il test falliva con un'eccezione non gestita).
+  testWidgets('«Da una foto» con un errore inatteso del motore: messaggio, nessun foglio, copia sparita', (tester) async {
+    final h = await pumpSr(tester, initialLocation: '/', righeOcr: cartellino, erroreOcr: StateError('motore rotto'));
+    final copia = File('${h.cartella.path}/galleria.jpg')..writeAsBytesSync([1]);
+    h.foto.add(copia.path);
+    await tester.tap(find.byKey(const ValueKey('spesa_cartellino')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cartellino_daFoto')));
+    await attendiLettura(tester);
+    expect(find.text('La foto non è riuscita. Riprova.'), findsOneWidget);
+    expect(find.byType(ConfermaCartellinoSheet), findsNothing);
+    expect(find.byKey(const ValueKey('cartellino_daFoto')), findsOneWidget);
+    expect(copia.existsSync(), isFalse);
+  });
 }

@@ -199,6 +199,15 @@ void main() {
       expect(parser.interpreta(scontrino([('PANE', '1,20')], totale: '1,20', piede: ['10/10/2031']), oggi: oggi).data, isNull);
       expect(parser.interpreta(scontrino([('PANE', '1,20')], totale: '1,20', piede: ['10/10/2024']), oggi: oggi).data, isNull);
     });
+    // F12.8: prima la prima data NON plausibile chiudeva la ricerca (null), anche con la data vera
+    // sotto: un buono «valido fino al 31/12/2027» stampato prima della data dello scontrino.
+    test('una data non plausibile si salta: vale la prima plausibile dopo', () {
+      final l = parser.interpreta(
+        scontrino([('PANE', '1,20')], totale: '1,20', piede: ['BUONO VALIDO FINO AL 31/12/2027', '10-10-26 18:32 DOC.N. 0123-0045']),
+        oggi: oggi,
+      );
+      expect(l.data, CivilDate(2026, 10, 10));
+    });
   });
 
   test('non quadra: una riga persa → quadra false, righeIgnorate > 0', () {

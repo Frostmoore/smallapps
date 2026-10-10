@@ -1132,10 +1132,10 @@ volta sola; nella fase di ciascuna app si spuntano.
 
 - [ ] **F10** Te l'ho prestato — `apps/prestato/` (nome della cartella da confermare in F10.0)
 - [ ] **F11** Dove l'ho lasciato? — posizione in primo piano + foto
-- [~] **F12** Spending Review (ex «Quanto sto spendendo?») — contatore della spesa con budget, cartellini e scontrini letti sul telefono — ⚑ **LA PROSSIMA** (scelta del proprietario il 2026-10-10). Specsheet in §8 «F12 — Spending Review»
+- [x] **F12** Spending Review (ex «Quanto sto spendendo?») — CHIUSA il 2026-10-10 → `v10.0.0` (codice completo Android e iPhone, 339 test; store da fare: serve l'App ID del proprietario). Specsheet in §8 «F12 — Spending Review»
   - [x] **F12.0** Decisioni di partenza con il proprietario — FATTO il 2026-10-10/11 (§8 F12.0): nome «Spending Review» in it ed en, `com.smp.spendingreview`, Android e iPhone, nessun widget, interfaccia «C · Una mano», due tasti Cartellino e Scontrino, cartellino interpretato, peso a mano e bilancia, «spesa gratis, revisione Pro» a **2,99 €**, OCR Vision su iOS e PP-OCRv5 su ONNX Runtime **1.28.0 bloccata** su Android
-  - [x] **F12.1** Specsheet — SCRITTA il 2026-10-11 (§8 F12.1.1–F12.1.18): file, dipendenze e guardie di privacy in build, dominio (centesimi, arrotondamenti half-up, offerte, tastierino), parser di cartellino/bilancia/scontrino sui riquadri, confronto, statistiche, `packages/micro_ocr`, dati, rotte, schermate, servizi, Pro (`FeatureKey.documentScan` nuova), permessi e privacy, trappole, test con il banco di regressione, prestazioni. domande D1–D4 **risposte dal proprietario il 2026-10-11** (§8 F12.10: nascoste, tastierino alla cassa, budget mensile Pro, carta fedelta' chiesta ogni volta)
-  - [x] **F12.2a** `FeatureKey.documentScan` in `micro_core` + una riga `open()` nelle cinque app; test di tutte verdi — FATTO il 2026-10-11 (121/20/185/150/241/158/138)
+  - [x] **F12.1** Specsheet — SCRITTA il 2026-10-10 (§8 F12.1.1–F12.1.18): file, dipendenze e guardie di privacy in build, dominio (centesimi, arrotondamenti half-up, offerte, tastierino), parser di cartellino/bilancia/scontrino sui riquadri, confronto, statistiche, `packages/micro_ocr`, dati, rotte, schermate, servizi, Pro (`FeatureKey.documentScan` nuova), permessi e privacy, trappole, test con il banco di regressione, prestazioni. domande D1–D4 **risposte dal proprietario il 2026-10-10** (§8 F12.10: nascoste, tastierino alla cassa, budget mensile Pro, carta fedelta' chiesta ogni volta)
+  - [x] **F12.2a** `FeatureKey.documentScan` in `micro_core` + una riga `open()` nelle cinque app; test di tutte verdi — FATTO il 2026-10-10 (121/20/185/150/241/158/138)
   - [x] **F12.2b** `packages/micro_ocr/`: Vision (iOS), PP-OCRv5 su ORT 1.28.0 in Kotlin (Android), modelli nel repo con SHA-256, test JVM, test sul dispositivo, **parita' con RapidOCR ≥ 95%**, verifica 16 KB, atlante — FATTO il 2026-10-10 (atlante `packages/micro_ocr/codebase_reference.md`, `verify_atlas` 0 mancanti; commit e rituale ancora da fare)
     - [x] API Dart come F12.1.4/F12.1.9 (`Riquadro`, `RigaOcr`, `OcrModo`, `OcrEngine`, `OcrNonDisponibile`, `CanaleOcrEngine`, `FakeOcrEngine`); `flutter analyze` pulito, 29 test Dart verdi
     - [x] Modelli dal venv del banco (RapidOCR 3.10, SHA-256 uguali a quelli di RapidOCR), dizionario dai metadati del modello (502 simboli), Apache-2.0, `modelli_test.dart`, `.gitattributes`
@@ -1151,9 +1151,9 @@ volta sola; nella fase di ciascuna app si spuntano.
     - [x] pubspec commentato (versioni di QR Me, `micro_ocr` per percorso), font OFL, `l10n.yaml`, `tool/testi.py` → ARB (45 chiavi), `app_config` (`spending_review`/`spendingreview`/`spendingreview_pro_lifetime`, seme `#4ADE80`, scuro), `entitlement` (finto a 2,99 €), `feature_limits`, `paywall_config` (5 righe), `providers` (`SrSettingKeys` con `budgetMensile` per D3, senza `preferisciPrezzoCarta` per D4), `routes`, `app`, `labels`, `sr_palette` (valori esatti di F12.1.12), `ProGate`, `main`; `/` per ora mostra solo il totale (pagine in F12.4)
     - [x] Manifest: CAMERA; RECORD_AUDIO, WRITE/READ_EXTERNAL_STORAGE e **POST_NOTIFICATIONS** tolti (`tools:node="remove"`); fotocamera non obbligatoria; `allowBackup=false`; deep link spento (anche iOS). iOS: `NSCameraUsageDescription` e `NSPhotoLibraryUsageDescription` it/en, esclusione di `Documents/` dal backup iCloud in `AppDelegate.swift`
     - [x] Icona e splash da `docs/specs/icona-spending-review.png` con `tool/genera_icone.py` (fondo scuro `#161B22`, sagoma monocromatica con righe ed euro «bucati»), anteprime guardate
-    - [x] `verificaPrivacyOcr` dentro `android/app/build.gradle.kts`: verde; **rosso** con un `INTERNET` aggiunto in `src/main` (provato e tolto). ⚑ Ammessa anche `androidx.media3` per il solo ACCESS_NETWORK_STATE (lo porta `camera_android_camerax` via `camera-video`), e tutto il gruppo `datatransport` (anche `transport-runtime`, Play Billing). ☠ Lo script condiviso `packages/micro_ocr/android/privacy_ocr.gradle` (F12.2b) ammette solo `transport-backend-cct`: applicato cosi' a Spending Review farebbe fallire la release; da allineare prima di sostituire il task interno con `apply(from = …)` — **FATTO in F12.4** (2026-10-11): script allineato e task interno sostituito con `apply(from = …)`, verde e rosso riprovati
+    - [x] `verificaPrivacyOcr` dentro `android/app/build.gradle.kts`: verde; **rosso** con un `INTERNET` aggiunto in `src/main` (provato e tolto). ⚑ Ammessa anche `androidx.media3` per il solo ACCESS_NETWORK_STATE (lo porta `camera_android_camerax` via `camera-video`), e tutto il gruppo `datatransport` (anche `transport-runtime`, Play Billing). ☠ Lo script condiviso `packages/micro_ocr/android/privacy_ocr.gradle` (F12.2b) ammette solo `transport-backend-cct`: applicato cosi' a Spending Review farebbe fallire la release; da allineare prima di sostituire il task interno con `apply(from = …)` — **FATTO in F12.4** (2026-10-10): script allineato e task interno sostituito con `apply(from = …)`, verde e rosso riprovati
     - [x] `analyze` pulito, APK di debug compilato (con `micro_ocr`); anche `build apk --release` passa (lint, R8, guardia verde; APK universale 151 MB con ORT e modelli per 4 ABI: per Play si carica l'AAB, che divide per ABI)
-    - [x] App avviata sull'emulatore e sul simulatore iPhone — fatto con F12.4 (2026-10-11)
+    - [x] App avviata sull'emulatore e sul simulatore iPhone — fatto con F12.4 (2026-10-10)
   - [x] **F12.3** Dominio e dati con i test: arrotondamenti, offerte, tastierino, parser con le fixture (33 libere nel repo, 27 fuori), banco con il cricchetto, confronto, statistiche, repository, schema dump — FATTO il 2026-10-10 (210 test verdi; commit e rituale ancora da fare)
     - [x] `lib/domain/`: `Arrotonda` (half-up intero), `Quantita`, `Offerta` (5 sottoclassi, JSON tollerante), `RigaSpesa`, `Spesa` (+ `totaleSalvato`, `livelloBudgetDi`), `TastierinoState` «alla cassa» (D2), `Nomi`
     - [x] `lib/domain/lettura/`: `NumeriOcr` (espliciti, spezzati, fusi; percentuali escluse), `RigheVisive` (fascia media), `CartellinoParser` (doppio prezzo carta come `DoppioPrezzoCarta` + `scegliCarta`, D4), `BilanciaParser`, `ScontrinoParser` (verifica del totale con subtotale e contanti − resto), `UnisciParti`, `TestoOcr`; `Confronto`; `StatisticheSpesa` (+ `BudgetMese`, D3)
@@ -1161,8 +1161,8 @@ volta sola; nella fase di ciascuna app si spuntano.
     - [x] Fixture: `tool/esporta_fixture_ocr.py` (RapidOCR 3.10, PP-OCRv5 mobile latin, cls acceso), 33 nel repo + `LICENZE.md`, 27 in `microapps-campioni/f12/fixture/ppocrv5/`; pagamento POS di s13 tagliato
     - [x] Banco con cricchetto (`soglie.json`): sui 33 totale scontrino 15/15, bilancia 2/2, prezzo cartellino 12/20; sui 60 totale scontrino 16/16, bilancia 9/9, prezzo cartellino 29/45; parser ≤ 5 ms
     - [x] Test: arrotonda, offerta, riga_spesa, spesa, tastierino, nomi, numeri_ocr, cartellino/bilancia/scontrino parser, unisci_parti, confronto, statistiche, banco, spesa_repository, backup, paywall_config, texts_glyphs
-    - [x] Voce in `memory/decisioni.md` per gli scostamenti tecnici (2026-10-11 «scelte del bootstrap e del parser», + «scelte dell'interfaccia» di F12.4) e sezioni F12.1.4/F12.1.8/F12.1.10/F12.1.12/F12.1.14 aggiornate con D3 e D4 (in F12.4)
-  - [x] **F12.4** Interfaccia «C · Una mano» completa con i servizi, provata sull'emulatore con foto vere e sul simulatore — FATTO il 2026-10-11 (304 test verdi, `analyze` pulito; commit e rituale ancora da fare)
+    - [x] Voce in `memory/decisioni.md` per gli scostamenti tecnici (2026-10-10 «scelte del bootstrap e del parser», + «scelte dell'interfaccia» di F12.4) e sezioni F12.1.4/F12.1.8/F12.1.10/F12.1.12/F12.1.14 aggiornate con D3 e D4 (in F12.4)
+  - [x] **F12.4** Interfaccia «C · Una mano» completa con i servizi, provata sull'emulatore con foto vere e sul simulatore — FATTO il 2026-10-10 (304 test verdi, `analyze` pulito; commit e rituale ancora da fare)
     - [x] Servizi `lib/services/`: `LetturaService` (+ `RisultatoCartellino`, `ScontrinoLetto` con le giunzioni), `Fotocamera.ritagliaAlMirino` (isolate, EXIF, originale sempre cancellato) + `Obiettivo`/`ObiettivoCamera` (fotocamera sostituibile nei test), `scegliFotoDiSistema`, `CsvExport`, `Aptica`, `ImpostazioniSistema` (canale nostro su Android e iOS, niente plugin); provider per ognuno in `providers.dart`
     - [x] Spesa (`/`): totale enorme (non scala col testo, 64 → 48 sotto i 700 dp), barra del budget verde/ambra/rossa, residuo, lista (piu' recente in alto, scorri = elimina con «Annulla» 5 s, tocco = `RigaSheet`), Cartellino e Scontrino (badge PRO, acquisto → si apre lo scontrino), tastierino sempre visibile (`GrigliaTasti` 4×4, tasti fissi a 48), vibrazioni (tasto, rifiuto, aggiunto, soglie 80/100% una volta per spesa), banner «Spesa iniziata ieri», `BudgetSheet` (+ «usalo anche per le prossime»)
     - [x] Cartellino (`/cartellino`, `?modo=bilancia`): mirino 86% 4:3, velo 55%, interruttore Cartellino|Bilancia, bilancia riconosciuta da sola, torcia, «Da una foto», «Leggo…», suggerimento sullo scritto a mano una volta, permesso negato con «Apri le impostazioni»; fogli `ConfermaCartellinoSheet` (nome, prezzo grande modificabile con un tocco, barrato, €/kg, pillola dell'offerta, quantita' N con NxM, chip alternativi, «Aggiungi (ora 2)», **due bottoni con/senza carta, nessun default** — D4), `SceltaCartellinoSheet`, `PesoSheet` (grammi/kg, anteprima del conto, «Leggi l'etichetta della bilancia»), `ConfermaBilanciaSheet`
@@ -1172,21 +1172,34 @@ volta sola; nella fase di ciascuna app si spuntano.
     - [x] Guardia condivisa `privacy_ocr.gradle` allineata (gruppo datatransport, media3 solo per ACCESS_NETWORK_STATE, INTERNET stretto) e applicata con `apply(from = …)`: release verde, rossa con INTERNET di prova (tolto); `noCompress onnx` nel modulo app
     - [x] Emulatore (Medium Phone API 35): tastierino (2,49; 3 × 1,50), mirino sulla scena virtuale (nessun prezzo, nessuna foto rimasta in cache), cartellino c11 dalla galleria («quale?» fra due proposte, al kg → peso 500 g = 0,95), bilancia b07 riconosciuta da sola (1,082 × 1,59 = 1,72), paywall 2,99 € e Pro finto, scontrino s06 dalla galleria → confronto → chiusura → storico → statistiche, tema chiaro al 130%; campioni cancellati dall'emulatore. Simulatore iPhone 18 Pro Max: build e avvio, schermata principale in italiano
     - [x] Trovato e corretto sull'emulatore: «T*talE PARZIALE» (OCR) letto come articolo → `t.?tale\s*parziale` nel parser (test `scontrino_subtotale_test.dart`, banco invariato)
-  - [x] **F12.5** Pro: limiti, paywall, `ProGate` sulle pagine, test di coerenza — FATTO il 2026-10-11: `ProGate` sulle rotte `/scontrino` (+ confronto e registrazione) e `/statistiche`; spese nascoste col lucchetto anche da link diretto; badge PRO su Scontrino, Statistiche, backup, CSV (ripristino gratis); test `pro_gate_test.dart`, `storico_page_test.dart`, `paywall_config_test.dart` (esistente)
-  - [x] **F12.6** Grafica (gia' scelta, «C · Una mano», applicata in F12.4): tema chiaro derivato e `palette_contrast_test.dart` (AA in entrambi i temi) — FATTO il 2026-10-11; [ ] conferma del proprietario sugli scatti scuro/chiaro
+  - [x] **F12.5** Pro: limiti, paywall, `ProGate` sulle pagine, test di coerenza — FATTO il 2026-10-10: `ProGate` sulle rotte `/scontrino` (+ confronto e registrazione) e `/statistiche`; spese nascoste col lucchetto anche da link diretto; badge PRO su Scontrino, Statistiche, backup, CSV (ripristino gratis); test `pro_gate_test.dart`, `storico_page_test.dart`, `paywall_config_test.dart` (esistente)
+  - [x] **F12.6** Grafica (gia' scelta, «C · Una mano», applicata in F12.4): tema chiaro derivato e `palette_contrast_test.dart` (AA in entrambi i temi) — FATTO il 2026-10-10; [ ] conferma del proprietario sugli scatti scuro/chiaro
   - [~] **F12.7** Test, rifinitura, iOS su iPad via TestFlight, fixture di Vision, **taratura con le foto vere del proprietario**, misure di prestazione su un Android vero, controllo privacy sull'APK di release — parte da qui FATTA il 2026-10-10 (336 test verdi, `analyze` pulito); restano iPad/TestFlight (serve l'App ID del proprietario), le foto vere del proprietario e un Android vero
     - [x] **Banco sui ritagli del mirino** (il caso d'uso vero: un cartellino inquadrato, 4:3): `test/fixtures/ocr/ritagli_mirino.json` (47 ritagli fatti a mano, coordinate sole, immagini fuori dal repo; esclusi i 7 scritti a mano), `tool/esporta_fixture_ocr.py --ritagli` (ritaglio in memoria) → motore `ppocrv5-mirino` (20 nel repo, 27 fuori) col suo cricchetto. Il banco ora carica le private per ogni cartella di motore
     - [x] Parser del cartellino migliorato (prima → dopo, PP-OCRv5): **ritagli 47** prezzo 32 → **36/40**, al kg 16 → **19/22**, offerte 4 → **9/10**, pieno 2 → **6/6**, nome 14 → **25/39** (metrica nuova); **foto larghe 60** prezzo 29 → **33/45**, al kg 15 → **17/27**, offerte 3 → **8/10**, pieno 3 → **6/6**. Regole: contesto spezzato al separatore nelle righe con piu' numeri («250 g: 1,89 € - Soit le kg: 7,56», c11), «/ k9» e «ol ku», «AILC.12,80», etichetta «Al kg» del valore illeggibile, quantita' «1/kg», NxM col prezzo «anziche'» (anche senza il prezzo grande, «3*1»), al kg coerente col prezzo effettivo, coppia pieno/scontato legata dalla percentuale (prezzo dinamico c33, anche come ancora unica), «SCONTO 40» senza «%», bollino senza prezzo (proposta col solo sconto), «0.99-», «(23%», nome sotto il prezzo (Esselunga), lettere cirilliche gemelle (Vision), ancore al 60%. Restano errori solo dove l'OCR non legge il numero (c02 stilizzati, c12 LCD, «L.» di c09, al kg di c13, «-30» di c32)
     - [x] Bilancia: nome del prodotto = scritta piu' grande, niente insegne/offerte/codici: PP-OCRv5 2 → **5/9** con la metrica nuova `bilancia.prodotto` (a occhio 7/9). Scontrino: totale senza importo chiude il corpo (Vision s01), asterischi in coda tolti, `negozioMostrato` senza punteggiatura finale. X delle miniature dello scontrino sulla foto (Center + Stack della misura della foto)
-    - [x] **Vision misurato sul parser** (simulatore iPhone 18 Pro Max, 107 immagini = 60 intere + 47 ritagli, banco `micro_ocr` d'esempio, log → `esporta_fixture_ocr.py --log` → motori `vision-sim` e `vision-sim-mirino`, 33+20 nel repo): ritagli prezzo **33/40** (PP 36), al kg 16/22 (PP 19), offerte 9/10, pieno 4/6 (PP 6), nome 24/39; foto intere prezzo 31/45 (PP 33), al kg 11/27 (PP 17), **totale scontrino 14/16 (PP 16)**, **totale bilancia 7/9 (PP 9)**, peso 5/9 (PP 8). Tempi Vision sul simulatore: mediana 371 ms, max 661 ms. ⚑ Raccomandazione: non cambiare ancora motore; misurare sull'iPad (TestFlight) con le stesse 107 immagini; se il distacco sui totali di bilancia e scontrino resta, ORT 1.28 anche su iOS (decisione 2026-10-11, +22 MB) — decide il proprietario
+    - [x] **Vision misurato sul parser** (simulatore iPhone 18 Pro Max, 107 immagini = 60 intere + 47 ritagli, banco `micro_ocr` d'esempio, log → `esporta_fixture_ocr.py --log` → motori `vision-sim` e `vision-sim-mirino`, 33+20 nel repo): ritagli prezzo **33/40** (PP 36), al kg 16/22 (PP 19), offerte 9/10, pieno 4/6 (PP 6), nome 24/39; foto intere prezzo 31/45 (PP 33), al kg 11/27 (PP 17), **totale scontrino 14/16 (PP 16)**, **totale bilancia 7/9 (PP 9)**, peso 5/9 (PP 8). Tempi Vision sul simulatore: mediana 371 ms, max 661 ms. ⚑ Raccomandazione: non cambiare ancora motore; misurare sull'iPad (TestFlight) con le stesse 107 immagini; se il distacco sui totali di bilancia e scontrino resta, ORT 1.28 anche su iOS (decisione 2026-10-10, +22 MB) — decide il proprietario
     - [x] ☠ Trovato: Vision legge il PAN mascherato con le «x» (s13): pulizia delle fixture rinforzata (`RIPULISCI`, `INIZIO_POS`) e controllo del banco esteso a `x{4,}\d{4}`. ☠ `debugPrint` throttled perdeva le ultime righe del banco sul dispositivo: l'esempio usa `print`
     - [x] Flussi provati con OCR vero, database vero e foto dei campioni (`integration_test/flussi_test.dart`, `SR_FOTO` fuori dal repo, selettore di sistema sostituito): cartellino 3,59 → bilancia 7,71 (totale 11,30) → scontrino Emme Piu' 6,15 → confronto → chiusura → storico, copie temporanee sparite. iOS simulatore: 0,54 / 0,96 / 0,45 s; emulatore Android (PP-OCRv5): 0,95 / 0,99 / 1,14 s. Parser: max 4,8 ms (banco sul PC)
-    - [x] Emulatore a mano: testo al 130%, tema chiaro, spesa vuota e storico vuoto, permesso fotocamera negato («La fotocamera e' spenta» + «Apri le impostazioni» che apre davvero le impostazioni + «Da una foto»), spesa col tastierino 2,49 + 2,22 = 4,71 → chiusura → storico; emulatore riportato al 100%. ⚑ L'APK debug avviato da solo resta sullo splash (VM in attesa del debugger): per le prove a mano si usa la release
+    - [x] Emulatore a mano: testo al 130%, tema chiaro, spesa vuota e storico vuoto, permesso fotocamera negato («La fotocamera e' spenta» + «Apri le impostazioni» che apre davvero le impostazioni + «Da una foto»), spesa col tastierino 2,49 + 2,22 = 4,71 → chiusura → storico; emulatore riportato al 100%. ~~⚑ L'APK debug avviato da solo resta sullo splash (VM in attesa del debugger)~~ — **chiarito in F12.8: non e' un difetto dell'app** (vedi F12.8 e `apps/spending_review/codebase_reference.md` §14.2): l'APK di debug vero parte da solo; restano sullo splash la build di un test d'integrazione (installata da `flutter test integration_test/…`, che sovrascrive anche `app-debug.apk`) e un'attivita' avviata con `start-paused`
     - [x] Esclusione dal backup iCloud verificata sul simulatore: `com_apple_backup_excludeItem` su `Documents/`, `Documents/spending_review/` e (dal secondo avvio) `spending_review.sqlite`. Fuori dall'esclusione: `Library/Application Support/spending_review/logs` e le preferenze (budget, tema)
     - [x] Release: `build apk --release` (167 MB, APK con tre ABI) con `verificaPrivacyOcr` verde; `verifica_privacy_android.ps1` verde dopo aver corretto un **falso positivo**: «1DS» compariva nel codice macchina ARMv7 di ORT (istruzioni Thumb), non come stringa; ora le stringhe corte contano solo dentro stringhe stampabili di 8+ caratteri (provato rosso su un APK finto con «Microsoft 1DS SDK»). Esempio di `micro_ocr` ricompilato (Android debug, iOS simulatore)
     - [ ] TestFlight su iPad e banco Vision sull'iPad; [ ] foto vere del proprietario (fixture fuori dal repo, cricchetto); [ ] misure F12.1.18 su un Android vero di fascia media (avvio a freddo, memoria, `--split-per-abi --analyze-size`)
-  - [ ] **F12.8** Atlanti `apps/spending_review` e `packages/micro_ocr` (+ `micro_core` e cinque app per `documentScan`), `verify_atlas` 0 mancanti
-  - [ ] **F12.9** Rituale di fine fase, card «In arrivo» in vetrina, StatusMicroApps con entrambi gli store, branch di versione nuovo
+  - [x] **F12.8** Atlanti `apps/spending_review` e `packages/micro_ocr` (+ `micro_core` e cinque app per `documentScan`), `verify_atlas` 0 mancanti — FATTO il 2026-10-10 (341 esiti: 339 verdi + 2 saltati di proposito, `analyze` pulito; commit e rituale ancora da fare, F12.9)
+    - [x] **Difetto «APK di debug fermo sullo splash» (F12.7) indagato sull'emulatore** (Medium_Phone_API_35): **non e' dell'app**. L'APK di debug vero, avviato da solo (`am start` e launcher, 5 avvii a freddo, anche con una spesa aperta), arriva al tastierino come QR Me debug. Riprodotte le due cause vere: (a) **build di un test d'integrazione** — `flutter test integration_test/flussi_test.dart -d …` installa `com.smp.spendingreview` col TEST come entrypoint e sovrascrive `build/app/outputs/flutter-apk/app-debug.apk`; senza `SR_FOTO` il test esce senza `runApp` e lo splash resta, anche con un intent pulito dal launcher; (b) **`--ez start-paused true`** (`flutter drive`, `run --start-paused`): la VM attende il debugger, e il task conserva l'intent radice con l'extra, quindi anche l'icona dopo un `am kill` riapre in pausa. Rimedi (documentati come trappola nell'atlante §14.2): rifare `build apk --debug` dopo un test d'integrazione; `am force-stop` o togliere l'app dalle recenti. Nessun codice cambiato per questo; emulatore lasciato con l'APK di debug vero
+    - [x] `apps/spending_review/codebase_reference.md` nuovo (~3200 righe): decisioni, «dove sta cosa», albero, nativo, tabelle Drift con vincoli/indici/sicurezza, ogni classe con ogni membro (**firme estratte a macchina dall'AST** con un estrattore basato su `package:analyzer`, effetti scritti a mano, copertura controllata: 0 classi/dichiarazioni/effetti mancanti), rotte con guardie/argomenti/errori, configurazione (dart-define, preferenze, identificativi, SKU, permessi, testi, dipendenze, comandi), catalogo dei test (ogni file, banco con motori `ppocrv5`/`ppocrv5-mirino`/`vision-sim`/`vision-sim-mirino`, cricchetto, `SR_CAMPIONI`, `SR_FOTO`, impianto), regole e trappole, cosa NON esiste, debito, differenze dalla specsheet, perche'
+    - [x] `verify_atlas`: **0 non documentati** per `apps/spending_review` (143 simboli; i 96 «citati ma assenti» controllati a mano: solo terze parti, costanti di piattaforma, dart-define, doppi dei test, costanti dello script Python), `packages/micro_ocr` (7), `packages/micro_core` (84), Full Freezer, Scorte Calore, Film Tracker, QR Me. ☠ **TrashCan ha 11 non documentati gia' prima di F12.8** (`CollectionCalendars`, `CollectionExceptions`, `RecurrenceRules`, `OccurrenceOrigin`, `RuleEditorPage`, `TrashcanApp`, `WastePalette`, `WastePreset`, `WeekdayPicker`, `LEn`, `LIt`): debito del suo atlante, fuori da F12
+    - [x] **Firme confrontate a macchina**: Spending Review **945** firme e testate delle tabelle, **926 identiche** al sorgente normalizzato + **19 inizializzatori lunghi troncati di proposito** identici fino ai puntini, **0 diverse** (piu' 1115 frammenti fra apici in tutto l'atlante: 1000 identici, 115 sono espressioni citate nel testo, controllate a mano). `micro_ocr`: 112 frammenti, 32 Dart identici; resi letterali i 5 costruttori Dart scritti in forma tipizzata; il resto e' Kotlin/Swift/Gradle. `micro_core`: 177 frammenti, 90 identici, il resto forme abbreviate dell'atlante di F1 (campione controllato: coerenti)
+    - [x] `packages/micro_ocr/codebase_reference.md`: la usa Spending Review; regola «1DS» dello script sul binario (stringhe corte solo dentro stringhe stampabili di 8+ caratteri); `print` e non `debugPrint` nell'esempio; fixture di Vision del simulatore esistenti (iPad ancora no); debito aggiornato. `packages/micro_core/codebase_reference.md`: `FeatureKey` a **16** valori, riga `documentScan`, colonne riverificate sui `feature_limits.dart` delle **sei** app. Una riga `documentScan` negli atlanti di TrashCan, Full Freezer, Scorte Calore, Film Tracker, QR Me («15» → «16» in QR Me)
+    - [x] **Difetti trovati rileggendo il codice e corretti con un test** (rosso prima, verde dopo): (1) `CartellinoCameraPage._daUnaFoto` perdeva gli errori inattesi del motore (nessun messaggio) → snack `cartellino_scattoFallito` (`cartellino_camera_test.dart` +1); (2) `ScontrinoParser._data` restituiva null alla prima data non plausibile anche con la data vera dopo → si salta (`scontrino_parser_test.dart` +1, banco invariato); (3) `SpendingBackupSource.importPayload` con un campo di testo di tipo sbagliato lanciava `TypeError`, che `BackupService.restore` (solo `on Exception`) non intercetta → `_testoONull` con `FormatException` (`backup_test.dart` +1); (4) commenti superati in `routes.dart` (`LetturaScontrino` → `ScontrinoLetto`; il lucchetto del dettaglio). Messi nel debito dell'atlante (§15.2): cancellazione delle copie del selettore senza il controllo della cartella in `ScontrinoCameraPage`; `_salva` senza `catch` nelle pagine dello scontrino
+  - [x] **F12.9** Rituale di fine fase, card «In arrivo» in vetrina, StatusMicroApps con entrambi gli store, branch di versione nuovo — FATTO il 2026-10-10: piano, atlanti (Spending Review, micro_ocr, micro_core, cinque app), StatusMicroApps, README, decisioni, Projects Tracker, branch `v10.0.0`. Card «In arrivo» **pronta in locale, pubblicazione da confermare** dal proprietario
+
+**Ripresa F12 (stato al 2026-10-10, sera).** Spending Review e' completa come codice: 339 test, analisi pulita, release Android con guardie di privacy verdi (ORT 1.28.0, niente telemetria, 16 KB ok), flussi provati sull'emulatore e sul simulatore iPhone. Restano:
+  1. **Proprietario:** App ID `com.smp.spendingreview` (niente App Group) e app su App Store Connect; poi profilo via API, TestFlight, scheda completa via API.
+  2. **Sull'iPad:** misurare Vision sulle 107 immagini del banco; se resta sotto PP-OCRv5 su bilancia e scontrino, valutare ORT 1.28 anche su iOS (+22 MB, decisione del proprietario).
+  3. **Foto vere** del proprietario (bilance italiane, catene mancanti: `microapps-campioni/f12/LEGGIMI.md`) per tarare il parser; misure su un Android vero di fascia media.
+  4. Play: dopo il D-U-N-S, come le altre app; riga `spendingreview` nel License Server.
+  5. Debito minore (atlante §debito): copie del selettore nello scontrino, `catch` nei `_salva`, log e preferenze fuori dall'esclusione iCloud, gli 11 simboli non documentati nell'atlante di TrashCan.
 - [ ] **F13** Quanto dividiamo? — divisione del conto
 - [ ] **F14** Ricordamelo qui — promemoria per luogo (geofencing, permesso in background)
 - [ ] **F15** Quanti sono? — conteggio con la fotocamera (**decisione sull'AI prima di F15.0**)
@@ -1224,7 +1237,7 @@ volta sola; nella fase di ciascuna app si spuntano.
 
 ☠ **BUG APERTO — PRIORITA' 1 (segnalato dal proprietario il 2026-10-10, ore 3):** il **widget di
 TrashCan non si aggiorna da solo a mezzanotte**: cambia giorno solo dopo aver aperto l'app.
-«Perde completamente di senso se non si aggiorna da solo.» Da fare per primo il 2026-10-11, prima di
+«Perde completamente di senso se non si aggiorna da solo.» Da fare per primo il 2026-10-10, prima di
 Spending Review: capire su quale piattaforma lo vede (iPad/iOS e/o Android), verificare che il widget
 **calcoli i giorni dalle date** al momento del disegno (ADR-018) e che la piattaforma lo ridisegni a
 mezzanotte senza l'app (iOS: timeline WidgetKit con una voce alle 00:00 di ogni giorno e
@@ -5354,7 +5367,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   partenza.
 - Nessun permesso. Widget possibile (totale corrente).
 
-#### F12.0 — Prime decisioni del proprietario (2026-10-10), il resto il 2026-10-11
+#### F12.0 — Prime decisioni del proprietario (2026-10-10), il resto il 2026-10-10
 
 - **Nome: «Spending Review»** (proprietario). Da chiarire domani se vale per entrambe le lingue
   come «QR Me» (la cartella sara' presumibilmente `apps/spending_review/`, bundle
@@ -5365,13 +5378,13 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   gli **angoli verdi da inquadratura** suggerisce la **lettura dello scontrino con la fotocamera**:
   domandarlo esplicitamente in F12.0 (OCR sul telefono, con la regola «dati solo sul telefono»:
   niente ML Kit; su iOS Vision e' locale, su Android serve un OCR che non mandi dati).
-- **Gratis/Pro e prezzo** (proprietario, 2026-10-11): **«spesa gratis, revisione Pro»**, Pro **2,99 €**.
+- **Gratis/Pro e prezzo** (proprietario, 2026-10-10): **«spesa gratis, revisione Pro»**, Pro **2,99 €**.
   - **Gratis:** tastierino, budget, **lettura dei cartellini illimitata**, etichette della bilancia,
     ultime **5 spese** salvate.
   - **Pro:** **Scontrino** (controllo alla cassa **e** registrazione della spesa dallo scontrino),
     **storico illimitato con statistiche** (per mese e per negozio, spesa media, sforamenti del
     budget), **export CSV**, **backup**.
-- **Scontrino** (proprietario, 2026-10-11): serve **sia** a confrontare alla cassa il contato con lo
+- **Scontrino** (proprietario, 2026-10-10): serve **sia** a confrontare alla cassa il contato con lo
   scontrino (differenza e righe sospette) **sia a registrare la spesa** dallo scontrino letto, anche
   se durante la spesa non si e' contato niente (la spesa salvata nello storico prende righe e totale
   dallo scontrino).
@@ -5389,7 +5402,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   **nome del prodotto** e **prezzo da pagare**, riconoscendo almeno: prezzo in offerta vs prezzo
   barrato/«anziche'», prezzo **al kg/al litro** (prezzo unitario) vs prezzo della confezione, offerte
   tipo **3x2 / 2x1 / -30%**, centesimi scritti piccoli. Se c'e' ambiguita' l'app propone e l'utente
-  conferma con un tocco. Da definire il 2026-10-11 nella specsheet: quali formati (cartellini dei
+  conferma con un tocco. Da definire il 2026-10-10 nella specsheet: quali formati (cartellini dei
   supermercati italiani), cosa fare con i prodotti a peso.
 - **Prodotti a peso** (proprietario, 2026-10-10: «entrambe le cose»): **sia** peso scritto a mano
   dopo il cartellino al kg, **sia** lettura dell'etichetta della bilancia (che porta gia' il totale).
@@ -5401,7 +5414,7 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
 - ☠ **OCR solo sul telefono** (regola «dati solo sul telefono»): su iOS **Vision** (locale); su
   Android **niente ML Kit** → valutare un OCR che giri tutto nell'app (es. Tesseract via FFI) e la
   sua precisione sui cartellini; e' il punto tecnico piu' rischioso di F12.
-- **Specsheet scritta il 2026-10-11**: vedi la sezione **«F12 — Spending Review»** qui sotto (F12.0
+- **Specsheet scritta il 2026-10-10**: vedi la sezione **«F12 — Spending Review»** qui sotto (F12.0
   riepilogo delle decisioni, F12.1 specsheet, F12.2 ordine di lavoro, F12.10 domande aperte). Le righe
   qui sopra restano come traccia: dove differiscono (es. «Tesseract via FFI», «Widget possibile»), vince
   la sezione F12.
@@ -6274,7 +6287,7 @@ ovvia, con il perche'.
 ### F12.0 — Decisioni di partenza (riepilogo, 2026-10-10/11)
 
 Prese con il proprietario (scheda «F12 — Quanto sto spendendo?» in §8 F10–F19, paragrafo F12.0, e
-`memory/decisioni.md`, voci del 2026-10-10 e 2026-10-11). Dove contraddicono la scheda delle idee,
+`memory/decisioni.md`, voci del 2026-10-10 e 2026-10-10). Dove contraddicono la scheda delle idee,
 vincono queste. Le decisioni **tecniche** prese scrivendo questa specsheet sono marcate ⚑ nei
 punti F12.1.x e vanno registrate in `memory/decisioni.md` al rituale di F12.1.
 
@@ -6320,7 +6333,7 @@ punti F12.1.x e vanno registrate in `memory/decisioni.md` al rituale di F12.1.
    - **lo scritto a mano non e' supportato** (zero cifre lette sui campioni c04, c05, c25): si usa
      il tastierino, e l'app lo dice.
 5. **Gratis e Pro: «spesa gratis, revisione Pro»**, Pro **2,99 €** una tantum (proprietario,
-   2026-10-11):
+   2026-10-10):
 
    | Funzione | Gratis | Pro | `FeatureKey` → limite |
    |---|---|---|---|
@@ -6360,7 +6373,7 @@ punti F12.1.x e vanno registrate in `memory/decisioni.md` al rituale di F12.1.
 7. **Icona del proprietario**: `docs/specs/icona-spending-review.png` (PNG 1254x1254 RGBA
    trasparente). Si ripulisce e si generano icone e splash con `tool/genera_icone.py` (copiato da
    `apps/qr_me/tool/genera_icone.py`). Seme del tema `#4ADE80` (il verde della grafica scelta).
-8. **OCR solo sul telefono** (`docs/specs/f12-ocr.md`, `memory/decisioni.md` 2026-10-11): **iOS
+8. **OCR solo sul telefono** (`docs/specs/f12-ocr.md`, `memory/decisioni.md` 2026-10-10): **iOS
    Vision** (locale, 0 MB); **Android PaddleOCR PP-OCRv5 mobile** (rilevatore `PP-OCRv5_mobile_det`
    + riconoscitore `latin_PP-OCRv5_mobile_rec`) su **ONNX Runtime 1.28.0 esatta**; ripiego gli stessi
    modelli su **NCNN**; Tesseract ultima spiaggia; **ML Kit escluso**, **LiteRT 2.x escluso**. ☠ ONNX
@@ -6883,7 +6896,7 @@ class CartellinoParser {
   const CartellinoParser();
   LetturaCartellino interpreta(List<RigaOcr> righe);
 }
-// ⚑ SUPERATO da D4 (2026-10-11, «chiedi ogni volta»): niente `preferisciPrezzoCarta`. Con due prezzi
+// ⚑ SUPERATO da D4 (2026-10-10, «chiedi ogni volta»): niente `preferisciPrezzoCarta`. Con due prezzi
 // la proposta porta `DoppioPrezzoCarta? carta` (conCarta, senzaCarta) e il foglio di conferma chiede
 // con DUE bottoni; `PropostaCartellino.scegliCarta({required bool conCarta})` applica la scelta.
 ```
@@ -8053,7 +8066,7 @@ con cui si sviluppa se la risposta non arriva prima della sottofase indicata; ca
 - **D4 — Prezzo con la carta fedelta' di default?** Proposta: **si'** (interruttore «Ho la carta
   fedelta'» acceso). Nessun campione lo copre ancora: la regola si tara con le foto vere.
 
-**RISPOSTE DEL PROPRIETARIO (2026-10-11) — vincono sulle proposte sopra:**
+**RISPOSTE DEL PROPRIETARIO (2026-10-10) — vincono sulle proposte sopra:**
 - **D1 → nascoste**: oltre le 5 le spese restano sul telefono e non si vedono; il Pro le ritrova
   tutte con le statistiche gia' piene. Nessuna potatura.
 - **D2 → tastierino «alla cassa»**: `2 4 9` = 2,49, virgola facoltativa, quantita' con `×`

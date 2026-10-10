@@ -14,7 +14,7 @@ import 'package:micro_core/micro_core.dart';
 /// `FeatureKey.values` e' scritta qui, anche quelle aperte.
 const FeatureLimits srFeatureLimits = <FeatureKey, FeatureLimit>{
   // ⚑ 5 spese chiuse VISIBILI: le altre restano nel database, nascoste (risposta D1 del
-  // proprietario, 2026-10-11). Il limite lo applica la LETTURA (`osservaChiuse(limite: 5)`),
+  // proprietario, 2026-10-10). Il limite lo applica la LETTURA (`osservaChiuse(limite: 5)`),
   // mai una cancellazione: chi compra il Pro dopo tre mesi ritrova tutto, statistiche piene.
   FeatureKey.fullHistory: FeatureLimit.count(freeMax: 5),
 

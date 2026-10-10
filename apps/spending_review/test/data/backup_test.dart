@@ -141,4 +141,26 @@ void main() {
     );
     expect((await nuovo.osservaInCorso().first)!.righe.single.nome, 'Resta');
   });
+
+  // F12.8: con `as String?` un campo di testo di tipo sbagliato lanciava TypeError, che e' un Error e
+  // non una Exception: `BackupService.restore` intercetta solo `on Exception`, quindi l'errore usciva
+  // senza il messaggio «ripristino fallito». Ora e' una FormatException come gli altri campi rotti.
+  test('un campo di testo di tipo sbagliato e\' una FormatException (non un TypeError), e il database resta', () async {
+    await nuovo.aggiungiRiga(riga('Resta', 100));
+    final source = SpendingBackupSource(nuovoDb);
+    final spesa = {
+      'id': 1, 'stato': 'chiusa', 'iniziataIl': 0, 'chiusaIl': 0, 'dataSpesa': 20261010, 'totale': 100, 'fonte': 'contate',
+    };
+    final rigaRotta = {
+      'spesaId': 1, 'insieme': 'contate', 'posizione': 0, 'nome': 'X', 'pezzi': 1, 'unita': 7, 'prezzoUnitario': 100,
+      'totale': 100, 'origine': 'tastierino', 'stornata': false, 'creataIl': 0,
+    };
+    for (final payload in [
+      {'negozi': <Object?>[], 'spese': [spesa], 'righe': <Object?>[]},
+      {'negozi': <Object?>[], 'spese': [{...spesa, 'dataSpesa': '2026-10-10'}], 'righe': [rigaRotta]},
+    ]) {
+      await expectLater(source.importPayload(payload, mode: ImportMode.replaceAll), throwsFormatException);
+    }
+    expect((await nuovo.osservaInCorso().first)!.righe.single.nome, 'Resta');
+  });
 }

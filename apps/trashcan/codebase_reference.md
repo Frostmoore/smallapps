@@ -1063,6 +1063,8 @@ causa.
 Deciso dal proprietario l'11 settembre 2026. La mappa vive in
 `lib/app/feature_limits.dart` ed e' l'unico posto in cui cambiarlo.
 
+⚑ **F12.8 (2026-10-10)**: la mappa scrive **tutte le 16 chiavi** di `FeatureKey`. Le due nate dopo questa app sono `open()` qui, una riga ciascuna e nessun cambiamento di comportamento (il test di coerenza del paywall le vuole tutte): `imageExport` (2026-10-09, QR Me) e **`documentScan`** (2026-10-10, F12.2a: lo Scontrino di Spending Review). Tabella completa delle chiavi e di chi le limita: `packages/micro_core/codebase_reference.md`.
+
 | Funzione | Chiave | Piano gratuito |
 |---|---|---|
 | Secondo calendario e oltre | `unlimitedEntities` | uno solo |

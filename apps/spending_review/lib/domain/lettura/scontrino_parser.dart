@@ -492,6 +492,9 @@ class ScontrinoParser {
   }
 
   /// La prima data plausibile: non nel futuro di oltre 1 giorno e non piu' vecchia di 366 giorni.
+  /// ⚑ F12.8: una data non plausibile si SALTA e si cerca la successiva (prima chiudeva la ricerca
+  /// con null): un buono «valido fino al 31/12/2027» stampato prima della data dello scontrino non
+  /// deve far perdere la data vera.
   static CivilDate? _data(List<String> testi, DateTime oggi) {
     final o = CivilDate.fromDateTime(oggi);
     for (final t in testi) {
@@ -507,7 +510,7 @@ class ScontrinoParser {
           continue;
         }
         final giorni = o.daysUntil(d);
-        if (giorni > 1 || giorni < -366) return null;
+        if (giorni > 1 || giorni < -366) continue;
         return d;
       }
     }

@@ -62,7 +62,7 @@ final class IncrementaUltima extends EffettoTasto {
 }
 
 /// La macchina a stati del tastierino «alla cassa» (develop_microapps.md F12.1.3; risposta D2 del
-/// proprietario, 2026-10-11).
+/// proprietario, 2026-10-10).
 ///
 /// ⚑ **Virgola facoltativa, come alla cassa**: `2 4 9` = 2,49 (le cifre entrano da destra come
 /// centesimi) e `2 , 4 9` = 2,49 come si legge sul cartellino. Il display mostra **sempre** il

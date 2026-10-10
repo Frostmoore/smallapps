@@ -93,7 +93,7 @@ packages/micro_core/
 │     │                                LicenseApi, LicenseApiClient
 │     ├─ export/csv_writer.dart        CsvWriter
 │     ├─ gate/
-│     │  ├─ feature_key.dart           FeatureKey (15 valori; imageExport dal 2026-10-09)
+│     │  ├─ feature_key.dart           FeatureKey (16 valori; imageExport dal 2026-10-09, documentScan dal 2026-10-10)
 │     │  ├─ feature_limits.dart        FeatureLimit, FeatureLimits
 │     │  ├─ feature_gate.dart          GateVerdict, GateAllowed, GateBlocked,
 │     │  │                             BlockReason, FeatureGate
@@ -380,28 +380,42 @@ Classi di risposta: `ServerEntitlement` (`status`, `productId`, `purchasedAt`, `
 
 ### Gating (ADR-017)
 
-`enum FeatureKey` (15 valori, in quest'ordine): `unlimitedEntities`, `secondaryEntities`,
+`enum FeatureKey` (16 valori, in quest'ordine): `unlimitedEntities`, `secondaryEntities`,
 `photos`, `statistics`, `fullHistory`, `csvExport`, `pdfReport`, `backupRestore`,
 `advancedWidget`, `notifications`, `multipleNotifications`, `calendarSync`, `customCategories`,
-`themeCustomization`, `imageExport`
+`themeCustomization`, `imageExport`, `documentScan`
 
-| Valore | Cosa vende | Chi la limita oggi (`lib/app/feature_limits.dart` delle app, 2026-10-09) |
+Tabella verificata il **2026-10-10 (F12.8)** leggendo i `lib/app/feature_limits.dart` delle **sei**
+app (TrashCan, Full Freezer, Scorte Calore, Film Tracker, QR Me, Spending Review): ogni app scrive
+**tutte** le 16 chiavi; quelle non nominate in una cella sono `open()` in quell'app.
+
+| Valore | Cosa vende | Chi la limita oggi (`lib/app/feature_limits.dart` delle app) |
 |---|---|---|
-| `unlimitedEntities` | l'entita' principale oltre il limite gratuito | TrashCan, Full Freezer, Scorte Calore `count(1)`; QR Me `count(1)` (preferiti); Film Tracker no (rullini illimitati) |
+| `unlimitedEntities` | l'entita' principale oltre il limite gratuito | TrashCan, Full Freezer, Scorte Calore `count(1)`; QR Me `count(1)` (preferiti); Film Tracker e Spending Review no |
 | `secondaryEntities` | entita' di contorno (macchine fotografiche, scomparti) | Film Tracker `count(1)` |
-| `photos` | foto allegate ai record | nessuna |
-| `statistics` | grafici e aggregazioni | Full Freezer, Scorte Calore, Film Tracker `locked` |
-| `fullHistory` | storico completo invece che troncato | Full Freezer `locked`, Scorte Calore `count(90)`, QR Me `count(5)` |
-| `csvExport` | esportazione CSV | Full Freezer, Scorte Calore, Film Tracker `locked` |
+| `photos` | foto allegate ai record | nessuna (Spending Review non conserva foto) |
+| `statistics` | grafici e aggregazioni | Full Freezer, Scorte Calore, Film Tracker, **Spending Review** (con il budget del mese) `locked` |
+| `fullHistory` | storico completo invece che troncato | Full Freezer `locked`, Scorte Calore `count(90)`, QR Me `count(5)`, **Spending Review `count(5)`** (le spese oltre le 5 restano nel database, nascoste: le filtra la lettura) |
+| `csvExport` | esportazione CSV | Full Freezer, Scorte Calore, Film Tracker, **Spending Review** `locked` |
 | `pdfReport` | riepilogo PDF | Film Tracker `locked` |
-| `backupRestore` | backup completo (il ripristino resta gratis nelle app) | tutte e cinque `locked` |
+| `backupRestore` | backup completo (il ripristino resta gratis nelle app) | tutte e **sei** `locked` |
 | `advancedWidget` | widget ricco | nessuna |
 | `notifications` | il promemoria in se' (distinta da `multipleNotifications`, il secondo orario) | TrashCan, Full Freezer, Scorte Calore `locked` |
 | `multipleNotifications` | piu' promemoria per evento | TrashCan `locked` |
 | `calendarSync` | sincronizzazione col calendario | Scorte Calore `locked` |
-| `customCategories` | categorie definite dall'utente (in QR Me: i moduli Wi-Fi/contatto/email/SMS/telefono) | Full Freezer, QR Me `locked` |
+| `customCategories` | categorie definite dall'utente (in QR Me: i moduli Wi-Fi/contatto/email) | Full Freezer, QR Me `locked` |
 | `themeCustomization` | colori, icone, tema (in QR Me: lo stile del QR) | TrashCan, QR Me `locked` |
-| `imageExport` | **esportare come immagine un contenuto generato dall'app** (il QR di QR Me in PNG) | **QR Me** `locked`; le altre quattro `open()` |
+| `imageExport` | **esportare come immagine un contenuto generato dall'app** (il QR di QR Me in PNG, l'etichetta) | **QR Me** `locked`; le altre cinque `open()` |
+| `documentScan` | **leggere con la fotocamera un documento lungo e trasformarlo in dati** (lo Scontrino di Spending Review: confronto alla cassa e registrazione della spesa) | **Spending Review** `locked`; le altre cinque `open()` |
+
+⚑ **`documentScan`** (aggiunta il **2026-10-10** con Spending Review, F12.2a): nessuna chiave
+esistente andava bene. `photos` vuol dire «allegare foto ai record» (gratis in Full Freezer e Film
+Tracker, e lo scontrino **non** si conserva come foto); `pdfReport`/`imageExport`/`csvExport` sono
+esportazioni. **Generica** apposta: la riusera' F13 («Quanto dividiamo?», lo scontrino da dividere).
+Costo: una riga `FeatureKey.documentScan: FeatureLimit.open()` nelle cinque app che non la vendono
+(`apps/{trashcan,full_freezer,scorte_calore,film_tracker,qr_me}/lib/app/feature_limits.dart`), perche'
+i loro `paywall_config_test` vogliono tutte le chiavi; `locked()` con il suo beneficio nel paywall
+(primo della lista) in `apps/spending_review`.
 
 ⚑ **`imageExport`** (aggiunta il **2026-10-09** con QR Me, F17.2a) e' distinta da `csvExport` e
 `pdfReport`: e' un'altra decisione commerciale. ☠ **Aggiungere una voce tocca tutte le app**: ogni

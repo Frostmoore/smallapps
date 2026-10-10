@@ -943,6 +943,8 @@ ha messo ChangeNotifierProvider fra le API legacy, e cosi' e' esplicito cosa rid
 `const FeatureLimits freezerFeatureLimits` — la mappa di §10. Nessuna pagina scrive
 `if (isPro)`: si passa da `featureGateProvider`.
 
+⚑ **F12.8 (2026-10-10)**: la mappa scrive **tutte le 16 chiavi** di `FeatureKey`. Le due nate dopo questa app sono `open()` qui, una riga ciascuna e nessun cambiamento di comportamento (il test di coerenza del paywall le vuole tutte): `imageExport` (2026-10-09, QR Me) e **`documentScan`** (2026-10-10, F12.2a: lo Scontrino di Spending Review). Tabella completa delle chiavi e di chi le limita: `packages/micro_core/codebase_reference.md`.
+
 ### `paywall_config.dart`
 
 | Funzione | Firma |

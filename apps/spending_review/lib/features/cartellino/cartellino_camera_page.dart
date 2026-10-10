@@ -142,6 +142,12 @@ class _CartellinoCameraPageState extends ConsumerState<CartellinoCameraPage> {
     setState(() => _leggo = true);
     try {
       await _leggi(percorsi.first);
+    } on Object catch (e) {
+      // ☠ F12.8: senza questo ramo un errore inatteso del motore (non `OcrNonDisponibile`, che
+      // `LetturaService` trasforma in `OcrAssente`) usciva da un `unawaited` e si perdeva: la pagina
+      // tornava pronta senza dire niente. Lo stesso messaggio dello scatto, come fa lo Scontrino.
+      MicroLog.w('foto del cartellino: $e');
+      if (mounted) MicroSnack.error(context, L.of(context).cartellino_scattoFallito);
     } finally {
       if (mounted) setState(() => _leggo = false);
     }

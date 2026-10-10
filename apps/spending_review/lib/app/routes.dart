@@ -20,10 +20,14 @@ abstract final class Routes {
   /// Pro, `ProGate(FeatureKey.documentScan)` sulla pagina.
   static const String scontrino = '/scontrino';
 
-  /// Pro; `extra: LetturaScontrino`.
+  /// Pro; `extra: ScontrinoLetto` (lettura + giunzioni, `lib/services/lettura_service.dart`); senza →
+  /// «Non trovato». ⚑ F12.8: il commento diceva `LetturaScontrino` (il tipo della specsheet, sostituito
+  /// in F12.4).
   static const String confronto = '/scontrino/confronto';
 
-  /// Pro; `extra: LetturaScontrino`.
+  /// Pro; `extra: ScontrinoLetto` (lettura + giunzioni, `lib/services/lettura_service.dart`); senza →
+  /// «Non trovato». ⚑ F12.8: il commento diceva `LetturaScontrino` (il tipo della specsheet, sostituito
+  /// in F12.4).
   static const String registra = '/scontrino/registra';
 
   /// `extra: ChiusuraArgs`.
@@ -32,7 +36,8 @@ abstract final class Routes {
   /// Gratis: ultime 5.
   static const String storico = '/storico';
 
-  /// Una spesa nascosta (oltre le 5) dal gratis → paywall, non la pagina.
+  /// Una spesa nascosta (oltre le 5) dal gratis → la pagina mostra il lucchetto col paywall, non la
+  /// spesa (`DettaglioSpesaPage`). Un `:id` non numerico → «Non trovato».
   static const String dettaglio = '/storico/:id';
   static String dettaglioDi(int id) => '/storico/$id';
 

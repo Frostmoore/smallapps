@@ -52,7 +52,7 @@ final class MeseSpesa {
   String toString() => 'MeseSpesa($anno-$mese: $spese spese, $totale, sforamenti $sforamenti/$conBudget)';
 }
 
-/// Il budget del MESE (risposta D3 del proprietario, 2026-10-11, Pro): quanto si e' speso nel
+/// Il budget del MESE (risposta D3 del proprietario, 2026-10-10, Pro): quanto si e' speso nel
 /// mese contro un tetto.
 @immutable
 final class BudgetMese {

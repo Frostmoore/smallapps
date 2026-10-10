@@ -68,7 +68,7 @@ enum FeatureKey {
   /// Spending Review: controllo alla cassa e registrazione della spesa).
   ///
   /// ⛑ Distinta da [photos] (allegare una foto, gratis nelle altre app) e da [imageExport]
-  /// (esportare). Aggiunta il 2026-10-11 con Spending Review (F12.2a); generica perche' F13
+  /// (esportare). Aggiunta il 2026-10-10 con Spending Review (F12.2a); generica perche' F13
   /// la riusera'. Le app che non la usano la mappano `open()`.
   documentScan,
 }

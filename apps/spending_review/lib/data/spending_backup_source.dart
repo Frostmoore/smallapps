@@ -137,7 +137,7 @@ class SpendingBackupSource implements BackupSource {
         final idFile = _intero(s, 'id');
         var stato = _testo(s, 'stato');
         int? chiusaIl = _interoONull(s, 'chiusaIl');
-        String? dataSpesa = s['dataSpesa'] as String?;
+        String? dataSpesa = _testoONull(s, 'dataSpesa');
         final sueRighe = righePerSpesa[idFile] ?? const [];
         if (stato == 'in_corso' && (mode == ImportMode.mergeKeepExisting || inCorsoNelTelefono)) {
           if (sueRighe.isEmpty) continue;
@@ -169,12 +169,12 @@ class SpendingBackupSource implements BackupSource {
             nome: Value(_testo(r, 'nome')),
             pezzi: Value(_interoONull(r, 'pezzi')),
             millesimi: Value(_interoONull(r, 'millesimi')),
-            unita: Value(r['unita'] as String?),
+            unita: Value(_testoONull(r, 'unita')),
             prezzoUnitarioCents: _intero(r, 'prezzoUnitario'),
             totaleCents: _intero(r, 'totale'),
-            offertaJson: Value(r['offerta'] as String?),
+            offertaJson: Value(_testoONull(r, 'offerta')),
             prezzoRifCents: Value(_interoONull(r, 'prezzoRif')),
-            unitaRif: Value(r['unitaRif'] as String?),
+            unitaRif: Value(_testoONull(r, 'unitaRif')),
             totaleStampatoCents: Value(_interoONull(r, 'totaleStampato')),
             origine: _testo(r, 'origine'),
             stornata: Value(r['stornata'] == true),
@@ -206,4 +206,13 @@ class SpendingBackupSource implements BackupSource {
 
   static String _testo(Map<String, Object?> m, String k) =>
       m[k] is String ? m[k]! as String : throw FormatException('backup: «$k» mancante');
+
+  /// Un testo facoltativo: null o una stringa. ☠ F12.8: prima era `m[k] as String?`, che con un tipo
+  /// sbagliato lancia `TypeError` (un Error, non una Exception): `BackupService.restore` intercetta solo
+  /// `on Exception`, e l'errore usciva senza il messaggio «ripristino fallito».
+  static String? _testoONull(Map<String, Object?> m, String k) => switch (m[k]) {
+    null => null,
+    final String v => v,
+    _ => throw FormatException('backup: «$k» non e\' un testo'),
+  };
 }

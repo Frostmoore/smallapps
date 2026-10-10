@@ -40,7 +40,7 @@ final settingsProvider = Provider<SettingsStore>(
 /// Le chiavi delle preferenze proprie di Spending Review (quelle comuni sono in `SettingKeys`),
 /// develop_microapps.md F12.1.10.
 ///
-/// ⚑ **Niente `preferisciPrezzoCarta`**: la risposta D4 del proprietario (2026-10-11) ha tolto il
+/// ⚑ **Niente `preferisciPrezzoCarta`**: la risposta D4 del proprietario (2026-10-10) ha tolto il
 /// default; quando un cartellino ha due prezzi, il foglio li mostra entrambi e si sceglie ogni
 /// volta.
 abstract final class SrSettingKeys {

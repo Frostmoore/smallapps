@@ -6,10 +6,16 @@ latin** su **ONNX Runtime 1.28.0 esatta** (dalla 1.29 c'e' la telemetria Microso
 Dart (`OcrEngine`) per i due motori e un `FakeOcrEngine` per i test delle app.
 
 Specsheet: `develop_microapps.md` F12.1.2, F12.1.4, F12.1.9, F12.1.16, F12.1.17. Ricerca:
-`docs/specs/f12-ocr.md`. Decisioni: `memory/decisioni.md`, voci del 2026-10-11 (OCR e scelte tecniche).
+`docs/specs/f12-ocr.md`. Decisioni: `memory/decisioni.md`, voci del 2026-10-10 (OCR e scelte tecniche).
 
 Stato al 2026-10-10: **F12.2b fatta** (lato Dart, Android, iOS, guardie, parita' con RapidOCR
-99,6%, 16 KB verificato). La usano: nessuna app ancora (Spending Review in costruzione, F12.2c+).
+99,6%, 16 KB verificato). **La usa Spending Review** (`apps/spending_review`, da F12.2c; il suo
+atlante e' `apps/spending_review/codebase_reference.md`): `CanaleOcrEngine` dietro
+`ocrEngineProvider`, `FakeOcrEngine` nei test di widget, `RigaOcr`/`Riquadro` in tutti i parser del
+dominio, guardia `privacy_ocr.gradle` applicata dal suo `build.gradle.kts`.
+Aggiornato al 2026-10-10 (F12.8): ultime modifiche al codice in F12.7 (`example/lib/main.dart` con
+`print` al posto di `debugPrint`, regola «1DS» di `tool/verifica_privacy_android.ps1`); il lato Dart,
+Kotlin e Swift non e' cambiato da F12.2b.
 
 ---
 
@@ -74,7 +80,8 @@ packages/micro_ocr/
 │  ├─ micro_ocr.podspec         frameworks Vision, ImageIO; nessuna dipendenza esterna
 │  └─ micro_ocr/{Package.swift, Sources/micro_ocr/{MicroOcrPlugin.swift, VisionOcr.swift, PrivacyInfo.xcprivacy}}
 └─ example/                     app di prova (com.smp.micro_ocr_example), MAI pubblicata
-   ├─ lib/main.dart             legge tutte le immagini di F12_DIR e mostra testo e tempi
+   ├─ lib/main.dart             legge tutte le immagini di F12_DIR, mostra testo e tempi e stampa
+   │                            una riga «MICRO_OCR|<json>» per immagine con print() (☠ non debugPrint, §9)
    ├─ integration_test/ocr_motore_test.dart   PNG disegnato dal test → «2,49» (Android e iOS)
    ├─ integration_test/ocr_parita_test.dart   legge F12_DIR e stampa MICRO_OCR|<json> per il banco
    └─ android/app/build.gradle.kts            noCompress onnx + apply(from = privacy_ocr.gradle): come un'app vera
@@ -92,7 +99,7 @@ packages/micro_ocr/
 | Android test | `org.jetbrains.kotlin:kotlin-test` | dal plugin Kotlin | JUnit 5 (`useJUnitPlatform`), non JUnit 4 come diceva la specsheet: il template di Flutter 3.47 usa questo |
 | iOS | Vision, ImageIO | sistema | 0 MB nell'app |
 
-⚑ **Niente `flutter_onnxruntime`** (decisione 2026-10-11): porterebbe `onnxruntime-objc` (~10 MB) anche
+⚑ **Niente `flutter_onnxruntime`** (decisione 2026-10-10): porterebbe `onnxruntime-objc` (~10 MB) anche
 su iPhone e la versione la deciderebbe un pacchetto di terzi.
 
 **Peso misurato** (APK di release arm64 dell'esempio, 2026-10-10): `libonnxruntime.so` 28,6 MB +
@@ -110,7 +117,7 @@ sinistra**, y verso il basso.
 
 | Membro | Firma | Effetto |
 |---|---|---|
-| costruttore | `const Riquadro({required double sinistra, required double alto, required double larghezza, required double altezza})` | |
+| costruttore | `const Riquadro({required this.sinistra, required this.alto, required this.larghezza, required this.altezza})` | i quattro campi `double` |
 | `Riquadro.daVision` | `factory Riquadro.daVision(double x, double y, double w, double h)` | da `boundingBox` di Vision (origine in BASSO): `alto = 1 − (y + h)` |
 | `Riquadro.fromJson` | `factory Riquadro.fromJson(Map<String, Object?> json)` | da `{"x","y","w","h"}`; accetta int, double e stringhe numeriche; mancanti = 0 |
 | campi | `final double sinistra, alto, larghezza, altezza` | |
@@ -122,7 +129,7 @@ sinistra**, y verso il basso.
 #### `final class RigaOcr` (`@immutable`)
 | Membro | Firma | Effetto |
 |---|---|---|
-| costruttore | `const RigaOcr({required String testo, required Riquadro riquadro, required double confidenza})` | confidenza 0..1 |
+| costruttore | `const RigaOcr({required this.testo, required this.riquadro, required this.confidenza})` | campi `final String testo`, `final Riquadro riquadro`, `final double confidenza` (0..1) |
 | `RigaOcr.fromJson` | `factory RigaOcr.fromJson(Map<String, Object?> json)` | formato **piatto** delle fixture `{"t","x","y","w","h","c"}`; `c` mancante = 1, `t` mancante = `''` |
 | `toJson` | `Map<String, Object?> toJson()` | `{"t", "x", "y", "w", "h", "c"}` |
 | `==`, `hashCode`, `toString` | | per valore |
@@ -142,7 +149,7 @@ grande va a strisce (§6.3); iOS: `minimumTextHeight` 0,008 per lo scontrino.
 | `rilascia` | `Future<void> rilascia()` | libera le sessioni (Android); il prossimo `leggi` le ricarica |
 
 #### `class OcrNonDisponibile implements Exception`
-`const OcrNonDisponibile(Object causa)`; `final Object causa`; `toString()`. L'**unica** eccezione
+`const OcrNonDisponibile(this.causa)`; `final Object causa`; `toString()`. L'**unica** eccezione
 che l'app deve gestire: plugin assente, modelli non caricabili, immagine illeggibile, errore nativo.
 
 ### `lib/src/canale_ocr_engine.dart`
@@ -150,7 +157,7 @@ che l'app deve gestire: plugin assente, modelli non caricabili, immagine illeggi
 #### `class CanaleOcrEngine implements OcrEngine`
 | Membro | Firma | Effetto |
 |---|---|---|
-| costruttore | `CanaleOcrEngine({MethodChannel canale = const MethodChannel('micro_ocr')})` | campo pubblico `final MethodChannel canale` (iniettabile nei test) |
+| costruttore | `CanaleOcrEngine({this.canale = const MethodChannel('micro_ocr')})` | campo pubblico `final MethodChannel canale` (iniettabile nei test) |
 | `nome` | `Future<String> nome()` | `invokeMethod('nome')`; null → `'sconosciuto'` |
 | `prepara`, `rilascia` | `Future<void> …()` | `invokeMethod` |
 | `leggi` | come l'interfaccia | `invokeListMethod<Map>('leggi', {'percorso': p, 'modo': modo.name})` → `rigaDaMappa`; null → `[]` |
@@ -164,7 +171,7 @@ che l'app deve gestire: plugin assente, modelli non caricabili, immagine illeggi
 #### `class FakeOcrEngine implements OcrEngine`
 | Membro | Firma | Effetto |
 |---|---|---|
-| costruttore | `FakeOcrEngine({List<RigaOcr> righe = const [], Duration ritardo = Duration.zero, Object? errore})` | copia `righe` in una lista modificabile |
+| costruttore | `FakeOcrEngine({List<RigaOcr> righe = const [], this.ritardo = Duration.zero, this.errore})` (campi `final Duration ritardo`, `final Object? errore`) | copia `righe` in una lista modificabile |
 | `righe` | `List<RigaOcr> righe` | modificabile fra un `leggi` e l'altro |
 | `ritardo`, `errore` | `final Duration ritardo; final Object? errore` | `leggi` aspetta `ritardo`, poi lancia `errore` se non nullo |
 | `letti`, `modi` | `final List<String> letti; final List<OcrModo> modi` | percorsi e modi richiesti, per le asserzioni (registrati anche se poi lancia) |
@@ -349,9 +356,9 @@ apply(from = "../../../../packages/micro_ocr/android/privacy_ocr.gradle")
 | b. chi porta la rete | report di fusione `outputs/logs/manifest-merger-release-report.txt` | una riga `ADDED/MERGED/IMPLIED/INJECTED from` del blocco `uses-permission#…INTERNET` che non contenga `[com.google.android.datatransport:` ; del blocco `…ACCESS_NETWORK_STATE` che non contenga `[com.google.android.datatransport:` **ne'** `[androidx.media3:`; una riga `provider#…ai.onnxruntime` |
 | c. dipendenze | `releaseRuntimeClasspath` risolto | `com.microsoft.onnxruntime` ≠ 1.28.0; `com.google.mlkit:*`, `firebase-analytics`, `play-services-tflite*`, `com.google.ai.edge.litert:*` |
 
-⚑ **Fonti ammesse, allineate il 2026-10-11 (F12.4) a cio' che Spending Review porta davvero**:
+⚑ **Fonti ammesse, allineate il 2026-10-10 (F12.4) a cio' che Spending Review porta davvero**:
 - gruppo **`com.google.android.datatransport`** intero (Play Billing porta sia `transport-backend-cct`
-  sia `transport-runtime`; fino al 2026-10-11 lo script ammetteva solo il primo e avrebbe fatto
+  sia `transport-runtime`; fino al 2026-10-10 lo script ammetteva solo il primo e avrebbe fatto
   fallire la release dell'app) per INTERNET e ACCESS_NETWORK_STATE;
 - **`androidx.media3`** solo per ACCESS_NETWORK_STATE: lo porta la fotocamera (`camera_android_camerax`
   → `androidx.camera:camera-video` → `media3-container` → `media3-common`), e' un permesso «normale»
@@ -362,14 +369,21 @@ apply(from = "../../../../packages/micro_ocr/android/privacy_ocr.gradle")
 - Il blocco di un elemento del report finisce alla prima riga che non inizia con un prefisso di fonte:
   le righe indentate che seguono sono attributi (`android:name`), non fonti.
 
-**Prova (Spending Review, 2026-10-11)**: `flutter build apk --release` verde; con un
+**Prova (Spending Review, 2026-10-10)**: `flutter build apk --release` verde; con un
 `<uses-permission INTERNET>` aggiunto per prova in `src/main` rosso con
 «INTERNET portato da una fonte non ammessa: ADDED from …\src\main\AndroidManifest.xml:11:5-66»
 (riga tolta subito dopo).
 e dopo `flutter build apk --release`:
 `pwsh packages/micro_ocr/tool/verifica_privacy_android.ps1 -Apk <apk>` (esce con 1 se trova
 `events.data.microsoft.com`, `OneCollector`, `TelemetryInitializer`, o `1DS` nei `.so` di ORT; stampa
-`aapt2 dump permissions`). Provato sull'esempio: verde sull'APK vero, rosso su un APK finto con
+`aapt2 dump permissions`). ⚑ **Regola delle stringhe corte (F12.7, 2026-10-10)**: le stringhe vietate
+di **5 caratteri o meno** («1DS») contano **solo dentro una stringa stampabile di almeno 8 caratteri**
+(`[ -~]{8,}`, come fa `strings`), e solo nei `.so`; le stringhe lunghe (gli indirizzi veri della
+telemetria) si cercano ancora **ovunque**, in Latin1 e in UTF-16. Perche': nel `.so` di ORT 1.28.0 per
+`armeabi-v7a` la sequenza «1DS» compare ~20 volte **dentro il codice macchina** (istruzioni Thumb,
+« 1DSDS ø»), non come stringa del programma: la vecchia ricerca dava un falso positivo e
+faceva fallire una release pulita. Provato rosso su un APK finto con «Microsoft 1DS SDK» (stringa
+stampabile) e verde sull'APK vero di Spending Review (167 MB, tre ABI). Provato sull'esempio: verde sull'APK vero, rosso su un APK finto con
 l'indirizzo di telemetria; il task Gradle rosso con `INTERNET` aggiunto al manifest dell'app.
 
 ## 9. Regole non negoziabili e trappole disinnescate
@@ -401,6 +415,8 @@ l'indirizzo di telemetria; il task Gradle rosso con `INTERNET` aggiunto al manif
 | `flutter test` disinstalla l'app alla fine | i campioni copiati con run-as spariscono con lei | installare, copiare, lanciare il test (che reinstalla con `-r` e poi disinstalla: pulizia automatica) |
 | Foto verticali coricate | EXIF ignorato | `ImmagineIngresso` (Android), orientamento a `VNImageRequestHandler` (iOS) |
 | R8 e JNI di ORT | classi rinominate → crash solo in release | `consumer-rules.pro`; provato: APK di release sull'emulatore, `prepara()` 216 ms |
+| «1DS» nel `.so` ARMv7 di ORT (F12.7) | la sequenza di byte compare per caso nel codice macchina Thumb: falso positivo della guardia sul binario | stringhe corte contate solo dentro stringhe stampabili di 8+ caratteri (§8) |
+| Ultime righe del banco perse sul dispositivo (F12.7) | `debugPrint` e' «throttled»: accoda e scrive poco alla volta; il test d'integrazione finiva prima che la coda si svuotasse (s15 e s16 sparivano dal log del simulatore) | `example/lib/main.dart` usa `print('MICRO_OCR|$json')` (con `// ignore: avoid_print`) |
 
 ## 10. Catalogo dei test
 
@@ -443,7 +459,9 @@ cartellini 0,2–4 s (tipico ~1 s), scontrini 0,9–3,3 s; simulatore 0,13–0,7
   rilettura capovolta delle righe verticali. Le righe orizzontali capovolte (foto a testa in giu')
   non si raddrizzano.
 - **Batch/threads tarati su un telefono vero**, XNNPACK: da misurare in F12.7 (F12.1.18).
-- Le **fixture di Vision** (`test/fixtures/ocr/vision/`): F12.7.
+- Le **fixture di Vision lette su un iPad vero**: oggi ci sono solo quelle del **simulatore**
+  (`apps/spending_review/test/fixtures/ocr/vision-sim/` e `vision-sim-mirino/`, F12.7, 33 + 20 nel
+  repo); quelle dell'iPad arrivano con TestFlight (F12.7, aperto).
 - `integration_test/ocr_parita_test.dart` che confronti da solo con le fixture (≥ 95%): oggi stampa e il
   confronto lo fa lo script del banco; le fixture nascono in F12.3.
 - Il «padding verticale» di RapidOCR per immagini larghissime (rapporto > 8) o basse ≤ 30 px.
@@ -452,10 +470,10 @@ cartellini 0,2–4 s (tipico ~1 s), scontrini 0,9–3,3 s; simulatore 0,13–0,7
 
 | Debito | Perche' rimandato | Quando |
 |---|---|---|
-| Tempi su Android vero di fascia media | l'emulatore x86_64 non e' rappresentativo | F12.7 |
+| Tempi su Android vero di fascia media | l'emulatore x86_64 non e' rappresentativo; nessun telefono Android vero disponibile al 2026-10-10 | F12.7 (ancora aperto: misure F12.1.18 di Spending Review) |
 | Classificatore 0/180 | cambierebbe il set dei modelli (decisione); +0,6 MB | se le foto vere del proprietario lo chiedono |
-| Il banco (`prepara_parita.py`, `confronta.py`) vive nello scratchpad | gli script toccano campioni fuori dal repo; F12.3 porta `tool/esporta_fixture_ocr.py` nell'app | F12.3 |
-| Vision su simulatore 77% sui numeri | il simulatore non usa il Neural Engine; misura vera su iPad | F12.7 |
+| Il banco di PARITA' (`prepara_parita.py`, `confronta.py`) vive ancora nello scratchpad | le fixture del PARSER invece sono nel repo dell'app da F12.3 (`apps/spending_review/tool/esporta_fixture_ocr.py`, anche `--ritagli` e `--log`); la parita' con RapidOCR non si rimisura finche' i modelli non cambiano | quando si toccano modelli o parametri |
+| Vision su simulatore 77% sui numeri; sul **parser** (F12.7) sotto PP-OCRv5 (ritagli prezzo 33/40 contro 36/40, totali bilancia 7/9 contro 9/9, scontrino 14/16 contro 16/16) | il simulatore non usa il Neural Engine; misura vera su iPad | F12.7 (TestFlight); se il distacco resta, ORT 1.28 anche su iOS (+22 MB) — decide il proprietario |
 
 ## 13. Il perche' delle scelte non ovvie
 

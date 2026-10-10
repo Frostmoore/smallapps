@@ -28,7 +28,7 @@ final class PrezzoUnitario {
   String toString() => 'PrezzoUnitario($valore/${unita.name})';
 }
 
-/// I due prezzi di un cartellino con la carta fedelta' (risposta D4 del proprietario, 2026-10-11:
+/// I due prezzi di un cartellino con la carta fedelta' (risposta D4 del proprietario, 2026-10-10:
 /// **chiedi ogni volta**). Il foglio di conferma mostra due bottoni e l'utente sceglie; nessun
 /// default, nessuna impostazione «Ho la carta».
 @immutable

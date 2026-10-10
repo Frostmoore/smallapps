@@ -22,7 +22,7 @@ import 'data_section.dart';
 /// (backup Pro, ripristino gratis, CSV Pro), **Informazioni** (versione, informativa, licenze).
 ///
 /// ⚑ **Niente «Ho la carta fedelta'»** (la specsheet lo prevedeva): la risposta D4 del
-/// proprietario (2026-10-11) ha tolto il default, e quando un cartellino ha due prezzi il foglio
+/// proprietario (2026-10-10) ha tolto il default, e quando un cartellino ha due prezzi il foglio
 /// li mostra entrambi ogni volta.
 /// ⚑ Il **tetto del mese** (D3, Pro) si imposta dalle Statistiche, dove si vede.
 class ImpostazioniPage extends ConsumerWidget {
