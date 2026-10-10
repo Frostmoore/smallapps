@@ -163,6 +163,8 @@ simulatore iPhone e dal proprietario su iPad (TestFlight).
 
 ### Google Play — 🔵 test interno, produzione bloccata dall'account
 
+> AAB **1.0.0 (3)** con la dettatura solo sul dispositivo pronto in `apps/full_freezer/store/full_freezer-1.0.0-3.aab` (2026-10-10), da caricare nel test interno.
+
 | Data | Evento |
 |---|---|
 | 2026-10-07 | App creata su Play Console (account **personale** SMPStudio); AAB **1.0.0 (2)** in **test interno**; prodotto `fullfreezer_pro_lifetime` **attivo**, base 3,27 EUR → 3,99 € in Italia; scheda dello Store compilata it/en (testi importati da `store/traduzioni-play.txt`), grafiche caricate |
@@ -190,9 +192,12 @@ simulatore iPhone e dal proprietario su iPad (TestFlight).
 | 2026-10-10 | In revisione (IN_REVIEW), poi **REJECTED, Guideline 2.1 — Information Needed** (iPad Air 11" M3): «Does the app send data to a third-party AI system? Does the AI feature send user data outside the device?». Risposta preparata: nessuna AI, categoria da un elenco di parole nell'app, voce con lo Speech framework di Apple e interpretazione con regole locali |
 | 2026-10-10 | Verificando la risposta: la dettatura **non** era limitata al telefono (`onDevice` assente, iOS/Android potevano usare i server di Apple/Google). Decisione del proprietario: **dettatura solo sul dispositivo** → build **1.0.0 (3)** in preparazione |
 
+| 2026-10-10 | **Il proprietario ha risposto ad Apple e reinviato** la 1.0.0 con la **build 1**: di nuovo WAITING_FOR_REVIEW. La build **3** (dettatura solo sul dispositivo) e' caricata e VALID ma non si puo' collegare a una versione in coda (409); scelta del proprietario: **lasciarla in coda**, niente ritiro |
+
 **Prossimi passi App Store:**
-- [ ] Build 1.0.0 (3) (dettatura on-device) caricata e collegata alla versione 1.0.0
-- [ ] **Proprietario:** rispondere ad Apple in App Store Connect (testo nel messaggio del 2026-10-10, da adattare: «speech recognition runs on the device only») e reinviare
+- [x] Risposta ad Apple e reinvio (proprietario, 2026-10-10)
+- [ ] Dopo l'approvazione: **1.0.1** con la dettatura solo sul dispositivo (il codice e' quello della build 3; serve `1.0.1+4` perche' la 1.0.0 pubblicata non accetta build nuove)
+- [ ] Insieme alla 1.0.1: pubblicare sul sito il paragrafo dell'informativa sulla dettatura (gia' scritto in `site/src/lang/*.legale.php`, **non ancora pubblicato**)
 
 Grafiche in `apps/full_freezer/store/grafiche/` (testata 1024x500, 6 schede 1320x2868 per App
 Store e 1080x2160 per Play, it/en). ☠ Firma: Xcode 27 non crea piu' profili nuovi con la chiave

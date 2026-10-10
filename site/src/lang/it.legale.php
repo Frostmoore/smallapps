@@ -223,6 +223,14 @@ HTML,
   si collega a nessun servizio esterno, e nessuna immagine viene inviata a noi o a terzi.
 </p>
 
+<p>
+  Full Freezer permette di <strong>dettare</strong> cosa metti nel congelatore. Il riconoscimento
+  della voce avviene <strong>esclusivamente sul telefono</strong>, con il riconoscimento vocale
+  locale del sistema: la voce non viene inviata né a noi, né ad Apple, né a Google. Se il tuo
+  telefono non offre il riconoscimento locale, la dettatura semplicemente non è disponibile e resta
+  il campo di testo. Il microfono si attiva solo mentre stai dettando.
+</p>
+
 <h3>Acquisto e verifica della versione Pro</h3>
 
 <p>

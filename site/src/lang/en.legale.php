@@ -229,6 +229,14 @@ HTML,
   image is ever sent to us or to anyone else.
 </p>
 
+<p>
+  Full Freezer lets you <strong>dictate</strong> what you put in the freezer. Speech is recognised
+  <strong>on the phone only</strong>, using the system's on-device speech recognition: your voice is
+  not sent to us, to Apple or to Google. If your phone does not offer on-device recognition,
+  dictation is simply unavailable and the text field remains. The microphone is on only while you
+  are dictating.
+</p>
+
 <h3>Buying and verifying the Pro version</h3>
 
 <p>
