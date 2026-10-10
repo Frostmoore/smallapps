@@ -5238,6 +5238,20 @@ tecnico. **Non sono ancora specsheet**: lo diventano in `Fx.1`, dopo le decision
   partenza.
 - Nessun permesso. Widget possibile (totale corrente).
 
+#### F12.0 — Prime decisioni del proprietario (2026-10-10), il resto il 2026-10-11
+
+- **Nome: «Spending Review»** (proprietario). Da chiarire domani se vale per entrambe le lingue
+  come «QR Me» (la cartella sara' presumibilmente `apps/spending_review/`, bundle
+  `com.smp.spendingreview`, `licenseAppId 'spendingreview'`: da confermare).
+- **Nessun widget** (proprietario): supera «Widget possibile» qui sopra.
+- **Icona dal proprietario**: `C:/Users/Pixel/Downloads/spendendo.png` (PNG 1254x1254 RGBA
+  trasparente), copiata in `docs/specs/icona-spending-review.png`. ⚑ Lo scontrino con l'euro dentro
+  gli **angoli verdi da inquadratura** suggerisce la **lettura dello scontrino con la fotocamera**:
+  domandarlo esplicitamente in F12.0 (OCR sul telefono, con la regola «dati solo sul telefono»:
+  niente ML Kit; su iOS Vision e' locale, su Android serve un OCR che non mandi dati).
+- **Gratis/Pro e prezzo**: aperti («ci pensiamo dopo»).
+- **Cosa fa esattamente**: aperto, da decidere insieme partendo dall'idea sopra.
+
 ### F13 — Quanto dividiamo?
 
 > Una utility per dividere velocemente un conto tra più persone. Può gestire divisione uguale,
