@@ -111,6 +111,27 @@ return [
     'app.spending-review.sommario' => 'Inquadri il cartellino e il prezzo si aggiunge al totale, '
                                     . 'col budget sempre davanti. Alla cassa controlla lo scontrino.',
 
+    'app.fair-share.claim'    => 'Chi deve cosa, senza conti a mano.',
+    'app.fair-share.sommario' => 'Dividi il conto come vuoi, anche leggendo lo scontrino, e tieni i conti di un viaggio o di una casa condivisa.',
+
+    'app.boomerang.claim'    => 'Le cose prestate tornano indietro.',
+    'app.boomerang.sommario' => 'Chi ha cosa e da quando: gli oggetti che presti e quelli che ti prestano, con un promemoria.',
+
+    'app.pin-drop.claim'    => 'Dove l\'hai lasciato? Te lo dice lui.',
+    'app.pin-drop.sommario' => 'L\'auto, la bici, l\'ombrellone: segna il posto con una foto e una nota, e ritrovalo.',
+
+    'app.geo-note.claim'    => 'Un promemoria che scatta nel posto giusto.',
+    'app.geo-note.sommario' => 'Ti ricorda le cose quando arrivi in un luogo o quando te ne vai: al supermercato, a casa, in ufficio.',
+
+    'app.tldr.claim'    => 'Troppo lungo? Te lo riassume.',
+    'app.tldr.sommario' => 'Condividi un articolo o un testo e ottieni un riassunto breve da leggere al volo.',
+
+    'app.read-aloud.claim'    => 'Gli articoli, da ascoltare.',
+    'app.read-aloud.sommario' => 'Condividi un articolo e te lo legge ad alta voce, mentre guidi, cucini o cammini.',
+
+    'app.link-peek.claim'    => 'Dove porta quel link? Guarda prima.',
+    'app.link-peek.sommario' => 'Scopri dove porta davvero un link abbreviato o sospetto prima di aprirlo, con i segnali di pericolo.',
+
     // ── Home ────────────────────────────────────────────────────────────────
     'home.titolo'      => 'App piccole per Android e iPhone, che fanno una cosa sola',
     'home.descrizione' => 'SMP MicroApps: applicazioni Android e iPhone leggere, senza account e '

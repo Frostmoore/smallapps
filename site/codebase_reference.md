@@ -3,7 +3,7 @@
 > Atlante del **sito vetrina** delle MicroApps.
 > **Obiettivo**: capire il sito, trovare ciò che serve e modificarlo **senza aprire i file**.
 >
-> **Aggiornato al**: 2026-10-10 · **Stato**: online su <https://smpmicroapps.it> (le modifiche del 2026-10-10 su
+> **Aggiornato al**: 2026-10-11 (area riservata `/riservato`, in locale, da pubblicare) · **Stato**: online su <https://smpmicroapps.it> (le modifiche del 2026-10-10 su
 > Scorte Calore e Film Tracker sono **in locale**, da pubblicare)
 > **Stack**: PHP 8.3 su php-fpm, nginx, zero dipendenze, zero build step
 > **Lingue**: italiano alla radice, inglese sotto `/en` (vedi §3bis)
@@ -40,6 +40,10 @@
 | Credenziali SMTP | `config.local.php` sul server, **non versionato** |
 | La configurazione nginx | `deploy/smpmicroapps.it.nginx` |
 | Far girare il sito in locale | `deploy/router.php` |
+| **L'area riservata `/riservato`** (login, stato delle app) | `public/riservato.php` (pagina) + `src/riservato.php` (sicurezza, disegno) — sezione «Area riservata» in fondo |
+| I dati dell'area riservata | `var/riservato/dati.json` (fuori da git e dal pacchetto), generati da `tool/genera_riservato.py` |
+| Caricare i dati dell'area riservata | `tool/pubblica_riservato.ps1` (`-SoloGenera` per non toccare il server) |
+| Generare l'impronta della password | `tool/impronta_riservato.php` (legge da stdin) |
 
 ---
 
@@ -61,6 +65,8 @@ site/
 │   ├── layout.php              pagina_inizio(), pagina_fine(), intestazione_legale(), etichetta_disponibilita()
 │   ├── pagina_app.php          pagina_app(): il modello delle pagine di Scorte Calore e Film Tracker
 │   ├── contact.php             validazione, CSRF, trappola, limite, archivio, notifica
+│   ├── riservato.php           area riservata: configurazione, sessione dedicata, CSRF, limite ai
+│   │                           tentativi, verifica Argon2id, disegno dei dati (vedi «Area riservata»)
 │   └── mailer.php              client SMTP minimo (classi Mailer, SmtpError)
 ├── public/                     ← LA DOCUMENT ROOT. Tutto il resto sta fuori.
 │   ├── index.php               home: titolo grande, griglia delle app, tre principi
@@ -69,6 +75,7 @@ site/
 │   ├── scorte-calore.php       vetrina di Scorte Calore: chiama pagina_app() con i 5 screenshot
 │   ├── film-tracker.php        vetrina di Film Tracker: chiama pagina_app() con i 6 screenshot
 │   ├── contatti.php            i tre canali + il modulo
+│   ├── riservato.php           /riservato: login, stato delle app, logout. Nessun link dal sito
 │   ├── sitemap.php             servita come /sitemap.xml
 │   ├── robots.txt
 │   ├── legale/                 cinque file da due righe: il contenuto sta nei dizionari
@@ -102,7 +109,16 @@ site/
 │   ├── smpmicroapps.it.nginx   il vhost, PRIMA che certbot ci aggiunga il blocco TLS
 │   ├── verifica_lingue.php     controlla che i dizionari abbiano le stesse chiavi
 │   └── router.php              solo per `php -S`: riproduce le URL pulite di nginx
-└── var/                        solo sul server: messaggi ricevuti e contatore. NON versionato.
+├── tool/                       NON va sul server (il pacchetto del §9 non lo include)
+│   ├── genera_riservato.py     Python 3 + Pillow: StatusMicroApps.md & co. → var/riservato/dati.json
+│   ├── pubblica_riservato.ps1  rigenera e carica SOLO dati.json su clawserver (-SoloGenera)
+│   └── impronta_riservato.php  impronta Argon2id della password, letta da stdin
+└── var/                        NON versionato, escluso dal pacchetto. Sul server:
+    ├── contatti.jsonl          i messaggi del modulo
+    ├── ratelimit.json          il contatore del modulo
+    ├── riservato/dati.json     i dati dell'area riservata (caricati da pubblica_riservato.ps1)
+    ├── riservato-tentativi.json  errori di login per IP (hash troncato), blocchi
+    └── sessioni-riservato/     i file di sessione dell'area riservata (sess_*)
 ```
 
 ---
@@ -487,6 +503,7 @@ Supporta porta 465 (TLS implicito) e 587 (STARTTLS), autenticazione `AUTH LOGIN`
 | `/legale/responsabilita` | `public/legale/responsabilita.php` | |
 | `/sitemap.xml` | `public/sitemap.php` | `rewrite ^ /sitemap.php last`. Contiene **entrambe** le lingue con gli `hreflang` |
 | `/robots.txt` | statico | |
+| `/riservato` | `public/riservato.php` | GET e POST. **Solo italiano**, nessun `/en/riservato` (con `/en` risponde lo stesso file, in italiano). 404 se `RISERVATO_HASH` manca, 503 se Argon2id non c'e' o l'impronta non e' Argon2id. Dettagli nella sezione «Area riservata» |
 | qualunque altro | 404 | |
 
 **Ogni rotta qui sopra esiste anche con il prefisso `/en`**, e serve lo stesso file: nginx
@@ -510,6 +527,8 @@ altrimenti un ipotetico `/energia` verrebbe servito come pagina inglese.
 | `smtp.to` | — | Dove arrivano i messaggi. |
 | `storageDir` | `site/var` | Fuori dalla webroot. |
 | `rateLimit.maxPerHour` | `5` | Per indirizzo IP. |
+| `RISERVATO_UTENTE` | `'smp-webmaster'` (anche come costante `RISERVATO_UTENTE_DEFAULT`) | Lo username dell'area riservata. Non e' un segreto. |
+| `RISERVATO_HASH` | `null` | L'impronta **Argon2id** della password dell'area riservata. `null` o assente = area disattivata (404). ☠ Mai la password in chiaro. |
 
 ---
 
@@ -595,7 +614,8 @@ php -S 127.0.0.1:8099 -t public deploy/router.php
 ## 10. Cosa NON esiste
 
 - **Nessun pannello di amministrazione**: i messaggi ricevuti si leggono con
-  `sudo cat /var/www/smpmicroapps/var/contatti.jsonl`.
+  `sudo cat /var/www/smpmicroapps/var/contatti.jsonl`. L'area riservata `/riservato` **mostra** lo
+  stato delle app e basta: non modifica niente, non legge i messaggi, non ha altri utenti.
 - **Nessuna pagina di dettaglio** per Full Freezer, QR Me e Spending Review: le card ci sono ma non
   sono link. Scorte Calore e Film Tracker ce l'hanno dal 2026-10-10.
 - **Nessuna promozionale** di Scorte Calore e Film Tracker: la sezione «In due parole» non compare
@@ -638,8 +658,13 @@ verso la versione inglese; con `it-IT` e senza intestazione deve restare dov'è.
 **4. Il modulo funziona in entrambe le lingue**: GET della pagina contatti, estrazione del
 token, POST. Deve rispondere "Messaggio ricevuto" e "Message received".
 
-**5. I file riservati non sono raggiungibili**: `/config.local.php`, `/src/config.php` e
-`/var/contatti.jsonl` devono dare tutti 404 o 403.
+**5. I file riservati non sono raggiungibili**: `/config.local.php`, `/src/config.php`,
+`/var/contatti.jsonl`, `/var/riservato/dati.json`, `/riservato/dati.json` e `/tool/genera_riservato.py`
+devono dare tutti 404 o 403.
+
+**6. L'area riservata** (se toccata): `/riservato` senza cookie mostra il login con
+`Cache-Control: no-store` e `X-Robots-Tag: noindex`; un login errato dà il messaggio generico dopo
+~1,5 s; il contenuto si vede solo dopo il login. Procedura completa nella sezione «Area riservata».
 
 Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente il difetto del
 §8 che una semplice verifica del codice 200 non avrebbe mai trovato.
@@ -660,6 +685,7 @@ Il controllo `<?php` nel corpo della risposta non è pignoleria: è esattamente 
 | **Promozionali solo in italiano** | le immagini di TrashCan hanno il testo italiano dentro, e sulla pagina inglese non si mostrano | se arrivano le versioni inglesi: nome file con la lingua, e via la condizione `$lingua === 'it'` in `trashcan.php` |
 | ~~**Il bottone Play è spento**~~ | **chiuso il 2026-10-09**: TrashCan ha `suPlay => true` | per le app successive: `suPlay => true` in `src/apps.php`, e basta |
 | ~~**Il bottone App Store è spento**~~ | **chiuso il 2026-10-09**: TrashCan ha `suAppStore => true` (disponibile anche in UE) | per le app successive: `suAppStore => true` e il loro `appStoreId` |
+| **Le card della home usano `style="--card-accent: …"`** | la CSP del vhost ha `style-src 'self'`, che **blocca gli attributi `style`**: in produzione l'accento per app delle card probabilmente non si applica (ricade su `--accent`, il verde). Visto il 2026-10-11 scrivendo l'area riservata, che per questo non usa attributi `style`; non verificato sul sito vivo | controllare con gli strumenti del browser su smpmicroapps.it; se confermato, una classe per app in `style.css` (o `'unsafe-hashes'` con gli hash) |
 | **Nessun backup dell'archivio messaggi** | `var/contatti.jsonl` vive solo sul server | quando arriveranno messaggi che valga la pena non perdere |
 
 ---
@@ -860,4 +886,290 @@ uno** store, e la pill dice dove.
 - Solo sulla pagina italiana (il testo e' dentro l'immagine): `pagina_app()` mostra la sezione solo se i
   file della lingua esistono.
 - Originali in `C:/Users/Pixel/Downloads/{Scorte Calore,Film Tracker}/` (non nel repo).
+
+
+## Area riservata `/riservato` (2026-10-11)
+
+**Decisione del proprietario (2026-10-11, `memory/decisioni.md`):** una pagina protetta con la tabella dello
+stato di tutte le app e, sotto, la lista delle app (fatte, non fatte, annullate) con descrizione, icona,
+decisioni e stato dettagliato. Accesso con username `smp-webmaster` e password. **Si aggiorna ogni volta
+che si aggiorna `StatusMicroApps.md`.** La password non va mai nel repo (pubblico su GitHub).
+
+Stato: **scritta e provata in locale il 2026-10-11, non ancora pubblicata**; sul server manca anche
+`RISERVATO_HASH`, quindi oggi `/riservato` risponderebbe 404.
+
+### File
+
+| File | Cosa fa |
+|---|---|
+| `public/riservato.php` | Il flusso della richiesta (vedi sotto) e l'HTML: testata minima, login, contenuto, logout |
+| `src/riservato.php` | Tutte le funzioni e le costanti: configurazione, intestazioni, sessione, CSRF, credenziali, limite, dati, disegno |
+| `public/assets/style.css` | In fondo, blocco «Area riservata»: classi `ris-*`, `input[type=password]`, `.btn--piccolo`. La pagina carica `style.css?v=8` (le pagine pubbliche restano su `?v=7`: non usano le classi nuove) |
+| `public/robots.txt` | `Disallow: /riservato` |
+| `config.example.php` | Le chiavi `RISERVATO_UTENTE` e `RISERVATO_HASH` (`null`) |
+| `tool/genera_riservato.py` | Il generatore dei dati |
+| `tool/pubblica_riservato.ps1` | Genera, controlla e carica `dati.json` su clawserver |
+| `tool/impronta_riservato.php` | Stampa l'impronta Argon2id di una password letta da stdin |
+| `var/riservato/dati.json` | I dati (fuori da git: `site/var/` e' nel `.gitignore`; fuori dal pacchetto del §9: `--exclude=var`) |
+
+☠ **`public/riservato.php` non include `src/layout.php`.** `layout.php` esegue `applica_lingua()` appena
+caricato, e un browser inglese senza cookie verrebbe rimbalzato su `/en/riservato`. L'area e' solo in
+italiano, con i testi scritti nella pagina e non nei dizionari (niente chiavi da tenere allineate in
+`verifica_lingue.php` per una pagina che nessun visitatore vede).
+
+### Il flusso (`public/riservato.php`)
+
+1. `riservato_intestazioni()` (prima di tutto).
+2. `riservato_stato_configurazione()`: `disattivata` → **404** (`404` nudo, come un indirizzo inesistente);
+   `argon2_assente` / `hash_non_argon2id` → **503** in testo semplice con il motivo, e `error_log`.
+3. `riservato_forza_https()` (301 su `https://smpmicroapps.it/riservato` se la richiesta e' in chiaro), poi
+   `riservato_sessione()`.
+4. **POST `azione=esci`**: con il token giusto `riservato_esci()`; in ogni caso **303** su `/riservato`.
+5. **POST `azione=entra`**: `riservato_blocco_residuo($ip)` → `null` = file dei tentativi inutilizzabile:
+   login **negato** (503, «Accesso momentaneamente non disponibile»); `> 0` = bloccato (**429**, «Troppi
+   tentativi non riusciti. Riprova fra N minuti.», **nessuna verifica** della password). Altrimenti
+   `riservato_verifica_credenziali()` **e** `riservato_csrf_valido()`, sempre tutti e due: se vanno bene
+   `riservato_azzera_errori()`, `riservato_entra()`, **303** su `/riservato`; se no
+   `riservato_registra_errore()` → «Accesso non riuscito. Controlla i dati e riprova.» (200) o, se e' appena
+   scattato il blocco, il messaggio del blocco (429). Ogni ramo d'errore finisce con
+   `riservato_attendi($inizio)`.
+6. GET (o POST fallita): `riservato_autenticato()` decide fra modulo di login e contenuto;
+   `riservato_dati()` viene chiamata **solo** se autenticato. Senza un `dati.json` valido la pagina lo dice.
+
+### Funzioni e costanti (`src/riservato.php`)
+
+| Funzione | Firma | Cosa fa |
+|---|---|---|
+| `riservato_configurazione` | `riservato_configurazione(): array` | `{utente: string, hash: ?string}` da `config()`; utente di ripiego `RISERVATO_UTENTE_DEFAULT` |
+| `riservato_stato_configurazione` | `riservato_stato_configurazione(): string` | `'ok'`, `'disattivata'`, `'argon2_assente'` (manca `PASSWORD_ARGON2ID`), `'hash_non_argon2id'` (`password_get_info()['algoName'] !== 'argon2id'`) |
+| `riservato_intestazioni` | `riservato_intestazioni(): void` | `Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private`, `Pragma`, `Expires: 0`, `Vary: Cookie`, `X-Robots-Tag: noindex, nofollow, noarchive`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff` |
+| `riservato_https` | `riservato_https(): bool` | `$_SERVER['HTTPS']` non vuoto e non `off` |
+| `riservato_sviluppo` | `riservato_sviluppo(): bool` | `PHP_SAPI === 'cli-server'`: l'unica eccezione a `Secure` e all'HTTPS forzato, impossibile sotto php-fpm |
+| `riservato_forza_https` | `riservato_forza_https(): void` | 301 su `SITO_URL . '/riservato'` se non HTTPS e non sviluppo, poi `exit` |
+| `riservato_ip` | `riservato_ip(): string` | `REMOTE_ADDR` (nginx parla direttamente con fpm, nessun proxy) |
+| `riservato_cartella` | `riservato_cartella(string $nome = ''): string` | `config()['storageDir']` (+ `/$nome`) |
+| `riservato_sessione` | `riservato_sessione(): void` | Sessione dedicata, idempotente: nome `smpriservato`, file in `var/sessioni-riservato/` (0700), cookie `path=/riservato`, `HttpOnly`, `SameSite=Strict`, `Secure` (salvo `php -S` in HTTP), `use_strict_mode`, `use_only_cookies`, `cache_limiter=''` |
+| `riservato_pulisci_sessioni` | `riservato_pulisci_sessioni(): void` | Cancella i `sess_*` piu' vecchi di 8 ore (chiamata a ogni login) |
+| `riservato_csrf` | `riservato_csrf(): string` | Token di sessione, 32 byte casuali in esadecimale |
+| `riservato_csrf_valido` | `riservato_csrf_valido(mixed $token): bool` | `hash_equals` col token di sessione |
+| `riservato_autenticato` | `riservato_autenticato(): bool` | Vero se `$_SESSION['riservato']['dentro']`, meno di 8 ore dal login e meno di 30 minuti dall'ultima richiesta (che aggiorna); se scaduta la distrugge |
+| `riservato_verifica_credenziali` | `riservato_verifica_credenziali(string $utente, string $password): bool` | `hash_equals` sullo username **e** `password_verify` sempre (contro `RISERVATO_HASH_FINTO` se l'utente e' sbagliato); password troncata a 4096 byte |
+| `riservato_entra` | `riservato_entra(): void` | `session_regenerate_id(true)`, sessione nuova con `login`/`ultimo` e token nuovo, pulizia delle sessioni vecchie |
+| `riservato_esci` | `riservato_esci(): void` | Svuota, cancella il cookie (`expires` nel passato), `session_destroy()` |
+| `riservato_attendi` | `riservato_attendi(float $inizio): void` | Dorme fino a `RISERVATO_TEMPO_RISPOSTA` secondi dall'inizio della richiesta |
+| `riservato_con_tentativi` | `riservato_con_tentativi(string $ip, callable $fn): mixed` | Apre `var/riservato-tentativi.json` con `flock`, scarta le voci ferme da un giorno, passa `($dati, $chiave)` a `$fn` che torna `[$dati, $risultato]`, riscrive. `null` se il file non si apre |
+| `riservato_blocco_residuo` | `riservato_blocco_residuo(string $ip): ?int` | Secondi di blocco rimasti (0 = libero), `null` = file inutilizzabile |
+| `riservato_registra_errore` | `riservato_registra_errore(string $ip): int` | Aggiunge un errore; al 5° in 15 minuti blocca per `15 min × 2^(blocchi-1)`, massimo 24 ore. Torna la durata del blocco appena iniziato (0 se nessuno) |
+| `riservato_azzera_errori` | `riservato_azzera_errori(string $ip): void` | Dimentica l'IP dopo un login riuscito |
+| `riservato_dati` | `riservato_dati(): ?array` | `var/riservato/dati.json` decodificato, solo se `formato === 1` |
+| `riservato_md` | `riservato_md(?string $testo): string` | Markdown in linea → HTML **dopo** `e()`: `**`, `` ` ``, `~~`, `[t](https://…)` |
+| `riservato_testo` | `riservato_testo(?string $testo): string` | Toglie `**`, `~~`, `` ` `` (per i `title`) |
+| `riservato_blocchi` | `riservato_blocchi(array $blocchi): string` | Disegna i blocchi del generatore: `titolo`, `paragrafo`, `codice`, `nota`, `tabella` (dentro `.scroll-x`), `lista` (con le caselle `spunta`) |
+| `riservato_etichetta_stato` | `riservato_etichetta_stato(string $stato): string` | `pubblicata` → «Pubblicata», `in-lavorazione`, `non-iniziata`, `annullata` |
+| `riservato_ancora` | `riservato_ancora(array $app): string` | `app-<nome-in-minuscolo-col-trattino>` per i link interni |
+
+| Costante | Valore | Perche' |
+|---|---|---|
+| `RISERVATO_UTENTE_DEFAULT` | `'smp-webmaster'` | Lo username non e' un segreto |
+| `RISERVATO_ARGON2` | `memory_cost 65536` (64 MiB), `time_cost 4`, `threads 1` | ~0,2 s per verifica; `threads 1` perche' le build con l'Argon2 di libsodium non accettano altro |
+| `RISERVATO_HASH_FINTO` | impronta Argon2id di 32 byte casuali buttati, stessi parametri | Pareggia il lavoro quando lo username e' sbagliato |
+| `RISERVATO_DURATA_MAX` | 8 ore | Durata massima della sessione dal login |
+| `RISERVATO_INATTIVITA` | 30 minuti | Logout per inattivita' |
+| `RISERVATO_MAX_ERRORI` / `RISERVATO_FINESTRA` | 5 / 15 minuti | Soglia del blocco |
+| `RISERVATO_BLOCCO_BASE` / `RISERVATO_BLOCCO_MAX` | 15 minuti / 24 ore | Blocco crescente: 15, 30, 60 … minuti; il conteggio dei blocchi si azzera dopo un giorno tranquillo |
+| `RISERVATO_TEMPO_RISPOSTA` | 1,5 s | Durata minima di ogni risposta d'errore (deve restare sopra il costo di Argon2id) |
+| `RISERVATO_COOKIE` / `RISERVATO_PERCORSO` | `smpriservato` / `/riservato` | Cookie distinto da `smpmicroapps` del modulo contatti |
+
+### Sicurezza: cosa c'e' e perche'
+
+- ⚑ **Senza impronta l'area e' chiusa (404), non aperta.** Un `config.local.php` dimenticato o rotto non
+  puo' esporre niente.
+- ☠ **Niente ripiego silenzioso.** Senza Argon2id nella build, o con un'impronta bcrypt o in chiaro: 503 con
+  il motivo. `password_verify()` accetterebbe una bcrypt senza dire niente.
+- ⚑ **Username e password verificati sempre tutti e due**, contro un'impronta finta se lo username e'
+  sbagliato, e un solo messaggio d'errore: ne' dal testo ne' dal tempo si capisce quale dei due era giusto.
+  Anche il token CSRF sbagliato da' lo stesso messaggio e conta come errore («il limite conta qualunque
+  errore», indicazione del proprietario).
+- ⚑ **Tempo costante sugli errori**: tutte le risposte d'errore (credenziali, token, IP bloccato) arrivano
+  dopo ~1,5 s dall'inizio della richiesta (misurato in locale: 1,50–1,52 s in tutti i casi).
+- ⚑ **Limite per IP su file** e non in sessione (la sessione la controlla il client). Durante il blocco la
+  password **non viene verificata**: neanche quella giusta entra (provato). ☠ Se il file non si apre il login
+  e' **negato** (al contrario del modulo contatti, dove il limite non deve far perdere messaggi).
+- ⚑ **Sessione dedicata in `var/sessioni-riservato/`**: su Ubuntu la cartella di sistema la ripulisce un cron
+  con il `gc_maxlifetime` globale (24 minuti) e la condividono tutti i siti del server.
+- ⚑ **`session_regenerate_id(true)`** al login (contro la fissazione della sessione) e `use_strict_mode`.
+- ⚑ **Cookie `SameSite=Strict`** e percorso `/riservato`: non parte mai da un altro sito e non viaggia sulle
+  altre pagine. Effetto collaterale accettato: arrivando da un link esterno (una mail) si vede il login anche
+  con una sessione aperta; ricaricando si entra.
+- ⚑ **`Cache-Control: no-store`**: dopo il logout il tasto «indietro» non mostra il contenuto dalla cache.
+  ☠ `session_start()` con il limitatore predefinito (`nocache`) **sovrascrive** `Cache-Control` ed
+  `Expires` (visto in prova): per questo `cache_limiter => ''`.
+- ⚑ **I dati non stanno in `public/`**: nessun indirizzo li serve; li legge solo PHP dopo il login.
+- ⚑ **Nessun attributo `style`**: la CSP del vhost ha `style-src 'self'`. Le iniziali colorate delle app non
+  iniziate sono **SVG generati** e messi come `data:` (permesso da `img-src 'self' data:`).
+- ⚑ **`X-Frame-Options: DENY`**: la pagina non si apre dentro un iframe (verificato: Edge la rifiuta).
+
+### Il generatore (`tool/genera_riservato.py`)
+
+```bash
+python site/tool/genera_riservato.py                 # → site/var/riservato/dati.json
+python site/tool/genera_riservato.py --uscita X.json # altrove, per prova
+```
+
+Solo libreria standard + **Pillow** (icone). Scrive in un `.tmp` e poi `os.replace`: chi legge non vede
+mai un file a meta'. Alla fine stampa un riassunto per app (stato, icona vera o iniziale, decisioni, sezioni).
+
+| Funzione | Cosa fa |
+|---|---|
+| `genera(radice: Path) -> dict` | Il documento intero |
+| `blocchi(testo: str) -> list[dict]` | Markdown → blocchi (`titolo`, `paragrafo`, `tabella`, `lista`, `nota`, `codice`) |
+| `voci_aperte(bl: list[dict]) -> list[str]` | Le caselle `- [ ]` non spuntate, anche dentro le note → «In sospeso» |
+| `breve(cella: str, massimo: int = 46) -> str` | La cella del riepilogo in poche parole: taglia al primo `; `, ` — `, `: ` o `(` che non sia un numero di build |
+| `nome_e_ex(cella: str) -> tuple[str, str \| None, bool]` | «**Boomerang** (ex Te l'ho prestato)» → nome, nome di lavoro, annullata (`~~…~~`) |
+| `stato_di(play: str, store: str, annullata: bool) -> str` | `annullata` (❌ o barrata), `pubblicata` (un 🟢), `non-iniziata` (tutte e due «⚪ non iniziata»), altrimenti `in-lavorazione` |
+| `catalogo_sito(radice: Path) -> dict[str, dict]` | `site/src/apps.php` letto con regex: slug, accento, flag |
+| `stringa_php(chiave: str, testo: str) -> str \| None` | Un valore `'a' . 'b'` dei dizionari PHP (claim e sommario da `it.php`) |
+| `prima_frase_readme(cartella: Path) -> str \| None` | Primo paragrafo di `apps/<app>/README.md`, se il sito non ha il sommario |
+| `descrizioni_develop(radice: Path) -> tuple[dict, dict]` | `develop_microapps.md` §1.1 (nome → problema) e §1.6 (fase → nome, ex, problema, «cosa pesa») |
+| `decisioni(radice: Path) -> list[dict]` | `memory/decisioni.md`: titoli `## AAAA-MM-GG[ (sera)] · titolo`, riga `**Vale per:**`, corpo in blocchi |
+| `decisioni_di(app: dict, tutte: list[dict]) -> list[dict]` | Le voci in cui titolo o «Vale per» nominano l'app, il nome di lavoro o la fase (`F12`, ma non dentro un intervallo `F10–F19`) |
+| `icona(cartella: Path) -> str \| None` | L'icona iOS vera: `image_path` e `background_color_ios` di `flutter_launcher_icons.yaml`, composta sul fondo, 128x128 WebP q85, data URI |
+| `iniziale_svg(nome: str, colore: str) -> str` | Il segnaposto con l'iniziale (accento del catalogo, o grigio) come SVG data URI |
+| `cella_sito(info: dict \| None) -> dict` | La colonna «Sito» per le app che non ce l'hanno nel riepilogo, dal catalogo |
+| `cella(testo: str) -> dict` | `{pallino, breve, completo}` di una cella |
+| `main() -> int` | Argomenti `--radice` (default: due cartelle sopra `tool/`) e `--uscita`; stdout in UTF-8 (la console di Windows e' cp1252) |
+| `leggi(percorso: Path) -> str` · `norm(testo: str) -> str` | Lettura UTF-8 · minuscolo con apostrofi tipografici uniformati (per i confronti) |
+| `celle(riga: str) -> list[str]` · `e_separatore(riga: str) -> bool` · `tabelle(testo: str) -> list[list[list[str]]]` | Le tabelle markdown di un testo (la prima riga e' l'intestazione) |
+| `sezioni(testo: str, livello: str = '## ') -> list[tuple[str, str]]` | Divide un markdown per titoli, ignorando quelli dentro i blocchi di codice |
+| `pallino(testo: str) -> tuple[str \| None, str]` · `togli_markdown(testo: str) -> str` | Il primo pallino (🟢 🟡 🔵 ⚪ 🔴 ❌ 🟠) · toglie `**`, `~~` e i backtick |
+
+⚑ **Icone come data URI dentro `dati.json`, non file serviti dopo il login.** Sono pochi KB l'una (WebP
+128 px): un solo file da caricare, nessuna rotta in piu' da proteggere, e la CSP ammette gia' `data:`. Un file
+separato in `var/riservato/` avrebbe chiesto un endpoint PHP che lo servisse controllando la sessione.
+⚑ Si usa l'**icona iOS** (quella di `flutter_launcher_icons.yaml`), non `originale.png`: e' l'icona che si
+vede sul telefono, gia' su fondo pieno.
+
+☠ **Le fonti si leggono per struttura**: il riepilogo e' la tabella con intestazione `App | Versione | …`,
+le app nuove quella con `App | Fase | …`, le sezioni per app sono i `## <Nome app>` di `StatusMicroApps.md`
+con lo **stesso nome** della tabella. Rinominare una colonna o un titolo fa sparire dati senza errori:
+dopo una modifica di struttura guardare il riassunto stampato dal generatore.
+
+### Il formato di `dati.json` (`formato: 1`)
+
+```jsonc
+{
+  "formato": 1,                         // la pagina rifiuta altri valori
+  "generato": "2026-10-11T01:09:00+02:00",
+  "aggiornamento_status": "2026-10-11 (…)",   // la riga «Ultimo aggiornamento» dello status
+  "legenda": "⚪ non iniziata sullo store · …",
+  "tabella": ["TrashCan", "Full Freezer", …], // righe della tabella: app pubblicate o in lavorazione
+  "in_sospeso": [{"app": "Account Google Play", "voci": ["markdown", …]}, …],
+  "app": [{
+    "nome": "Spending Review", "ex": "Quanto sto spendendo?", "fase": "F12", "slug": "spending-review",
+    "versione": null, "stato": "pubblicata|in-lavorazione|non-iniziata|annullata",
+    "claim": "…", "sommario": "…", "descrizione": "…", "peso": "…",
+    "icona": "data:image/webp;base64,…", "icona_vera": true, "cartella": "apps/spending_review",
+    "play": {"pallino": "⚪", "breve": "codice Android completo", "completo": "markdown della cella"},
+    "app_store": {…}, "sito": {…},
+    "decisioni": [{"data": "2026-10-10", "quando": "2026-10-10", "titolo": "…", "vale_per": "…",
+                   "sintesi": "…", "corpo": [blocchi]}],
+    "dettaglio": [blocchi]               // la sezione «## Nome» dello status
+  }],
+  "comuni": [{"titolo": "Account Google Play (comune a tutte le app)", "blocchi": [blocchi]}],
+  "decisioni_generali": [decisioni con «tutte»/«tutti» nel «Vale per»]
+}
+```
+
+Blocchi: `{"tipo":"titolo","testo","pallino"}`, `{"tipo":"paragrafo","testo"}`,
+`{"tipo":"tabella","intestazione":[…],"righe":[[…]]}`,
+`{"tipo":"lista","ordinata":bool,"voci":[{"testo","spunta":true|false|null}]}`,
+`{"tipo":"nota","blocchi":[…]}`, `{"tipo":"codice","testo"}`. Tutto il testo e' markdown in linea.
+
+### Come si aggiorna (a ogni aggiornamento di `StatusMicroApps.md`)
+
+```powershell
+# dalla radice del monorepo, in PowerShell (ssh di Windows: vedi la trappola di clawserver)
+powershell -File site/tool/pubblica_riservato.ps1 -SoloGenera   # solo genera e controlla
+powershell -File site/tool/pubblica_riservato.ps1               # genera e carica
+```
+
+Lo script: genera → controlla (`formato` 1, almeno un'app) → `scp` in `/tmp` di clawserver →
+`sudo install` in `/var/www/smpmicroapps/var/riservato/dati.json` (cartella 750, file 640,
+`www-data:www-data`) → `sudo chown -R www-data:www-data` sulla cartella. Non tocca nient'altro del sito.
+Parametri: `-SoloGenera`, `-Server` (default `clawserver`), `-Destinazione`. Provato il 2026-10-11 **solo
+con `-SoloGenera`** (Windows PowerShell 5.1 e PowerShell 7).
+
+### Come si imposta la password (una volta, sul server)
+
+1. Generare l'impronta **senza** che la password finisca nella history o negli argomenti (si legge da
+   stdin; su Linux l'eco e' spento). Va bene sul PC (il PHP di XAMPP ha Argon2id) o sul server:
+
+   ```bash
+   php site/tool/impronta_riservato.php          # chiede la password due volte, stampa l'impronta
+   # sul server, dove tool/ non c'e':
+   read -rs P && printf '%s' "$P" | php -r 'echo password_hash(stream_get_contents(STDIN), PASSWORD_ARGON2ID, ["memory_cost"=>65536,"time_cost"=>4,"threads"=>1]), PHP_EOL;'; unset P
+   ```
+
+   (`read -rs` non mostra quello che si scrive; `printf` e' interno alla shell, quindi la password non
+   compare nell'elenco dei processi.) ☠ In PowerShell su Windows l'eco non si spegne: scrivere la password
+   nella finestra e chiuderla, o usare Git Bash con `read -rs`.
+2. Metterla in `/var/www/smpmicroapps/config.local.php` (con `sudo`, fra **apici singoli**: l'impronta
+   contiene `$`):
+
+   ```php
+   'RISERVATO_UTENTE' => 'smp-webmaster',
+   'RISERVATO_HASH'   => '$argon2id$v=19$m=65536,t=4,p=1$…',
+   ```
+3. Controllare che l'Argon2id ci sia nella build del server:
+   `php -r 'var_dump(defined("PASSWORD_ARGON2ID"));'` (se manca a php-fpm, la pagina risponde 503 con il
+   motivo). Il server ha **PHP 8.3** (php8.3-fpm, socket nel vhost).
+4. Caricare il sito (§9) e i dati con `pubblica_riservato.ps1`.
+
+### Provato in locale il 2026-10-11 (PHP 8.2.12 di XAMPP, `php -S`, password di prova poi tolta)
+
+- `/riservato` senza cookie: modulo, 200, tutte le intestazioni presenti (`no-store`, `noindex`, …),
+  cookie `smpriservato; path=/riservato; HttpOnly; SameSite=Strict` (senza `Secure` solo perche' `php -S`
+  e' in HTTP).
+- Utente sbagliato / password sbagliata / token sbagliato: stesso messaggio, 1,50–1,52 s ciascuno.
+- 5° errore → 429 «Riprova fra 15 minuti»; durante il blocco anche la password giusta → 429. Blocco
+  successivo → 30 minuti.
+- Login giusto → 303, id di sessione nuovo, contenuto (14 app, 6 righe in tabella). Inattivita' di 31
+  minuti simulata nel file di sessione → di nuovo il login.
+- Logout con token sbagliato → resta dentro; con token giusto → cookie cancellato e login; il vecchio
+  cookie non riapre.
+- `/var/riservato/dati.json`, `/riservato/dati.json`, `/../var/…`, `/var/`, `/config.local.php`,
+  `/src/riservato.php`, `/tool/genera_riservato.py` → 404; `/riservato?file=…` → login.
+- Senza `RISERVATO_HASH` → 404; con un'impronta bcrypt → 503 con il motivo.
+- Screenshot Edge: login, errore, blocco, contenuto a 1400 px (con decisioni e stato dettagliato aperti) e a
+  390 px in un iframe di una copia statica (la tabella scorre in orizzontale).
+- `verifica_lingue.php` allineato; `/`, `/trashcan`, `/contatti`, `/en/` a 200.
+
+### Cosa NON c'e' (ancora)
+
+- **Pubblicazione**: ne' i file del sito ne' `dati.json` sono sul server; manca `RISERVATO_HASH` (→ 404).
+- **Un limite globale** oltre a quello per IP: chi prova da molti IP ha 5 tentativi ogni 15 minuti per IP.
+  Con Argon2id e una password lunga non e' un rischio pratico; ogni verifica pero' costa 64 MiB per ~0,2 s a
+  php-fpm. Da aggiungere (un contatore globale nello stesso file) se nei log comparissero raffiche.
+- **Pulizia delle sessioni del solo modulo di login**: ogni visita crea un `sess_*` (serve al token CSRF);
+  si cancellano a ogni login riuscito se piu' vecchi di 8 ore.
+- **Rehash automatico** (`password_needs_rehash`): il sito non scrive `config.local.php`. Per cambiare i
+  parametri si rigenera l'impronta a mano.
+- **Seconda lingua, altri utenti, modifica dei dati dalla pagina**: non previsti.
+
+## Aggiornamento 2026-10-11 — card delle app nuove, colore delle card, area riservata online
+
+- **Sette card «In arrivo» nuove** nel catalogo: `fair-share`, `boomerang`, `pin-drop`, `geo-note`, `tldr`,
+  `read-aloud`, `link-peek` (nomi del 2026-10-11, claim e sommario in `app.<slug>.*` nei due dizionari),
+  ciascuna con il suo `public/scarica/<slug>.php` (finche' non escono rimanda alla home `#app`).
+- ☠ **Colore delle card**: il vecchio `style="--card-accent: …"` sulla card era bloccato dalla CSP
+  (`style-src 'self'`), quindi in produzione tutte le card avevano il colore predefinito. Ora la card ha la
+  classe `card--<slug>` e `style.css` ha una riga `.card--<slug> { --card-accent: … }` per app (blocco
+  «Colore delle card per app»). **App nuova nel catalogo = una riga li'**, con lo stesso colore di
+  `accento`. CSS `?v=9`.
+- **Area riservata online** il 2026-10-11: impronta Argon2id impostata in `config.local.php` del server
+  (script temporaneo che legge la password da stdin, poi cancellato insieme alla copia di sicurezza del
+  file), `dati.json` caricato con `tool/pubblica_riservato.ps1`. Provati sul sito vivo: login errato
+  (messaggio generico, ~1,7 s), login giusto (303 e contenuto), 404 sugli accessi diretti a dati e
+  configurazione. **Da rilanciare `pubblica_riservato.ps1` a ogni aggiornamento di StatusMicroApps o
+  delle decisioni.**
 

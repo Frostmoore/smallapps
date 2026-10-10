@@ -106,6 +106,27 @@ return [
     'app.spending-review.sommario' => 'Point at the price tag and it adds up, with your budget always '
                                     . 'in sight. At the till, it checks the receipt.',
 
+    'app.fair-share.claim'    => 'Who owes what, without doing the maths.',
+    'app.fair-share.sommario' => 'Split the bill your way, even from the receipt, and keep track of a trip or a shared home.',
+
+    'app.boomerang.claim'    => 'Lent things come back.',
+    'app.boomerang.sommario' => 'Who has what and since when: what you lend and what you borrow, with a reminder.',
+
+    'app.pin-drop.claim'    => 'Where did you leave it? It knows.',
+    'app.pin-drop.sommario' => 'Your car, your bike, your sunbed: mark the spot with a photo and a note, and find it again.',
+
+    'app.geo-note.claim'    => 'A reminder that fires in the right place.',
+    'app.geo-note.sommario' => 'It reminds you when you arrive somewhere or leave: at the shop, at home, at the office.',
+
+    'app.tldr.claim'    => 'Too long? It sums it up.',
+    'app.tldr.sommario' => 'Share an article or some text and get a short summary to read at a glance.',
+
+    'app.read-aloud.claim'    => 'Articles, to listen to.',
+    'app.read-aloud.sommario' => 'Share an article and it reads it aloud while you drive, cook or walk.',
+
+    'app.link-peek.claim'    => 'Where does that link go? Peek first.',
+    'app.link-peek.sommario' => 'See where a short or suspicious link really leads before you open it, with the warning signs.',
+
     // ── Home ────────────────────────────────────────────────────────────────
     'home.titolo'      => 'Small Android and iPhone apps that do one thing',
     'home.descrizione' => 'SMP MicroApps: lightweight Android and iPhone apps with no accounts and no '

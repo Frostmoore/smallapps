@@ -894,6 +894,10 @@ esplicito nel comando quale toolchain si sta usando.
 
 ## §6 — RITUALE DI FINE FASE (obbligatorio)
 
+> ⚑ **Dal 2026-10-11**: dopo l'aggiornamento di `StatusMicroApps.md` e delle decisioni, lanciare
+> `pwsh site/tool/pubblica_riservato.ps1` per aggiornare l'area riservata del proprietario
+> (`https://smpmicroapps.it/riservato`). Mai scrivere la password da nessuna parte.
+
 **Alla fine di ciascuna fase**, senza che nessuno lo chieda, nell'ordine esatto:
 
 ### 1. Aggiornare `develop_microapps.md`

@@ -8,4 +8,7 @@ Disallow: /contatti?
 # I link «scarica» sono solo rimandi agli store (per le sponsorizzate): niente da indicizzare.
 Disallow: /scarica/
 
+# L'area riservata al proprietario: protetta da password e marcata noindex anche nella pagina.
+Disallow: /riservato
+
 Sitemap: https://smpmicroapps.it/sitemap.xml

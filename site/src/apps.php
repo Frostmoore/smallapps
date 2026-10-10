@@ -110,6 +110,76 @@ function catalogo(): array
             'packageId' => 'com.smp.spendingreview',
             'suPlay'    => false,
         ],
+        // F13, in programma (nome del 2026-10-11): card «In arrivo», nessuna pagina.
+        'fair-share' => [
+            'nome'      => 'Fair Share',
+            'accento'   => '#0F766E',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.fairshare',
+            'suPlay'    => false,
+        ],
+        // F10, in programma (nome del 2026-10-11): card «In arrivo», nessuna pagina.
+        'boomerang' => [
+            'nome'      => 'Boomerang',
+            'accento'   => '#B45309',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.boomerang',
+            'suPlay'    => false,
+        ],
+        // F11, in programma (nome del 2026-10-11): card «In arrivo», nessuna pagina.
+        'pin-drop' => [
+            'nome'      => 'Pin Drop',
+            'accento'   => '#B91C1C',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.pindrop',
+            'suPlay'    => false,
+        ],
+        // F14, in programma (nome del 2026-10-11): card «In arrivo», nessuna pagina.
+        'geo-note' => [
+            'nome'      => 'Geo Note',
+            'accento'   => '#6D28D9',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.geonote',
+            'suPlay'    => false,
+        ],
+        // F16, in programma (nome del 2026-10-11): card «In arrivo», nessuna pagina.
+        'tldr' => [
+            'nome'      => 'TLDR',
+            'accento'   => '#334155',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.tldr',
+            'suPlay'    => false,
+        ],
+        // F18, in programma (nome del 2026-10-11): card «In arrivo», nessuna pagina.
+        'read-aloud' => [
+            'nome'      => 'Read Aloud',
+            'accento'   => '#1D4ED8',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.readaloud',
+            'suPlay'    => false,
+        ],
+        // F19, in programma (nome del 2026-10-11): card «In arrivo», nessuna pagina.
+        'link-peek' => [
+            'nome'      => 'Link Peek',
+            'accento'   => '#0E7490',
+            'logo'      => null,
+            'testata'   => null,
+            'pubblicata' => false,
+            'packageId' => 'com.smp.linkpeek',
+            'suPlay'    => false,
+        ],
     ];
 }
 

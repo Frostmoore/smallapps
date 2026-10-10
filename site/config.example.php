@@ -52,4 +52,14 @@ return [
     'rateLimit' => [
         'maxPerHour' => 5,
     ],
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Area riservata /riservato (src/riservato.php)
+    // ─────────────────────────────────────────────────────────────────────────
+    //
+    // ☠ Qui NON si scrive mai la password, nemmeno in config.local.php: solo la sua impronta
+    // Argon2id, generata con il comando in codebase_reference.md («Come si imposta la password»).
+    // Con null (o chiave assente) l'area e' DISATTIVATA e /riservato risponde 404.
+    'RISERVATO_UTENTE' => 'smp-webmaster',
+    'RISERVATO_HASH'   => null,
 ];

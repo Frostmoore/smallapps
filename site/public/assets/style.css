@@ -965,3 +965,161 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   white-space: nowrap; border: 0;
 }
 
+
+/* ─── Area riservata, /riservato (2026-10-11) ─────────────────────────────── */
+
+/*
+  Una pagina sola, senza link dal sito: tabella dello stato, «In sospeso», la lista di tutte le
+  app con decisioni e stato dettagliato a scomparsa (<details>, niente JavaScript).
+
+  ☠ Nessun attributo `style` nell'HTML: la CSP del vhost ha `style-src 'self'`, che li blocca. I
+  colori delle iniziali arrivano dentro le icone SVG generate da tool/genera_riservato.py.
+*/
+input[type="password"] {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid #cdd6d0;
+  border-radius: var(--radius-s);
+  padding: 0.7rem 0.85rem;
+  width: 100%;
+}
+
+.btn--piccolo { padding: 0.45rem 1rem; font-size: 0.92rem; }
+.ris-esci { margin: 0; }
+.ris-login { max-width: 24rem; }
+
+.ris-sezione { padding-block: clamp(2rem, 5vw, 3.5rem); }
+.ris-titolo { font-size: 1.45rem; letter-spacing: -0.02em; margin: 2rem 0 1rem; }
+.ris-sezione .wrap > .ris-titolo:first-child { margin-top: 0; }
+
+/* Le tabelle: scorrono in orizzontale sul telefono invece di schiacciarsi. */
+.ris-scorri { border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface); }
+.ris-tab { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+.ris-tab th, .ris-tab td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.ris-tab thead th { background: var(--canvas); font-weight: 700; white-space: nowrap; }
+.ris-tab tbody tr:last-child > * { border-bottom: 0; }
+.ris-tab--stato { min-width: 640px; }
+.ris-tab--stato td { white-space: nowrap; }
+.ris-tab--stato tbody th { white-space: nowrap; font-weight: 700; }
+.ris-tab--stato tbody th a { color: var(--ink); text-decoration: none; }
+.ris-tab--stato tbody th a:hover { text-decoration: underline; }
+.ris-tab--dettaglio { font-size: 0.88rem; min-width: 520px; background: var(--surface); }
+.ris-tab--dettaglio td:first-child { white-space: nowrap; }
+.ris-versione { display: block; font-weight: 400; font-size: 0.8rem; color: var(--ink-faint); }
+.ris-pallino { display: inline-block; width: 1.3em; }
+.ris-legenda { font-size: 0.85rem; color: var(--ink-faint); margin: 0.6rem 0 0; }
+
+.ris-sospeso { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.ris-sospeso__gruppo {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 0.9rem 1.1rem;
+}
+.ris-sospeso__gruppo h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+.ris-sospeso__gruppo ul { margin: 0; padding-left: 1.1rem; font-size: 0.92rem; color: var(--ink-soft); display: grid; gap: 0.3rem; }
+
+/* L'indice delle app: una riga di chip che va a capo. */
+.ris-indice { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem; }
+.ris-chip {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--canvas);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink-soft);
+}
+.ris-chip--pubblicata { background: var(--accent-lt); color: var(--accent-dk); border-color: #cfe5da; }
+.ris-chip--in-lavorazione { background: #fff6e0; color: #7a5a00; border-color: #f0dfae; }
+.ris-chip--annullata { text-decoration: line-through; color: var(--ink-faint); }
+
+/* Una scheda per app. */
+.ris-app {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.3rem 1.4rem;
+  margin-bottom: 1rem;
+  scroll-margin-top: 80px;
+}
+.ris-app--non-iniziata, .ris-app--annullata { background: #f2f4f2; border-style: dashed; }
+.ris-app--annullata .ris-app__nome { text-decoration: line-through; color: var(--ink-faint); }
+.ris-app p { margin: 0.5rem 0 0; color: var(--ink-soft); }
+.ris-app__testa { display: flex; gap: 1rem; align-items: center; }
+.ris-app__icona { width: 64px; height: 64px; border-radius: 15px; flex: 0 0 auto; }
+.ris-app--annullata .ris-app__icona { filter: grayscale(1); opacity: 0.6; }
+.ris-app__nome { margin: 0; font-size: 1.3rem; letter-spacing: -0.02em; }
+.ris-app__sotto { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; align-items: center; margin: 0.25rem 0 0 !important; font-size: 0.88rem; color: var(--ink-faint) !important; }
+.ris-app__claim { font-weight: 650; color: var(--ink) !important; }
+.ris-app__desc { font-size: 0.93rem; }
+.ris-stato--pubblicata { background: var(--accent-lt); color: var(--accent-dk); }
+.ris-stato--in-lavorazione { background: #fff1c7; color: #7a5a00; }
+.ris-stato--annullata { background: #f6dcda; color: #7d241c; }
+.ris-app__stati {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+}
+.ris-app__stati li { background: var(--canvas); border: 1px solid var(--line); border-radius: 999px; padding: 0.2rem 0.7rem; }
+
+/* Le parti a scomparsa. */
+.ris-dett { margin-top: 0.8rem; border-top: 1px solid var(--line); padding-top: 0.6rem; }
+.ris-dett > summary, .ris-decisione > summary { cursor: pointer; font-weight: 650; }
+.ris-dett > summary { color: var(--accent-dk); }
+.ris-decisione { margin: 0.5rem 0; padding: 0.5rem 0.8rem; border-left: 3px solid var(--line); }
+.ris-decisione[open] { border-left-color: var(--accent); }
+.ris-decisione > summary { font-weight: 600; font-size: 0.95rem; }
+.ris-decisione p, .ris-decisione li, .ris-blocchi p, .ris-blocchi li { font-size: 0.92rem; color: var(--ink-soft); }
+.ris-data { color: var(--ink-faint); font-weight: 500; font-variant-numeric: tabular-nums; }
+.ris-vale { font-size: 0.85rem !important; }
+.ris-sottotitolo { margin: 1.3rem 0 0.4rem; font-size: 1rem; }
+.ris-nota { background: var(--canvas); border-left: 3px solid #cfd6d1; padding: 0.4rem 0.9rem; margin: 0.8rem 0; }
+.ris-codice { background: var(--deep); color: #e8f3ee; padding: 0.8rem 1rem; border-radius: var(--radius-s); overflow-x: auto; font-size: 0.82rem; }
+.ris code { font-size: 0.86em; background: rgba(16, 36, 27, 0.06); padding: 0.05em 0.3em; border-radius: 4px; word-break: break-word; }
+.ris-codice code { background: none; padding: 0; color: inherit; }
+.ris-spunte { list-style: none; padding-left: 0; }
+.ris-spunte li { position: relative; padding-left: 1.6rem; }
+.ris-spunta {
+  position: absolute; left: 0; top: 0.25em;
+  width: 1em; height: 1em;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 3px;
+  font-size: 0.9em; line-height: 1; text-align: center;
+}
+.ris-spunta--fatta { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ris-fatto { color: var(--ink-faint) !important; }
+
+/* ─── Colore delle card per app (2026-10-11) ──────────────────────────────── */
+
+/*
+  ☠ Il colore per app stava in un attributo `style="--card-accent: …"` sulla card, che la CSP
+  `style-src 'self'` blocca: in produzione tutte le card avevano il verde predefinito. Ora e' una classe
+  per app. **App nuova nel catalogo = una riga qui**, con lo stesso colore di `accento` in src/apps.php.
+*/
+.card--trashcan { --card-accent: #2E7D5B; }
+.card--full-freezer { --card-accent: #2C5F9E; }
+.card--scorte-calore { --card-accent: #A6503A; }
+.card--film-tracker { --card-accent: #4A5560; }
+.card--qr-me { --card-accent: #15803D; }
+.card--spending-review { --card-accent: #16A34A; }
+.card--fair-share { --card-accent: #0F766E; }
+.card--boomerang { --card-accent: #B45309; }
+.card--pin-drop { --card-accent: #B91C1C; }
+.card--geo-note { --card-accent: #6D28D9; }
+.card--tldr { --card-accent: #334155; }
+.card--read-aloud { --card-accent: #1D4ED8; }
+.card--link-peek { --card-accent: #0E7490; }
+/* fine colori card */
+

@@ -53,8 +53,7 @@ pagina_inizio('home.titolo', 'home.descrizione', '/');
         $classi = 'card' . ($app['pubblicata'] ? '' : ' card--soon');
         ?>
         <<?= $tag ?>
-          class="<?= $classi ?>"
-          style="--card-accent: <?= e($app['accento']) ?>"
+          class="<?= $classi ?> card--<?= e($slug) ?>"
           <?= $app['pubblicata'] ? 'href="' . e(url_per($lingua, '/' . $slug)) . '"' : '' ?>>
 
           <?php if (($app['testata'] ?? null) !== null): ?>
