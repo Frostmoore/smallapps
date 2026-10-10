@@ -19,7 +19,7 @@ Ultimo aggiornamento: **2026-10-09** (D-U-N-S ricevuto; stati App Store verifica
 
 | App | Versione | Google Play | App Store | Sito: pulsanti |
 |---|---|---|---|---|
-| **TrashCan** | 1.0.1 (12) | 🟢 **pubblicata**; **1.0.1 (12) in produzione** il 2026-10-10 (widget corretto) | 🟢 1.0.0 in vendita ovunque; 🟡 **1.0.1 (12) in revisione** (inviata il 2026-10-10) | 🟢 **accesi tutti e due** (2026-10-09); pill «Disponibile su iOS e Android» (2026-10-10) |
+| **TrashCan** | 1.0.1 (12) | 🟢 **pubblicata**; **1.0.1 (12) in produzione** il 2026-10-10 (widget corretto) | 🟢 **1.0.1 (12) in vendita** ovunque (2026-10-11, widget corretto) | 🟢 **accesi tutti e due** (2026-10-09); pill «Disponibile su iOS e Android» (2026-10-10) |
 | **Full Freezer** | 1.0.0 (2) | 🔵 **test interno**, Pro attivo; produzione bloccata dall'account personale (attesa D-U-N-S) | 🔴 **respinta 2.1** il 2026-10-10 (domanda sull'AI): risposta pronta, in arrivo la 1.0.0 (3) con la dettatura solo sul telefono | card grigia «In arrivo» |
 | **Scorte Calore** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | 🟢 **pagina e pulsante App Store** («Disponibile su iOS», 2026-10-10) |
 | **Film Tracker** | 1.0.0 (1) | ⚪ **non ancora creata** su Play Console; codice Android completo, grafiche Play pronte; bloccata dall'account personale (attesa D-U-N-S) | 🟢 **in vendita** (1.0.0 + Pro approvati, 2026-10-10) | 🟢 **pagina e pulsante App Store** («Disponibile su iOS», 2026-10-10) |
@@ -106,6 +106,7 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 > - [x] **Proprietario:** 1.0.1 inviata in revisione su App Store (2026-10-10): WAITING_FOR_REVIEW, verificato via API.
 >   Possibile chiedere la revisione accelerata (correzione di un difetto di una funzione centrale).
 > - [x] **Proprietario:** `trashcan-1.0.1-12.aab` caricato e **pubblicato** su Play (2026-10-10).
+> - [x] **App Store: 1.0.1 approvata e in vendita** (2026-10-11, READY_FOR_SALE verificato via API).
 > - [ ] Prova di una notte su un telefono Android vero e su iPad.
 
 ### Google Play — 🟢 pubblicata
@@ -133,6 +134,7 @@ Legenda: ⚪ non iniziata sullo store · 🔵 in test / in sviluppo · 🟡 in r
 | 2026-10-07 | Ricontrollato via API: Italia ancora `TRADER_STATUS_NOT_PROVIDED` (verifica DSA di Apple in corso, niente da fare da parte nostra) |
 | 2026-10-08 | Ricontrollato via API (due volte): Italia ancora `TRADER_STATUS_NOT_PROVIDED`; versione READY_FOR_SALE, Pro APPROVED |
 | 2026-10-09 | Verifica DSA approvata da Apple (comunicato dal proprietario): **disponibile in tutti i 175 paesi, Italia compresa** (ITA = AVAILABLE, nessun paese bloccato; verificato via API) |
+| 2026-10-11 | **1.0.1 (12)** con il widget corretto: approvata e **in vendita** (READY_FOR_SALE, verificato via API) |
 
 ✅ **Verifica DSA chiusa il 2026-10-09** (dati inviati il 2026-10-05): l'app e' comparsa in UE da
 sola, senza un nuovo invio. Vale per l'account: le altre app nasceranno gia' disponibili in UE.
