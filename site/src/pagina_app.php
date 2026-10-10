@@ -74,7 +74,8 @@ function pagina_app(string $slug, array $schermate, array $promo = []): void
 <section class="hero">
   <div class="wrap hero__grid">
     <div>
-    <p class="eyebrow"><?= e($app['nome']) ?> · <?= etichetta_disponibilita($app) ?></p>
+    <p class="eyebrow"><?= e($app['nome']) ?></p>
+    <?= pill_store($app, true) ?>
     <h1 class="display"><?= t("{$slug}.hero.titolo") ?></h1>
     <p class="lede"><?= t("{$slug}.hero.lede") ?></p>
     <div class="hero__actions">

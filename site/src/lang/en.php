@@ -26,6 +26,8 @@ return [
     'comune.data_legale'       => '10 October 2026',
     'comune.scopri'            => 'Find out more &rarr;',
     'comune.in_lavorazione'    => 'In the works',
+    'comune.su_app_store'   => 'Available on the App Store',
+    'comune.su_google_play' => 'Available on Google Play',
     'comune.in_arrivo'         => 'Coming soon',
     'comune.disponibile'       => 'Available',
     'comune.presto_play'       => 'Soon on Google Play',

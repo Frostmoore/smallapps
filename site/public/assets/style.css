@@ -934,3 +934,34 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 /* La riga discreta sotto i bottoni dell'hero quando l'app e' su un solo store
    («Su Android in arrivo.»): testo, non un bottone spento che sembrerebbe una promessa. */
 .hero__nota { margin-top: 1rem; }
+
+/* ─── Le pill degli store (2026-10-10) ────────────────────────────────────── */
+
+/*
+  Due pill piccole, una per store, con l'icona: Apple e Google Play. Sostituiscono la scritta
+  «Disponibile su …», che nelle card a quattro colonne andava su due righe.
+*/
+.store-pills { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; align-self: flex-start; }
+.store-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.62rem 0.22rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+  background: var(--accent-lt);
+  color: var(--accent-dk);
+}
+.store-pill svg { flex: none; }
+.store-pills--scuro { margin: -0.4rem 0 1.1rem; }
+.store-pills--scuro .store-pill { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+

@@ -814,3 +814,17 @@ uno** store, e la pill dice dove.
   390 px. ☠ Edge headless lanciato in serie dalla stessa sessione non scriveva i file: va lanciato
   con `Start-Process -Wait` e un `--user-data-dir` diverso per ogni cattura.
 - **Non ancora pubblicato** su clawserver.
+
+## Aggiornamento 2026-10-10 (notte) — pill degli store con le icone
+
+- `pill_store(array $app, bool $suScuro = false): string` in `src/layout.php`: due pill piccole, «iOS»
+  con il logo Apple e «Android» con il triangolo di Google Play, **solo per gli store dove l'app e'
+  disponibile** (`suAppStore`, `suPlay`). Icone SVG inline (tracciati di Simple Icons, CC0: niente
+  risorse esterne); testo accessibile completo in `.sr-only` (`comune.su_app_store`,
+  `comune.su_google_play`) e nel `title`.
+- Usata nelle card della home (al posto del `.tag` «Disponibile su …»; le app non pubblicate tengono il
+  `.tag` «In arrivo») e sotto l'occhiello delle pagine delle app (`trashcan.php`, `src/pagina_app.php`,
+  variante `--scuro` sull'hero). `etichetta_disponibilita()` resta ma non e' piu' usata nelle pagine.
+- Richiesta del proprietario: «non mi piace la pill gigante con scritto disponibile su... Mettici
+  proprio due pills una con l'icona di apple e una con l'icona del play store». CSS `style.css?v=7`.
+

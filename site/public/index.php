@@ -69,9 +69,11 @@ pagina_inizio('home.titolo', 'home.descrizione', '/');
             </span>
           <?php endif; ?>
 
-          <span class="tag <?= $app['pubblicata'] ? 'tag--live' : '' ?>">
-            <?= $app['pubblicata'] ? etichetta_disponibilita($app) : t('comune.in_arrivo') ?>
-          </span>
+          <?php if ($app['pubblicata']): ?>
+            <?= pill_store($app) ?>
+          <?php else: ?>
+            <span class="tag"><?= t('comune.in_arrivo') ?></span>
+          <?php endif; ?>
 
           <h3 class="card__name"><?= e($app['nome']) ?></h3>
           <p class="card__claim"><?= t("app.{$slug}.claim") ?></p>

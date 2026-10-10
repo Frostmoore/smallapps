@@ -30,6 +30,8 @@ return [
     'comune.data_legale'       => '10 ottobre 2026',
     'comune.scopri'            => 'Scopri di più &rarr;',
     'comune.in_lavorazione'    => 'In lavorazione',
+    'comune.su_app_store'   => 'Disponibile su App Store',
+    'comune.su_google_play' => 'Disponibile su Google Play',
     'comune.in_arrivo'         => 'In arrivo',
     'comune.disponibile'       => 'Disponibile',
     'comune.presto_play'       => 'Presto su Google Play',
